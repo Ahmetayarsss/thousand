@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts" / "enrich"))
 
-ENRICH_MODS = ["g2", "g3"]
+ENRICH_MODS = ["g2"]
 
 
 def load_groups():

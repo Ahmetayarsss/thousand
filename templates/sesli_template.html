@@ -63,7 +63,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
 <div class="hint" id="hint"><b>🔊</b> veya kelimeye dokun → cihaz sesiyle burada okur. <b>Cambridge</b> rozeti gerçek insan sesi + IPA için sözlük sayfasını açar. (Ses için dosyayı tarayıcıda aç.)</div>
 <div class="hint warn" id="warn">Bu tarayıcı sesli okumayı desteklemiyor gibi. Her karttaki <b>Cambridge</b> bağlantısını kullan.</div>
 <div id="list"></div>
-<footer>Not: Okunuş + İngilizce açıklama + örnek cümle şu an Grup 01 ve Grup 10'da (A2). Diğer gruplarda kelime + Türkçe anlam + ses + Cambridge var.<br>Okunuş yazımları yaklaşıktır.</footer>
+<footer>Not: Okunuş + İngilizce açıklama + örnek cümle grup grup ekleniyor. Henüz eklenmeyen gruplarda kelime + Türkçe anlam + ses + Cambridge var.<br>Okunuş yazımları yaklaşıktır.</footer>
 </div>
 <script>
 const GROUPS=__GROUPS_JSON__;
@@ -91,7 +91,7 @@ c.innerHTML=`<div class="row1"><span class="word">${d.w}</span><span class="tag"
 ${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
 <div class="tr">${d.tr||''}</div>
 ${d.en?`<div class="en">${d.en}</div>`:''}
-${d.ex?`<div class="ex"><span class="mini">🔊 örnek</span>${d.ex}</div>`:''}
+${d.ex?`<div class="ex">${d.ex}</div>`:''}
 <a class="cam" href="${d.cam}" target="_blank" rel="noopener">🔊 Cambridge →</a>`;
 c.querySelector('.word').onclick=()=>one(d.w,c);
 c.querySelector('.spk').onclick=e=>{e.stopPropagation();one(d.w,c);};

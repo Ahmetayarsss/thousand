@@ -1,0 +1,212 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oxford 3000 · Kelime Kartları</title>
+<style>
+:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--green:#2E9E5B;--green-d:#238049;--red:#D9544D;--red-d:#B83E38;--tr:#B03A2E;--ok:#0E8074;--accent:#3B6EA5;--speak:#E5892B}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overscroll-behavior:none}
+#app{max-width:600px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
+.top{flex:0 0 auto}
+.moderow{display:flex;gap:6px;background:#E9EDF3;border-radius:11px;padding:4px;margin:2px 0 8px}
+.moderow button{flex:1;border:0;background:transparent;color:var(--muted);font-weight:800;font-size:13.5px;padding:9px 0;border-radius:8px;cursor:pointer}
+.moderow button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.grouprow{display:flex;gap:7px;align-items:center}
+.nav{border:0;background:var(--ink);color:#fff;font-size:15px;font-weight:800;width:34px;height:34px;border-radius:9px;cursor:pointer;flex:0 0 auto}
+.nav:disabled{opacity:.35}
+select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 9px;font-size:13.5px;font-weight:600}
+.acc{display:inline-flex;background:#E9EDF3;border-radius:8px;padding:2px;flex:0 0 auto}
+.acc button{border:0;background:transparent;color:var(--muted);font-weight:800;font-size:11.5px;padding:6px 9px;border-radius:7px;cursor:pointer}
+.acc button.on{background:#fff;color:var(--ink)}
+.progline{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11.5px;color:var(--muted)}
+.bar{flex:1;height:7px;border-radius:6px;background:#E6EAF1;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.counter{font-weight:800;color:var(--ink);flex:0 0 auto}
+
+.stage{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding-top:8px}
+.dir{text-align:center;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.03em;margin-bottom:6px}
+.card{flex:1 1 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 26px rgba(20,30,50,.07);padding:22px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;user-select:none;position:relative;min-height:0;overflow:auto}
+.card:active{transform:scale(.996)}
+.lvl{position:absolute;top:14px;right:16px;font-size:11px;font-weight:800;color:#fff;background:var(--accent);border-radius:6px;padding:2px 8px}
+.spk{position:absolute;top:12px;left:14px;width:40px;height:40px;border-radius:50%;border:0;background:var(--speak);color:#fff;font-size:18px;display:none;place-items:center;cursor:pointer;box-shadow:0 2px 6px rgba(229,137,43,.4)}
+.spk.show{display:grid}
+.spk:active{transform:scale(.92)}
+.q{font-size:34px;font-weight:800;letter-spacing:-.01em;line-height:1.12}
+.q.small{font-size:27px}
+.tap{margin-top:18px;font-size:12px;color:var(--muted)}
+.ansbox{border-top:1px dashed var(--line);margin-top:18px;padding-top:16px;width:100%}
+.ok{color:var(--ok);font-weight:700;font-size:15px}
+.mean{font-size:22px;font-weight:800;margin-top:4px}
+.mean.tr{color:var(--tr)} .mean.en{color:var(--ink)}
+.ex{color:#5B6B7B;font-size:14px;font-style:italic;margin-top:10px}
+.controls{flex:0 0 auto;display:flex;gap:10px;margin-top:12px}
+.btn{flex:1;border:0;border-radius:14px;padding:16px 0;font-size:15.5px;font-weight:800;cursor:pointer;color:#fff}
+.btn:active{transform:translateY(1px)}
+.btn.again{background:var(--red)} .btn.know{background:var(--green)}
+.hidden{display:none!important}
+
+.result{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+.score{font-size:60px;font-weight:900;letter-spacing:-.03em}
+.score small{display:block;font-size:15px;font-weight:700;color:var(--muted);margin-top:2px}
+.rmsg{color:var(--muted);font-size:14px;margin:10px 0 4px}
+.wronglist{width:100%;max-width:420px;margin-top:14px;text-align:left;max-height:34vh;overflow:auto}
+.wr{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px;margin:6px 0;font-size:13.5px}
+.wr b{color:var(--ink)} .wr span{color:var(--tr)}
+.ractions{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.ractions button{border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:800;font-size:13px;border-radius:10px;padding:11px 14px;cursor:pointer}
+.ractions .prim{background:var(--ink);color:#fff;border-color:var(--ink)}
+.warn{font-size:11.5px;color:#8A6D3B;background:#FCF3E3;border:1px solid #F2E0BE;border-radius:9px;padding:8px 10px;margin-top:8px;display:none}
+.reset{flex:0 0 auto;text-align:center;margin-top:8px}
+.reset button{background:none;border:0;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer}
+</style></head><body><div id="app">
+<div class="top">
+  <div class="moderow" id="moderow">
+    <button data-m="test" class="on">Test (çalışma)</button>
+    <button data-m="exam">Gün sonu sınavı</button>
+  </div>
+  <div class="grouprow">
+    <button class="nav" id="prev">‹</button>
+    <select id="groupsel"></select>
+    <button class="nav" id="next">›</button>
+    <span class="acc" id="acc"><button data-l="en-GB" class="on">UK</button><button data-l="en-US">US</button></span>
+  </div>
+  <div class="progline">
+    <span class="bar" id="bar"></span>
+    <span class="counter" id="counter"></span>
+  </div>
+  <div class="warn" id="warn">İlerlemenin kaydı için dosyayı <b>tarayıcıda</b> (Chrome/Safari) aç. Sesi duymak için de tarayıcı gerekir.</div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="dir" id="dir"></div>
+  <div class="card" id="card">
+    <span class="lvl" id="lvl"></span>
+    <button class="spk" id="spk" aria-label="Dinle">🔊</button>
+    <div class="q" id="q"></div>
+    <div class="tap" id="tap">Cevap için karta dokun</div>
+    <div class="ansbox hidden" id="ansbox"></div>
+  </div>
+  <div class="controls hidden" id="ctrl">
+    <button class="btn again" id="again"></button>
+    <button class="btn know" id="know"></button>
+  </div>
+  <div class="reset"><button id="resetgroup">Bu grubun ilerlemesini sıfırla</button></div>
+</div>
+
+<div class="stage hidden" id="resultbox">
+  <div class="result">
+    <div class="score" id="score"></div>
+    <div class="rmsg" id="rmsg"></div>
+    <div class="wronglist" id="wronglist"></div>
+    <div class="ractions">
+      <button class="prim" id="r-again">Tekrar sına</button>
+      <button id="r-study">Yanlışları çalış</button>
+      <button id="r-next">Sonraki grup →</button>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+const GROUPS=__GROUPS_JSON__;
+const SKEY="ox3000_srs_v1";
+const INT=[0,0,1,3,7,16];
+let store={},storageOK=true;
+try{const raw=localStorage.getItem(SKEY);store=raw?JSON.parse(raw):{};localStorage.setItem("t_","1");localStorage.removeItem("t_");}
+catch(e){storageOK=false;}
+function save(){if(storageOK){try{localStorage.setItem(SKEY,JSON.stringify(store));}catch(e){}}}
+const DAY=86400000,now=()=>Date.now();
+function rec(w){return store[w]||(store[w]={box:0,due:0});}
+function grade(w,know){const r=rec(w);if(know){r.box=Math.min((r.box||0)+1,5);r.due=now()+INT[r.box]*DAY;}else{r.box=1;r.due=now();}save();}
+function markReview(w){const r=rec(w);r.box=1;r.due=now();save();}
+
+// TTS
+let LANG="en-GB",voices=[];const synth=window.speechSynthesis;
+function loadV(){voices=synth?synth.getVoices():[];}
+if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
+function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
+function speak(t){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=0.85;synth.speak(u);}
+
+let gi=0,mode='test',cur=null,side=0;
+let queue=[],examList=[],examIdx=0,examWrong=[],examTotal=0,examScore=0;
+
+function fillSelect(){document.getElementById('groupsel').innerHTML=GROUPS.map((g,i)=>`<option value="${i}">Grup ${String(g.no).padStart(2,'0')} · ${g.level} (${g.lo}–${g.hi})</option>`).join('');}
+function syncNav(){document.getElementById('prev').disabled=(gi===0);document.getElementById('next').disabled=(gi===GROUPS.length-1);}
+function stats(g){let neu=0,learn=0,known=0,due=0;g.items.forEach(it=>{const r=store[it.w];if(!r||!r.box)neu++;else if(r.box>=4)known++;else learn++;if(!r||r.due<=now())due++;});return{neu,learn,known,due};}
+function drawBar(){const g=GROUPS[gi],s=stats(g),t=g.items.length;document.getElementById('bar').innerHTML=`<i style="width:${s.known/t*100}%;background:var(--green)"></i><i style="width:${s.learn/t*100}%;background:#E0902B"></i><i style="width:${s.neu/t*100}%;background:#C9D2DE"></i>`;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function dirFor(){return Math.random()<0.5?'tr2en':'en2tr';}
+
+function renderPrompt(){
+  const g=GROUPS[gi];document.getElementById('lvl').textContent=g.level;
+  side=0;const q=document.getElementById('q'),ans=document.getElementById('ansbox'),spk=document.getElementById('spk');
+  ans.classList.add('hidden');ans.innerHTML='';document.getElementById('tap').style.display='';document.getElementById('ctrl').classList.add('hidden');spk.classList.remove('show');
+  q.className='q'+((cur.tr&&cur.tr.length>22)?' small':'');
+  if(cur._dir==='tr2en'){document.getElementById('dir').textContent='TÜRKÇE → İNGİLİZCE';q.textContent=cur.tr||'—';}
+  else{document.getElementById('dir').textContent='İNGİLİZCE → TÜRKÇE';q.textContent=cur.w;spk.classList.add('show');}
+}
+function reveal(){
+  if(side===1)return;side=1;document.getElementById('tap').style.display='none';
+  const ans=document.getElementById('ansbox'),spk=document.getElementById('spk');let h='';
+  if(cur._dir==='tr2en'){h+=`<div class="mean en">${cur.w}</div>`;if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;}
+  else{if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;h+=`<div class="mean tr">${cur.tr||'—'}</div>`;}
+  if(cur.ex)h+=`<div class="ex">${cur.ex}</div>`;
+  ans.innerHTML=h;ans.classList.remove('hidden');spk.classList.add('show');
+  document.getElementById('ctrl').classList.remove('hidden');
+  speak(cur.w); // cihaz sesi ile İngilizceyi oku
+}
+
+/* ---- TEST (SRS) ---- */
+function startTest(){mode='test';document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
+  document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';
+  const g=GROUPS[gi];queue=shuffle(g.items.filter(it=>{const r=store[it.w];return !r||r.due<=now();}));
+  drawBar();nextTest();}
+function nextTest(){drawBar();const g=GROUPS[gi],s=stats(g);
+  document.getElementById('counter').textContent=queue.length+' kaldı';
+  if(!queue.length){return testDone();}
+  cur=queue.shift();cur._dir=dirFor();renderPrompt();}
+function gradeTest(know){grade(cur.w,know);if(!know)queue.push(cur);nextTest();}
+function testDone(){const g=GROUPS[gi],s=stats(g);showResult(
+  s.known+'/'+g.items.length,'öğrenildi',
+  s.known===g.items.length?'Bu grubun tamamını öğrendin! 👏':'Bugünlük tekrar bitti. Zamanı gelen kelimeler yarın tekrar gelecek.',[],true);}
+
+/* ---- EXAM ---- */
+function startExam(){mode='exam';document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
+  document.getElementById('again').textContent='Bilemedim';document.getElementById('know').textContent='Bildim';
+  const g=GROUPS[gi];examList=shuffle(g.items.slice());examIdx=0;examWrong=[];examTotal=examList.length;examScore=0;
+  document.getElementById('bar').innerHTML='';nextExam();}
+function nextExam(){document.getElementById('counter').textContent=(examIdx+1)+'/'+examTotal;
+  if(examIdx>=examList.length)return examDone();
+  cur=examList[examIdx];cur._dir=dirFor();renderPrompt();}
+function gradeExam(correct){if(correct){examScore++;}else{examWrong.push(cur);markReview(cur.w);}examIdx++;nextExam();}
+function examDone(){const pct=Math.round(examScore/examTotal*100);
+  const wl=examWrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
+  let msg=pct>=90?'Harika! Bu grubu çok iyi biliyorsun. 🌟':pct>=70?'İyi gidiyor. Yanlışları biraz çalış.':'Bu grubu biraz daha çalışman iyi olur. Yanlışlar tekrar listene eklendi.';
+  showResult('%'+pct,examScore+'/'+examTotal+' doğru',msg,wl,false);}
+
+function showResult(big,small,msg,wlHtml,isTest){
+  document.getElementById('stage').classList.add('hidden');document.getElementById('resultbox').classList.remove('hidden');
+  document.getElementById('score').innerHTML=big+'<small>'+small+'</small>';
+  document.getElementById('rmsg').textContent=msg;
+  document.getElementById('wronglist').innerHTML=wlHtml||'';
+  document.getElementById('r-again').textContent=isTest?'Tekrar çalış':'Tekrar sına';
+  document.getElementById('r-study').style.display=(wlHtml&&wlHtml.length)?'':'none';
+}
+
+function start(){document.getElementById('resultbox').classList.add('hidden');(mode==='test'?startTest:startExam)();}
+document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
+document.getElementById('acc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');LANG=b.dataset.l;});
+document.getElementById('groupsel').addEventListener('change',e=>{gi=+e.target.value;syncNav();start();});
+document.getElementById('prev').addEventListener('click',()=>{if(gi>0){gi--;document.getElementById('groupsel').value=gi;syncNav();start();}});
+document.getElementById('next').addEventListener('click',()=>{if(gi<GROUPS.length-1){gi++;document.getElementById('groupsel').value=gi;syncNav();start();}});
+document.getElementById('card').addEventListener('click',reveal);
+document.getElementById('spk').addEventListener('click',e=>{e.stopPropagation();speak(cur.w);});
+document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
+document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
+document.getElementById('r-again').addEventListener('click',start);
+document.getElementById('r-study').addEventListener('click',()=>{mode='test';document.querySelectorAll('#moderow button').forEach(x=>x.classList.toggle('on',x.dataset.m==='test'));
+  queue=shuffle(examWrong.slice());document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
+  document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';nextTest();});
+document.getElementById('r-next').addEventListener('click',()=>{if(gi<GROUPS.length-1){gi++;document.getElementById('groupsel').value=gi;syncNav();start();}});
+document.getElementById('resetgroup').addEventListener('click',()=>{const g=GROUPS[gi];if(confirm('Bu grubun ilerlemesi silinsin mi?')){g.items.forEach(it=>delete store[it.w]);save();start();}});
+document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
+fillSelect();syncNav();start();
+</script></body></html>

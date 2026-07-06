@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oxford 3000 · 30 Grup — Sesli + Cambridge</title>
+<style>
+:root{--bg:#F5F6F8;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E7EAF0;--speak:#E5892B;--speak-d:#C9741A;
+--isim:#1E88E5;--fiil:#2E9E5B;--sifat:#8E44AD;--zarf:#E67E22;--diger:#5D6D7E;--tr:#B03A2E;--ok:#0E8074;
+--A1:#2E7D32;--A2:#C79100;--B1:#C2185B;--B2:#1565C0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px 60px}
+header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 14px;margin:0 -14px 12px}
+.title{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.title small{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:2px}
+.grouprow{display:flex;gap:8px;align-items:center;margin-top:9px}
+.nav{border:0;background:var(--ink);color:#fff;font-size:16px;font-weight:800;width:38px;height:38px;border-radius:10px;cursor:pointer;flex:0 0 auto}
+.nav:disabled{opacity:.35}
+select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 10px;font-size:14px;font-weight:600;color:var(--ink)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:9px}
+.seg{display:inline-flex;background:#EAEDF2;border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--muted);font-weight:700;font-size:13px;padding:6px 12px;border-radius:8px;cursor:pointer}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.speed{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.speed input{width:84px}
+.playall{margin-left:auto;border:0;background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer}
+.playall.stop{background:var(--speak-d)}
+.search{width:100%;margin-top:9px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-size:14px}
+.hint{font-size:12px;color:var(--muted);background:#EEF2F7;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;line-height:1.5}
+.warn{display:none;background:#FDECEA;border-color:#F5C4BD;color:#8A2A1E}
+.lvlbadge{display:inline-block;font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:2px 7px;vertical-align:middle}
+.secbar{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-weight:800;font-size:15px}
+.dot{width:12px;height:12px;border-radius:4px}
+.count{color:var(--muted);font-weight:600;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--diger);border-radius:14px;padding:11px 13px;margin:9px 0}
+.card.playing{box-shadow:0 0 0 2px var(--speak),0 6px 18px rgba(229,137,43,.18)}
+.row1{display:flex;align-items:center;gap:11px}
+.word{font-size:19px;font-weight:800;letter-spacing:-.01em;cursor:pointer}
+.tag{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.spk{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;background:var(--speak);color:#fff;font-size:18px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(229,137,43,.35)}
+.spk:active{transform:scale(.92)}
+.ok{color:var(--ok);font-weight:700;font-size:13.5px;margin-top:6px}
+.tr{color:var(--tr);font-size:14px;margin-top:3px}
+.en{color:#33414F;font-size:13px;margin-top:3px}
+.ex{color:#5B6B7B;font-size:13px;font-style:italic;margin-top:5px;border-top:1px dashed var(--line);padding-top:5px;cursor:pointer}
+.ex .mini{font-style:normal;color:var(--speak-d);font-weight:700;margin-right:5px}
+.cam{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:#0B5FA5;text-decoration:none;background:#E8F1FB;border:1px solid #C4DBF3;border-radius:7px;padding:3px 8px}
+.cam:active{background:#D8E8F8}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
+</style></head><body><div class="wrap">
+<header>
+  <div class="title">Oxford 3000 · Sesli <small>3000 kelime · 30 grup · cihaz sesi + Cambridge</small></div>
+  <div class="grouprow">
+    <button class="nav" id="prev">‹</button>
+    <select id="groupsel"></select>
+    <button class="nav" id="next">›</button>
+  </div>
+  <div class="controls">
+    <div class="seg" id="accent"><button data-lang="en-GB" class="on">UK</button><button data-lang="en-US">US</button></div>
+    <label class="speed">Hız <input id="rate" type="range" min="0.5" max="1" step="0.05" value="0.8"></label>
+    <button class="playall" id="playall">▶ Grubu oku</button>
+  </div>
+  <input class="search" id="search" placeholder="Bu grupta ara… (İngilizce/Türkçe)">
+</header>
+<div class="hint" id="hint"><b>🔊</b> veya kelimeye dokun → cihaz sesiyle burada okur. <b>Cambridge</b> rozeti gerçek insan sesi + IPA için sözlük sayfasını açar. (Ses için dosyayı tarayıcıda aç.)</div>
+<div class="hint warn" id="warn">Bu tarayıcı sesli okumayı desteklemiyor gibi. Her karttaki <b>Cambridge</b> bağlantısını kullan.</div>
+<div id="list"></div>
+<footer>Not: Okunuş + İngilizce açıklama + örnek cümle şu an Grup 01 ve Grup 10'da (A2). Diğer gruplarda kelime + Türkçe anlam + ses + Cambridge var.<br>Okunuş yazımları yaklaşıktır.</footer>
+</div>
+<script>
+const GROUPS=__GROUPS_JSON__;
+const SECS=["İsimler","Fiiller","Sıfatlar","Zarflar","Diğer"];
+const SColor={"İsimler":"var(--isim)","Fiiller":"var(--fiil)","Sıfatlar":"var(--sifat)","Zarflar":"var(--zarf)","Diğer":"var(--diger)"};
+const posTag={"isim":"isim","fiil":"fiil","sıfat":"sıfat","zarf":"zarf","edat":"edat","bağlaç":"bağlaç","zamir":"zamir","belirteç":"belirteç","ünlem":"ünlem","sayı":"sayı","kip fiili":"kip fiili","yardımcı fiil":"yard. fiil","artikel":"artikel","mastar":"mastar"};
+let LANG="en-GB",RATE=0.8,voices=[],gi=0;const synth=window.speechSynthesis;
+function loadV(){voices=synth?synth.getVoices():[];}
+if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
+function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
+let playing=false,queue=[],cur=null;
+function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
+function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
+function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
+function stop(){playing=false;queue=[];if(synth)synth.cancel();clr();const b=document.getElementById('playall');b.textContent="▶ Grubu oku";b.classList.remove('stop');}
+function all(){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;playing=true;queue=cs.slice();const b=document.getElementById('playall');b.textContent="■ Durdur";b.classList.add('stop');const step=()=>{if(!playing||!queue.length){stop();return;}const c=queue.shift();c.scrollIntoView({behavior:'smooth',block:'center'});speak(c.dataset.w,c,()=>setTimeout(step,250));};step();}
+
+function fillSelect(){const sel=document.getElementById('groupsel');sel.innerHTML=GROUPS.map((g,i)=>`<option value="${i}">Grup ${String(g.no).padStart(2,'0')} · ${g.level} (${g.lo}–${g.hi})</option>`).join('');}
+function renderGroup(){stop();const g=GROUPS[gi];const list=document.getElementById('list');list.innerHTML='';
+const bs={};SECS.forEach(s=>bs[s]=[]);g.items.forEach(d=>bs[d.sec].push(d));
+SECS.forEach(s=>{const arr=bs[s].slice().sort((a,b)=>a.w.localeCompare(b.w));if(!arr.length)return;
+const bar=document.createElement('div');bar.className='secbar';bar.innerHTML=`<span class="dot" style="background:${SColor[s]}"></span>${s} <span class="count">${arr.length}</span>`;list.appendChild(bar);
+arr.forEach(d=>{const c=document.createElement('div');c.className='card';c.style.borderLeftColor=SColor[s];c.dataset.w=d.w;c.dataset.s=(d.w+' '+(d.tr||'')).toLowerCase();
+c.innerHTML=`<div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''} · ${g.level}</span><button class="spk" aria-label="Dinle">🔊</button></div>
+${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
+<div class="tr">${d.tr||''}</div>
+${d.en?`<div class="en">${d.en}</div>`:''}
+${d.ex?`<div class="ex"><span class="mini">🔊 örnek</span>${d.ex}</div>`:''}
+<a class="cam" href="${d.cam}" target="_blank" rel="noopener">🔊 Cambridge →</a>`;
+c.querySelector('.word').onclick=()=>one(d.w,c);
+c.querySelector('.spk').onclick=e=>{e.stopPropagation();one(d.w,c);};
+const ex=c.querySelector('.ex');if(ex)ex.onclick=()=>one(d.ex,c);
+list.appendChild(c);});});
+document.getElementById('prev').disabled=(gi===0);
+document.getElementById('next').disabled=(gi===GROUPS.length-1);
+document.getElementById('search').value='';window.scrollTo({top:0});}
+
+document.getElementById('groupsel').addEventListener('change',e=>{gi=+e.target.value;renderGroup();});
+document.getElementById('prev').addEventListener('click',()=>{if(gi>0){gi--;document.getElementById('groupsel').value=gi;renderGroup();}});
+document.getElementById('next').addEventListener('click',()=>{if(gi<GROUPS.length-1){gi++;document.getElementById('groupsel').value=gi;renderGroup();}});
+document.getElementById('accent').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');LANG=b.dataset.lang;});
+document.getElementById('rate').addEventListener('input',e=>RATE=parseFloat(e.target.value));
+document.getElementById('playall').addEventListener('click',()=>{playing?stop():all();});
+document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});
+document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
+fillSelect();renderGroup();
+</script></body></html>

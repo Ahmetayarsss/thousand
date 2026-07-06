@@ -31,7 +31,7 @@ kelime çalışma araçları.
 - `cam`: Cambridge linki — `dictionary.cambridge.org/dictionary/english-turkish/SLUG`
   (küçük harf, boşluk/özel karakter → tire, `o'clock → o-clock`). Hepsinde dolu.
 - `ok` (okunuş), `en` (İngilizce açıklama), `ex` (örnek cümle): grup grup elle
-  yazılıyor. **Şu an dolu olan gruplar: 1, 10.**
+  yazılıyor. **Şu an dolu olan gruplar: 1, 2, 3, 10.**
 
 ### Okunuş kuralı
 

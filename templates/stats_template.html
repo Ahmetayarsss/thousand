@@ -2,8 +2,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oxford 3000 · İlerleme</title>
+<script src="progress.js"></script>
 <style>
-:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--amber:#E5892B;--neu:#C7D0DB}
+:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--amber:#E5892B;--neu:#C7D0DB;--green-bg:#E7F5EC;--amber-bg:#FCF0E1;--secgray:#EDF0F4;--secgray-ink:#9AA6B4}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 .wrap{max-width:600px;margin:0 auto;padding:8px 14px calc(24px + env(safe-area-inset-bottom))}
@@ -35,8 +36,19 @@ h1{font-size:20px;font-weight:800;margin:0}
 .ex-row .p{flex:0 0 auto;font-weight:800;font-size:15px}
 .ex-row .p.hi{color:var(--green)} .ex-row .p.mid{color:var(--amber)} .ex-row .p.lo{color:#D9544D}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:14px 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sec{position:relative;border-radius:14px;padding:10px 8px;border:1.5px solid var(--line);background:var(--secgray);min-height:64px;display:flex;flex-direction:column;justify-content:space-between}
+.sec .snum{font-size:20px;font-weight:800;line-height:1;color:var(--secgray-ink)}
+.sec .slvl{align-self:flex-start;margin-top:6px;font-size:10px;font-weight:800;color:#fff;background:var(--accent);border-radius:5px;padding:1px 6px}
+.sec.green{background:var(--green-bg);border-color:var(--green)} .sec.green .snum{color:var(--green)}
+.sec.yellow{background:var(--amber-bg);border-color:var(--amber)} .sec.yellow .snum{color:var(--amber)}
+.sec .badge{position:absolute;top:6px;right:8px;font-size:13px}
+.sec.cur{box-shadow:0 0 0 3px rgba(59,110,165,.35)}
+.sec .curtag{position:absolute;top:-8px;left:7px;background:var(--accent);color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:1px 6px}
+.tekrar{margin-top:7px;border:0;background:var(--amber);color:#fff;font-weight:800;font-size:11.5px;border-radius:8px;padding:6px 0;width:100%;cursor:pointer}
+.tekrar:active{transform:scale(.96)}
 @media (prefers-color-scheme:dark){
-  :root{--bg:#12161C;--card:#1B2129;--ink:#EAF0F7;--muted:#8A96A6;--line:#2A323C;--neu:#2A323C}
+  :root{--bg:#12161C;--card:#1B2129;--ink:#EAF0F7;--muted:#8A96A6;--line:#2A323C;--neu:#2A323C;--green-bg:#16301F;--amber-bg:#332412;--secgray:#20262E;--secgray-ink:#69747F}
   .big .cell{background:#12161C}
 }
 </style>
@@ -46,6 +58,11 @@ h1{font-size:20px;font-weight:800;margin:0}
   <div class="bar-top">
     <a class="back" href="__BACK__"><span>‹</span> Kartlar</a>
     <h1>İlerleme</h1>
+  </div>
+
+  <div class="card">
+    <h2>Bölümler</h2>
+    <div class="grid" id="secgrid"></div>
   </div>
 
   <div class="card">
@@ -77,6 +94,28 @@ h1{font-size:20px;font-weight:800;margin:0}
 
 <script>
 const SG=__GROUPS_JSON__;
+
+/* --- Bölümler haritası (30 kart) --- */
+(function(){
+  const cur=window.OX?OX.current():0;
+  document.getElementById('secgrid').innerHTML=SG.map((g,i)=>{
+    const st=window.OX?OX.status(g.no):'gray';
+    const badge=st==='green'?'✓':st==='yellow'?'🔁':'';
+    return '<div class="sec '+st+(i===cur?' cur':'')+'">'
+      +(i===cur?'<span class="curtag">şu an</span>':'')
+      +(badge?'<span class="badge">'+badge+'</span>':'')
+      +'<div class="snum">'+g.no+'</div>'
+      +'<span class="slvl">'+g.level+'</span>'
+      +(st==='yellow'?'<button class="tekrar" data-i="'+i+'">Tekrar</button>':'')
+      +'</div>';
+  }).join('');
+  document.getElementById('secgrid').addEventListener('click',e=>{
+    const b=e.target.closest('.tekrar'); if(!b)return;
+    const i=+b.dataset.i; if(window.OX)OX.startReview(i);
+    location.href='kartlar.html?exam=1';
+  });
+})();
+
 const store=JSON.parse(localStorage.getItem('ox3000_srs_v1')||'{}');
 const exams=JSON.parse(localStorage.getItem('ox3000_exams_v1')||'[]');
 const now=Date.now();

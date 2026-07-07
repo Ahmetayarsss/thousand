@@ -7,17 +7,24 @@ Speech API sorunları böylece aşılır. İlerleme telefonda (`localStorage`) s
 
 ## Yapı
 
-Menü yok. Sayfa sırası **liste ⇄ kartlar ⇄ istatistik**; yana kaydırarak geçilir
-(kartlar ekranında 📊 butonu da istatistiğe götürür). Ses yalnızca **US** aksanı.
-Kartta 🔊 yalnız cevap açıldıktan sonra görünür ve yalnız basınca çalar
-(otomatik seslendirme yok).
+Menü yok. Sayfa sırası (yana kaydırma): **bölümler ⇄ liste ⇄ kartlar ⇄ istatistik**.
+Ses yalnızca **US** aksanı. Kartta 🔊 yalnız cevap açıldıktan sonra görünür ve yalnız
+basınca çalar (otomatik seslendirme yok).
+
+**Sıralı/kilitli ilerleme:** Liste ve kartlar hep "şu anki bölümü" gösterir (grup
+seçici/oklar yok; Hız + Grubu oku kalır). Bir bölümün **gün sonu sınavı %100** geçilirse
+bölüm YEŞİL olur ve sıradaki bölüm açılır; geçilemezse GRİ kalıp liste yeniden açılır.
+Yeşilden **2 gün** sonra bölüm SARI olur ve haritada **Tekrar** butonu çıkar; Tekrar o
+bölümün sınavını tekrar yaptırır (durum mantığı `app/www/progress.js`).
 
 ```
 app/
   www/               # uygulamanın web varlıkları (webDir)
-    index.html       # açılış = kelime listesi — build_all.py üretir
-    kartlar.html     # kelime kartları — build_all.py üretir
+    index.html       # açılış = şu anki bölümün kelime listesi — build_all.py üretir
+    kartlar.html     # şu anki bölümün kartları/sınavı — build_all.py üretir
+    bolumler.html    # 30 bölüm haritası (renk + Tekrar) — build_all.py üretir
     istatistik.html  # ilerleme + sınav sonuçları — build_all.py üretir
+    progress.js      # bölüm ilerleme durumu (sıralı kilit) — elle yazılır
     tts-bridge.js    # native TTS köprüsü (tarayıcıda no-op) — elle yazılır
   android/           # Capacitor'ün ürettiği native proje
   capacitor.config.json

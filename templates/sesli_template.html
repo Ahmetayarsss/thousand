@@ -45,13 +45,10 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:#0B5FA5;text-decoration:none;background:#E8F1FB;border:1px solid #C4DBF3;border-radius:7px;padding:3px 8px}
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
-</style></head><body><div class="wrap">
+.seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
+</style><script src="progress.js"></script></head><body><div class="wrap">
 <header>
-  <div class="grouprow">
-    <button class="nav" id="prev">‹</button>
-    <select id="groupsel"></select>
-    <button class="nav" id="next">›</button>
-  </div>
+  <div class="seclabel" id="seclabel"></div>
   <div class="controls">
     <label class="speed">Hız <input id="rate" type="range" min="0.5" max="1" step="0.05" value="0.8"></label>
     <button class="playall" id="playall">▶ Grubu oku</button>
@@ -67,7 +64,7 @@ const GROUPS=__GROUPS_JSON__;
 const SECS=["İsimler","Fiiller","Sıfatlar","Zarflar","Diğer"];
 const SColor={"İsimler":"var(--isim)","Fiiller":"var(--fiil)","Sıfatlar":"var(--sifat)","Zarflar":"var(--zarf)","Diğer":"var(--diger)"};
 const posTag={"isim":"isim","fiil":"fiil","sıfat":"sıfat","zarf":"zarf","edat":"edat","bağlaç":"bağlaç","zamir":"zamir","belirteç":"belirteç","ünlem":"ünlem","sayı":"sayı","kip fiili":"kip fiili","yardımcı fiil":"yard. fiil","artikel":"artikel","mastar":"mastar"};
-let LANG="en-US",RATE=0.8,voices=[],gi=0;const synth=window.speechSynthesis;
+let LANG="en-US",RATE=0.8,voices=[],gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0);const synth=window.speechSynthesis;
 function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
@@ -78,7 +75,7 @@ function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
 function stop(){playing=false;queue=[];if(synth)synth.cancel();clr();const b=document.getElementById('playall');b.textContent="▶ Grubu oku";b.classList.remove('stop');}
 function all(){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;playing=true;queue=cs.slice();const b=document.getElementById('playall');b.textContent="■ Durdur";b.classList.add('stop');const step=()=>{if(!playing||!queue.length){stop();return;}const c=queue.shift();c.scrollIntoView({behavior:'smooth',block:'center'});speak(c.dataset.w,c,()=>setTimeout(step,250));};step();}
 
-function fillSelect(){const sel=document.getElementById('groupsel');sel.innerHTML=GROUPS.map((g,i)=>`<option value="${i}">Grup ${String(g.no).padStart(2,'0')} · ${g.level} (${g.lo}–${g.hi})</option>`).join('');}
+function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
 function renderGroup(){stop();const g=GROUPS[gi];const list=document.getElementById('list');list.innerHTML='';
 const bs={};SECS.forEach(s=>bs[s]=[]);g.items.forEach(d=>bs[d.sec].push(d));
 SECS.forEach(s=>{const arr=bs[s].slice().sort((a,b)=>a.w.localeCompare(b.w));if(!arr.length)return;
@@ -94,16 +91,11 @@ c.querySelector('.word').onclick=()=>one(d.w,c);
 c.querySelector('.spk').onclick=e=>{e.stopPropagation();one(d.w,c);};
 const ex=c.querySelector('.ex');if(ex)ex.onclick=()=>one(d.ex,c);
 list.appendChild(c);});});
-document.getElementById('prev').disabled=(gi===0);
-document.getElementById('next').disabled=(gi===GROUPS.length-1);
 document.getElementById('search').value='';window.scrollTo({top:0});}
 
-document.getElementById('groupsel').addEventListener('change',e=>{gi=+e.target.value;renderGroup();});
-document.getElementById('prev').addEventListener('click',()=>{if(gi>0){gi--;document.getElementById('groupsel').value=gi;renderGroup();}});
-document.getElementById('next').addEventListener('click',()=>{if(gi<GROUPS.length-1){gi++;document.getElementById('groupsel').value=gi;renderGroup();}});
 document.getElementById('rate').addEventListener('input',e=>RATE=parseFloat(e.target.value));
 document.getElementById('playall').addEventListener('click',()=>{playing?stop():all();});
 document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
-fillSelect();renderGroup();
+setSecLabel();renderGroup();
 </script></body></html>

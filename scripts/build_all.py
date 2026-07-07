@@ -82,7 +82,7 @@ def render(groups):
     #   kartlar        → sola: istatistik | sağa: liste
     for tpl, data, out, app_out, swipe in [
         ("sesli_template.html", sesli_groups, "Oxford3000_30grup_sesli.html",
-         "app/www/index.html", ("kartlar.html", "bolumler.html")),
+         "app/www/index.html", ("kartlar.html", "")),
         ("kartlar_template.html", kart_groups, "Oxford3000_kartlar.html",
          "app/www/kartlar.html", ("istatistik.html", "index.html")),
     ]:
@@ -120,18 +120,6 @@ def render(groups):
     )
     (ROOT / "app/www/istatistik.html").write_text(app_stats, encoding="utf-8")
     print(f"app/www/istatistik.html: {len(app_stats)} bayt")
-
-    # Bölümler haritası (yalnız no + level lazım)
-    sec_data = [{"no": g["no"], "level": g["level"]} for g in groups]
-    sec_tpl = (ROOT / "templates" / "bolumler_template.html").read_text(encoding="utf-8")
-    sec_tpl = sec_tpl.replace(
-        "__GROUPS_JSON__", json.dumps(sec_data, ensure_ascii=False, separators=(",", ":"))
-    )
-    (ROOT / "bolumler.html").write_text(sec_tpl, encoding="utf-8")
-    print(f"bolumler.html: {len(sec_tpl)} bayt")
-    app_sec = sec_tpl.replace("</head>", swipe_script("index.html", "") + "</head>", 1)
-    (ROOT / "app/www/bolumler.html").write_text(app_sec, encoding="utf-8")
-    print(f"app/www/bolumler.html: {len(app_sec)} bayt")
 
     # progress.js: kanonik kopya app/www'da; kök (tarayıcı) sürümü için kopyala
     prog = (ROOT / "app/www/progress.js").read_text(encoding="utf-8")

@@ -13,6 +13,9 @@ on:
       - "app/**"
       - ".github/workflows/build-apk.yml"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -57,3 +60,17 @@ jobs:
           name: oxford3000-debug-apk
           path: app/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: APK'yı sabit adlandır
+        run: cp app/android/app/build/outputs/apk/debug/app-debug.apk Oxford3000.apk
+
+      - name: Release olarak yayınla (apk-latest)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: "Oxford 3000 — son APK"
+          prerelease: true
+          files: Oxford3000.apk
+          body: |
+            Otomatik derlenen debug APK (her push'ta güncellenir).
+            Telefona kurmak için: indir → aç → "bilinmeyen kaynaklara izin ver".

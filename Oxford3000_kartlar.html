@@ -175,13 +175,16 @@ function gradeExam(correct){if(correct){examScore++;}else{examWrong.push(cur);ma
 function examDone(){const pct=Math.round(examScore/examTotal*100);
   try{const ex=JSON.parse(localStorage.getItem(EKEY)||'[]');ex.push({t:now(),g:gi,no:GROUPS[gi].no,level:GROUPS[gi].level,score:examScore,total:examTotal,pct:pct});localStorage.setItem(EKEY,JSON.stringify(ex.slice(-100)));}catch(e){}
   const pass=(examScore===examTotal);              // geçmek için %100 gerekli
-  if(window.OX)OX.examResult(gi,GROUPS[gi].no,pass);
+  const res=(window.OX?OX.examResult(gi,GROUPS[gi].no,pass):(pass?'green':'reopen'));
+  const gold=(res==='gold');                        // 4. tekrar geçildi → tam öğrenme
   const wl=examWrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
   const last=(gi>=GROUPS.length-1);
   let msg=pass
-    ?('Bölümü geçtin! ✓ '+(last?'Tüm bölümleri bitirdin! 🎉':'Sıradaki bölüm açıldı.'))
+    ?(gold
+       ?'Tam öğrendin! ⭐ Bu bölüm altın oldu — artık tekrar istenmeyecek.'
+       :'Bölümü geçtin! ✓ '+(last?'Tüm bölümleri bitirdin! 🎉':'Sıradaki bölüm açıldı.'))
     :('%'+pct+' — bu bölümü geçemedin. (Geçmek için hepsi doğru olmalı.) Bölüm gri kaldı, yeniden çalış.');
-  showResult(pass?'✓':'%'+pct,examScore+'/'+examTotal+' doğru',msg,wl,false);
+  showResult(pass?(gold?'⭐':'✓'):'%'+pct,examScore+'/'+examTotal+' doğru',msg,wl,false);
   document.getElementById('r-next').textContent=pass?(last?'Listeye dön':'Sonraki bölüm →'):'Listeye dön (yeniden çalış)';
   document.getElementById('r-next').style.display='';}
 

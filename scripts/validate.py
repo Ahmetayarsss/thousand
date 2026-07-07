@@ -27,16 +27,18 @@ def err(msg):
 
 
 def check_ok(gno, w, ok):
-    if not OK_RE.match(ok):
-        err(f"G{gno} {w!r}: okunuşta izinsiz karakter: {ok!r}")
-        return
-    syls = ok.split("-")
-    stressed = [s for s in syls if s == s.upper() and s != s.lower()]
-    if len(syls) > 1 and not stressed:
-        err(f"G{gno} {w!r}: vurgulu (BÜYÜK) hece yok: {ok!r}")
-    for s in syls:
-        if s not in (s.upper(), s.lower()):
-            err(f"G{gno} {w!r}: hece karışık büyük/küçük: {ok!r}")
+    # Çoklu-biçim kelimeler (ör. "a, an") " / " ile ayrılabilir; her parça ayrı denetlenir.
+    for part in [p.strip() for p in ok.split("/")]:
+        if not OK_RE.match(part):
+            err(f"G{gno} {w!r}: okunuşta izinsiz karakter: {ok!r}")
+            continue
+        syls = part.split("-")
+        stressed = [s for s in syls if s == s.upper() and s != s.lower()]
+        if len(syls) > 1 and not stressed:
+            err(f"G{gno} {w!r}: vurgulu (BÜYÜK) hece yok: {ok!r}")
+        for s in syls:
+            if s not in (s.upper(), s.lower()):
+                err(f"G{gno} {w!r}: hece karışık büyük/küçük: {ok!r}")
 
 
 def check_ex(gno, w, ex):

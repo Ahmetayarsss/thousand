@@ -27,7 +27,7 @@ DATA = {
  "opponent": ("ı-POU-nınt", "a person you compete against", "He beat his <b>opponent</b> easily."),
  "distribution": ("dist-ri-BYU-şın", "the act of giving things out", "The <b>distribution</b> of food to the poor took days."),
  "critical": ("KRİ-ti-kıl", "finding fault; extremely important", "This is a <b>critical</b> moment."),
- "whisper": ("Uİs-pır", "to speak very quietly", "She <b>whispered</b> the secret in my ear."),
+ "whisper": ("UİS-pır", "to speak very quietly", "She <b>whispered</b> the secret in my ear."),
  "concerned": ("kın-SÖRND", "worried; involved", "I'm <b>concerned</b> about his health."),
  "adopt": ("ı-DOPT", "to take as your own; to start using", "They decided to <b>adopt</b> a child."),
  "accuse": ("ı-KYUZ", "to say someone did something wrong", "Don't <b>accuse</b> me without proof."),

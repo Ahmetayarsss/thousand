@@ -56,13 +56,7 @@ h1{font-size:20px;font-weight:800;margin:0}
 <body>
 <div class="wrap">
   <div class="bar-top">
-    <a class="back" href="__BACK__"><span>‹</span> Kartlar</a>
     <h1>İlerleme</h1>
-  </div>
-
-  <div class="card">
-    <h2>Bölümler</h2>
-    <div class="grid" id="secgrid"></div>
   </div>
 
   <div class="card">
@@ -74,16 +68,20 @@ h1{font-size:20px;font-weight:800;margin:0}
     </div>
     <div class="pbar"><i class="k" id="pb-k"></i><i class="a" id="pb-a"></i></div>
     <div class="legend">
-      <span><b style="background:var(--green)"></b>Öğrenildi (kutu 4–5)</span>
+      <span><b style="background:var(--green)"></b>Öğrenildi</span>
       <span><b style="background:var(--amber)"></b>Öğreniliyor</span>
       <span><b style="background:var(--neu)"></b>Başlanmadı</span>
     </div>
-    <div class="legend" id="due-line" style="margin-top:10px"></div>
   </div>
 
   <div class="card">
     <h2>Seviyeye göre</h2>
     <div id="levels"></div>
+  </div>
+
+  <div class="card">
+    <h2>Bölümler</h2>
+    <div class="grid" id="secgrid"></div>
   </div>
 
   <div class="card">
@@ -116,23 +114,19 @@ const SG=__GROUPS_JSON__;
   });
 })();
 
-const store=JSON.parse(localStorage.getItem('ox3000_srs_v1')||'{}');
 const exams=JSON.parse(localStorage.getItem('ox3000_exams_v1')||'[]');
-const now=Date.now();
-function cls(w){const r=store[w];if(!r||!r.box)return 'neu';if(r.box>=4)return 'known';return 'learn';}
+const curIdx=window.OX?OX.current():-1;
 
-let total=0,known=0,learn=0,neu=0,due=0;
+// Sınavı geçilen (yeşil/sarı) bölümün kelimeleri = öğrenildi; şu an çalışılan = öğreniliyor.
+let total=0,known=0,learn=0,neu=0;
 const byLvl={};
-SG.forEach(g=>{
+SG.forEach((g,i)=>{
   const L=byLvl[g.level]||(byLvl[g.level]={total:0,known:0});
-  g.ws.forEach(w=>{
-    total++;L.total++;
-    const c=cls(w);
-    if(c==='known'){known++;L.known++;}
-    else if(c==='learn')learn++;
-    else neu++;
-    const r=store[w];if(r&&r.due<=now)due++;
-  });
+  const n=g.ws.length; total+=n; L.total+=n;
+  const passed=window.OX?OX.status(g.no)!=='gray':false;
+  if(passed){known+=n; L.known+=n;}
+  else if(i===curIdx){learn+=n;}
+  else{neu+=n;}
 });
 
 document.getElementById('n-known').textContent=known;
@@ -140,8 +134,6 @@ document.getElementById('n-learn').textContent=learn;
 document.getElementById('n-neu').textContent=neu;
 document.getElementById('pb-k').style.width=(known/total*100)+'%';
 document.getElementById('pb-a').style.width=(learn/total*100)+'%';
-document.getElementById('due-line').innerHTML=
-  '<span>Bugün tekrar bekleyen: <b style="background:none;width:auto;color:var(--accent);font-weight:800">'+due+' kelime</b></span>';
 
 const order=['A1','A2','B1','B2'];
 document.getElementById('levels').innerHTML=order.filter(l=>byLvl[l]).map(l=>{
@@ -162,6 +154,6 @@ document.getElementById('exams').innerHTML = ex.length
         +'<span class="d">'+fmtDate(e.t)+' · '+e.score+'/'+e.total+'</span>'
         +'<span class="p '+pc+'">%'+e.pct+'</span></div>';
     }).join('')
-  : '<div class="empty">Henüz sınav yapmadın. Kartlar ekranında “Gün sonu sınavı”nı dene.</div>';
+  : '<div class="empty">Henüz sınav yapmadın. Kartlar ekranında “Sınav”ı dene.</div>';
 </script>
 </body></html>

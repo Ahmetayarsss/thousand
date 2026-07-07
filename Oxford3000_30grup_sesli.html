@@ -73,7 +73,15 @@ function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
 function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
 function stop(){playing=false;queue=[];if(synth)synth.cancel();clr();const b=document.getElementById('playall');b.textContent="▶ Grubu oku";b.classList.remove('stop');}
-function all(){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;playing=true;queue=cs.slice();const b=document.getElementById('playall');b.textContent="■ Durdur";b.classList.add('stop');const step=()=>{if(!playing||!queue.length){stop();return;}const c=queue.shift();c.scrollIntoView({behavior:'smooth',block:'center'});speak(c.dataset.w,c,()=>setTimeout(step,250));};step();}
+function all(){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
+  const b=document.getElementById('playall');b.textContent="■ Durdur";b.classList.add('stop');playing=true;
+  const native=window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform();
+  if(native&&synth){
+    // Ekran kapalıyken de sürsün diye tek bir seslendirme olarak oku (cihaz TTS'i arka planda çalar).
+    synth.cancel();const text=cs.map(c=>c.dataset.w).join('. ')+'.';
+    const u=new SpeechSynthesisUtterance(text);u.lang=LANG;u.rate=RATE;u.onend=()=>stop();u.onerror=()=>stop();synth.speak(u);return;
+  }
+  queue=cs.slice();const step=()=>{if(!playing||!queue.length){stop();return;}const c=queue.shift();c.scrollIntoView({behavior:'smooth',block:'center'});speak(c.dataset.w,c,()=>setTimeout(step,250));};step();}
 
 function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
 function renderGroup(){stop();const g=GROUPS[gi];const list=document.getElementById('list');list.innerHTML='';

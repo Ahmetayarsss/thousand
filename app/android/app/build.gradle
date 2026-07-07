@@ -16,8 +16,22 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        // Sabit imza: her derlemede aynı anahtar → yeni APK öncekinin üstüne
+        // güncelleme olarak kurulur (kişisel kullanım için; gizli değil).
+        stable {
+            storeFile file('oxford.keystore')
+            storePassword 'oxford123'
+            keyAlias 'oxford'
+            keyPassword 'oxford123'
+        }
+    }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.stable
+        }
         release {
+            signingConfig signingConfigs.stable
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -1,0 +1,59 @@
+name: Android APK derle
+
+# Oxford 3000 uygulamasını (app/) GitHub sunucularında derler ve
+# imzalı debug APK'sını indirilebilir bir artifact olarak yükler.
+# Elle çalıştırmak için: Actions sekmesi > "Android APK derle" > Run workflow.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/oxford-3000-pronunciation-defs-inzs33
+    paths:
+      - "app/**"
+      - ".github/workflows/build-apk.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      - name: Node kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: JDK 21 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Android SDK kur
+        uses: android-actions/setup-android@v3
+
+      - name: Gerekli SDK paketlerini yükle
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Bağımlılıkları kur (npm ci)
+        working-directory: app
+        run: npm ci
+
+      - name: Web varlıklarını senkronla (cap sync)
+        working-directory: app
+        run: npx cap sync android
+
+      - name: Debug APK derle
+        working-directory: app/android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: APK'yı artifact olarak yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: oxford3000-debug-apk
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

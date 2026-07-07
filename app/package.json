@@ -1,0 +1,17 @@
+{
+  "name": "oxford3000-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Oxford 3000 Türkçe çalışma uygulaması (Android)",
+  "scripts": {
+    "sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor-community/text-to-speech": "^5.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

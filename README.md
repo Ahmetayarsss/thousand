@@ -21,6 +21,7 @@ kelime çalışma araçları.
 | `scripts/build_all.py` | Enrichment'ı uygular + iki HTML'i üretir |
 | `scripts/validate.py` | Veri tutarlılık kontrolleri |
 | `scripts/enrich/gN.py` | Grup N'nin okunuş/açıklama/örnek içeriği |
+| `app/` | Android uygulaması (Capacitor + yerel TTS) — kurulum & APK için `app/README.md` |
 
 > HTML'lerin sesi ve ilerleme kaydı için dosyaları **tarayıcıda** açın
 > (uygulama içi önizlemede değil).

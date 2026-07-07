@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oxford 3000</title>
+<script src="tts-bridge.js"></script>
+<style>
+:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--speak:#E5892B}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overscroll-behavior:none}
+.wrap{max-width:600px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:24px 20px calc(24px + env(safe-area-inset-bottom))}
+.brand{text-align:center;margin-bottom:34px}
+.brand h1{margin:0;font-size:38px;font-weight:800;letter-spacing:-.02em}
+.brand .sub{margin-top:8px;color:var(--muted);font-size:14.5px;font-weight:600}
+.brand .badge{display:inline-block;margin-top:12px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;border-radius:20px;padding:4px 12px;letter-spacing:.02em}
+.menu{display:flex;flex-direction:column;gap:14px}
+.tile{display:flex;align-items:center;gap:16px;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px 20px;box-shadow:0 8px 26px rgba(20,30,50,.07);color:var(--ink);transition:transform .06s}
+.tile:active{transform:scale(.985)}
+.tile .ico{flex:0 0 auto;width:54px;height:54px;border-radius:15px;display:grid;place-items:center;font-size:26px}
+.tile.liste .ico{background:rgba(59,110,165,.14)}
+.tile.kartlar .ico{background:rgba(46,158,91,.14)}
+.tile .txt{flex:1 1 auto;min-width:0}
+.tile .txt .t{font-size:19px;font-weight:800}
+.tile .txt .d{margin-top:3px;font-size:13px;color:var(--muted);font-weight:600}
+.tile .arw{flex:0 0 auto;color:var(--muted);font-size:22px;font-weight:800}
+footer{text-align:center;margin-top:30px;color:var(--muted);font-size:11.5px;line-height:1.5}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#12161C;--card:#1B2129;--ink:#EAF0F7;--muted:#8A96A6;--line:#2A323C}
+  .tile{box-shadow:0 8px 26px rgba(0,0,0,.35)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <h1>Oxford 3000</h1>
+    <div class="sub">Türkçe konuşanlar için İngilizce kelime çalışması</div>
+    <div class="badge">A1 – B2 · 3000 kelime</div>
+  </div>
+  <nav class="menu">
+    <a class="tile liste" href="liste.html">
+      <span class="ico">📚</span>
+      <span class="txt"><span class="t">Kelime Listesi</span><span class="d">30 grup · anlam, okunuş, ses, örnek</span></span>
+      <span class="arw">›</span>
+    </a>
+    <a class="tile kartlar" href="kartlar.html">
+      <span class="ico">🗂️</span>
+      <span class="txt"><span class="t">Kelime Kartları</span><span class="d">Flashcard · test & gün sonu sınavı</span></span>
+      <span class="arw">›</span>
+    </a>
+  </nav>
+  <footer>Ses için cihazınızda İngilizce TTS sesi yüklü olmalıdır.<br>İlerlemeniz telefonda saklanır.</footer>
+</div>
+</body></html>

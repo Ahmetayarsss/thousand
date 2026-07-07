@@ -1,0 +1,8 @@
+{
+  "appId": "com.oxford3000.study",
+  "appName": "Oxford 3000",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}

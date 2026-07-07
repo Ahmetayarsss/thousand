@@ -1,2 +1,14 @@
 __pycache__/
 *.pyc
+
+# Node / Capacitor
+app/node_modules/
+
+# Android derleme çıktıları (proje dosyalarının kendisi commit'lenir)
+app/android/.gradle/
+app/android/build/
+app/android/app/build/
+app/android/captures/
+app/android/local.properties
+app/android/.idea/
+*.iml

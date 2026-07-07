@@ -23,6 +23,15 @@ sys.path.insert(0, str(ROOT / "scripts" / "enrich"))
 
 ENRICH_MODS = ["g2", "g3"]
 
+# Android uygulaması sürümüne eklenen "‹ Menü" geri çubuğu (ana menüye döner).
+BACK_BAR = (
+    '<div style="flex:0 0 auto;display:flex;align-items:center;padding:6px 0 2px">'
+    '<a href="index.html" style="display:inline-flex;align-items:center;gap:5px;'
+    'text-decoration:none;color:var(--ink);font-weight:800;font-size:14px;'
+    'padding:6px 12px 6px 4px;border-radius:9px">'
+    '<span style="font-size:20px;line-height:1">‹</span> Menü</a></div>'
+)
+
 
 def load_groups():
     with open(ROOT / "data" / "all_groups.json", encoding="utf-8") as f:
@@ -58,15 +67,31 @@ def render(groups):
         }
         for g in groups
     ]
-    for tpl, data, out in [
-        ("sesli_template.html", sesli_groups, "Oxford3000_30grup_sesli.html"),
-        ("kartlar_template.html", kart_groups, "Oxford3000_kartlar.html"),
+    # container: uygulama sürümünde geri çubuğunu bu açılış div'inden hemen sonra ekle
+    for tpl, data, out, app_out, container in [
+        ("sesli_template.html", sesli_groups, "Oxford3000_30grup_sesli.html",
+         "app/www/liste.html", '<div class="wrap">'),
+        ("kartlar_template.html", kart_groups, "Oxford3000_kartlar.html",
+         "app/www/kartlar.html", '<div id="app">'),
     ]:
         html = (ROOT / "templates" / tpl).read_text(encoding="utf-8")
         blob = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
         html = html.replace("__GROUPS_JSON__", blob)
+
+        # 1) Bağımsız kök HTML (tarayıcıda çift tıkla aç)
         (ROOT / out).write_text(html, encoding="utf-8")
         print(f"{out}: {len(html)} bayt")
+
+        # 2) Android uygulaması sürümü: TTS köprüsü + "‹ Menü" geri çubuğu
+        app_html = html.replace(
+            "</head>", '<script src="tts-bridge.js"></script></head>', 1
+        )
+        assert container in app_html, f"{tpl}: kapsayıcı bulunamadı: {container}"
+        app_html = app_html.replace(container, container + BACK_BAR, 1)
+        app_path = ROOT / app_out
+        app_path.parent.mkdir(parents=True, exist_ok=True)
+        app_path.write_text(app_html, encoding="utf-8")
+        print(f"{app_out}: {len(app_html)} bayt")
 
 
 def main():

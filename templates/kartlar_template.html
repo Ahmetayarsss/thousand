@@ -13,6 +13,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family
 .grouprow{display:flex;gap:7px;align-items:center}
 .nav{border:0;background:var(--ink);color:#fff;font-size:15px;font-weight:800;width:34px;height:34px;border-radius:9px;cursor:pointer;flex:0 0 auto}
 .nav:disabled{opacity:.35}
+.statslink{text-decoration:none;font-size:17px;display:grid;place-items:center}
 select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 9px;font-size:13.5px;font-weight:600}
 .acc{display:inline-flex;background:#E9EDF3;border-radius:8px;padding:2px;flex:0 0 auto}
 .acc button{border:0;background:transparent;color:var(--muted);font-weight:800;font-size:11.5px;padding:6px 9px;border-radius:7px;cursor:pointer}
@@ -67,6 +68,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
     <button class="nav" id="prev">‹</button>
     <select id="groupsel"></select>
     <button class="nav" id="next">›</button>
+    <a class="nav statslink" href="istatistik.html" aria-label="İlerleme / sınav sonuçları">📊</a>
   </div>
   <div class="progline">
     <span class="bar" id="bar"></span>
@@ -106,7 +108,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 </div>
 <script>
 const GROUPS=__GROUPS_JSON__;
-const SKEY="ox3000_srs_v1";
+const SKEY="ox3000_srs_v1";const EKEY="ox3000_exams_v1";
 const INT=[0,0,1,3,7,16];
 let store={},storageOK=true;
 try{const raw=localStorage.getItem(SKEY);store=raw?JSON.parse(raw):{};localStorage.setItem("t_","1");localStorage.removeItem("t_");}
@@ -140,7 +142,7 @@ function renderPrompt(){
   ans.classList.add('hidden');ans.innerHTML='';document.getElementById('tap').style.display='';document.getElementById('ctrl').classList.add('hidden');spk.classList.remove('show');
   q.className='q'+((cur.tr&&cur.tr.length>22)?' small':'');
   if(cur._dir==='tr2en'){document.getElementById('dir').textContent='TÜRKÇE → İNGİLİZCE';q.textContent=cur.tr||'—';}
-  else{document.getElementById('dir').textContent='İNGİLİZCE → TÜRKÇE';q.textContent=cur.w;spk.classList.add('show');}
+  else{document.getElementById('dir').textContent='İNGİLİZCE → TÜRKÇE';q.textContent=cur.w;}
 }
 function reveal(){
   if(side===1)return;side=1;document.getElementById('tap').style.display='none';
@@ -150,7 +152,6 @@ function reveal(){
   if(cur.ex)h+=`<div class="ex">${cur.ex}</div>`;
   ans.innerHTML=h;ans.classList.remove('hidden');spk.classList.add('show');
   document.getElementById('ctrl').classList.remove('hidden');
-  speak(cur.w); // cihaz sesi ile İngilizceyi oku
 }
 
 /* ---- TEST (SRS) ---- */
@@ -177,6 +178,7 @@ function nextExam(){document.getElementById('counter').textContent=(examIdx+1)+'
   cur=examList[examIdx];cur._dir=dirFor();renderPrompt();}
 function gradeExam(correct){if(correct){examScore++;}else{examWrong.push(cur);markReview(cur.w);}examIdx++;nextExam();}
 function examDone(){const pct=Math.round(examScore/examTotal*100);
+  try{const ex=JSON.parse(localStorage.getItem(EKEY)||'[]');ex.push({t:now(),g:gi,no:GROUPS[gi].no,level:GROUPS[gi].level,score:examScore,total:examTotal,pct:pct});localStorage.setItem(EKEY,JSON.stringify(ex.slice(-100)));}catch(e){}
   const wl=examWrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
   let msg=pct>=90?'Harika! Bu grubu çok iyi biliyorsun. 🌟':pct>=70?'İyi gidiyor. Yanlışları biraz çalış.':'Bu grubu biraz daha çalışman iyi olur. Yanlışlar tekrar listene eklendi.';
   showResult('%'+pct,examScore+'/'+examTotal+' doğru',msg,wl,false);}

@@ -23,13 +23,12 @@ sys.path.insert(0, str(ROOT / "scripts" / "enrich"))
 
 ENRICH_MODS = ["g2", "g3"]
 
-# Android uygulaması: menü yok. Liste (index.html) açılır; yatay kaydırmayla
-# kartlar.html'e ve geri geçilir. Bu script her app sayfasına <head>'e eklenir.
-# dir: -1 sola kaydır, +1 sağa kaydır → target sayfaya git. Slider/buton/link/
-# select üzerindeki dokunuşlar hariç tutulur (yanlış tetiklenmesin).
-def swipe_script(direction, target):
+# Android uygulaması: menü yok. Sayfa sırası liste ⇄ kartlar ⇄ istatistik.
+# Yatay kaydırma: sola → NEXT sayfa, sağa → PREV sayfa (boş ise o yön no-op).
+# Slider/buton/link/select üzerindeki dokunuşlar hariç (yanlış tetiklenmesin).
+def swipe_script(next_t, prev_t):
     return (
-        "<script>(function(){var D=%d,T=%r;var x0=0,y0=0,t0=0,ok=false;"
+        "<script>(function(){var N=%r,P=%r;var x0=0,y0=0,t0=0,ok=false;"
         "addEventListener('touchstart',function(e){"
         "if(e.touches.length!==1){ok=false;return;}"
         "var el=e.target;"
@@ -39,9 +38,9 @@ def swipe_script(direction, target):
         "var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;"
         "if(Date.now()-t0>800)return;"
         "if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;"
-        "if((D<0&&dx<0)||(D>0&&dx>0))location.href=T;},{passive:true});"
+        "if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});"
         "})();</script>"
-    ) % (direction, target)
+    ) % (next_t, prev_t)
 
 
 def load_groups():
@@ -78,14 +77,14 @@ def render(groups):
         }
         for g in groups
     ]
-    # app_out: uygulama sayfası. swipe: (yön, hedef) yatay kaydırma navigasyonu.
-    #   index.html (liste)  → sola kaydır → kartlar.html
-    #   kartlar.html        → sağa kaydır → index.html
+    # app_out: uygulama sayfası. swipe: (next, prev) yatay kaydırma hedefleri.
+    #   liste (index)  → sola: kartlar
+    #   kartlar        → sola: istatistik | sağa: liste
     for tpl, data, out, app_out, swipe in [
         ("sesli_template.html", sesli_groups, "Oxford3000_30grup_sesli.html",
-         "app/www/index.html", (-1, "kartlar.html")),
+         "app/www/index.html", ("kartlar.html", "")),
         ("kartlar_template.html", kart_groups, "Oxford3000_kartlar.html",
-         "app/www/kartlar.html", (1, "index.html")),
+         "app/www/kartlar.html", ("istatistik.html", "index.html")),
     ]:
         html = (ROOT / "templates" / tpl).read_text(encoding="utf-8")
         blob = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
@@ -102,6 +101,25 @@ def render(groups):
         app_path.parent.mkdir(parents=True, exist_ok=True)
         app_path.write_text(app_html, encoding="utf-8")
         print(f"{app_out}: {len(app_html)} bayt")
+
+    # İstatistik / ilerleme sayfası (yalnız kelime listesi lazım: no, level, ws)
+    stats_data = [
+        {"no": g["no"], "level": g["level"], "ws": [it["w"] for it in g["items"]]}
+        for g in groups
+    ]
+    stats_tpl = (ROOT / "templates" / "stats_template.html").read_text(encoding="utf-8")
+    stats_blob = json.dumps(stats_data, ensure_ascii=False, separators=(",", ":"))
+    stats_tpl = stats_tpl.replace("__GROUPS_JSON__", stats_blob)
+    # Kök (tarayıcı) sürümü: kartlar'a geri döner, swipe yok
+    root_stats = stats_tpl.replace("__BACK__", "Oxford3000_kartlar.html")
+    (ROOT / "istatistik.html").write_text(root_stats, encoding="utf-8")
+    print(f"istatistik.html: {len(root_stats)} bayt")
+    # Uygulama sürümü: geri = kartlar.html, sağa kaydır → kartlar
+    app_stats = stats_tpl.replace("__BACK__", "kartlar.html").replace(
+        "</head>", swipe_script("", "kartlar.html") + "</head>", 1
+    )
+    (ROOT / "app/www/istatistik.html").write_text(app_stats, encoding="utf-8")
+    print(f"app/www/istatistik.html: {len(app_stats)} bayt")
 
 
 def main():

@@ -7,15 +7,17 @@ Speech API sorunları böylece aşılır. İlerleme telefonda (`localStorage`) s
 
 ## Yapı
 
-Menü yok: uygulama doğrudan **kelime listesine** (`index.html`) açılır; ekranı
-**yana kaydırınca kelime kartlarına** (`kartlar.html`) geçilir, geri kaydırınca
-listeye döner. Ses yalnızca **US** aksanıdır.
+Menü yok. Sayfa sırası **liste ⇄ kartlar ⇄ istatistik**; yana kaydırarak geçilir
+(kartlar ekranında 📊 butonu da istatistiğe götürür). Ses yalnızca **US** aksanı.
+Kartta 🔊 yalnız cevap açıldıktan sonra görünür ve yalnız basınca çalar
+(otomatik seslendirme yok).
 
 ```
 app/
   www/               # uygulamanın web varlıkları (webDir)
     index.html       # açılış = kelime listesi — build_all.py üretir
     kartlar.html     # kelime kartları — build_all.py üretir
+    istatistik.html  # ilerleme + sınav sonuçları — build_all.py üretir
     tts-bridge.js    # native TTS köprüsü (tarayıcıda no-op) — elle yazılır
   android/           # Capacitor'ün ürettiği native proje
   capacitor.config.json

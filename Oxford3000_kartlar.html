@@ -129,14 +129,15 @@ function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').te
 function stats(g){let neu=0,learn=0,known=0,due=0;g.items.forEach(it=>{const r=store[it.w];if(!r||!r.box)neu++;else if(r.box>=4)known++;else learn++;if(!r||r.due<=now())due++;});return{neu,learn,known,due};}
 function drawBar(){const g=GROUPS[gi],s=stats(g),t=g.items.length;document.getElementById('bar').innerHTML=`<i style="width:${s.known/t*100}%;background:var(--green)"></i><i style="width:${s.learn/t*100}%;background:#E0902B"></i><i style="width:${s.neu/t*100}%;background:#C9D2DE"></i>`;}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function dirFor(){return 'en2tr';}
+function dirFor(){return Math.random()<0.5?'tr2en':'en2tr';}
 
 function renderPrompt(){
   const g=GROUPS[gi];document.getElementById('lvl').textContent=g.level;
   side=0;const q=document.getElementById('q'),ans=document.getElementById('ansbox'),spk=document.getElementById('spk');
   ans.classList.add('hidden');ans.innerHTML='';document.getElementById('tap').style.display='';document.getElementById('ctrl').classList.add('hidden');spk.classList.remove('show');
-  q.className='q'+((cur.w&&cur.w.length>16)?' small':'');
-  q.textContent=cur.w;
+  const front=(cur._dir==='tr2en')?(cur.tr||'—'):cur.w;
+  q.className='q'+((front&&front.length>18)?' small':'');
+  q.textContent=front;
 }
 function reveal(){
   if(side===1)return;side=1;document.getElementById('tap').style.display='none';

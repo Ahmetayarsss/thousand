@@ -4,7 +4,7 @@
 <title>Oxford 3000 · İlerleme</title>
 <script src="progress.js"></script>
 <style>
-:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--amber:#E5892B;--neu:#C7D0DB;--green-bg:#E7F5EC;--amber-bg:#FCF0E1;--secgray:#EDF0F4;--secgray-ink:#9AA6B4}
+:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--amber:#E5892B;--neu:#C7D0DB;--green-bg:#E7F5EC;--amber-bg:#FCF0E1;--secgray:#EDF0F4;--secgray-ink:#9AA6B4;--gold:#C9A227;--gold-bg:#FBF3D6}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 .wrap{max-width:600px;margin:0 auto;padding:8px 14px calc(24px + env(safe-area-inset-bottom))}
@@ -42,13 +42,16 @@ h1{font-size:20px;font-weight:800;margin:0}
 .sec .slvl{align-self:flex-start;margin-top:6px;font-size:10px;font-weight:800;color:#fff;background:var(--accent);border-radius:5px;padding:1px 6px}
 .sec.green{background:var(--green-bg);border-color:var(--green)} .sec.green .snum{color:var(--green)}
 .sec.yellow{background:var(--amber-bg);border-color:var(--amber)} .sec.yellow .snum{color:var(--amber)}
+.sec.gold{background:var(--gold-bg);border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)} .sec.gold .snum{color:var(--gold)}
+.seclegend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:12px;font-size:11.5px;color:var(--muted)}
+.seclegend span{display:inline-flex;align-items:center;gap:5px} .seclegend b{width:11px;height:11px;border-radius:3px;display:inline-block}
 .sec .badge{position:absolute;top:6px;right:8px;font-size:13px}
 .sec.cur{box-shadow:0 0 0 3px rgba(59,110,165,.35)}
 .sec .curtag{position:absolute;top:-8px;left:7px;background:var(--accent);color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:1px 6px}
 .tekrar{margin-top:7px;border:0;background:var(--amber);color:#fff;font-weight:800;font-size:11.5px;border-radius:8px;padding:6px 0;width:100%;cursor:pointer}
 .tekrar:active{transform:scale(.96)}
 @media (prefers-color-scheme:dark){
-  :root{--bg:#12161C;--card:#1B2129;--ink:#EAF0F7;--muted:#8A96A6;--line:#2A323C;--neu:#2A323C;--green-bg:#16301F;--amber-bg:#332412;--secgray:#20262E;--secgray-ink:#69747F}
+  :root{--bg:#12161C;--card:#1B2129;--ink:#EAF0F7;--muted:#8A96A6;--line:#2A323C;--neu:#2A323C;--green-bg:#16301F;--amber-bg:#332412;--secgray:#20262E;--secgray-ink:#69747F;--gold:#D9B94A;--gold-bg:#332B12}
   .big .cell{background:#12161C}
 }
 </style>
@@ -82,6 +85,11 @@ h1{font-size:20px;font-weight:800;margin:0}
   <div class="card">
     <h2>Bölümler</h2>
     <div class="grid" id="secgrid"></div>
+    <div class="seclegend">
+      <span><b style="background:var(--green)"></b>✓ Öğrenildi</span>
+      <span><b style="background:var(--amber)"></b>🔁 Tekrar zamanı</span>
+      <span><b style="background:var(--gold)"></b>⭐ Tam öğrenildi</span>
+    </div>
   </div>
 
   <div class="card">
@@ -98,7 +106,7 @@ const SG=__GROUPS_JSON__;
   const cur=window.OX?OX.current():0;
   document.getElementById('secgrid').innerHTML=SG.map((g,i)=>{
     const st=window.OX?OX.status(g.no):'gray';
-    const badge=st==='green'?'✓':st==='yellow'?'🔁':'';
+    const badge=st==='green'?'✓':st==='yellow'?'🔁':st==='gold'?'⭐':'';
     return '<div class="sec '+st+(i===cur?' cur':'')+'">'
       +(i===cur?'<span class="curtag">şu an</span>':'')
       +(badge?'<span class="badge">'+badge+'</span>':'')

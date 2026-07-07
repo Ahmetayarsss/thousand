@@ -17146,9 +17146,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kömür",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "KOUL",
+    "en": "a black rock burned for heat",
+    "ex": "They burned <b>coal</b> to warm the house.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/coal"
    },
    {
@@ -17156,9 +17156,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "özür dilemek",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ı-PO-lı-cayz",
+    "en": "to say you are sorry",
+    "ex": "He <b>apologized</b> for being late.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/apologize"
    },
    {
@@ -17166,9 +17166,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "oy; oy vermek",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "VOUT",
+    "en": "a choice in an election; to make that choice",
+    "ex": "She is old enough to <b>vote</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/vote"
    },
    {
@@ -17176,9 +17176,9 @@
     "pos": "edat",
     "sec": "Diğer",
     "tr": "artı",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "PLAS",
+    "en": "added to; and also",
+    "ex": "Two <b>plus</b> two is four.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/plus"
    },
    {
@@ -17186,9 +17186,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sergi",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ek-si-Bİ-şın",
+    "en": "a public show of art or objects",
+    "ex": "We saw a photo <b>exhibition</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/exhibition"
    },
    {
@@ -17196,9 +17196,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "istatistik",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "stı-TİS-tik",
+    "en": "a fact shown as a number",
+    "ex": "This <b>statistic</b> shows the number of visitors.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/statistic"
    },
    {
@@ -17206,9 +17206,9 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "ağır bir şekilde, yoğun",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "HE-vi-li",
+    "en": "in a heavy way; a lot",
+    "ex": "It was raining <b>heavily</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/heavily"
    },
    {
@@ -17216,9 +17216,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "patlamak",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "iks-PLOUD",
+    "en": "to burst with a loud bang",
+    "ex": "The old bomb might <b>explode</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/explode"
    },
    {
@@ -17226,9 +17226,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "rahatlatıcı",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-LEK-sing",
+    "en": "helping you rest and feel calm",
+    "ex": "A warm bath is very <b>relaxing</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/relaxing"
    },
    {
@@ -17236,9 +17236,9 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "geriye doğru",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "BEK-uıdz",
+    "en": "towards the back",
+    "ex": "Count <b>backwards</b> from ten.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/backwards"
    },
    {
@@ -17246,9 +17246,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "doğu",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "İİS-tın",
+    "en": "in or from the east",
+    "ex": "They live in the <b>eastern</b> part of the country.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/eastern"
    },
    {
@@ -17256,9 +17256,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "çocukluk",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ÇAYLD-hud",
+    "en": "the time when you are a child",
+    "ex": "She had a happy <b>childhood</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/childhood"
    },
    {
@@ -17266,9 +17266,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "reklam",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ED",
+    "en": "an advertisement",
+    "ex": "I saw the job in an <b>ad</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/ad"
    },
    {
@@ -17276,9 +17276,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ruh hali, mizaç",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "MUD",
+    "en": "the way you feel",
+    "ex": "He is in a good <b>mood</b> today.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/mood"
    },
    {
@@ -17286,9 +17286,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "baskı",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "PRİN-ting",
+    "en": "the process of making words on paper",
+    "ex": "The <b>printing</b> of the book took a week.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/printing"
    },
    {
@@ -17296,9 +17296,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "nükleer",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "NYUK-li-ır",
+    "en": "relating to atomic energy",
+    "ex": "The country built a <b>nuclear</b> power station.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/nuclear"
    },
    {
@@ -17306,9 +17306,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "hatırlatmak",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-MAYND",
+    "en": "to make someone remember",
+    "ex": "Please <b>remind</b> me to call the doctor.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/remind"
    },
    {
@@ -17316,9 +17316,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "acente; ajan",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "EY-cınt",
+    "en": "a person who acts for others; a spy",
+    "ex": "A travel <b>agent</b> booked our trip.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/agent"
    },
    {
@@ -17326,9 +17326,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "gerçeklik",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-E-lı-ti",
+    "en": "the way things really are",
+    "ex": "In <b>reality</b>, the job is very hard.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/reality"
    },
    {
@@ -17336,9 +17336,9 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "kesinlikle",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "EB-sı-lut-li",
+    "en": "completely; totally",
+    "ex": "You are <b>absolutely</b> right.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/absolutely"
    },
    {
@@ -17346,9 +17346,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "batmak; lavabo",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SİNK",
+    "en": "to go under water; a basin",
+    "ex": "The heavy stone will <b>sink</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/sink"
    },
    {
@@ -17356,9 +17356,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "baharatlı, acılı",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SPAY-si",
+    "en": "having a strong hot flavour",
+    "ex": "I like <b>spicy</b> food.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/spicy"
    },
    {
@@ -17366,9 +17366,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ayarlamak; takım",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SET",
+    "en": "to put or fix; a group of things",
+    "ex": "She has a full <b>set</b> of tools.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/set"
    },
    {
@@ -17376,9 +17376,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "görev, ödev",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ı-SAYN-mınt",
+    "en": "a task or piece of work",
+    "ex": "The teacher gave us an <b>assignment</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/assignment"
    },
    {
@@ -17386,9 +17386,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "protesto",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "PROU-test",
+    "en": "a public show of disagreement",
+    "ex": "Thousands joined the <b>protest</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/protest"
    },
    {
@@ -17396,9 +17396,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "aralık; menzil; çeşit",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "REYNC",
+    "en": "a set of different things; the distance covered",
+    "ex": "The shop sells a wide <b>range</b> of shoes.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/range"
    },
    {
@@ -17406,9 +17406,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "soluk alıp verme",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "BRİİ-ding",
+    "en": "taking air in and out",
+    "ex": "Deep <b>breathing</b> helps you relax.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/breathing"
    },
    {
@@ -17416,9 +17416,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "analiz",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ı-NE-lı-sis",
+    "en": "a careful study of something",
+    "ex": "The <b>analysis</b> showed a clear result.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/analysis"
    },
    {
@@ -17426,9 +17426,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "memnun, mutlu",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "GLED",
+    "en": "happy; pleased",
+    "ex": "I'm <b>glad</b> you could come.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/glad"
    },
    {
@@ -17436,9 +17436,9 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "daha önce, önceden",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "PRİİ-vi-ıs-li",
+    "en": "before now",
+    "ex": "She had <b>previously</b> worked in a bank.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/previously"
    },
    {
@@ -17446,9 +17446,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "şiir",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "POU-im",
+    "en": "a piece of writing in verse",
+    "ex": "He wrote a <b>poem</b> about the sea.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/poem"
    },
    {
@@ -17456,9 +17456,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "vardiya; kaydırmak",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ŞİFT",
+    "en": "a work period; to move",
+    "ex": "She works the night <b>shift</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/shift"
    },
    {
@@ -17466,9 +17466,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kuyruk, sıra",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "KYU",
+    "en": "a line of people waiting",
+    "ex": "There was a long <b>queue</b> at the bank.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/queue"
    },
    {
@@ -17476,9 +17476,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "stadyum",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "STEY-di-ım",
+    "en": "a large sports ground with seats",
+    "ex": "The football <b>stadium</b> was full.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/stadium"
    },
    {
@@ -17486,9 +17486,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "şikayet",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "kım-PLEYNT",
+    "en": "a statement that you are not happy",
+    "ex": "The customer made a <b>complaint</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/complaint"
    },
    {
@@ -17496,9 +17496,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "yalan söylemek; yalan",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "LAY",
+    "en": "to say something untrue; an untrue statement",
+    "ex": "Don't <b>lie</b> to me.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/lie-tell-a-lie"
    },
    {
@@ -17506,9 +17506,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dezavantaj",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "di-sıd-VAN-tic",
+    "en": "something that makes things harder",
+    "ex": "The high price is a <b>disadvantage</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/disadvantage"
    },
    {
@@ -17516,9 +17516,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "değiş tokuş; borsa",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "iks-ÇEYNC",
+    "en": "to give one thing and get another",
+    "ex": "Can I <b>exchange</b> this shirt for a bigger size?",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/exchange"
    },
    {
@@ -17526,9 +17526,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "dökmek",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "POR",
+    "en": "to make liquid flow out",
+    "ex": "<b>Pour</b> the milk into the glass.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/pour"
    },
    {
@@ -17536,9 +17536,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "çevirmek, tercüme etmek",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "trenz-LEYT",
+    "en": "to change words into another language",
+    "ex": "Can you <b>translate</b> this into Turkish?",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/translate"
    },
    {
@@ -17546,9 +17546,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "emekli",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-TA-yıd",
+    "en": "no longer working because of age",
+    "ex": "My grandfather is <b>retired</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/retired"
    },
    {
@@ -17556,9 +17556,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "iletişim; temas",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "KON-tekt",
+    "en": "communication; to get in touch with",
+    "ex": "Please <b>contact</b> me by email.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/contact"
    },
    {
@@ -17566,9 +17566,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "sözlü, konuşulan",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SPOU-kın",
+    "en": "said in speech, not written",
+    "ex": "Her <b>spoken</b> English is excellent.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/spoken"
    },
    {
@@ -17576,9 +17576,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "konu, mesele; sayı",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "İ-şu",
+    "en": "an important topic; a magazine number",
+    "ex": "Money is a serious <b>issue</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/issue"
    },
    {
@@ -17586,9 +17586,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "madeni para",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "KOYN",
+    "en": "a piece of metal money",
+    "ex": "She dropped a <b>coin</b> on the floor.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/coin"
    },
    {
@@ -17596,9 +17596,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "ayarlamak; takım",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SET",
+    "en": "to put or fix; a group of things",
+    "ex": "She has a full <b>set</b> of tools.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/set"
    },
    {
@@ -17606,9 +17606,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "akmak; akış",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "FLOU",
+    "en": "to move like a liquid; a steady movement",
+    "ex": "The river <b>flows</b> to the sea.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/flow"
    },
    {
@@ -17616,9 +17616,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "taramak",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SKEN",
+    "en": "to look over quickly; to use a machine to read",
+    "ex": "The cashier will <b>scan</b> the barcode.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/scan"
    },
    {
@@ -17626,9 +17626,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "uyarmak",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "UORN",
+    "en": "to tell of a danger",
+    "ex": "The sign <b>warns</b> drivers of ice.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/warn"
    },
    {
@@ -17636,9 +17636,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "avlu, bahçe; yarda",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "YARD",
+    "en": "an area next to a building; a unit of length",
+    "ex": "The children play in the <b>yard</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/yard"
    },
    {
@@ -17646,9 +17646,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "giriş",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "EN-trıns",
+    "en": "a way in",
+    "ex": "The <b>entrance</b> is at the front of the building.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/entrance"
    },
    {
@@ -17656,9 +17656,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yazılım",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SOFT-ue-ır",
+    "en": "computer programs",
+    "ex": "We installed new <b>software</b> on the computer.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/software"
    },
    {
@@ -17666,9 +17666,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "olası olmayan",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "an-LAYK-li",
+    "en": "not probable",
+    "ex": "It is <b>unlikely</b> to snow in summer.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/unlikely"
    },
    {
@@ -17676,9 +17676,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "tema",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "TİİM",
+    "en": "the main subject or idea",
+    "ex": "The <b>theme</b> of the film is friendship.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/theme"
    },
    {
@@ -17686,9 +17686,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "heyecan",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ik-SAYT-mınt",
+    "en": "a feeling of being excited",
+    "ex": "There was great <b>excitement</b> before the game.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/excitement"
    },
    {
@@ -17696,9 +17696,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "rezervasyon; çekince",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "re-zır-VEY-şın",
+    "en": "a booking; a doubt",
+    "ex": "I made a <b>reservation</b> at the restaurant.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/reservation"
    },
    {
@@ -17706,9 +17706,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "iğne; toplu iğne",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "PİN",
+    "en": "a thin pointed piece of metal",
+    "ex": "She fixed the note with a <b>pin</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/pin"
    },
    {
@@ -17716,9 +17716,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "ekonomik",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "e-kı-NO-mik",
+    "en": "relating to money and business",
+    "ex": "The country has <b>economic</b> problems.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/economic"
    },
    {
@@ -17726,9 +17726,9 @@
     "pos": "edat",
     "sec": "Diğer",
     "tr": "-e rağmen",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "dis-PAYT",
+    "en": "in spite of",
+    "ex": "<b>Despite</b> the rain, we enjoyed the trip.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/despite"
    },
    {
@@ -17736,9 +17736,9 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "tamamen",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "TOU-tı-li",
+    "en": "completely",
+    "ex": "I <b>totally</b> agree with you.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/totally"
    },
    {
@@ -17746,9 +17746,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "liman",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "PORT",
+    "en": "a town where ships load and unload",
+    "ex": "The ship arrived at the <b>port</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/port"
    },
    {
@@ -17756,9 +17756,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "belirlemek",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "di-TÖR-min",
+    "en": "to decide or find out",
+    "ex": "The test will <b>determine</b> your level.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/determine"
    },
    {
@@ -17766,9 +17766,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "minik, ufacık",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "TAY-ni",
+    "en": "extremely small",
+    "ex": "A <b>tiny</b> insect landed on my hand.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/tiny"
    },
    {
@@ -17776,9 +17776,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "tekrarlanan",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-PİİT-id",
+    "en": "done again and again",
+    "ex": "Her <b>repeated</b> efforts finally worked.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/repeated"
    },
    {
@@ -17786,9 +17786,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "yasal, hukuki",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "LİİG-ıl",
+    "en": "allowed by law",
+    "ex": "It is <b>legal</b> to drive at eighteen.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/legal"
    },
    {
@@ -17796,9 +17796,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kabuk",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ŞEL",
+    "en": "the hard outer cover of an egg or nut",
+    "ex": "The crab hides in its <b>shell</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/shell"
    },
    {
@@ -17806,9 +17806,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "toz",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "DAST",
+    "en": "fine dry dirt",
+    "ex": "There was <b>dust</b> on the old books.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/dust"
    },
    {
@@ -17816,9 +17816,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "toplam",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "TOU-tıl",
+    "en": "the whole amount",
+    "ex": "The <b>total</b> cost was fifty liras.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/total"
    },
    {
@@ -17826,9 +17826,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "kızartmak",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "FRAY",
+    "en": "to cook in hot oil",
+    "ex": "<b>Fry</b> the eggs for two minutes.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/fry"
    },
    {
@@ -17836,9 +17836,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sunum",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "pre-zın-TEY-şın",
+    "en": "a formal talk with information",
+    "ex": "She gave a <b>presentation</b> about the project.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/presentation"
    },
    {
@@ -17846,9 +17846,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "ilişkilendirmek",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-LEYT",
+    "en": "to show a connection",
+    "ex": "It's hard to <b>relate</b> these two ideas.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/relate"
    },
    {
@@ -17856,9 +17856,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "renkli",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "KA-lırd",
+    "en": "having colour",
+    "ex": "She drew with <b>coloured</b> pencils.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/coloured"
    },
    {
@@ -17866,9 +17866,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "hazır",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "pri-PE-ırd",
+    "en": "ready",
+    "ex": "Are you <b>prepared</b> for the exam?",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/prepared"
    },
    {
@@ -17876,9 +17876,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "atmosfer, hava",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ET-mıs-fi-ır",
+    "en": "the air around the Earth; a mood",
+    "ex": "The café had a friendly <b>atmosphere</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/atmosphere"
    },
    {
@@ -17886,9 +17886,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "tatsız, nahoş",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "an-PLE-zınt",
+    "en": "not nice; unkind",
+    "ex": "There was an <b>unpleasant</b> smell in the room.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/unpleasant"
    },
    {
@@ -17896,9 +17896,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "tedarik, arz; sağlamak",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "sıp-LAY",
+    "en": "an amount available; to provide",
+    "ex": "The town has a good water <b>supply</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/supply"
    },
    {
@@ -17906,9 +17906,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kanal",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ÇE-nıl",
+    "en": "a TV station; a narrow area of water",
+    "ex": "Which <b>channel</b> is the match on?",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/channel"
    },
    {
@@ -17916,9 +17916,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "alkollü; alkolik",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "el-kı-HO-lik",
+    "en": "containing alcohol; addicted to alcohol",
+    "ex": "They don't serve <b>alcoholic</b> drinks here.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/alcoholic"
    },
    {
@@ -17926,9 +17926,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "stüdyo",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "STYU-di-ou",
+    "en": "a room where art, music or films are made",
+    "ex": "The band recorded the song in a <b>studio</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/studio"
    },
    {
@@ -17936,9 +17936,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "makbuz, fiş",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-SİİT",
+    "en": "a paper showing you paid",
+    "ex": "Keep your <b>receipt</b> in case you return it.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/receipt"
    },
    {
@@ -17946,9 +17946,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "istekli, hevesli",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "KİİN",
+    "en": "very interested; eager",
+    "ex": "She is <b>keen</b> to learn new things.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/keen"
    },
    {
@@ -17956,9 +17956,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "marka",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "BREND",
+    "en": "a company's name for its products",
+    "ex": "What <b>brand</b> of coffee do you buy?",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/brand"
    },
    {
@@ -17966,9 +17966,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "belirti, semptom",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SİMP-tım",
+    "en": "a sign of an illness",
+    "ex": "A cough is a <b>symptom</b> of a cold.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/symptom"
    },
    {
@@ -17976,9 +17976,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "masum",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "İ-nı-sınt",
+    "en": "not guilty; harmless",
+    "ex": "The court found him <b>innocent</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/innocent"
    },
    {
@@ -17986,9 +17986,9 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "kesinlikle, elbette",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ŞOR-li",
+    "en": "certainly; without doubt",
+    "ex": "<b>Surely</b> you remember me?",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/surely"
    },
    {
@@ -17996,9 +17996,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "sarhoş",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "DRANK",
+    "en": "having had too much alcohol",
+    "ex": "He was <b>drunk</b> after the party.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/drunk"
    },
    {
@@ -18006,9 +18006,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "sürekli",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "kın-TİN-yu-ıs",
+    "en": "happening without stopping",
+    "ex": "There was a <b>continuous</b> noise from the road.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/continuous"
    },
    {
@@ -18016,9 +18016,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "merkezi",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "SENT-rıl",
+    "en": "in the middle; most important",
+    "ex": "They live in a <b>central</b> part of town.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/central"
    },
    {
@@ -18026,9 +18026,9 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "ilişkili, akraba",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-LEY-tid",
+    "en": "connected; in the same family",
+    "ex": "These two problems are <b>related</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/related"
    },
    {
@@ -18036,9 +18036,9 @@
     "pos": "bağlaç",
     "sec": "Diğer",
     "tr": "her ne zaman",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "uen-E-vır",
+    "en": "at any time that",
+    "ex": "Come <b>whenever</b> you like.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/whenever"
    },
    {
@@ -18046,9 +18046,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kutlama",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "se-li-BREY-şın",
+    "en": "a special event to mark something",
+    "ex": "There was a big <b>celebration</b> for her birthday.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/celebration"
    },
    {
@@ -18056,9 +18056,9 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "bu yüzden, dolayısıyla",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "DE-ır-for",
+    "en": "for that reason",
+    "ex": "It was raining; <b>therefore</b>, we stayed inside.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/therefore"
    },
    {
@@ -18066,9 +18066,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ulus, millet",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "NEY-şın",
+    "en": "a country and its people",
+    "ex": "The whole <b>nation</b> watched the final.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/nation"
    },
    {
@@ -18076,9 +18076,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "uyarı",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "UOR-ning",
+    "en": "something that tells of danger",
+    "ex": "The weather <b>warning</b> said a storm was coming.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/warning"
    },
    {
@@ -18086,9 +18086,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "güncellemek; güncelleme",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "AP-deyt",
+    "en": "to make current; the newest information",
+    "ex": "Please <b>update</b> the app.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/update"
    },
    {
@@ -18096,9 +18096,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "davranmak; tedavi etmek; ikram",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "TRİİT",
+    "en": "to behave towards; to give medical care",
+    "ex": "Doctors <b>treat</b> sick people.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/treat"
    },
    {
@@ -18106,9 +18106,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ağ",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "NET",
+    "en": "material with holes; the internet",
+    "ex": "The fisherman threw his <b>net</b> into the sea.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/net"
    },
    {
@@ -18116,9 +18116,9 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "göçmen",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "İ-mig-rınt",
+    "en": "a person who moves to another country to live",
+    "ex": "Her parents were <b>immigrants</b> from Italy.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/immigrant"
    },
    {
@@ -18126,9 +18126,9 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "ciddi bir şekilde",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "Sİ-ri-ıs-li",
+    "en": "in a serious way; really",
+    "ex": "You should take this problem <b>seriously</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/seriously"
    },
    {
@@ -18136,9 +18136,9 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "reddetmek",
-    "ok": "",
-    "en": "",
-    "ex": "",
+    "ok": "ri-CEKT",
+    "en": "to refuse to accept",
+    "ex": "The company may <b>reject</b> his offer.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/reject"
    }
   ]

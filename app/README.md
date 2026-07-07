@@ -7,20 +7,23 @@ Speech API sorunları böylece aşılır. İlerleme telefonda (`localStorage`) s
 
 ## Yapı
 
+Menü yok: uygulama doğrudan **kelime listesine** (`index.html`) açılır; ekranı
+**yana kaydırınca kelime kartlarına** (`kartlar.html`) geçilir, geri kaydırınca
+listeye döner. Ses yalnızca **US** aksanıdır.
+
 ```
 app/
   www/               # uygulamanın web varlıkları (webDir)
-    index.html       # ana menü (iki buton) — elle yazılır
+    index.html       # açılış = kelime listesi — build_all.py üretir
+    kartlar.html     # kelime kartları — build_all.py üretir
     tts-bridge.js    # native TTS köprüsü (tarayıcıda no-op) — elle yazılır
-    liste.html       # ../scripts/build_all.py üretir (data/all_groups.json'dan)
-    kartlar.html     # ../scripts/build_all.py üretir
   android/           # Capacitor'ün ürettiği native proje
   capacitor.config.json
   package.json
 ```
 
-`liste.html` ve `kartlar.html`, kök dizindeki `scripts/build_all.py` tarafından
-şablonlardan üretilir (aynı içerik + `tts-bridge.js` + "‹ Menü" geri çubuğu).
+`index.html` ve `kartlar.html`, kök dizindeki `scripts/build_all.py` tarafından
+şablonlardan üretilir (aynı içerik + `tts-bridge.js` + yatay kaydırma navigasyonu).
 Kelime içeriği güncellenince: `python3 scripts/build_all.py` çalıştır, sonra
 `cd app && npx cap sync android`.
 

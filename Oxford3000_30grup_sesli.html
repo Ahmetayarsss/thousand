@@ -47,20 +47,17 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 </style></head><body><div class="wrap">
 <header>
-  <div class="title">Oxford 3000 · Sesli <small>3000 kelime · 30 grup · cihaz sesi + Cambridge</small></div>
   <div class="grouprow">
     <button class="nav" id="prev">‹</button>
     <select id="groupsel"></select>
     <button class="nav" id="next">›</button>
   </div>
   <div class="controls">
-    <div class="seg" id="accent"><button data-lang="en-GB" class="on">UK</button><button data-lang="en-US">US</button></div>
     <label class="speed">Hız <input id="rate" type="range" min="0.5" max="1" step="0.05" value="0.8"></label>
     <button class="playall" id="playall">▶ Grubu oku</button>
   </div>
   <input class="search" id="search" placeholder="Bu grupta ara… (İngilizce/Türkçe)">
 </header>
-<div class="hint" id="hint"><b>🔊</b> veya kelimeye dokun → cihaz sesiyle burada okur. <b>Cambridge</b> rozeti gerçek insan sesi + IPA için sözlük sayfasını açar. (Ses için dosyayı tarayıcıda aç.)</div>
 <div class="hint warn" id="warn">Bu tarayıcı sesli okumayı desteklemiyor gibi. Her karttaki <b>Cambridge</b> bağlantısını kullan.</div>
 <div id="list"></div>
 <footer>Not: Okunuş + İngilizce açıklama + örnek cümle grup grup ekleniyor. Henüz eklenmeyen gruplarda kelime + Türkçe anlam + ses + Cambridge var.<br>Okunuş yazımları yaklaşıktır.</footer>
@@ -70,7 +67,7 @@ const GROUPS=[{"no":1,"level":"A1","lo":1,"hi":100,"items":[{"w":"boring","pos":
 const SECS=["İsimler","Fiiller","Sıfatlar","Zarflar","Diğer"];
 const SColor={"İsimler":"var(--isim)","Fiiller":"var(--fiil)","Sıfatlar":"var(--sifat)","Zarflar":"var(--zarf)","Diğer":"var(--diger)"};
 const posTag={"isim":"isim","fiil":"fiil","sıfat":"sıfat","zarf":"zarf","edat":"edat","bağlaç":"bağlaç","zamir":"zamir","belirteç":"belirteç","ünlem":"ünlem","sayı":"sayı","kip fiili":"kip fiili","yardımcı fiil":"yard. fiil","artikel":"artikel","mastar":"mastar"};
-let LANG="en-GB",RATE=0.8,voices=[],gi=0;const synth=window.speechSynthesis;
+let LANG="en-US",RATE=0.8,voices=[],gi=0;const synth=window.speechSynthesis;
 function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
@@ -104,7 +101,6 @@ document.getElementById('search').value='';window.scrollTo({top:0});}
 document.getElementById('groupsel').addEventListener('change',e=>{gi=+e.target.value;renderGroup();});
 document.getElementById('prev').addEventListener('click',()=>{if(gi>0){gi--;document.getElementById('groupsel').value=gi;renderGroup();}});
 document.getElementById('next').addEventListener('click',()=>{if(gi<GROUPS.length-1){gi++;document.getElementById('groupsel').value=gi;renderGroup();}});
-document.getElementById('accent').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');LANG=b.dataset.lang;});
 document.getElementById('rate').addEventListener('input',e=>RATE=parseFloat(e.target.value));
 document.getElementById('playall').addEventListener('click',()=>{playing?stop():all();});
 document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});

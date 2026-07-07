@@ -23,14 +23,25 @@ sys.path.insert(0, str(ROOT / "scripts" / "enrich"))
 
 ENRICH_MODS = ["g2", "g3"]
 
-# Android uygulaması sürümüne eklenen "‹ Menü" geri çubuğu (ana menüye döner).
-BACK_BAR = (
-    '<div style="flex:0 0 auto;display:flex;align-items:center;padding:6px 0 2px">'
-    '<a href="index.html" style="display:inline-flex;align-items:center;gap:5px;'
-    'text-decoration:none;color:var(--ink);font-weight:800;font-size:14px;'
-    'padding:6px 12px 6px 4px;border-radius:9px">'
-    '<span style="font-size:20px;line-height:1">‹</span> Menü</a></div>'
-)
+# Android uygulaması: menü yok. Liste (index.html) açılır; yatay kaydırmayla
+# kartlar.html'e ve geri geçilir. Bu script her app sayfasına <head>'e eklenir.
+# dir: -1 sola kaydır, +1 sağa kaydır → target sayfaya git. Slider/buton/link/
+# select üzerindeki dokunuşlar hariç tutulur (yanlış tetiklenmesin).
+def swipe_script(direction, target):
+    return (
+        "<script>(function(){var D=%d,T=%r;var x0=0,y0=0,t0=0,ok=false;"
+        "addEventListener('touchstart',function(e){"
+        "if(e.touches.length!==1){ok=false;return;}"
+        "var el=e.target;"
+        "if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}"
+        "var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});"
+        "addEventListener('touchend',function(e){if(!ok)return;ok=false;"
+        "var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;"
+        "if(Date.now()-t0>800)return;"
+        "if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;"
+        "if((D<0&&dx<0)||(D>0&&dx>0))location.href=T;},{passive:true});"
+        "})();</script>"
+    ) % (direction, target)
 
 
 def load_groups():
@@ -67,12 +78,14 @@ def render(groups):
         }
         for g in groups
     ]
-    # container: uygulama sürümünde geri çubuğunu bu açılış div'inden hemen sonra ekle
-    for tpl, data, out, app_out, container in [
+    # app_out: uygulama sayfası. swipe: (yön, hedef) yatay kaydırma navigasyonu.
+    #   index.html (liste)  → sola kaydır → kartlar.html
+    #   kartlar.html        → sağa kaydır → index.html
+    for tpl, data, out, app_out, swipe in [
         ("sesli_template.html", sesli_groups, "Oxford3000_30grup_sesli.html",
-         "app/www/liste.html", '<div class="wrap">'),
+         "app/www/index.html", (-1, "kartlar.html")),
         ("kartlar_template.html", kart_groups, "Oxford3000_kartlar.html",
-         "app/www/kartlar.html", '<div id="app">'),
+         "app/www/kartlar.html", (1, "index.html")),
     ]:
         html = (ROOT / "templates" / tpl).read_text(encoding="utf-8")
         blob = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
@@ -82,12 +95,9 @@ def render(groups):
         (ROOT / out).write_text(html, encoding="utf-8")
         print(f"{out}: {len(html)} bayt")
 
-        # 2) Android uygulaması sürümü: TTS köprüsü + "‹ Menü" geri çubuğu
-        app_html = html.replace(
-            "</head>", '<script src="tts-bridge.js"></script></head>', 1
-        )
-        assert container in app_html, f"{tpl}: kapsayıcı bulunamadı: {container}"
-        app_html = app_html.replace(container, container + BACK_BAR, 1)
+        # 2) Android uygulaması sürümü: TTS köprüsü + yatay kaydırma navigasyonu
+        inject = '<script src="tts-bridge.js"></script>' + swipe_script(*swipe) + "</head>"
+        app_html = html.replace("</head>", inject, 1)
         app_path = ROOT / app_out
         app_path.parent.mkdir(parents=True, exist_ok=True)
         app_path.write_text(app_html, encoding="utf-8")

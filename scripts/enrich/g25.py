@@ -22,7 +22,7 @@ DATA = {
  "broad": ("BROD", "wide; covering a lot", "The river is very <b>broad</b> here."),
  "detect": ("di-TEKT", "to discover or notice", "The alarm can <b>detect</b> smoke."),
  "matching": ("ME-çing", "going well together; the same", "She wore a hat and <b>matching</b> gloves."),
- "institution": ("ins-ti-TYU-şın", "a large important organization", "A bank is a financial <b>institution</b>."),
+ "institution": ("ins-ti-TU-şın", "a large important organization", "A bank is a financial <b>institution</b>."),
  "soul": ("SOUL", "the spirit of a person", "Music touches the <b>soul</b>."),
  "criticism": ("KRİ-ti-si-zım", "the act of finding fault", "He couldn't accept the <b>criticism</b>."),
  "purchase": ("PÖR-çıs", "the act of buying; to buy", "Keep the receipt for your <b>purchase</b>."),

@@ -34,7 +34,7 @@ DATA = {
  "minister": ("Mİ-nis-tır", "a senior member of a government", "The <b>minister</b> announced new taxes."),
  "hell": ("HEL", "a place of punishment after death", "Some religions describe <b>hell</b> as full of fire."),
  "demand": ("di-MAND", "a firm request; a need for a product", "There is a high <b>demand</b> for houses."),
- "numerous": ("NYU-mı-rıs", "very many", "She has visited the city on <b>numerous</b> occasions."),
+ "numerous": ("NU-mı-rıs", "very many", "She has visited the city on <b>numerous</b> occasions."),
  "bacteria": ("bek-Tİ-ri-ı", "very small living things that can cause disease", "Soap kills many <b>bacteria</b>."),
  "proposal": ("prı-POU-zıl", "a plan or suggestion; an offer of marriage", "The committee accepted her <b>proposal</b>."),
  "generate": ("CE-nı-reyt", "to produce or create", "The wind farm <b>generates</b> electricity."),

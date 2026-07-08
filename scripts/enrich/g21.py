@@ -72,7 +72,7 @@ DATA = {
  "require": ("ri-KUA-yır", "to need", "This recipe <b>requires</b> three eggs."),
  "particularly": ("pır-TİK-yu-lı-li", "especially", "I <b>particularly</b> like the blue one."),
  "academic": ("e-kı-DE-mik", "relating to education and study", "She had an excellent <b>academic</b> record."),
- "consume": ("kın-SYUM", "to eat, drink or use up", "Cars <b>consume</b> a lot of fuel."),
+ "consume": ("kın-SUM", "to eat, drink or use up", "Cars <b>consume</b> a lot of fuel."),
  "emotion": ("i-MOU-şın", "a strong feeling", "Joy is a positive <b>emotion</b>."),
  "advise": ("ıd-VAYZ", "to give advice", "The doctor <b>advised</b> me to rest."),
  "religious": ("ri-Lİ-cıs", "relating to religion", "They hold <b>religious</b> ceremonies here."),

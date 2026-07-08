@@ -99,7 +99,7 @@ DATA = {
  "mail": ("MEYL", "letters and parcels; to send", "I received your <b>mail</b> this morning."),
  "hero": ("Hİ-rou", "a brave or admired person", "The firefighter was a real <b>hero</b>."),
  "marry": ("ME-ri", "to become husband and wife", "They will <b>marry</b> next spring."),
- "opportunity": ("o-pır-TYU-nı-ti", "a good chance to do something", "This job is a great <b>opportunity</b>."),
+ "opportunity": ("o-pır-TU-nı-ti", "a good chance to do something", "This job is a great <b>opportunity</b>."),
  "direct": ("day-REKT", "going straight; to guide", "Is there a <b>direct</b> train to Ankara?"),
  "middle": ("Mİ-dıl", "the centre; halfway", "He stood in the <b>middle</b> of the room."),
 }

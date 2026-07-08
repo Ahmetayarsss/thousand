@@ -100,6 +100,6 @@ DATA = {
  "evaluate": ("i-VEL-yu-eyt", "to judge the value of something", "Teachers <b>evaluate</b> the students' work."),
  "domestic": ("dı-MES-tik", "relating to the home; of one country", "Cats are <b>domestic</b> animals."),
  "former": ("FOR-mır", "of an earlier time; previous", "The <b>former</b> teacher visited the school."),
- "assume": ("ı-SYUM", "to think something is true without proof", "I <b>assume</b> you have read the book."),
+ "assume": ("ı-SUM", "to think something is true without proof", "I <b>assume</b> you have read the book."),
  "shocked": ("ŞOKT", "very surprised and upset", "We were <b>shocked</b> by the sad news."),
 }

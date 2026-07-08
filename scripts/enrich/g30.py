@@ -46,7 +46,7 @@ DATA = {
  "fellow": ("FE-lou", "a man; belonging to the same group", "He helped his <b>fellow</b> workers."),
  "contribution": ("kont-ri-BYU-şın", "something you give to help", "Everyone made a <b>contribution</b> to the gift."),
  "raw": ("RO", "not cooked; in a natural state", "The fish was served <b>raw</b>."),
- "enthusiastic": ("in-tyu-zi-ES-tik", "showing great interest and excitement", "The fans were very <b>enthusiastic</b>."),
+ "enthusiastic": ("in-tu-zi-ES-tik", "showing great interest and excitement", "The fans were very <b>enthusiastic</b>."),
  "universe": ("YU-ni-vörs", "all of space and everything in it", "The <b>universe</b> is vast and full of stars."),
  "forgive": ("fır-GİV", "to stop being angry about a wrong", "Please <b>forgive</b> me for being late."),
  "cancer": ("KEN-sır", "a serious disease that grows in the body", "Doctors work hard to cure <b>cancer</b>."),

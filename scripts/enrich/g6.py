@@ -83,7 +83,7 @@ DATA = {
  "quick": ("KUİK", "fast; taking little time", "Let's have a <b>quick</b> lunch."),
  "our": ("A-uır", "belonging to us", "This is <b>our</b> house."),
  "stop": ("STOP", "to end movement or action", "The car <b>stopped</b> at the light."),
- "during": ("DYU-ring", "all through a period of time", "Don't talk <b>during</b> the film."),
+ "during": ("DU-ring", "all through a period of time", "Don't talk <b>during</b> the film."),
  "forty": ("FOR-ti", "the number 40", "My teacher is <b>forty</b> years old."),
  "programme": ("PROU-grem", "a show on TV or radio; a plan", "This TV <b>programme</b> is funny."),
  "common": ("KO-mın", "happening often; shared", "Rain is <b>common</b> in spring."),

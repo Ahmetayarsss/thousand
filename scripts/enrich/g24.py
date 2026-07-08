@@ -91,7 +91,7 @@ DATA = {
  "mix": ("MİKS", "to combine things together", "<b>Mix</b> the sugar and the butter."),
  "occasion": ("ı-KEY-jın", "a special event; a time when something happens", "A wedding is a happy <b>occasion</b>."),
  "chest": ("ÇEST", "the front of the body; a large strong box", "He felt a pain in his <b>chest</b>."),
- "consumer": ("kın-SYU-mır", "a person who buys goods", "<b>Consumers</b> want lower prices."),
+ "consumer": ("kın-SU-mır", "a person who buys goods", "<b>Consumers</b> want lower prices."),
  "conclude": ("kın-KLUD", "to end; to decide after thinking", "The judge will <b>conclude</b> the case today."),
  "technical": ("TEK-ni-kıl", "relating to skills or machines", "The report is full of <b>technical</b> words."),
  "tin": ("TİN", "a metal container; a soft metal", "She opened a <b>tin</b> of beans."),

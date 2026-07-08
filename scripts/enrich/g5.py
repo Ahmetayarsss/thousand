@@ -80,7 +80,7 @@ DATA = {
  "topic": ("TO-pik", "the subject of a talk or text", "Today's <b>topic</b> is health."),
  "sentence": ("SEN-tıns", "a group of words that makes sense; a punishment", "Write a <b>sentence</b> with this word."),
  "way": ("UEY", "a road or path; a method", "Which <b>way</b> is the station?"),
- "student": ("STYU-dınt", "a person who studies", "She is a good <b>student</b>."),
+ "student": ("STU-dınt", "a person who studies", "She is a good <b>student</b>."),
  "movie": ("MU-vi", "a film", "Let's watch a <b>movie</b> tonight."),
  "foot": ("FUT", "the part of your body you stand on", "My <b>foot</b> hurts."),
  "day": ("DEY", "24 hours; the time when it is light", "Have a nice <b>day</b>!"),

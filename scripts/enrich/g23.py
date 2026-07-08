@@ -2,7 +2,7 @@
 # Grup 23 (B1) — okunuş / İngilizce açıklama / örnek cümle
 GRUP_NO = 23
 DATA = {
- "tube": ("TYUB", "a long hollow pipe; a soft container", "The paint comes in a <b>tube</b>."),
+ "tube": ("TUB", "a long hollow pipe; a soft container", "The paint comes in a <b>tube</b>."),
  "disappointing": ("di-sı-POYN-ting", "not as good as hoped", "The film was <b>disappointing</b>."),
  "treatment": ("TRİİT-mınt", "medical care; the way you deal with someone", "The new <b>treatment</b> cured the disease."),
  "addition": ("ı-Dİ-şın", "the act of adding; the sum", "In <b>addition</b> to tea, they served cakes."),

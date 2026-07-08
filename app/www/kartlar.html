@@ -173,7 +173,7 @@ function gradeExam(correct){if(checkSpeed())return;
 /* ---- Hile yakalama: test + sınavda geçerli; kademeli mesaj; 4.'ten itibaren ilerlemeyi sıfırlar ---- */
 const CKEY="ox3000_cheat_v1";
 // Bu güncellemede sayacı bir kez sıfırla (deneyebilmen için); flag sayesinde tekrar sıfırlamaz.
-try{if(!localStorage.getItem('ox3000_cheat_migr_v3')){localStorage.removeItem(CKEY);localStorage.setItem('ox3000_cheat_migr_v3','1');}}catch(e){}
+try{if(!localStorage.getItem('ox3000_cheat_migr_v4')){localStorage.removeItem(CKEY);localStorage.setItem('ox3000_cheat_migr_v4','1');}}catch(e){}
 function cheatN(){try{return (parseInt(localStorage.getItem(CKEY),10))||0;}catch(e){return 0;}}
 // true dönerse: ilerleme sıfırlandı ve tur yeniden başlatıldı → çağıran devam etmemeli.
 function checkSpeed(){
@@ -183,23 +183,23 @@ function checkSpeed(){
   return false;
 }
 // Sıfırlama sonrası: bölümü yeniden senkronla (frontier=0) ve aynı sayfada turu baştan başlat.
-function resyncAndRestart(){ gi=window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0; setSecLabel(); start(); }
-function cheatCaught(){   // true dönerse ilerleme sıfırlandı
+function restartRound(){ start(); }   // yalnız mevcut sınav/test turunu baştan başlatır; ilerleme (bölümler/seviye) DOKUNULMAZ
+function cheatCaught(){   // true dönerse mevcut tur yeniden başlatıldı
   let n=cheatN()+1;try{localStorage.setItem(CKEY,n);}catch(e){}
   if(n<4){
     showCheat(n===1?"hayiydiy gaydeş":(n===2?"Yaşayan en hızlı insan Barry Allen'ın bilinmeyen bı akrabası falan mısın bu ne hız":"son uyarım"),false);
     return false;                          // sadece uyarı; sınav/test kaldığı yerden sürer
   }
-  if(window.OX&&OX.reset)OX.reset();       // 4. ve sonrası: sorgusuz sualsiz ilerlemeyi sıfırla
-  if(n===4) showCheat("sen kaşındın",true);// yalnız 4.'te mesaj; kapanınca yeniden başlar
-  else resyncAndRestart();                 // 5. ve sonrası: mesajsız, hemen yeniden başlar
+  // 4. ve sonrası: SADECE mevcut sınav/test turu sıfırlanır (baştan başlar); gelişim/bölümler korunur.
+  if(n===4) showCheat("sen kaşındın",true);// yalnız 4.'te mesaj; kapanınca tur baştan
+  else restartRound();                     // 5. ve sonrası: mesajsız, hemen tur baştan
   return true;
 }
 function showCheat(msg,restart){
   if(synth)synth.cancel();
   const o=document.getElementById('cheat');o.querySelector('.cheat-msg').textContent=msg;o.classList.add('show');
   const dur=Math.min(6000,Math.max(3000,msg.length*60));   // mesaj uzunluğuna göre okunabilir süre
-  setTimeout(()=>{o.classList.remove('show');tPrompt=performance.now();if(restart)resyncAndRestart();},dur);
+  setTimeout(()=>{o.classList.remove('show');tPrompt=performance.now();if(restart)restartRound();},dur);
 }
 function examDone(){const pct=Math.round(examScore/examTotal*100);
   try{const ex=JSON.parse(localStorage.getItem(EKEY)||'[]');ex.push({t:now(),g:gi,no:GROUPS[gi].no,level:GROUPS[gi].level,score:examScore,total:examTotal,pct:pct});localStorage.setItem(EKEY,JSON.stringify(ex.slice(-100)));}catch(e){}

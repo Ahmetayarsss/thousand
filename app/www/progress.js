@@ -71,6 +71,19 @@ window.OX = (function () {
     } catch (e) {}
   }
 
+  // Tek seferlik telafi: eski (hatalı) hile cezası tüm ilerlemeyi sildiği için,
+  // ilerleme boşsa Bölüm 1'i geçilmiş sayıp Bölüm 2'yi aç. Yalnız bir kez çalışır;
+  // mevcut ilerlemesi olan kullanıcıya dokunmaz.
+  try {
+    if (!localStorage.getItem("ox3000_restore_v1")) {
+      if (frontier() === 0 && Object.keys(sections()).length === 0) {
+        si(K_SEC, { "1": { greenAt: Date.now(), rc: 0 } });
+        si(K_FRO, 1);
+      }
+      localStorage.setItem("ox3000_restore_v1", "1");
+    }
+  } catch (e) {}
+
   return {
     DAY: DAY, MAX: MAX,
     frontier: frontier, review: review, current: current,

@@ -62,10 +62,19 @@ window.OX = (function () {
 
   function startReview(idx) { si(K_REV, idx); }
 
+  // Tüm ilerlemeyi sıfırla (hile cezası): frontier→0, bölümler ve review temizlenir.
+  function reset() {
+    try {
+      localStorage.removeItem(K_FRO);
+      localStorage.removeItem(K_SEC);
+      localStorage.removeItem(K_REV);
+    } catch (e) {}
+  }
+
   return {
     DAY: DAY, MAX: MAX,
     frontier: frontier, review: review, current: current,
     sections: sections, status: status,
-    examResult: examResult, startReview: startReview
+    examResult: examResult, startReview: startReview, reset: reset
   };
 })();

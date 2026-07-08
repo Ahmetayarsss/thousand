@@ -43,6 +43,9 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .btn:active{transform:translateY(1px)}
 .btn.again{background:var(--red)} .btn.know{background:var(--green)}
 .hidden{display:none!important}
+.cheat{position:fixed;inset:0;z-index:9999;background:#fff;display:none;align-items:center;justify-content:center;padding:34px;text-align:center}
+.cheat.show{display:flex}
+.cheat-msg{color:#111;font-size:30px;font-weight:900;line-height:1.3;max-width:620px}
 
 .result{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
 .score{font-size:60px;font-weight:900;letter-spacing:-.03em}
@@ -101,6 +104,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
   </div>
 </div>
 </div>
+<div class="cheat" id="cheat"><div class="cheat-msg"></div></div>
 <script>
 const GROUPS=__GROUPS_JSON__;
 const EKEY="ox3000_exams_v1";
@@ -117,6 +121,7 @@ function speak(t){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtt
 
 let gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0),mode='test',cur=null,side=0;
 let queue=[],testTotal=0,examList=[],examIdx=0,examWrong=[],examTotal=0,examScore=0;
+let tPrompt=0,tReveal=0,suspStreak=0;   // hile tespiti: soru gösterim / çevirme anı, art arda şüpheli sayısı
 
 function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
 function drawBar(){const t=testTotal||GROUPS[gi].items.length,doneN=Math.max(0,t-queue.length);document.getElementById('bar').innerHTML=`<i style="width:${t?doneN/t*100:0}%;background:var(--green)"></i>`;}
@@ -130,9 +135,10 @@ function renderPrompt(){
   const front=(cur._dir==='tr2en')?(cur.tr||'—'):cur.w;
   q.className='q'+((front&&front.length>18)?' small':'');
   q.textContent=front;
+  tPrompt=performance.now();   // soru gösterildi
 }
 function reveal(){
-  if(side===1)return;side=1;document.getElementById('tap').style.display='none';
+  if(side===1)return;side=1;tReveal=performance.now();document.getElementById('tap').style.display='none';
   const ans=document.getElementById('ansbox'),spk=document.getElementById('spk');let h='';
   if(cur._dir==='tr2en'){h+=`<div class="mean en">${cur.w}</div>`;if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;}
   else{if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;h+=`<div class="mean tr">${cur.tr||'—'}</div>`;}
@@ -161,7 +167,32 @@ function startExam(){mode='exam';document.getElementById('resultbox').classList.
 function nextExam(){document.getElementById('counter').textContent=(examIdx+1)+'/'+examTotal;
   if(examIdx>=examList.length)return examDone();
   cur=examList[examIdx];cur._dir=dirFor();renderPrompt();}
-function gradeExam(correct){if(correct){examScore++;}else{examWrong.push(cur);}examIdx++;nextExam();}
+function gradeExam(correct){
+  // Hile tespiti: çevirme süresi ve karar süresi ikisi de insanüstü hızlıysa şüpheli.
+  const flip=tReveal-tPrompt, decide=performance.now()-tReveal;
+  if(flip>0&&flip<300&&decide<350){ if(++suspStreak>=6){ suspStreak=0; if(cheatCaught())return; } }
+  else suspStreak=0;
+  if(correct){examScore++;}else{examWrong.push(cur);}examIdx++;nextExam();}
+
+/* ---- Hile yakalama: kademeli mesajlar; 4.'den itibaren ilerlemeyi sıfırlar ---- */
+const CKEY="ox3000_cheat_v1";
+function cheatN(){try{return (parseInt(localStorage.getItem(CKEY),10))||0;}catch(e){return 0;}}
+function cheatCaught(){
+  let n=cheatN()+1;try{localStorage.setItem(CKEY,n);}catch(e){}
+  let msg,reset=false;
+  if(n===1)msg="hayiydiy gaydeş";
+  else if(n===2)msg="Yaşayan en hızlı insan Barry Allen'ın bilinmeyen bı akrabası falan mısın bu ne hız";
+  else if(n===3)msg="son uyarım";
+  else {msg="sen kaşındın";reset=true;}   // 4. ve sonrası: her seferinde sıfırla
+  if(reset&&window.OX&&OX.reset)OX.reset();
+  showCheat(msg,reset);
+  return reset;
+}
+function showCheat(msg,reset){
+  if(synth)synth.cancel();
+  const o=document.getElementById('cheat');o.querySelector('.cheat-msg').textContent=msg;o.classList.add('show');
+  setTimeout(()=>{o.classList.remove('show');tPrompt=performance.now();if(reset)location.href='index.html';},2000);
+}
 function examDone(){const pct=Math.round(examScore/examTotal*100);
   try{const ex=JSON.parse(localStorage.getItem(EKEY)||'[]');ex.push({t:now(),g:gi,no:GROUPS[gi].no,level:GROUPS[gi].level,score:examScore,total:examTotal,pct:pct});localStorage.setItem(EKEY,JSON.stringify(ex.slice(-100)));}catch(e){}
   const pass=(examScore===examTotal);              // geçmek için %100 gerekli

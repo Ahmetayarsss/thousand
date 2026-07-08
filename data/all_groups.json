@@ -25808,7 +25808,8 @@
     "ok": "PRES",
     "en": "to push firmly; the news media",
     "ex": [
-     "<b>Press</b> the button to start."
+     "<b>Press</b> the button to start.",
+     "The story was in all the <b>press</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/press"
    },
@@ -25988,7 +25989,8 @@
     "ok": "RENT",
     "en": "money paid to use a home; to pay for use",
     "ex": [
-     "The monthly <b>rent</b> is high."
+     "The monthly <b>rent</b> is high.",
+     "We <b>rent</b> a flat in the city."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/rent"
    },
@@ -26000,7 +26002,8 @@
     "ok": "MÖR-dır",
     "en": "the crime of killing someone",
     "ex": [
-     "The police are investigating a <b>murder</b>."
+     "The police are investigating a <b>murder</b>.",
+     "He was accused of trying to <b>murder</b> his wife."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/murder"
    },
@@ -26048,7 +26051,9 @@
     "ok": "STİK",
     "en": "a thin piece of wood; to attach",
     "ex": [
-     "The dog chewed the <b>stick</b>."
+     "The dog chewed the <b>stick</b>.",
+     "<b>Stick</b> the photo in the album.",
+     "The window can <b>stick</b> in summer."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/stick"
    },
@@ -26060,6 +26065,7 @@
     "ok": "SUİÇ",
     "en": "a button to turn things on or off; to change",
     "ex": [
+     "Where is the light <b>switch</b>?",
      "<b>Switch</b> off the light before you leave."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/switch"
@@ -26108,7 +26114,8 @@
     "ok": "REYS",
     "en": "a speed competition; a group of people",
     "ex": [
-     "She came first in the <b>race</b>."
+     "She came first in the <b>race</b>.",
+     "The club is open to people of every <b>race</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/race"
    },
@@ -26180,7 +26187,8 @@
     "ok": "İM-port",
     "en": "goods brought from abroad; to bring in",
     "ex": [
-     "The country's main <b>import</b> is oil."
+     "The country's main <b>import</b> is oil.",
+     "They <b>import</b> cars from Germany."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/import"
    },
@@ -26240,7 +26248,8 @@
     "ok": "BO-dır",
     "en": "to annoy; to make an effort",
     "ex": [
-     "Don't <b>bother</b> him while he's working."
+     "Don't <b>bother</b> him while he's working.",
+     "Don't <b>bother</b> to cook; we'll eat out."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/bother"
    },
@@ -26264,7 +26273,8 @@
     "ok": "kı-MİT",
     "en": "to do a crime; to promise",
     "ex": [
-     "He would never <b>commit</b> a crime."
+     "He would never <b>commit</b> a crime.",
+     "She is ready to <b>commit</b> to the project."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/commit"
    },
@@ -26312,7 +26322,8 @@
     "ok": "SO-lid",
     "en": "hard and firm; not liquid",
     "ex": [
-     "Ice is water in a <b>solid</b> form."
+     "Ice is water in a <b>solid</b> form.",
+     "The house is built on <b>solid</b> rock."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/solid"
    },
@@ -26372,6 +26383,7 @@
     "ok": "LAYV",
     "en": "to be alive; happening now",
     "ex": [
+     "Fish can't <b>live</b> out of water.",
      "We watched the concert <b>live</b> on TV."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/live"
@@ -26516,7 +26528,8 @@
     "ok": "DU-ti",
     "en": "something you must do; a tax",
     "ex": [
-     "It is a nurse's <b>duty</b> to care for patients."
+     "It is a nurse's <b>duty</b> to care for patients.",
+     "You must pay <b>duty</b> on these goods."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/duty"
    },
@@ -26564,7 +26577,8 @@
     "ok": "HA-yır",
     "en": "to pay to use; to employ",
     "ex": [
-     "We can <b>hire</b> a car at the airport."
+     "We can <b>hire</b> a car at the airport.",
+     "The company will <b>hire</b> ten new workers."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/hire"
    },
@@ -26672,7 +26686,8 @@
     "ok": "STEN-dırd",
     "en": "a level of quality; usual",
     "ex": [
-     "The hotel offers a high <b>standard</b> of service."
+     "The hotel offers a high <b>standard</b> of service.",
+     "This is the <b>standard</b> size for a door."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/standard"
    },
@@ -27004,7 +27019,8 @@
     "ok": "TUB",
     "en": "a long hollow pipe; a soft container",
     "ex": [
-     "The paint comes in a <b>tube</b>."
+     "The paint comes in a <b>tube</b>.",
+     "Water ran through a rubber <b>tube</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/tube"
    },
@@ -27028,7 +27044,8 @@
     "ok": "TRİİT-mınt",
     "en": "medical care; the way you deal with someone",
     "ex": [
-     "The new <b>treatment</b> cured the disease."
+     "The new <b>treatment</b> cured the disease.",
+     "The prisoners received harsh <b>treatment</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/treatment"
    },
@@ -27040,7 +27057,8 @@
     "ok": "ı-Dİ-şın",
     "en": "the act of adding; the sum",
     "ex": [
-     "In <b>addition</b> to tea, they served cakes."
+     "In <b>addition</b> to tea, they served cakes.",
+     "Children learn <b>addition</b> and subtraction."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/addition"
    },
@@ -27052,7 +27070,9 @@
     "ok": "ÇARC",
     "en": "a price; to fill with electricity; an accusation",
     "ex": [
-     "There is no <b>charge</b> for children."
+     "There is no <b>charge</b> for children.",
+     "The phone is on <b>charge</b>.",
+     "He faces a <b>charge</b> of theft."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/charge"
    },
@@ -27076,7 +27096,8 @@
     "ok": "UE-dır",
     "en": "used to show a choice or doubt",
     "ex": [
-     "I don't know <b>whether</b> to stay or go."
+     "I don't know <b>whether</b> to stay or go.",
+     "<b>Whether</b> you like it or not, we must go."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/whether"
    },
@@ -27112,7 +27133,8 @@
     "ok": "UEYST",
     "en": "to use badly; unwanted material",
     "ex": [
-     "Don't <b>waste</b> water."
+     "Don't <b>waste</b> water.",
+     "The factory dumps its <b>waste</b> in the river."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/waste"
    },
@@ -27136,7 +27158,8 @@
     "ok": "SKRİPT",
     "en": "the written words of a play or film",
     "ex": [
-     "The actor learned his <b>script</b>."
+     "The actor learned his <b>script</b>.",
+     "The old letter was in beautiful <b>script</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/script"
    },
@@ -27172,7 +27195,8 @@
     "ok": "GREYN",
     "en": "the seeds of food plants like wheat; a tiny piece",
     "ex": [
-     "Bread is made from <b>grain</b>."
+     "Bread is made from <b>grain</b>.",
+     "There wasn't a <b>grain</b> of sand in her shoe."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/grain"
    },
@@ -27220,6 +27244,7 @@
     "ok": "PRE-şır",
     "en": "the force of pushing; stress",
     "ex": [
+     "Check the air <b>pressure</b> in the tyres.",
      "He is under a lot of <b>pressure</b> at work."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/pressure"
@@ -27232,7 +27257,8 @@
     "ok": "HAY-layt",
     "en": "to draw attention to; the best part",
     "ex": [
-     "The teacher <b>highlighted</b> the key words."
+     "The teacher <b>highlighted</b> the key words.",
+     "The zoo was the <b>highlight</b> of the trip."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/highlight"
    },
@@ -27280,7 +27306,8 @@
     "ok": "ıd-MİT",
     "en": "to agree that something is true; to let in",
     "ex": [
-     "He <b>admitted</b> his mistake."
+     "He <b>admitted</b> his mistake.",
+     "This ticket <b>admits</b> two people."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/admit"
    },
@@ -27292,6 +27319,7 @@
     "ok": "ri-VAYZ",
     "en": "to study again; to change",
     "ex": [
+     "We had to <b>revise</b> our plans.",
      "I need to <b>revise</b> for the test."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/revise"
@@ -27340,7 +27368,8 @@
     "ok": "ı-Fİ-şıl",
     "en": "approved by authority; a person in office",
     "ex": [
-     "This is the <b>official</b> website."
+     "This is the <b>official</b> website.",
+     "A government <b>official</b> made a speech."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/official"
    },
@@ -27424,7 +27453,8 @@
     "ok": "ÇE-linc",
     "en": "a difficult task; to question",
     "ex": [
-     "Learning a language is a <b>challenge</b>."
+     "Learning a language is a <b>challenge</b>.",
+     "She <b>challenged</b> him to a race."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/challenge"
    },
@@ -27472,7 +27502,8 @@
     "ok": "UAN-dır",
     "en": "to want to know; a feeling of surprise",
     "ex": [
-     "I <b>wonder</b> what time it is."
+     "I <b>wonder</b> what time it is.",
+     "The children looked at the stars in <b>wonder</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/wonder"
    },
@@ -27556,7 +27587,8 @@
     "ok": "SEKS",
     "en": "being male or female",
     "ex": [
-     "Please write your name and <b>sex</b> on the form."
+     "Please write your name and <b>sex</b> on the form.",
+     "The film has scenes of violence and <b>sex</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/sex"
    },
@@ -27580,7 +27612,8 @@
     "ok": "PRO-pır-ti",
     "en": "something you own; land and buildings",
     "ex": [
-     "The house is his personal <b>property</b>."
+     "The house is his personal <b>property</b>.",
+     "This metal has a special <b>property</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/property"
    },
@@ -27616,6 +27649,7 @@
     "ok": "KLOZ",
     "en": "a part of a sentence; a section of a document",
     "ex": [
+     "A sentence can have more than one <b>clause</b>.",
      "This <b>clause</b> explains the rules."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/clause"
@@ -27736,7 +27770,8 @@
     "ok": "GRE-cu-ıt",
     "en": "a person who has finished a degree",
     "ex": [
-     "She is a <b>graduate</b> of Oxford."
+     "She is a <b>graduate</b> of Oxford.",
+     "He will <b>graduate</b> from university in June."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/graduate"
    },
@@ -27748,7 +27783,8 @@
     "ok": "GREYD",
     "en": "a mark for school work; a level",
     "ex": [
-     "He got a good <b>grade</b> in maths."
+     "He got a good <b>grade</b> in maths.",
+     "My son is in the fifth <b>grade</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/grade"
    },
@@ -27760,6 +27796,7 @@
     "ok": "SE-kınd-ri",
     "en": "less important; after primary (school)",
     "ex": [
+     "The cost is of <b>secondary</b> importance.",
      "He goes to a <b>secondary</b> school."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/secondary"
@@ -27772,7 +27809,8 @@
     "ok": "in-GEYCD",
     "en": "having agreed to marry; busy",
     "ex": [
-     "They got <b>engaged</b> last month."
+     "They got <b>engaged</b> last month.",
+     "The line is <b>engaged</b>; try again later."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/engaged"
    },
@@ -27856,7 +27894,8 @@
     "ok": "SMART",
     "en": "clever; neat and tidy",
     "ex": [
-     "That's a <b>smart</b> idea."
+     "That's a <b>smart</b> idea.",
+     "He looked <b>smart</b> in his new suit."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/smart"
    },
@@ -28012,7 +28051,8 @@
     "ok": "DOU",
     "en": "in spite of the fact; however",
     "ex": [
-     "<b>Though</b> it was late, they kept working."
+     "<b>Though</b> it was late, they kept working.",
+     "It's hard work. I enjoy it, <b>though</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/though"
    },
@@ -28084,7 +28124,8 @@
     "ok": "EKS-port",
     "en": "goods sold abroad; to send abroad",
     "ex": [
-     "Coffee is the country's main <b>export</b>."
+     "Coffee is the country's main <b>export</b>.",
+     "They <b>export</b> fruit to Europe."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/export"
    },
@@ -28192,7 +28233,8 @@
     "ok": "SE-ting",
     "en": "the place where something happens; an adjustment",
     "ex": [
-     "The <b>setting</b> of the film is a small village."
+     "The <b>setting</b> of the film is a small village.",
+     "Turn the oven to a low <b>setting</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/setting"
    }
@@ -28236,7 +28278,8 @@
     "ok": "PRAY-mı-ri",
     "en": "most important; first (school)",
     "ex": [
-     "Health is of <b>primary</b> importance."
+     "Health is of <b>primary</b> importance.",
+     "She teaches at a <b>primary</b> school."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/primary"
    },
@@ -28296,7 +28339,8 @@
     "ok": "kuo-li-fi-KEY-şın",
     "en": "an exam or skill that makes you able to do a job",
     "ex": [
-     "She has the right <b>qualifications</b> for the job."
+     "She has the right <b>qualifications</b> for the job.",
+     "Patience is an important <b>qualification</b> for a teacher."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/qualification"
    },
@@ -28308,7 +28352,8 @@
     "ok": "A-yırn",
     "en": "a hard metal; a tool for pressing clothes",
     "ex": [
-     "The gate is made of <b>iron</b>."
+     "The gate is made of <b>iron</b>.",
+     "Use a hot <b>iron</b> on the shirt."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/iron"
    },
@@ -28344,6 +28389,7 @@
     "ok": "YUST",
     "en": "not new; familiar with",
     "ex": [
+     "He bought a <b>used</b> car.",
      "I'm not <b>used</b> to getting up early."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/used"
@@ -28368,7 +28414,8 @@
     "ok": "BEND",
     "en": "to make something curved; a curve",
     "ex": [
-     "<b>Bend</b> your knees when you lift the box."
+     "<b>Bend</b> your knees when you lift the box.",
+     "The car slowed at the <b>bend</b> in the road."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/bend"
    },
@@ -28452,6 +28499,7 @@
     "ok": "pır-FOR-mıns",
     "en": "a show; how well someone does",
     "ex": [
+     "The <b>performance</b> starts at eight.",
      "The team's <b>performance</b> was excellent."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/performance"
@@ -28572,7 +28620,8 @@
     "ok": "NEYL",
     "en": "a thin metal pin; the hard part on a finger",
     "ex": [
-     "Hammer the <b>nail</b> into the wood."
+     "Hammer the <b>nail</b> into the wood.",
+     "She painted her <b>nails</b> red."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/nail"
    },
@@ -28584,7 +28633,8 @@
     "ok": "ROUL",
     "en": "to move by turning over; a tube shape",
     "ex": [
-     "The ball <b>rolled</b> under the table."
+     "The ball <b>rolled</b> under the table.",
+     "She bought a <b>roll</b> of paper."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/roll"
    },
@@ -28608,6 +28658,7 @@
     "ok": "KUO-li-fay",
     "en": "to reach the needed level; to gain the right",
     "ex": [
+     "Our team <b>qualified</b> for the final.",
      "She <b>qualified</b> as a doctor last year."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/qualify"
@@ -28632,7 +28683,8 @@
     "ok": "BEN",
     "en": "to officially forbid; a rule against",
     "ex": [
-     "The school will <b>ban</b> mobile phones."
+     "The school will <b>ban</b> mobile phones.",
+     "There is a <b>ban</b> on smoking here."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/ban"
    },
@@ -28644,7 +28696,8 @@
     "ok": "FEN-si",
     "en": "decorated; to want or like",
     "ex": [
-     "She wore a <b>fancy</b> dress to the party."
+     "She wore a <b>fancy</b> dress to the party.",
+     "Do you <b>fancy</b> a cup of tea?"
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/fancy"
    },
@@ -28656,7 +28709,9 @@
     "ok": "SPOT",
     "en": "a small mark; a place; to notice",
     "ex": [
-     "There is a <b>spot</b> of ink on the page."
+     "There is a <b>spot</b> of ink on the page.",
+     "This is a lovely <b>spot</b> for a picnic.",
+     "Can you <b>spot</b> the difference?"
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/spot"
    },
@@ -28668,6 +28723,7 @@
     "ok": "SPRED",
     "en": "to open out; to reach more places",
     "ex": [
+     "<b>Spread</b> the butter on the bread.",
      "The fire <b>spread</b> quickly."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/spread"
@@ -28692,6 +28748,7 @@
     "ok": "YUST",
     "en": "not new; familiar with",
     "ex": [
+     "He bought a <b>used</b> car.",
      "I'm not <b>used</b> to getting up early."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/used"
@@ -28764,7 +28821,8 @@
     "ok": "kı-MÖR-şıl",
     "en": "relating to business; a TV advert",
     "ex": [
-     "The area has many <b>commercial</b> buildings."
+     "The area has many <b>commercial</b> buildings.",
+     "A TV <b>commercial</b> interrupted the film."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/commercial"
    },
@@ -28788,7 +28846,8 @@
     "ok": "Mİİ-di-ım",
     "en": "in the middle; average",
     "ex": [
-     "I'd like a <b>medium</b> coffee, please."
+     "I'd like a <b>medium</b> coffee, please.",
+     "Television is a powerful <b>medium</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/medium"
    },
@@ -28800,7 +28859,8 @@
     "ok": "EYM",
     "en": "a goal; to point at",
     "ex": [
-     "Our <b>aim</b> is to finish by Friday."
+     "Our <b>aim</b> is to finish by Friday.",
+     "He <b>aimed</b> the arrow at the target."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/aim"
    },
@@ -28836,7 +28896,8 @@
     "ok": "SİMP-li",
     "en": "in an easy way; just",
     "ex": [
-     "<b>Simply</b> add water and stir."
+     "<b>Simply</b> add water and stir.",
+     "I did it <b>simply</b> because I wanted to."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/simply"
    },
@@ -28968,7 +29029,8 @@
     "ok": "in-TE-li-cıns",
     "en": "the ability to learn and think; secret information",
     "ex": [
-     "Dolphins have great <b>intelligence</b>."
+     "Dolphins have great <b>intelligence</b>.",
+     "The spy gathered secret <b>intelligence</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/intelligence"
    },
@@ -28992,6 +29054,7 @@
     "ok": "CÖR-nıl",
     "en": "a serious magazine; a daily record",
     "ex": [
+     "She published her results in a science <b>journal</b>.",
      "She writes in her <b>journal</b> every night."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/journal"
@@ -29004,7 +29067,8 @@
     "ok": "KORT",
     "en": "a place where legal cases are heard; a sports area",
     "ex": [
-     "The case went to <b>court</b>."
+     "The case went to <b>court</b>.",
+     "They played on the tennis <b>court</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/court"
    },
@@ -29124,7 +29188,8 @@
     "ok": "ıt-REK-şın",
     "en": "something that pulls interest",
     "ex": [
-     "The castle is a popular tourist <b>attraction</b>."
+     "The castle is a popular tourist <b>attraction</b>.",
+     "There is a strong <b>attraction</b> between the two."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/attraction"
    },
@@ -29148,7 +29213,8 @@
     "ok": "RE-lı-tiv",
     "en": "a family member; compared to something else",
     "ex": [
-     "Many <b>relatives</b> came to the wedding."
+     "Many <b>relatives</b> came to the wedding.",
+     "They live in <b>relative</b> comfort."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/relative"
    },
@@ -29172,7 +29238,8 @@
     "ok": "ri-MOUT",
     "en": "far away; distant",
     "ex": [
-     "They live in a <b>remote</b> village."
+     "They live in a <b>remote</b> village.",
+     "Change the channel with the <b>remote</b> control."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/remote"
    },
@@ -29280,7 +29347,8 @@
     "ok": "ÇEST",
     "en": "the front of the body; a large strong box",
     "ex": [
-     "He felt a pain in his <b>chest</b>."
+     "He felt a pain in his <b>chest</b>.",
+     "She keeps old letters in a wooden <b>chest</b>."
     ],
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/chest"
    },

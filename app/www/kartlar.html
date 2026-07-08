@@ -170,7 +170,7 @@ function nextExam(){document.getElementById('counter').textContent=(examIdx+1)+'
 function gradeExam(correct){
   // Hile tespiti: çevirme süresi ve karar süresi ikisi de insanüstü hızlıysa şüpheli.
   const flip=tReveal-tPrompt, decide=performance.now()-tReveal;
-  if(flip>0&&flip<300&&decide<350){ if(++suspStreak>=6){ suspStreak=0; if(cheatCaught())return; } }
+  if(flip>0&&flip<300&&decide<350){ if(++suspStreak>=2){ suspStreak=0; if(cheatCaught())return; } }
   else suspStreak=0;
   if(correct){examScore++;}else{examWrong.push(cur);}examIdx++;nextExam();}
 

@@ -92,11 +92,11 @@ c.innerHTML=`<div class="row1"><span class="word">${d.w}</span><span class="tag"
 ${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
 <div class="tr">${d.tr||''}</div>
 ${d.en?`<div class="en">${d.en}</div>`:''}
-${d.ex?`<div class="ex">${d.ex}</div>`:''}
+${(d.ex&&d.ex.length)?d.ex.map(s=>`<div class="ex">${s}</div>`).join(''):''}
 <a class="cam" href="${d.cam}" target="_blank" rel="noopener">🔊 Cambridge →</a>`;
 c.querySelector('.word').onclick=()=>one(d.w,c);
 c.querySelector('.spk').onclick=e=>{e.stopPropagation();one(d.w,c);};
-const ex=c.querySelector('.ex');if(ex)ex.onclick=()=>one(d.ex,c);
+c.querySelectorAll('.ex').forEach(ex=>ex.onclick=()=>one(ex.textContent,c));
 list.appendChild(c);});});
 document.getElementById('search').value='';window.scrollTo({top:0});}
 

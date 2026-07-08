@@ -42,14 +42,17 @@ def check_ok(gno, w, ok):
 
 
 def check_ex(gno, w, ex):
-    m = re.search(r"<b>(.+?)</b>", ex)
-    if not m:
-        err(f"G{gno} {w!r}: örnekte <b>kelime</b> yok: {ex!r}")
-        return
-    marked = m.group(1).lower()
+    # ex bir cümle listesidir; her cümlede <b>kelime</b> olmalı.
+    sents = ex if isinstance(ex, list) else [ex]
     base = w.lower()
-    if base not in marked and marked not in base and not marked.startswith(base[:4]):
-        err(f"G{gno} {w!r}: işaretli kelime uyumsuz: {marked!r}")
+    for s in sents:
+        m = re.search(r"<b>(.+?)</b>", s)
+        if not m:
+            err(f"G{gno} {w!r}: örnekte <b>kelime</b> yok: {s!r}")
+            continue
+        marked = m.group(1).lower()
+        if base not in marked and marked not in base and not marked.startswith(base[:4]):
+            err(f"G{gno} {w!r}: işaretli kelime uyumsuz: {marked!r}")
 
 
 def main():

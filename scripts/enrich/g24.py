@@ -10,7 +10,7 @@ DATA = {
  "mud": ("MAD", "soft wet earth", "The children played in the <b>mud</b>."),
  "rope": ("ROUP", "thick strong cord", "They tied the boat with a <b>rope</b>."),
  "qualification": ("kuo-li-fi-KEY-şın", "an exam or skill that makes you able to do a job", "She has the right <b>qualifications</b> for the job."),
- "iron": ("A-yın", "a hard metal; a tool for pressing clothes", "The gate is made of <b>iron</b>."),
+ "iron": ("A-yırn", "a hard metal; a tool for pressing clothes", "The gate is made of <b>iron</b>."),
  "similarity": ("si-mı-LE-rı-ti", "the state of being alike", "There is a <b>similarity</b> between the two brothers."),
  "environmental": ("in-vay-rın-MEN-tıl", "relating to the natural world", "Pollution is a serious <b>environmental</b> problem."),
  "used": ("YUST", "not new; familiar with", "I'm not <b>used</b> to getting up early."),

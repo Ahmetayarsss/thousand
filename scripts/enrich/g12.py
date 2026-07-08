@@ -64,7 +64,7 @@ DATA = {
  "item": ("AY-tım", "a single thing in a list", "The first <b>item</b> on the list is bread."),
  "affect": ("ı-FEKT", "to change or influence", "Cold weather can <b>affect</b> your mood."),
  "bit": ("BİT", "a small piece or amount", "I'm a little <b>bit</b> tired."),
- "perhaps": ("PREPS", "maybe", "<b>Perhaps</b> we should wait a while."),
+ "perhaps": ("pır-HEPS", "maybe", "<b>Perhaps</b> we should wait a while."),
  "disagree": ("di-sı-GRİİ", "to have a different opinion", "I <b>disagree</b> with that idea."),
  "platform": ("PLET-form", "a raised area; where trains stop", "The train leaves from <b>platform</b> two."),
  "united": ("yu-NAY-tid", "joined together", "The two clubs are now <b>united</b>."),

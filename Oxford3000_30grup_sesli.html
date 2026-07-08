@@ -40,7 +40,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .ok{color:var(--ok);font-weight:700;font-size:13.5px;margin-top:6px}
 .tr{color:var(--tr);font-size:14px;margin-top:3px}
 .en{color:#33414F;font-size:13px;margin-top:3px}
-.ex{color:#5B6B7B;font-size:13px;font-style:italic;margin-top:5px;border-top:1px dashed var(--line);padding-top:5px;cursor:pointer}
+.ex{color:#5B6B7B;font-size:13px;font-style:italic;margin-top:5px;border-top:1px dashed var(--line);padding-top:5px}
 .ex .mini{font-style:normal;color:var(--speak-d);font-weight:700;margin-right:5px}
 .cam{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:#0B5FA5;text-decoration:none;background:#E8F1FB;border:1px solid #C4DBF3;border-radius:7px;padding:3px 8px}
 .cam:active{background:#D8E8F8}
@@ -74,12 +74,7 @@ function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
 function stop(){playing=false;queue=[];if(synth)synth.cancel();clr();const b=document.getElementById('playall');b.textContent="▶ Grubu oku";b.classList.remove('stop');}
 function all(){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
   const b=document.getElementById('playall');b.textContent="■ Durdur";b.classList.add('stop');playing=true;
-  const native=window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform();
-  if(native&&synth){
-    // Ekran kapalıyken de sürsün diye tek bir seslendirme olarak oku (cihaz TTS'i arka planda çalar).
-    synth.cancel();const text=cs.map(c=>c.dataset.w).join('. ')+'.';
-    const u=new SpeechSynthesisUtterance(text);u.lang=LANG;u.rate=RATE;u.onend=()=>stop();u.onerror=()=>stop();synth.speak(u);return;
-  }
+  // Her kelimeyi tek tek oku: okunan kart vurgulanır ve ekran ona kayar (takip).
   queue=cs.slice();const step=()=>{if(!playing||!queue.length){stop();return;}const c=queue.shift();c.scrollIntoView({behavior:'smooth',block:'center'});speak(c.dataset.w,c,()=>setTimeout(step,250));};step();}
 
 function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
@@ -94,9 +89,7 @@ ${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
 ${d.en?`<div class="en">${d.en}</div>`:''}
 ${(d.ex&&d.ex.length)?d.ex.map(s=>`<div class="ex">${s}</div>`).join(''):''}
 <a class="cam" href="${d.cam}" target="_blank" rel="noopener">🔊 Cambridge →</a>`;
-c.querySelector('.word').onclick=()=>one(d.w,c);
 c.querySelector('.spk').onclick=e=>{e.stopPropagation();one(d.w,c);};
-c.querySelectorAll('.ex').forEach(ex=>ex.onclick=()=>one(ex.textContent,c));
 list.appendChild(c);});});
 document.getElementById('search').value='';window.scrollTo({top:0});}
 

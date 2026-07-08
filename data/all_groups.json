@@ -220,7 +220,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "tanıtmak; takdim etmek",
-    "ok": "int-rı-DYUS",
+    "ok": "int-rı-DUS",
     "en": "to make people know each other; to present",
     "ex": "Let me <b>introduce</b> my friend Ali.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/introduce"
@@ -310,7 +310,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "salı",
-    "ok": "TYUZ-dey",
+    "ok": "TUZ-dey",
     "en": "the day after Monday",
     "ex": "The meeting is on <b>Tuesday</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/tuesday"
@@ -870,7 +870,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "yeni",
-    "ok": "NYU",
+    "ok": "NU",
     "en": "recently made; not old",
     "ex": "She bought a <b>new</b> phone.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/new"
@@ -4822,7 +4822,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "öğrenci",
-    "ok": "STYU-dınt",
+    "ok": "STU-dınt",
     "en": "a person who studies",
     "ex": "She is a good <b>student</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/student"
@@ -5860,7 +5860,7 @@
     "pos": "edat",
     "sec": "Diğer",
     "tr": "süresince",
-    "ok": "DYU-ring",
+    "ok": "DU-ring",
     "en": "all through a period of time",
     "ex": "Don't talk <b>during</b> the film.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/during"
@@ -7266,7 +7266,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "gazete",
-    "ok": "NYUZ-pey-pır",
+    "ok": "NUZ-pey-pır",
     "en": "printed sheets with news",
     "ex": "He reads the <b>newspaper</b> every morning.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/newspaper"
@@ -7796,7 +7796,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "haber",
-    "ok": "NYUZ",
+    "ok": "NUZ",
     "en": "information about recent events",
     "ex": "Did you hear the <b>news</b>?",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/news"
@@ -10690,7 +10690,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "azaltmak",
-    "ok": "ri-DYUS",
+    "ok": "ri-DUS",
     "en": "to make smaller or less",
     "ex": "We must <b>reduce</b> waste.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/reduce"
@@ -10910,7 +10910,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "üretmek",
-    "ok": "PRO-dyus",
+    "ok": "PRO-dus",
     "en": "to make or grow something",
     "ex": "This factory <b>produces</b> cars.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/produce"
@@ -12068,7 +12068,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "fırsat",
-    "ok": "o-pır-TYU-nı-ti",
+    "ok": "o-pır-TU-nı-ti",
     "en": "a good chance to do something",
     "ex": "This job is a great <b>opportunity</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/opportunity"
@@ -13924,7 +13924,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "aptal",
-    "ok": "STYU-pid",
+    "ok": "STU-pid",
     "en": "not clever; silly",
     "ex": "It was a <b>stupid</b> mistake.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/stupid"
@@ -17296,7 +17296,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "nükleer",
-    "ok": "NYUK-li-ır",
+    "ok": "NUK-li-ır",
     "en": "relating to atomic energy",
     "ex": "The country built a <b>nuclear</b> power station.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/nuclear"
@@ -17926,7 +17926,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "stüdyo",
-    "ok": "STYU-di-ou",
+    "ok": "STU-di-ou",
     "en": "a room where art, music or films are made",
     "ex": "The band recorded the song in a <b>studio</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/studio"
@@ -18574,7 +18574,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "beklenen; vadesi gelmiş",
-    "ok": "DYU",
+    "ok": "DU",
     "en": "expected; needing to be paid",
     "ex": "The rent is <b>due</b> on the first of the month.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/due"
@@ -18674,7 +18674,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kostüm",
-    "ok": "KOS-tyum",
+    "ok": "KOS-tum",
     "en": "special clothes for a role or event",
     "ex": "She wore a witch <b>costume</b> to the party.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/costume"
@@ -19064,7 +19064,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yapımcı; üretici",
-    "ok": "prı-DYU-sır",
+    "ok": "prı-DU-sır",
     "en": "a person who makes films or goods",
     "ex": "The film <b>producer</b> found the money for the movie.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/producer"
@@ -20870,7 +20870,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "tüketmek",
-    "ok": "kın-SYUM",
+    "ok": "kın-SUM",
     "en": "to eat, drink or use up",
     "ex": "Cars <b>consume</b> a lot of fuel.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/consume"
@@ -21778,7 +21778,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "görev; gümrük vergisi",
-    "ok": "DYU-ti",
+    "ok": "DU-ti",
     "en": "something you must do; a tax",
     "ex": "It is a nurse's <b>duty</b> to care for patients.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/duty"
@@ -22018,7 +22018,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "tutum",
-    "ok": "E-ti-tyud",
+    "ok": "E-ti-tud",
     "en": "a way of thinking or feeling",
     "ex": "She has a positive <b>attitude</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/attitude"
@@ -22186,7 +22186,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "tüp; boru",
-    "ok": "TYUB",
+    "ok": "TUB",
     "en": "a long hollow pipe; a soft container",
     "ex": "The paint comes in a <b>tube</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/tube"
@@ -24094,7 +24094,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "tüketici",
-    "ok": "kın-SYU-mır",
+    "ok": "kın-SU-mır",
     "en": "a person who buys goods",
     "ex": "<b>Consumers</b> want lower prices.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/consumer"
@@ -24402,7 +24402,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kurum",
-    "ok": "ins-ti-TYU-şın",
+    "ok": "ins-ti-TU-şın",
     "en": "a large important organization",
     "ex": "A bank is a financial <b>institution</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/institution"
@@ -25530,7 +25530,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "sayısız, pek çok",
-    "ok": "NYU-mı-rıs",
+    "ok": "NU-mı-rıs",
     "en": "very many",
     "ex": "She has visited the city on <b>numerous</b> occasions.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/numerous"
@@ -26688,7 +26688,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "coşku, heves",
-    "ok": "in-TYU-zi-ez-ım",
+    "ok": "in-TU-zi-ez-ım",
     "en": "strong interest and excitement",
     "ex": "She spoke with great <b>enthusiasm</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/enthusiasm"
@@ -26758,7 +26758,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ezgi, melodi",
-    "ok": "TYUN",
+    "ok": "TUN",
     "en": "a series of musical notes; a melody",
     "ex": "She hummed a happy <b>tune</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/tune"
@@ -27716,7 +27716,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "peşinden gitmek, sürdürmek",
-    "ok": "pır-SYU",
+    "ok": "pır-SU",
     "en": "to follow; to try to achieve",
     "ex": "She wants to <b>pursue</b> a career in music.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/pursue"
@@ -28136,7 +28136,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "enstitü",
-    "ok": "İNS-ti-tyut",
+    "ok": "İNS-ti-tut",
     "en": "an organization for study or work",
     "ex": "He studied at a science <b>institute</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/institute"
@@ -29214,7 +29214,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "varsaymak",
-    "ok": "ı-SYUM",
+    "ok": "ı-SUM",
     "en": "to think something is true without proof",
     "ex": "I <b>assume</b> you have read the book.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/assume"
@@ -29682,7 +29682,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "coşkulu, hevesli",
-    "ok": "in-tyu-zi-ES-tik",
+    "ok": "in-tu-zi-ES-tik",
     "en": "showing great interest and excitement",
     "ex": "The fans were very <b>enthusiastic</b>.",
     "cam": "https://dictionary.cambridge.org/dictionary/english-turkish/enthusiastic"

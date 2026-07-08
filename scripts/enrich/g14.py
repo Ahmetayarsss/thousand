@@ -83,7 +83,7 @@ DATA = {
  "provide": ("prı-VAYD", "to give what is needed", "The hotel <b>provides</b> free breakfast."),
  "research": ("Rİİ-sörç", "careful study to find facts", "She is doing <b>research</b> on plants."),
  "employ": ("im-PLOY", "to give someone a job", "The factory <b>employs</b> 200 people."),
- "stupid": ("STYU-pid", "not clever; silly", "It was a <b>stupid</b> mistake."),
+ "stupid": ("STU-pid", "not clever; silly", "It was a <b>stupid</b> mistake."),
  "following": ("FO-lou-ing", "coming next; below", "Answer the <b>following</b> questions."),
  "ship": ("ŞİP", "a large boat", "The <b>ship</b> sailed across the ocean."),
  "decision": ("di-Sİ-jın", "a choice you make", "It was a hard <b>decision</b> to make."),

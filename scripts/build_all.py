@@ -64,6 +64,34 @@ def apply_enrichment(groups):
     return groups
 
 
+def normalize_examples(groups):
+    """ex alanını her zaman liste (cümle listesi) yap."""
+    for g in groups:
+        for it in g["items"]:
+            ex = it.get("ex", "")
+            if isinstance(ex, str):
+                it["ex"] = [ex] if ex else []
+            else:
+                it["ex"] = [s for s in ex if s]
+
+
+def apply_multi_examples(groups):
+    """multi_examples.EX overlay'i: (grup_no, kelime) -> [cümle, ...].
+
+    Çok anlamlı kelimeler için her anlama bir örnek cümle. 100-kelime
+    kısıtı yok; hem enrich'li gruplara hem de JSON'daki Grup 1/10'a uygulanır.
+    """
+    try:
+        import multi_examples as ME
+    except ImportError:
+        return
+    for g in groups:
+        for it in g["items"]:
+            sents = ME.EX.get((g["no"], it["w"]))
+            if sents:
+                it["ex"] = list(sents)
+
+
 def render(groups):
     sesli_groups = groups
     kart_groups = [
@@ -71,7 +99,7 @@ def render(groups):
             "no": g["no"], "level": g["level"], "lo": g["lo"], "hi": g["hi"],
             "items": [
                 {"w": it["w"], "tr": it["tr"], "ok": it.get("ok", ""),
-                 "ex": re.sub(r"</?b>", "", it.get("ex", ""))}
+                 "ex": [re.sub(r"</?b>", "", s) for s in it.get("ex", [])]}
                 for it in g["items"]
             ],
         }
@@ -129,6 +157,8 @@ def render(groups):
 
 def main():
     groups = apply_enrichment(load_groups())
+    normalize_examples(groups)
+    apply_multi_examples(groups)
     with open(ROOT / "data" / "all_groups.json", "w", encoding="utf-8") as f:
         json.dump(groups, f, ensure_ascii=False, indent=1)
     render(groups)

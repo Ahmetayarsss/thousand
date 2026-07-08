@@ -144,7 +144,7 @@ function reveal(){
   const ans=document.getElementById('ansbox'),spk=document.getElementById('spk');let h='';
   if(cur._dir==='tr2en'){h+=`<div class="mean en">${cur.w}</div>`;if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;}
   else{if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;h+=`<div class="mean tr">${cur.tr||'—'}</div>`;}
-  if(cur.ex)h+=`<div class="ex">${cur.ex}</div>`;
+  if(cur.ex&&cur.ex.length)cur.ex.forEach(s=>{h+=`<div class="ex">${s}</div>`;});
   ans.innerHTML=h;ans.classList.remove('hidden');spk.classList.add('show');
   document.getElementById('ctrl').classList.remove('hidden');
 }

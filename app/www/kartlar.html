@@ -23,7 +23,6 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .counter{font-weight:800;color:var(--ink);flex:0 0 auto}
 
 .stage{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding-top:8px}
-.dir{text-align:center;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.03em;margin-bottom:6px}
 .card{flex:1 1 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 26px rgba(20,30,50,.07);padding:22px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;user-select:none;position:relative;min-height:0;overflow:auto}
 .card:active{transform:scale(.996)}
 .lvl{position:absolute;top:14px;right:16px;font-size:11px;font-weight:800;color:#fff;background:var(--accent);border-radius:6px;padding:2px 8px}
@@ -58,8 +57,6 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .ractions button{border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:800;font-size:13px;border-radius:10px;padding:11px 14px;cursor:pointer}
 .ractions .prim{background:var(--ink);color:#fff;border-color:var(--ink)}
 .warn{font-size:11.5px;color:#8A6D3B;background:#FCF3E3;border:1px solid #F2E0BE;border-radius:9px;padding:8px 10px;margin-top:8px;display:none}
-.reset{flex:0 0 auto;text-align:center;margin-top:8px}
-.reset button{background:none;border:0;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer}
 .seclabel{flex:1;font-size:15px;font-weight:800;color:var(--ink)}
 </style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='istatistik.html',P='index.html';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div id="app">
 <div class="top">
@@ -170,19 +167,18 @@ function nextExam(){document.getElementById('counter').textContent=(examIdx+1)+'
 function gradeExam(correct){if(checkSpeed())return;
   if(correct){examScore++;}else{examWrong.push(cur);}examIdx++;nextExam();}
 
-/* ---- Hile yakalama: test + sınavda geçerli; kademeli mesaj; 4.'ten itibaren ilerlemeyi sıfırlar ---- */
+/* ---- Hile yakalama: test + sınavda geçerli; kademeli mesaj; 4.'ten itibaren mevcut turu sıfırlar (gelişim korunur) ---- */
 const CKEY="ox3000_cheat_v1";
-// Bu güncellemede sayacı bir kez sıfırla (deneyebilmen için); flag sayesinde tekrar sıfırlamaz.
+// Sayacı bu sürümde bir kez sıfırla (flag sayesinde tekrar sıfırlamaz).
 try{if(!localStorage.getItem('ox3000_cheat_migr_v4')){localStorage.removeItem(CKEY);localStorage.setItem('ox3000_cheat_migr_v4','1');}}catch(e){}
 function cheatN(){try{return (parseInt(localStorage.getItem(CKEY),10))||0;}catch(e){return 0;}}
-// true dönerse: ilerleme sıfırlandı ve tur yeniden başlatıldı → çağıran devam etmemeli.
+// true dönerse: mevcut sınav/test turu yeniden başlatıldı → çağıran devam etmemeli.
 function checkSpeed(){
   const flip=tReveal-tPrompt, decide=performance.now()-tReveal;
   if(flip>0&&flip<300&&decide<350){ if(++suspStreak>=2){ suspStreak=0; return cheatCaught(); } }
   else suspStreak=0;
   return false;
 }
-// Sıfırlama sonrası: bölümü yeniden senkronla (frontier=0) ve aynı sayfada turu baştan başlat.
 function restartRound(){ start(); }   // yalnız mevcut sınav/test turunu baştan başlatır; ilerleme (bölümler/seviye) DOKUNULMAZ
 function cheatCaught(){   // true dönerse mevcut tur yeniden başlatıldı
   let n=cheatN()+1;try{localStorage.setItem(CKEY,n);}catch(e){}
@@ -202,19 +198,23 @@ function showCheat(msg,restart){
   setTimeout(()=>{o.classList.remove('show');tPrompt=performance.now();if(restart)restartRound();},dur);
 }
 function examDone(){const pct=Math.round(examScore/examTotal*100);
+  const wasReview=!!(window.OX&&OX.review()!=null);   // examResult REV'i temizlemeden önce yakala
   try{const ex=JSON.parse(localStorage.getItem(EKEY)||'[]');ex.push({t:now(),g:gi,no:GROUPS[gi].no,level:GROUPS[gi].level,score:examScore,total:examTotal,pct:pct});localStorage.setItem(EKEY,JSON.stringify(ex.slice(-100)));}catch(e){}
   const pass=(examScore===examTotal);              // geçmek için %100 gerekli
   const res=(window.OX?OX.examResult(gi,GROUPS[gi].no,pass):(pass?'green':'reopen'));
   const gold=(res==='gold');                        // 4. tekrar geçildi → tam öğrenme
   const wl=examWrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
   const last=(gi>=GROUPS.length-1);
-  let msg=pass
-    ?(gold
-       ?'Tam öğrendin! ⭐ Bu bölüm altın oldu — artık tekrar istenmeyecek.'
-       :'Bölümü geçtin! ✓ '+(last?'Tüm bölümleri bitirdin! 🎉':'Sıradaki bölüm açıldı.'))
-    :('%'+pct+' — bu bölümü geçemedin. (Geçmek için hepsi doğru olmalı.) Bölüm gri kaldı, yeniden çalış.');
+  let msg;
+  if(pass){
+    if(gold) msg='Tam öğrendin! ⭐ Bu bölüm altın oldu — artık tekrar istenmeyecek.';
+    else if(wasReview) msg='Tekrar tamamlandı! ✓ Bölüm tazelendi.';
+    else msg='Bölümü geçtin! ✓ '+(last?'Tüm bölümleri bitirdin! 🎉':'Sıradaki bölüm açıldı.');
+  }else{
+    msg='%'+pct+' — bu bölümü geçemedin. (Geçmek için hepsi doğru olmalı.) Bölüm gri kaldı, yeniden çalış.';
+  }
   showResult(pass?(gold?'⭐':'✓'):'%'+pct,examScore+'/'+examTotal+' doğru',msg,wl,false);
-  document.getElementById('r-next').textContent=pass?(last?'Listeye dön':'Sonraki bölüm →'):'Listeye dön (yeniden çalış)';
+  document.getElementById('r-next').textContent=pass?((wasReview||last)?'Listeye dön':'Sonraki bölüm →'):'Listeye dön (yeniden çalış)';
   document.getElementById('r-next').style.display='';}
 
 function showResult(big,small,msg,wlHtml,isTest){

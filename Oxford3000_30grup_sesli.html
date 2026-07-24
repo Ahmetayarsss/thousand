@@ -71,10 +71,17 @@ function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
 function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
 function stop(){playing=false;queue=[];if(synth)synth.cancel();clr();const b=document.getElementById('playall');b.textContent="▶ Grubu oku";b.classList.remove('stop');}
-function all(){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
-  const b=document.getElementById('playall');b.textContent="■ Durdur";b.classList.add('stop');playing=true;
-  // Her kelimeyi tek tek oku: okunan kart vurgulanır ve ekran ona kayar (takip).
-  queue=cs.slice();const step=()=>{if(!playing||!queue.length){stop();return;}const c=queue.shift();c.scrollIntoView({behavior:'smooth',block:'center'});speak(c.dataset.w,c,()=>setTimeout(step,250));};step();}
+function all(){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length||!synth)return;
+  const b=document.getElementById('playall');b.textContent="■ Durdur";b.classList.add('stop');playing=true;synth.cancel();
+  // Tüm grubu TEK seslendirme olarak oku → ekran kapalıyken de kesintisiz sürer (cihaz TTS'i arka planda çalar).
+  const words=cs.map(c=>c.dataset.w),text=words.join('. ')+'.';
+  const starts=[];let pos=0;words.forEach(w=>{starts.push(pos);pos+=w.length+2;});   // her kelimenin metindeki başlangıcı (". "=2)
+  const u=new SpeechSynthesisUtterance(text);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;
+  let idx=-1;
+  // Kelime sınırı olayı destekleniyorsa (tarayıcı) okunan kartı vurgula ve ekranı ona kaydır. Telefonda tetiklenmese de ses sürer.
+  u.onboundary=e=>{if(e.name&&e.name!=='word')return;let i=0;while(i+1<starts.length&&starts[i+1]<=e.charIndex)i++;if(i!==idx){idx=i;clr();cur=cs[i];cs[i].classList.add('playing');cs[i].scrollIntoView({behavior:'smooth',block:'center'});}};
+  u.onend=()=>stop();u.onerror=u.onend;
+  synth.speak(u);}
 
 function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
 function renderGroup(){stop();const g=GROUPS[gi];const list=document.getElementById('list');list.innerHTML='';

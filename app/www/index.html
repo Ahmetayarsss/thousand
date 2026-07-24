@@ -21,7 +21,8 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .speed{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
 .speed input{width:84px}
-.playall{margin-left:auto;border:0;background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer}
+.playbtns{margin-left:auto;display:flex;gap:6px}
+.playall{border:0;background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer}
 .playall.stop{background:var(--speak-d)}
 .search{width:100%;margin-top:9px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-size:14px}
 .hint{font-size:12px;color:var(--muted);background:#EEF2F7;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;line-height:1.5}
@@ -50,7 +51,10 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
     <label class="speed">Hız <input id="rate" type="range" min="0.5" max="1" step="0.05" value="0.8"></label>
-    <button class="playall" id="playall">▶ Grubu oku</button>
+    <div class="playbtns">
+      <button class="playall" id="playall">▶ Grubu oku</button>
+      <button class="playall" id="loopall">🔁 Döngü</button>
+    </div>
   </div>
   <input class="search" id="search" placeholder="Bu grupta ara… (İngilizce/Türkçe)">
 </header>
@@ -66,21 +70,25 @@ let LANG="en-US",RATE=0.8,voices=[],gi=(window.OX?Math.max(0,Math.min(OX.current
 function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
-let playing=false,queue=[],cur=null;
+let playing=false,looping=false,queue=[],cur=null;
 function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
+function setPlayBtns(){const p=document.getElementById('playall'),l=document.getElementById('loopall');
+  p.textContent=(playing&&!looping)?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing&&!looping);
+  l.textContent=(playing&&looping)?"■ Durdur":"🔁 Döngü";l.classList.toggle('stop',playing&&looping);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
 function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
-function stop(){playing=false;queue=[];if(synth)synth.cancel();clr();const b=document.getElementById('playall');b.textContent="▶ Grubu oku";b.classList.remove('stop');}
-function all(){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length||!synth)return;
-  const b=document.getElementById('playall');b.textContent="■ Durdur";b.classList.add('stop');playing=true;synth.cancel();
-  // Tüm grubu TEK seslendirme olarak oku → ekran kapalıyken de kesintisiz sürer (cihaz TTS'i arka planda çalar).
+function stop(){playing=false;looping=false;queue=[];if(synth)synth.cancel();clr();setPlayBtns();}
+// Tüm grubu TEK seslendirme olarak oku → ekran kapalıyken de kesintisiz sürer. loop=true ise bitince baştan başlar.
+function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length||!synth)return;
+  playing=true;looping=!!loop;setPlayBtns();synth.cancel();
   const words=cs.map(c=>c.dataset.w),text=words.join('. ')+'.';
   const starts=[];let pos=0;words.forEach(w=>{starts.push(pos);pos+=w.length+2;});   // her kelimenin metindeki başlangıcı (". "=2)
   const u=new SpeechSynthesisUtterance(text);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;
   let idx=-1;
   // Kelime sınırı olayı destekleniyorsa (tarayıcı) okunan kartı vurgula ve ekranı ona kaydır. Telefonda tetiklenmese de ses sürer.
   u.onboundary=e=>{if(e.name&&e.name!=='word')return;let i=0;while(i+1<starts.length&&starts[i+1]<=e.charIndex)i++;if(i!==idx){idx=i;clr();cur=cs[i];cs[i].classList.add('playing');cs[i].scrollIntoView({behavior:'smooth',block:'center'});}};
-  u.onend=()=>stop();u.onerror=u.onend;
+  u.onend=()=>{if(playing&&looping){readGroup(true);}else{stop();}};   // döngü: bitince baştan
+  u.onerror=u.onend;
   synth.speak(u);}
 
 function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
@@ -100,7 +108,8 @@ list.appendChild(c);});});
 document.getElementById('search').value='';window.scrollTo({top:0});}
 
 document.getElementById('rate').addEventListener('input',e=>RATE=parseFloat(e.target.value));
-document.getElementById('playall').addEventListener('click',()=>{playing?stop():all();});
+document.getElementById('playall').addEventListener('click',()=>{(playing&&!looping)?stop():readGroup(false);});
+document.getElementById('loopall').addEventListener('click',()=>{(playing&&looping)?stop():readGroup(true);});
 document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
 setSecLabel();renderGroup();

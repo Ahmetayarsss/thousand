@@ -9,7 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.content.pm.ServiceInfo;
 import android.speech.tts.TextToSpeech;
@@ -50,6 +52,7 @@ public class GroupTtsService extends Service {
     private volatile boolean active = false;
     private float rate = 1.0f;
     private boolean ready = false;
+    private final Handler main = new Handler(Looper.getMainLooper());
     private PowerManager.WakeLock wakeLock;
 
     @Override
@@ -61,6 +64,7 @@ public class GroupTtsService extends Service {
         String[] ws = intent != null ? intent.getStringArrayExtra("words") : null;
         rate = intent != null ? intent.getFloatExtra("rate", 1.0f) : 1.0f;
         loop = intent != null && intent.getBooleanExtra("loop", false);
+        main.removeCallbacksAndMessages(null);   // önceki turdan kalan döngü post'unu iptal et
         words.clear();
         if (ws != null) {
             for (String w : ws) if (w != null) words.add(w);
@@ -101,7 +105,12 @@ public class GroupTtsService extends Service {
             Integer i = idx(utteranceId);
             if (i != null && i.intValue() == words.size() - 1) {   // son kelime bitti
                 if (active && loop) {
-                    enqueueAll();                                    // döngü: baştan
+                    // Döngü: yeni turu TTS callback'inin İÇİNDEN değil, ana thread'e
+                    // post ederek başlat. Motorların çoğu, onDone içinden yapılan
+                    // speak() çağrısını sessizce düşürür → döngü bir turdan sonra ölür.
+                    main.post(() -> {
+                        if (active && loop) enqueueAll();
+                    });
                 } else {
                     Progress p = progress;
                     if (p != null) p.onDone();
@@ -174,6 +183,7 @@ public class GroupTtsService extends Service {
     private void stopEverything() {
         active = false;
         loop = false;
+        main.removeCallbacksAndMessages(null);
         if (tts != null) {
             try { tts.stop(); } catch (Exception e) {}
         }
@@ -205,6 +215,7 @@ public class GroupTtsService extends Service {
     public void onDestroy() {
         active = false;
         loop = false;
+        main.removeCallbacksAndMessages(null);
         if (tts != null) {
             try { tts.stop(); tts.shutdown(); } catch (Exception e) {}
             tts = null;

@@ -51,7 +51,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
     <label class="speed">Hız <input id="rate" type="range" min="0.5" max="1" step="0.05" value="0.8"></label>
-    <label class="speed">Bekleme <input id="gap" type="range" min="0" max="3" step="0.25" value="0.5"><span id="gapval">0.5 sn</span></label>
+    <label class="speed">Bekleme <input id="gap" type="range" min="0" max="3" step="0.25" value="0.5"></label>
     <div class="playbtns">
       <button class="playall" id="playall">▶ Grubu oku</button>
     </div>
@@ -125,7 +125,7 @@ list.appendChild(c);});});
 document.getElementById('search').value='';window.scrollTo({top:0});}
 
 document.getElementById('rate').addEventListener('input',e=>RATE=parseFloat(e.target.value));
-function setGap(v){GAP=Math.round(parseFloat(v)*1000);const el=document.getElementById('gapval');if(el)el.textContent=parseFloat(v).toString().replace('.',',')+' sn';}
+function setGap(v){GAP=Math.round(parseFloat(v)*1000);}
 document.getElementById('gap').addEventListener('input',e=>setGap(e.target.value));
 setGap(document.getElementById('gap').value);
 document.getElementById('playall').addEventListener('click',()=>{playing?stop():readGroup(true);});   // Grubu oku = sürekli döngü

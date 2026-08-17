@@ -46,7 +46,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
-</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses7</div><div class="wrap">
+</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses8</div><div class="wrap">
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
@@ -84,8 +84,6 @@ if(GT&&GT.addListener){
   GT.addListener('wordStart',ev=>{const i=ev&&ev.index;if(i==null)return;if(i>=0&&i<curCards.length){clr();cur=curCards[i];cur.classList.add('playing');cur.scrollIntoView({behavior:'smooth',block:'center'});}});
   // Döngüsüz okuma bitince butonları sıfırla.
   GT.addListener('done',()=>{playing=false;looping=false;clr();setPlayBtns();});
-  // Tek kelime (Cambridge) sesi bitince vurguyu kaldır.
-  GT.addListener('wordAudioDone',()=>clrWord());
 }
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}
@@ -99,17 +97,13 @@ function playAudioUrl(url,card){return new Promise(res=>{
   a.addEventListener('playing',ok);a.onended=()=>clrWord();a.onerror=()=>{if(!done){done=true;clrWord();res(false);}};
   a.play().then(ok).catch(()=>{if(!done){done=true;clrWord();res(false);}});
 });}
-// Tek kelime 🔊: 1) uygulama içi Cambridge sesi (indirilmiş kelimeler, offline) →
-//               2) native Cambridge (internet varken diğer kelimeler) → 3) cihaz sesi.
+// Tek kelime 🔊: 1) uygulamaya gömülü Cambridge sesi (offline) → 2) cihaz sesi.
 async function one(t,card){
   if(synth)synth.cancel();stop();
   try{if(await playAudioUrl('audio/'+slugOf(t)+'.mp3',card))return;}catch(e){}
-  if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');}
-    try{const r=await GT.speakWord({word:t});if(r&&r.ok)return;toast('Cambridge sesi yok — '+((r&&r.reason)||'?'));}catch(e){toast('Cambridge hata: '+e);}
-    clrWord();}
   speak(t,card);
 }
-function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}if(GT){GT.stop();if(GT.stopWord)GT.stopWord();}clrWord();if(synth)synth.cancel();clr();setPlayBtns();}
+function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}if(GT)GT.stop();clrWord();if(synth)synth.cancel();clr();setPlayBtns();}
 // Grubu oku. loop=true ise bitince baştan başlar (sonsuz). GAP: kelimeler arası bekleme (ms).
 function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
   playing=true;looping=!!loop;setPlayBtns();

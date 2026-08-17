@@ -58,7 +58,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .ractions .prim{background:var(--ink);color:#fff;border-color:var(--ink)}
 .warn{font-size:11.5px;color:#8A6D3B;background:#FCF3E3;border:1px solid #F2E0BE;border-radius:9px;padding:8px 10px;margin-top:8px;display:none}
 .seclabel{flex:1;font-size:15px;font-weight:800;color:var(--ink)}
-</style><script src="progress.js"></script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses7</div><div id="app">
+</style><script src="progress.js"></script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses8</div><div id="app">
 <div class="top">
   <div class="moderow" id="moderow">
     <button data-m="test" class="on">Test (çalışma)</button>
@@ -128,11 +128,9 @@ function playAudioUrl(url){return new Promise(res=>{
   a.addEventListener('playing',ok);a.onerror=()=>{if(!done){done=true;res(false);}};
   a.play().then(ok).catch(()=>{if(!done){done=true;res(false);}});
 });}
-// 🔊: 1) uygulama içi Cambridge sesi (offline) → 2) native Cambridge (internet) → 3) cihaz sesi.
+// 🔊: 1) uygulamaya gömülü Cambridge sesi (offline) → 2) cihaz sesi.
 async function sayWord(t){
-  if(GT&&GT.stopWord)GT.stopWord();
   try{if(await playAudioUrl('audio/'+slugOf(t)+'.mp3'))return;}catch(e){}
-  if(GT&&GT.speakWord){try{const r=await GT.speakWord({word:t});if(r&&r.ok)return;toast('Cambridge sesi yok — '+((r&&r.reason)||'?'));}catch(e){toast('Cambridge hata: '+e);}}
   speak(t);}
 
 let gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0),mode='test',cur=null,side=0;

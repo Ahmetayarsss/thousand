@@ -54,7 +54,6 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
     <label class="speed">Bekleme <input id="gap" type="range" min="0" max="3" step="0.25" value="0.5"><span id="gapval">0.5 sn</span></label>
     <div class="playbtns">
       <button class="playall" id="playall">▶ Grubu oku</button>
-      <button class="playall" id="loopall">🔁 Döngü</button>
     </div>
   </div>
   <input class="search" id="search" placeholder="Bu grupta ara… (İngilizce/Türkçe)">
@@ -82,9 +81,8 @@ if(GT&&GT.addListener){
   // Döngüsüz okuma bitince butonları sıfırla.
   GT.addListener('done',()=>{playing=false;looping=false;clr();setPlayBtns();});
 }
-function setPlayBtns(){const p=document.getElementById('playall'),l=document.getElementById('loopall');
-  p.textContent=(playing&&!looping)?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing&&!looping);
-  l.textContent=(playing&&looping)?"■ Durdur":"🔁 Döngü";l.classList.toggle('stop',playing&&looping);}
+function setPlayBtns(){const p=document.getElementById('playall');
+  p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
 function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
 function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}if(GT)GT.stop();if(synth)synth.cancel();clr();setPlayBtns();}
@@ -130,8 +128,7 @@ document.getElementById('rate').addEventListener('input',e=>RATE=parseFloat(e.ta
 function setGap(v){GAP=Math.round(parseFloat(v)*1000);const el=document.getElementById('gapval');if(el)el.textContent=parseFloat(v).toString().replace('.',',')+' sn';}
 document.getElementById('gap').addEventListener('input',e=>setGap(e.target.value));
 setGap(document.getElementById('gap').value);
-document.getElementById('playall').addEventListener('click',()=>{(playing&&!looping)?stop():readGroup(false);});
-document.getElementById('loopall').addEventListener('click',()=>{(playing&&looping)?stop():readGroup(true);});
+document.getElementById('playall').addEventListener('click',()=>{playing?stop():readGroup(true);});   // Grubu oku = sürekli döngü
 document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
 setSecLabel();renderGroup();

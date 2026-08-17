@@ -60,17 +60,29 @@ jobs:
 
       - name: Web varlıklarını senkronla (cap sync)
         working-directory: app
-        run: npx cap sync android
+        run: npx cap sync android 2>&1 | tee /tmp/capsync.log
 
       - name: Debug APK derle
         working-directory: app/android
         run: |
-          for i in 1 2 3; do
-            ./gradlew assembleDebug --no-daemon --stacktrace && exit 0
-            echo "gradle denemesi $i başarısız — ağ/geçici hata olabilir, tekrar..."
-            sleep $((i * 15))
-          done
-          echo "gradle 3 denemede de başarısız"; exit 1
+          set -o pipefail
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
+
+      - name: Hata logunu depoya yaz (teşhis)
+        if: failure()
+        run: |
+          {
+            echo "===== cap sync (son 60) ====="
+            tail -n 60 /tmp/capsync.log 2>/dev/null || echo "capsync.log yok"
+            echo
+            echo "===== gradle (son 300) ====="
+            tail -n 300 /tmp/gradle.log 2>/dev/null || echo "gradle.log yok → hata gradle'dan ÖNCEki bir adımda (ör. SDK/npm)"
+          } > ci-error.log
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add ci-error.log
+          git commit -m "CI teşhis logu" || echo "commit yok"
+          git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33 || echo "push yok"
 
       - name: APK'yı artifact olarak yükle
         uses: actions/upload-artifact@v4

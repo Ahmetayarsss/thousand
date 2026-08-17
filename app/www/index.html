@@ -46,7 +46,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
-</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses6</div><div class="wrap">
+</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses7</div><div class="wrap">
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
@@ -90,10 +90,21 @@ if(GT&&GT.addListener){
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
-// Tek kelime 🔊: 1) Cambridge'in gerçek insan sesi (native) → 2) cihaz sesi.
+function slugOf(w){return w.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+// Bir mp3 (yerel/uzak) çal; oynatma başlarsa true, hata olursa false döner.
+function playAudioUrl(url,card){return new Promise(res=>{
+  try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}
+  clrWord();if(card){wordCard=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});}
+  const a=new Audio(url);wordAudio=a;let done=false;const ok=()=>{if(!done){done=true;res(true);}};
+  a.addEventListener('playing',ok);a.onended=()=>clrWord();a.onerror=()=>{if(!done){done=true;clrWord();res(false);}};
+  a.play().then(ok).catch(()=>{if(!done){done=true;clrWord();res(false);}});
+});}
+// Tek kelime 🔊: 1) uygulama içi Cambridge sesi (indirilmiş kelimeler, offline) →
+//               2) native Cambridge (internet varken diğer kelimeler) → 3) cihaz sesi.
 async function one(t,card){
   if(synth)synth.cancel();stop();
-  if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});}
+  try{if(await playAudioUrl('audio/'+slugOf(t)+'.mp3',card))return;}catch(e){}
+  if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');}
     try{const r=await GT.speakWord({word:t});if(r&&r.ok)return;toast('Cambridge sesi yok — '+((r&&r.reason)||'?'));}catch(e){toast('Cambridge hata: '+e);}
     clrWord();}
   speak(t,card);

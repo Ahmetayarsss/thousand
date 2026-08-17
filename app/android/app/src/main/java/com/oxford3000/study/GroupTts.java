@@ -46,6 +46,13 @@ public class GroupTts extends Plugin {
                 }
             } catch (Exception e) {}
         }
+        JSArray slugArr = call.getArray("slugs");
+        List<String> slugs = new ArrayList<>();
+        if (slugArr != null) {
+            try {
+                for (Object o : slugArr.toList()) slugs.add(o == null ? "" : String.valueOf(o));
+            } catch (Exception e) {}
+        }
 
         // Servisten gelen geri bildirimleri WebView olaylarına çevir.
         GroupTtsService.progress = new GroupTtsService.Progress() {
@@ -65,6 +72,7 @@ public class GroupTts extends Plugin {
         Intent i = new Intent(getContext(), GroupTtsService.class);
         i.setAction(GroupTtsService.ACTION_START);
         i.putExtra("words", words.toArray(new String[0]));
+        i.putExtra("slugs", slugs.toArray(new String[0]));
         i.putExtra("rate", rate);
         i.putExtra("loop", loop);
         i.putExtra("gap", gap);

@@ -7,13 +7,16 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.content.pm.ServiceInfo;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.content.pm.ServiceInfo;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 
@@ -26,11 +29,12 @@ import java.util.Locale;
 /**
  * Grup seslendirmesini FOREGROUND SERVICE içinde çalıştırır.
  *
- * Kalıcı bildirimli servis, ekran kapalıyken/uygulama arkada iken Android
- * tarafından öldürülmez; böylece TTS kesintisiz sürer. Tüm kelimeler Android
- * TTS kuyruğuna (QUEUE_ADD) verilir; döngü ve "son kelime" mantığı native
- * UtteranceProgressListener ile yürür. Her kelime başında GroupTts eklentisine
- * geri bildirim (Progress) yollanır → ekran açıkken JS kartı vurgular.
+ * Her kelime için önce uygulamaya GÖMÜLÜ Cambridge mp3'ü (assets: public/audio/
+ * {slug}.mp3) MediaPlayer ile çalınır; o kelimenin gömülü sesi yoksa cihaz TTS'ine
+ * düşülür. Sıra, bekleme (gap) ve döngü ana thread'deki Handler ile yürür. Kalıcı
+ * bildirimli servis + wake lock sayesinde ekran kapalıyken/arka planda kesilmez.
+ * Her kelime başında GroupTts eklentisine geri bildirim (onWord) yollanır → ekran
+ * açıkken JS kartı vurgular.
  */
 public class GroupTtsService extends Service {
 
@@ -39,7 +43,6 @@ public class GroupTtsService extends Service {
     private static final String CHANNEL = "oxford_tts";
     private static final int NOTIF_ID = 4201;
 
-    // Servis → eklenti (kelime olayları / bitiş). Aynı süreçte çalıştığı için statik yeterli.
     public interface Progress {
         void onWord(int index);
         void onDone();
@@ -47,12 +50,14 @@ public class GroupTtsService extends Service {
     public static volatile Progress progress;
 
     private TextToSpeech tts;
+    private boolean ttsReady = false;
+    private MediaPlayer player;
     private final List<String> words = new ArrayList<>();
+    private final List<String> slugs = new ArrayList<>();
     private volatile boolean loop = false;
     private volatile boolean active = false;
-    private volatile int gapMs = 0;                 // kelimeler arası bekleme (ms)
+    private volatile int gapMs = 0;
     private float rate = 1.0f;
-    private boolean ready = false;
     private final Handler main = new Handler(Looper.getMainLooper());
     private PowerManager.WakeLock wakeLock;
 
@@ -63,14 +68,17 @@ public class GroupTtsService extends Service {
             return START_NOT_STICKY;
         }
         String[] ws = intent != null ? intent.getStringArrayExtra("words") : null;
+        String[] sl = intent != null ? intent.getStringArrayExtra("slugs") : null;
         rate = intent != null ? intent.getFloatExtra("rate", 1.0f) : 1.0f;
         loop = intent != null && intent.getBooleanExtra("loop", false);
         gapMs = intent != null ? Math.max(0, intent.getIntExtra("gap", 0)) : 0;
-        main.removeCallbacksAndMessages(null);   // önceki turdan kalan döngü post'unu iptal et
+
+        main.removeCallbacksAndMessages(null);
+        releasePlayer();
         words.clear();
-        if (ws != null) {
-            for (String w : ws) if (w != null) words.add(w);
-        }
+        slugs.clear();
+        if (ws != null) for (String w : ws) words.add(w == null ? "" : w);
+        if (sl != null) for (String s : sl) slugs.add(s == null ? "" : s);
         active = true;
 
         startAsForeground();
@@ -78,77 +86,117 @@ public class GroupTtsService extends Service {
 
         if (tts == null) {
             tts = new TextToSpeech(getApplicationContext(), status -> {
-                if (status == TextToSpeech.SUCCESS) {
+                ttsReady = (status == TextToSpeech.SUCCESS);
+                if (ttsReady) {
                     tts.setLanguage(Locale.US);
-                    tts.setOnUtteranceProgressListener(listener);
-                    ready = true;
-                    enqueueAll();
+                    tts.setOnUtteranceProgressListener(ttsListener);
                 }
+                startSequence();   // gömülü sesler TTS'siz de çalar; yine de başlat
             });
-        } else if (ready) {
-            enqueueAll();
+        } else {
+            startSequence();
         }
         return START_STICKY;
     }
 
-    private final UtteranceProgressListener listener = new UtteranceProgressListener() {
-        @Override
-        public void onStart(String utteranceId) {
-            Integer i = idx(utteranceId);
-            Progress p = progress;
-            if (i != null && p != null) p.onWord(i.intValue());
+    private void startSequence() {
+        if (!active || words.isEmpty()) { if (!words.isEmpty()) return; stopEverything(); return; }
+        playIndex(0);
+    }
+
+    /** i. kelimeyi çal: önce gömülü mp3, yoksa TTS. */
+    private void playIndex(int i) {
+        if (!active) return;
+        if (i < 0 || i >= words.size()) { afterItem(words.size() - 1); return; }
+        Progress p = progress;
+        if (p != null) p.onWord(i);
+        String slug = (i < slugs.size()) ? slugs.get(i) : "";
+        if (slug != null && !slug.isEmpty() && playMp3(slug, i)) return;
+        speakTts(i < words.size() ? words.get(i) : "", i);
+    }
+
+    /** Gömülü mp3'ü assets'ten çal. Başlatabildiyse true. */
+    private boolean playMp3(String slug, final int i) {
+        AssetFileDescriptor afd;
+        try {
+            afd = getAssets().openFd("public/audio/" + slug + ".mp3");
+        } catch (Exception e) {
+            return false;   // bu kelimenin gömülü sesi yok → TTS'e düş
         }
+        try {
+            releasePlayer();
+            final MediaPlayer mp = new MediaPlayer();
+            player = mp;
+            mp.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build());
+            mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            final AssetFileDescriptor fafd = afd;
+            mp.setOnPreparedListener(m -> {
+                try { m.start(); } catch (Exception e) { close(fafd); afterItem(i); }
+            });
+            mp.setOnCompletionListener(m -> { close(fafd); afterItem(i); });
+            mp.setOnErrorListener((m, what, extra) -> { close(fafd); afterItem(i); return true; });
+            mp.prepareAsync();
+            return true;
+        } catch (Exception e) {
+            close(afd);
+            return false;
+        }
+    }
 
-        @Override
-        public void onError(String utteranceId) {}
+    private void speakTts(String word, int i) {
+        if (tts == null || !ttsReady) { afterItem(i); return; }
+        tts.setSpeechRate(rate);
+        Bundle pr = new Bundle();
+        pr.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "w" + i);
+        try {
+            tts.speak(word, TextToSpeech.QUEUE_FLUSH, pr, "w" + i);
+        } catch (Exception e) {
+            afterItem(i);
+        }
+    }
 
-        @Override
-        public void onDone(String utteranceId) {
-            Integer i = idx(utteranceId);
-            if (i != null && i.intValue() == words.size() - 1) {   // son kelime bitti
-                if (active && loop) {
-                    // Döngü: yeni turu TTS callback'inin İÇİNDEN değil, ana thread'e
-                    // post ederek başlat. Motorların çoğu, onDone içinden yapılan
-                    // speak() çağrısını sessizce düşürür → döngü bir turdan sonra ölür.
-                    // postDelayed(gapMs): turlar arasında da kelime bekleme süresi kadar boşluk.
-                    main.postDelayed(() -> {
-                        if (active && loop) enqueueAll();
-                    }, gapMs);
+    private final UtteranceProgressListener ttsListener = new UtteranceProgressListener() {
+        @Override public void onStart(String id) {}
+        @Override public void onError(String id) { Integer i = idx(id); if (i != null) afterItem(i); }
+        @Override public void onDone(String id) { Integer i = idx(id); if (i != null) afterItem(i); }
+    };
+
+    /** i. kelime bitti → gap kadar bekle → sonraki (ya da döngü/bitiş). */
+    private void afterItem(final int i) {
+        if (!active) return;
+        main.postDelayed(() -> {
+            if (!active) return;
+            int next = i + 1;
+            if (next >= words.size()) {
+                if (loop) {
+                    playIndex(0);
                 } else {
                     Progress p = progress;
                     if (p != null) p.onDone();
                     stopEverything();
                 }
+            } else {
+                playIndex(next);
             }
-        }
-    };
+        }, gapMs);
+    }
 
     private Integer idx(String id) {
         if (id == null || !id.startsWith("w")) return null;
-        try {
-            return Integer.valueOf(id.substring(1));
-        } catch (Exception e) {
-            return null;
-        }
+        try { return Integer.valueOf(id.substring(1)); } catch (Exception e) { return null; }
     }
 
-    private void enqueueAll() {
-        if (tts == null || words.isEmpty()) return;
-        tts.setSpeechRate(rate);
-        int n = words.size();
-        int g = gapMs;
-        for (int i = 0; i < n; i++) {
-            String id = "w" + i;
-            int mode = (i == 0) ? TextToSpeech.QUEUE_FLUSH : TextToSpeech.QUEUE_ADD;
-            Bundle params = new Bundle();
-            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id);
-            tts.speak(words.get(i), mode, params, id);
-            // Kelimeler arası bekleme: sessiz utterance (son kelimeden sonra yok;
-            // turlar arası boşluk döngüde postDelayed ile veriliyor). "s" önekli id
-            // → idx() null döner, vurgu/döngü mantığını etkilemez.
-            if (g > 0 && i < n - 1) {
-                tts.playSilentUtterance(g, TextToSpeech.QUEUE_ADD, "s" + i);
-            }
+    private void close(AssetFileDescriptor afd) {
+        try { if (afd != null) afd.close(); } catch (Exception e) {}
+    }
+
+    private void releasePlayer() {
+        if (player != null) {
+            try { player.reset(); player.release(); } catch (Exception e) {}
+            player = null;
         }
     }
 
@@ -194,9 +242,8 @@ public class GroupTtsService extends Service {
         active = false;
         loop = false;
         main.removeCallbacksAndMessages(null);
-        if (tts != null) {
-            try { tts.stop(); } catch (Exception e) {}
-        }
+        releasePlayer();
+        if (tts != null) { try { tts.stop(); } catch (Exception e) {} }
         releaseLock();
         try {
             if (Build.VERSION.SDK_INT >= 24) stopForeground(Service.STOP_FOREGROUND_REMOVE);
@@ -211,14 +258,12 @@ public class GroupTtsService extends Service {
                 PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
                 wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "oxford3000:tts");
             }
-            if (!wakeLock.isHeld()) wakeLock.acquire(3 * 60 * 60 * 1000L);   // en fazla 3 saat güvenlik
+            if (!wakeLock.isHeld()) wakeLock.acquire(3 * 60 * 60 * 1000L);
         } catch (Exception e) {}
     }
 
     private void releaseLock() {
-        try {
-            if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
-        } catch (Exception e) {}
+        try { if (wakeLock != null && wakeLock.isHeld()) wakeLock.release(); } catch (Exception e) {}
     }
 
     @Override
@@ -226,6 +271,7 @@ public class GroupTtsService extends Service {
         active = false;
         loop = false;
         main.removeCallbacksAndMessages(null);
+        releasePlayer();
         if (tts != null) {
             try { tts.stop(); tts.shutdown(); } catch (Exception e) {}
             tts = null;

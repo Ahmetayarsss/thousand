@@ -46,7 +46,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
-</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses8</div><div class="wrap">
+</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses9</div><div class="wrap">
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
@@ -107,23 +107,25 @@ function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(g
 // Grubu oku. loop=true ise bitince baştan başlar (sonsuz). GAP: kelimeler arası bekleme (ms).
 function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
   playing=true;looping=!!loop;setPlayBtns();
-  if(GT){   // NATIVE: tüm kelimeler Android TTS kuyruğuna; döngü + bekleme + ekran-kapalı okuma + kelime olayları native tarafta
+  if(GT){   // NATIVE: her kelime için gömülü Cambridge mp3'ü (yoksa cihaz sesi), döngü + bekleme + ekran-kapalı native tarafta
     curCards=cs;if(synth)synth.cancel();
-    GT.speakGroup({words:cs.map(c=>c.dataset.w),rate:RATE,loop:!!loop,gap:GAP});
+    GT.speakGroup({words:cs.map(c=>c.dataset.w),slugs:cs.map(c=>slugOf(c.dataset.w)),rate:RATE,loop:!!loop,gap:GAP});
     return;
   }
-  // TARAYICI (fallback): kelime kelime oku; her kelimeden sonra GAP kadar bekle.
+  // TARAYICI (fallback): her kelimede önce gömülü mp3, yoksa TTS; sonra GAP bekle.
   if(!synth){stop();return;}
   synth.cancel();
-  const words=cs.map(c=>c.dataset.w);let i=0;
-  (function next(){
+  let i=0;
+  (async function next(){
     if(!playing)return;
-    if(i>=words.length){if(looping){i=0;}else{stop();return;}}
-    const card=cs[i];clr();cur=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});
-    const u=new SpeechSynthesisUtterance(words[i]);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;
-    u.onend=()=>{if(!playing)return;i++;if(GAP>0){gapTimer=setTimeout(next,GAP);}else next();};
-    u.onerror=u.onend;
-    synth.speak(u);
+    if(i>=cs.length){if(looping){i=0;}else{stop();return;}}
+    const card=cs[i],w=cs[i].dataset.w;clr();cur=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});
+    const advance=()=>{if(!playing)return;i++;if(GAP>0){gapTimer=setTimeout(next,GAP);}else next();};
+    let played=false;
+    try{played=await playAudioUrl('audio/'+slugOf(w)+'.mp3',null);}catch(e){}
+    if(played){if(wordAudio){wordAudio.onended=advance;wordAudio.onerror=advance;}else advance();return;}
+    const u=new SpeechSynthesisUtterance(w);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;
+    u.onend=advance;u.onerror=advance;synth.speak(u);
   })();}
 
 function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}

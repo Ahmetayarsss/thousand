@@ -13,8 +13,6 @@ import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,8 +21,11 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.core.app.NotificationCompat;
+import androidx.media.session.MediaButtonReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +39,10 @@ import java.util.Locale;
  * bekleme (gap) ve döngü ana thread Handler ile yürür. Kalıcı bildirim + wake lock
  * ile ekran kapalıyken de kesilmez.
  *
- * Kulaklık/medya düğmeleri: aktif bir MediaSession + ses odağı sayesinde kulaklığın
- * oynat/duraklat düğmesi bu servisi duraklatır/sürdürür ve KALDIĞI KELİMEDEN devam
- * eder (mp3 ortasından, TTS ise o kelimeyi baştan). Bildirimde de Duraklat/Devam var.
+ * Kulaklık/medya düğmeleri: MediaSessionCompat + MediaButtonReceiver ile kulaklığın
+ * oynat/duraklat'ı bu servisi duraklatır/sürdürür ve KALDIĞI KELİMEDEN devam eder
+ * (mp3 ortasından; TTS ise o kelimeyi baştan). Bildirim MediaStyle olduğundan
+ * Duraklat/Devam ve Durdur düğmeleri görünür. Başka ses/arama (odak kaybı) → duraklar.
  */
 public class GroupTtsService extends Service {
 
@@ -64,19 +66,25 @@ public class GroupTtsService extends Service {
     private volatile boolean loop = false;
     private volatile boolean active = false;
     private volatile boolean paused = false;
-    private volatile int index = 0;          // şu an çalan/çalınacak kelime
-    private boolean mpPaused = false;         // mp3 ortasında mı duraklatıldı
+    private volatile int index = 0;
+    private boolean mpPaused = false;
     private volatile int gapMs = 0;
     private float rate = 1.0f;
     private final Handler main = new Handler(Looper.getMainLooper());
     private PowerManager.WakeLock wakeLock;
-    private MediaSession session;
+    private MediaSessionCompat session;
     private AudioManager am;
-    private Object focusReq;                   // AudioFocusRequest (API 26+)
+    private Object focusReq;   // AudioFocusRequest (API 26+)
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        ensureSession();
         String action = intent != null ? intent.getAction() : null;
+
+        if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
+            MediaButtonReceiver.handleIntent(session, intent);   // kulaklık düğmesi → onPlay/onPause
+            return START_STICKY;
+        }
         if (ACTION_STOP.equals(action)) { stopEverything(); return START_NOT_STICKY; }
         if (ACTION_TOGGLE.equals(action)) { if (active) { if (paused) resume(); else pause(); } return START_STICKY; }
 
@@ -96,7 +104,6 @@ public class GroupTtsService extends Service {
         paused = false;
         index = 0;
 
-        ensureSession();
         requestFocus();
         startAsForeground();
         acquireLock();
@@ -119,7 +126,7 @@ public class GroupTtsService extends Service {
     private void startSequence() {
         if (!active) return;
         if (words.isEmpty()) { stopEverything(); return; }
-        setPlaybackState(true);
+        setState(true);
         playIndex(0);
     }
 
@@ -152,7 +159,7 @@ public class GroupTtsService extends Service {
             mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             final AssetFileDescriptor fafd = afd;
             mp.setOnPreparedListener(m -> {
-                if (paused) return;                         // hazır olduğunda duraklatılmışsa başlatma
+                if (paused) return;
                 try { m.start(); } catch (Exception e) { close(fafd); afterItem(i); }
             });
             mp.setOnCompletionListener(m -> { close(fafd); afterItem(i); });
@@ -202,7 +209,7 @@ public class GroupTtsService extends Service {
         }, gapMs);
     }
 
-    // ---- Duraklat / Sürdür (kulaklık & bildirim) ----
+    // ---- Duraklat / Sürdür ----
     private void pause() {
         if (!active || paused) return;
         paused = true;
@@ -211,8 +218,8 @@ public class GroupTtsService extends Service {
         if (player != null) {
             try { if (player.isPlaying()) { player.pause(); mpPaused = true; } } catch (Exception e) {}
         }
-        if (tts != null) { try { tts.stop(); } catch (Exception e) {} }   // TTS ortadan sürdürülemez → kelimeyi baştan
-        setPlaybackState(false);
+        if (tts != null) { try { tts.stop(); } catch (Exception e) {} }
+        setState(false);
         refreshNotification();
     }
 
@@ -220,24 +227,22 @@ public class GroupTtsService extends Service {
         if (!active || !paused) return;
         paused = false;
         requestFocus();
-        setPlaybackState(true);
+        setState(true);
         refreshNotification();
         if (mpPaused && player != null) {
             try { player.start(); mpPaused = false; return; } catch (Exception e) {}
         }
-        playIndex(index);   // TTS ya da başka durumda: kaldığı kelimeyi baştan
+        playIndex(index);
     }
 
-    // ---- MediaSession (kulaklık/medya düğmeleri) ----
+    // ---- MediaSession ----
     private void ensureSession() {
         if (session != null) return;
         try {
-            session = new MediaSession(this, "OxfordTts");
-            if (Build.VERSION.SDK_INT < 26) {
-                session.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS
-                        | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-            }
-            session.setCallback(new MediaSession.Callback() {
+            session = new MediaSessionCompat(this, "OxfordTts");
+            session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+                    | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+            session.setCallback(new MediaSessionCompat.Callback() {
                 @Override public void onPlay() { resume(); }
                 @Override public void onPause() { pause(); }
                 @Override public void onStop() { stopEverything(); }
@@ -246,15 +251,15 @@ public class GroupTtsService extends Service {
         } catch (Exception e) {}
     }
 
-    private void setPlaybackState(boolean playing) {
+    private void setState(boolean playing) {
         if (session == null) return;
         try {
-            long actions = PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE
-                    | PlaybackState.ACTION_PLAY_PAUSE | PlaybackState.ACTION_STOP;
-            int st = playing ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED;
-            PlaybackState ps = new PlaybackState.Builder()
+            long actions = PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE
+                    | PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_STOP;
+            int st = playing ? PlaybackStateCompat.STATE_PLAYING : PlaybackStateCompat.STATE_PAUSED;
+            PlaybackStateCompat ps = new PlaybackStateCompat.Builder()
                     .setActions(actions)
-                    .setState(st, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0f)
+                    .setState(st, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
                     .build();
             session.setPlaybackState(ps);
         } catch (Exception e) {}
@@ -295,7 +300,7 @@ public class GroupTtsService extends Service {
         if (f == AudioManager.AUDIOFOCUS_LOSS
                 || f == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
                 || f == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-            pause();   // başka ses/arama → duraklat (kullanıcı kulaklıktan sürdürebilir)
+            pause();
         }
     };
 
@@ -354,12 +359,18 @@ public class GroupTtsService extends Service {
         int toggleIcon = paused ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause;
         String toggleText = paused ? "Devam" : "Duraklat";
 
+        androidx.media.app.NotificationCompat.MediaStyle style =
+                new androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(0, 1);
+        if (session != null) style.setMediaSession(session.getSessionToken());
+
         NotificationCompat.Builder b = new NotificationCompat.Builder(this, CHANNEL)
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setContentTitle("Oxford 3000")
                 .setContentText(paused ? "Duraklatıldı" : "Grup okunuyor…")
-                .setOngoing(true)
+                .setOngoing(!paused)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setStyle(style)
                 .addAction(toggleIcon, toggleText, togglePending)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Durdur", stopPending);
         if (openPending != null) b.setContentIntent(openPending);
@@ -373,7 +384,7 @@ public class GroupTtsService extends Service {
         main.removeCallbacksAndMessages(null);
         releasePlayer();
         if (tts != null) { try { tts.stop(); } catch (Exception e) {} }
-        setPlaybackState(false);
+        setState(false);
         if (session != null) { try { session.setActive(false); session.release(); } catch (Exception e) {} session = null; }
         abandonFocus();
         releaseLock();

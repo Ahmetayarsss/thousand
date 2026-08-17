@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Depoyu al
         uses: actions/checkout@v4
+        with:
+          ref: claude/oxford-3000-pronunciation-defs-inzs33
 
       - name: Node kur
         uses: actions/setup-node@v4
@@ -83,15 +85,23 @@ jobs:
             tail -n 250 /tmp/gradle.log 2>/dev/null || echo "gradle.log yok → gradle'a gelinmedi"
           } > ci-error.log
           echo "log boyutu: $(wc -c < ci-error.log) bayt"
+          BR=claude/oxford-3000-pronunciation-defs-inzs33
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          cp ci-error.log /tmp/ci-error.log
-          git fetch origin claude/oxford-3000-pronunciation-defs-inzs33 || true
-          git checkout -B _log origin/claude/oxford-3000-pronunciation-defs-inzs33 || git checkout -B _log
-          cp /tmp/ci-error.log ci-error.log
           git add -f ci-error.log
           git commit -m "CI teşhis logu" || echo "commit yok"
-          for i in 1 2 3; do git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33 && break || { echo "push $i başarısız, güncelle"; git fetch origin claude/oxford-3000-pronunciation-defs-inzs33; git reset --soft origin/claude/oxford-3000-pronunciation-defs-inzs33; git add -f ci-error.log; git commit -m "CI teşhis logu" || true; sleep 4; }; done
+          for i in 1 2 3 4 5; do
+            git push origin "HEAD:$BR" && break
+            echo "push $i başarısız, güncelle"; git fetch origin "$BR"; git rebase "origin/$BR" || git rebase --abort; sleep 4
+          done
+
+      - name: Log'u artifact olarak da yükle (yedek)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-error-log
+          path: ci-error.log
+          if-no-files-found: warn
 
       - name: APK'yı artifact olarak yükle
         uses: actions/upload-artifact@v4

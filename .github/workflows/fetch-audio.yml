@@ -51,8 +51,8 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add media/introduce_us.mp3
-          git commit -m "Cambridge introduce US sesi (runner ile çekildi)"
-          git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33
+          git commit -m "Cambridge introduce US sesi (runner ile çekildi)" || echo "değişiklik yok, atlanıyor"
+          git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33 || echo "push atlandı"
 
       - name: Artifact olarak da yükle
         uses: actions/upload-artifact@v4

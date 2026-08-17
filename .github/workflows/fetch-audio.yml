@@ -1,0 +1,62 @@
+name: Cambridge sesi çek (introduce US)
+
+# Cambridge'in "introduce" sayfasından US telaffuz mp3'ünü indirir,
+# depoya (media/) koyar ve artifact olarak yükler. Elle çalıştırılır.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+        with:
+          ref: claude/oxford-3000-pronunciation-defs-inzs33
+
+      - name: introduce US mp3 çek
+        run: |
+          set -e
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          echo "== Sayfa indiriliyor =="
+          code=$(curl -sSL -A "$UA" -H "Accept: text/html" -H "Accept-Language: en-US,en;q=0.9" \
+                 -w "%{http_code}" -o page.html "https://dictionary.cambridge.org/dictionary/english/introduce")
+          echo "HTTP: $code   sayfa: $(wc -c < page.html) bayt"
+          echo "== us_pron mp3 aranıyor =="
+          URL=$(grep -oE '/media/[^"]*us_pron[^"]*\.mp3' page.html | head -1 || true)
+          if [ -z "$URL" ]; then
+            echo "us_pron bulunamadı; sayfadaki tüm mp3'ler:"
+            grep -oE '/media/[^"]*\.mp3' page.html | head -20 || true
+            echo "== tahmini URL deneniyor =="
+            URL="/media/english/us_pron/i/int/intro/introduce.mp3"
+          fi
+          echo "Ses yolu: $URL"
+          echo "== mp3 indiriliyor =="
+          code=$(curl -sSL -A "$UA" -e "https://dictionary.cambridge.org/" \
+                 -w "%{http_code}" -o introduce_us.mp3 "https://dictionary.cambridge.org$URL")
+          echo "HTTP: $code   mp3: $(wc -c < introduce_us.mp3) bayt"
+          file introduce_us.mp3 || true
+          # mp3 gerçekten ses mi? (ilk baytlar ID3/MPEG olmalı)
+          head -c 4 introduce_us.mp3 | xxd || true
+          test "$(wc -c < introduce_us.mp3)" -gt 1000
+
+      - name: Depoya koy (media/)
+        run: |
+          mkdir -p media
+          cp introduce_us.mp3 media/introduce_us.mp3
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add media/introduce_us.mp3
+          git commit -m "Cambridge introduce US sesi (runner ile çekildi)"
+          git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33
+
+      - name: Artifact olarak da yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: introduce-us-mp3
+          path: introduce_us.mp3
+          if-no-files-found: error

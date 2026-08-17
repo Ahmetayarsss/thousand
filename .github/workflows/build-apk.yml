@@ -41,13 +41,14 @@ jobs:
         run: |
           ok=0
           for i in 1 2 3 4 5; do
-            yes | sdkmanager --licenses > /dev/null 2>&1 || true
-            if sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"; then
+            yes | sdkmanager --licenses > /tmp/sdk.log 2>&1 || true
+            if sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" >> /tmp/sdk.log 2>&1; then
               ok=1; break
             fi
-            echo "sdkmanager denemesi $i başarısız — ağ hatası olabilir, tekrar deneniyor..."
+            echo "sdkmanager denemesi $i başarısız — tekrar deneniyor..." | tee -a /tmp/sdk.log
             sleep $((i * 10))
           done
+          tail -n 40 /tmp/sdk.log || true
           [ "$ok" = "1" ] || { echo "SDK paketleri 5 denemede kurulamadı"; exit 1; }
 
       - name: Bağımlılıkları kur (npm ci)
@@ -72,17 +73,21 @@ jobs:
         if: failure()
         run: |
           {
-            echo "===== cap sync (son 60) ====="
-            tail -n 60 /tmp/capsync.log 2>/dev/null || echo "capsync.log yok"
+            echo "===== SDK paketleri (son 60) ====="
+            tail -n 60 /tmp/sdk.log 2>/dev/null || echo "sdk.log yok"
             echo
-            echo "===== gradle (son 300) ====="
-            tail -n 300 /tmp/gradle.log 2>/dev/null || echo "gradle.log yok → hata gradle'dan ÖNCEki bir adımda (ör. SDK/npm)"
+            echo "===== cap sync (son 40) ====="
+            tail -n 40 /tmp/capsync.log 2>/dev/null || echo "capsync.log yok → cap sync'e gelinmedi"
+            echo
+            echo "===== gradle (son 250) ====="
+            tail -n 250 /tmp/gradle.log 2>/dev/null || echo "gradle.log yok → gradle'a gelinmedi"
           } > ci-error.log
+          echo "log boyutu: $(wc -c < ci-error.log) bayt"
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add ci-error.log
+          git add -f ci-error.log
           git commit -m "CI teşhis logu" || echo "commit yok"
-          git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33 || echo "push yok"
+          for i in 1 2 3; do git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33 && break || { echo "push denemesi $i başarısız"; sleep 5; }; done
 
       - name: APK'yı artifact olarak yükle
         uses: actions/upload-artifact@v4

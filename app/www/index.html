@@ -31,7 +31,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .secbar{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-weight:800;font-size:15px}
 .dot{width:12px;height:12px;border-radius:4px}
 .count{color:var(--muted);font-weight:600;font-size:13px}
-.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--diger);border-radius:14px;padding:11px 13px;margin:9px 0}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--diger);border-radius:14px;padding:11px 13px;margin:9px 0;cursor:pointer}
 .card.playing{box-shadow:0 0 0 2px var(--speak),0 6px 18px rgba(229,137,43,.18)}
 .row1{display:flex;align-items:center;gap:11px}
 .word{font-size:19px;font-weight:800;letter-spacing:-.01em;cursor:pointer}
@@ -133,12 +133,12 @@ const bs={};SECS.forEach(s=>bs[s]=[]);g.items.forEach(d=>bs[d.sec].push(d));
 SECS.forEach(s=>{const arr=bs[s].slice().sort((a,b)=>a.w.localeCompare(b.w));if(!arr.length)return;
 const bar=document.createElement('div');bar.className='secbar';bar.innerHTML=`<span class="dot" style="background:${SColor[s]}"></span>${s} <span class="count">${arr.length}</span>`;list.appendChild(bar);
 arr.forEach(d=>{const c=document.createElement('div');c.className='card';c.style.borderLeftColor=SColor[s];c.dataset.w=d.w;c.dataset.s=(d.w+' '+(d.tr||'')).toLowerCase();
-c.innerHTML=`<div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''} · ${g.level}</span><button class="spk" aria-label="Dinle">🔊</button></div>
+c.innerHTML=`<div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''} · ${g.level}</span></div>
 ${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
 <div class="tr">${d.tr||''}</div>
 ${d.en?`<div class="en">${d.en}</div>`:''}
 ${(d.ex&&d.ex.length)?d.ex.map(s=>`<div class="ex">${s}</div>`).join(''):''}`;
-c.querySelector('.spk').onclick=e=>{e.stopPropagation();one(d.w,c);};
+c.onclick=()=>one(d.w,c);   // karta basınca oku
 list.appendChild(c);});});
 document.getElementById('search').value='';window.scrollTo({top:0});}
 

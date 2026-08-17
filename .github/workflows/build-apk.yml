@@ -85,9 +85,13 @@ jobs:
           echo "log boyutu: $(wc -c < ci-error.log) bayt"
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+          cp ci-error.log /tmp/ci-error.log
+          git fetch origin claude/oxford-3000-pronunciation-defs-inzs33 || true
+          git checkout -B _log origin/claude/oxford-3000-pronunciation-defs-inzs33 || git checkout -B _log
+          cp /tmp/ci-error.log ci-error.log
           git add -f ci-error.log
           git commit -m "CI teşhis logu" || echo "commit yok"
-          for i in 1 2 3; do git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33 && break || { echo "push denemesi $i başarısız"; sleep 5; }; done
+          for i in 1 2 3; do git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33 && break || { echo "push $i başarısız, güncelle"; git fetch origin claude/oxford-3000-pronunciation-defs-inzs33; git reset --soft origin/claude/oxford-3000-pronunciation-defs-inzs33; git add -f ci-error.log; git commit -m "CI teşhis logu" || true; sleep 4; }; done
 
       - name: APK'yı artifact olarak yükle
         uses: actions/upload-artifact@v4

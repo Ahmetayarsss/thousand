@@ -91,10 +91,11 @@ public class GroupTtsService extends Service {
                     tts.setLanguage(Locale.US);
                     tts.setOnUtteranceProgressListener(ttsListener);
                 }
-                startSequence();   // gömülü sesler TTS'siz de çalar; yine de başlat
+                // MediaPlayer ana thread'de kurulsun (callback'ler için Looper garantisi).
+                main.post(this::startSequence);   // gömülü sesler TTS'siz de çalar; yine de başlat
             });
         } else {
-            startSequence();
+            main.post(this::startSequence);
         }
         return START_STICKY;
     }

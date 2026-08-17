@@ -67,6 +67,13 @@ public class GroupTts extends Plugin {
             public void onDone() {
                 notifyListeners("done", new JSObject());
             }
+
+            @Override
+            public void onError(String msg) {
+                JSObject data = new JSObject();
+                data.put("msg", msg);
+                notifyListeners("ttsError", data);   // JS balonda gösterir (teşhis)
+            }
         };
 
         Intent i = new Intent(getContext(), GroupTtsService.class);

@@ -83,6 +83,8 @@ if(GT&&GT.addListener){
   GT.addListener('wordStart',ev=>{const i=ev&&ev.index;if(i==null)return;if(i>=0&&i<curCards.length){clr();cur=curCards[i];cur.classList.add('playing');cur.scrollIntoView({behavior:'smooth',block:'center'});}});
   // Döngüsüz okuma bitince butonları sıfırla.
   GT.addListener('done',()=>{playing=false;looping=false;clr();setPlayBtns();});
+  // Servisten teşhis/hata mesajı → ekranda balon.
+  GT.addListener('ttsError',ev=>{toast((ev&&ev.msg)?ev.msg:'Ses/bildirim hatası');});
 }
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}

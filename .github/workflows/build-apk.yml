@@ -39,12 +39,24 @@ jobs:
 
       - name: Gerekli SDK paketlerini yükle
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          ok=0
+          for i in 1 2 3 4 5; do
+            yes | sdkmanager --licenses > /dev/null 2>&1 || true
+            if sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"; then
+              ok=1; break
+            fi
+            echo "sdkmanager denemesi $i başarısız — ağ hatası olabilir, tekrar deneniyor..."
+            sleep $((i * 10))
+          done
+          [ "$ok" = "1" ] || { echo "SDK paketleri 5 denemede kurulamadı"; exit 1; }
 
       - name: Bağımlılıkları kur (npm ci)
         working-directory: app
-        run: npm ci
+        run: |
+          for i in 1 2 3; do
+            npm ci && break
+            echo "npm ci denemesi $i başarısız, tekrar..."; sleep $((i * 10))
+          done
 
       - name: Web varlıklarını senkronla (cap sync)
         working-directory: app
@@ -52,7 +64,13 @@ jobs:
 
       - name: Debug APK derle
         working-directory: app/android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: |
+          for i in 1 2 3; do
+            ./gradlew assembleDebug --no-daemon --stacktrace && exit 0
+            echo "gradle denemesi $i başarısız — ağ/geçici hata olabilir, tekrar..."
+            sleep $((i * 15))
+          done
+          echo "gradle 3 denemede de başarısız"; exit 1
 
       - name: APK'yı artifact olarak yükle
         uses: actions/upload-artifact@v4

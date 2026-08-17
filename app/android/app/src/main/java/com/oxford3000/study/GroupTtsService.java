@@ -55,8 +55,14 @@ public class GroupTtsService extends Service {
     public interface Progress {
         void onWord(int index);
         void onDone();
+        void onError(String msg);
     }
     public static volatile Progress progress;
+
+    private void err(String m) {
+        Progress p = progress;
+        if (p != null) { try { p.onError(m); } catch (Exception e) {} }
+    }
 
     private TextToSpeech tts;
     private boolean ttsReady = false;
@@ -321,16 +327,53 @@ public class GroupTtsService extends Service {
     }
 
     private void startAsForeground() {
-        Notification n = buildNotification();
+        Notification n;
+        try {
+            n = buildNotification();
+        } catch (Exception e) {
+            err("bildirim kurulamadı: " + e.getClass().getSimpleName());
+            n = buildBasicNotification();   // MediaStyle olmadan basit bildirim
+        }
+        boolean fg = false;
         try {
             if (Build.VERSION.SDK_INT >= 29) {
                 startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             } else {
                 startForeground(NOTIF_ID, n);
             }
+            fg = true;
         } catch (Exception e) {
-            try { startForeground(NOTIF_ID, n); } catch (Exception ignored) {}
+            try { startForeground(NOTIF_ID, n); fg = true; }
+            catch (Exception e2) { err("foreground başlatılamadı: " + e2.getClass().getSimpleName()); }
         }
+        // Teşhis: bildirim gerçekten görünebilir mi?
+        try {
+            boolean enabled = androidx.core.app.NotificationManagerCompat.from(this).areNotificationsEnabled();
+            if (!enabled) {
+                err("Bildirim KAPALI. Telefon Ayarlar → Uygulamalar → Oxford 3000 → Bildirimler'i AÇ.");
+            } else if (fg) {
+                // sessiz: her şey yolunda
+            }
+        } catch (Exception e) {}
+    }
+
+    /** MediaStyle olmadan, kesin gösterilen basit bildirim (yedek). */
+    private Notification buildBasicNotification() {
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+        PendingIntent stopPending = PendingIntent.getService(this, 0,
+                new Intent(this, GroupTtsService.class).setAction(ACTION_STOP), flags);
+        PendingIntent togglePending = PendingIntent.getService(this, 2,
+                new Intent(this, GroupTtsService.class).setAction(ACTION_TOGGLE), flags);
+        return new NotificationCompat.Builder(this, CHANNEL)
+                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setContentTitle("Oxford 3000")
+                .setContentText(paused ? "Duraklatıldı — devam için ▶" : "Grup okunuyor…")
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .addAction(paused ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause,
+                        paused ? "Devam" : "Duraklat", togglePending)
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Durdur", stopPending)
+                .build();
     }
 
     private void refreshNotification() {

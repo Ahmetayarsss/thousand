@@ -115,6 +115,16 @@ function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
 function speak(t){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=0.85;synth.speak(u);}
+// Native Cambridge sesi (varsa): 🔊 → gerçek insan sesi, yoksa cihaz TTS'i.
+const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
+let toastEl=null,toastTimer=null;
+function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
+function sayWord(t){
+  if(GT&&GT.speakWord){if(GT.stopWord)GT.stopWord();
+    GT.speakWord({word:t}).then(r=>{if(!r||!r.ok){toast('Cambridge sesi yok — '+((r&&r.reason)||'?'));speak(t);}}).catch(e=>{toast('Cambridge hata: '+e);speak(t);});
+    return;}
+  speak(t);}
 
 let gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0),mode='test',cur=null,side=0;
 let queue=[],testTotal=0,examList=[],examIdx=0,examWrong=[],examTotal=0,examScore=0;
@@ -230,7 +240,7 @@ function showResult(big,small,msg,wlHtml,isTest){
 function start(){document.getElementById('resultbox').classList.add('hidden');(mode==='test'?startTest:startExam)();}
 document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
 document.getElementById('card').addEventListener('click',reveal);
-document.getElementById('spk').addEventListener('click',e=>{e.stopPropagation();speak(cur.w);});
+document.getElementById('spk').addEventListener('click',e=>{e.stopPropagation();sayWord(cur.w);});
 document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
 document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
 document.getElementById('r-again').addEventListener('click',start);

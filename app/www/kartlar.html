@@ -58,7 +58,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .ractions .prim{background:var(--ink);color:#fff;border-color:var(--ink)}
 .warn{font-size:11.5px;color:#8A6D3B;background:#FCF3E3;border:1px solid #F2E0BE;border-radius:9px;padding:8px 10px;margin-top:8px;display:none}
 .seclabel{flex:1;font-size:15px;font-weight:800;color:var(--ink)}
-</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='istatistik.html',P='index.html';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses4</div><div id="app">
+</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='istatistik.html',P='index.html';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses5</div><div id="app">
 <div class="top">
   <div class="moderow" id="moderow">
     <button data-m="test" class="on">Test (çalışma)</button>
@@ -120,10 +120,28 @@ const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNative
 const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
 let toastEl=null,toastTimer=null;
 function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
-function sayWord(t){
-  if(GT&&GT.speakWord){if(GT.stopWord)GT.stopWord();
-    GT.speakWord({word:t}).then(r=>{if(!r||!r.ok){toast('Cambridge sesi yok — '+((r&&r.reason)||'?'));speak(t);}}).catch(e=>{toast('Cambridge hata: '+e);speak(t);});
-    return;}
+let wordAudio=null;
+// Sözlük API'sinden (dictionaryapi.dev) gerçek insan sesi URL'si bul (US tercih). CORS açık.
+async function fetchDictAudio(word){
+  try{
+    const res=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word.toLowerCase().trim()));
+    if(!res.ok)return null;
+    const data=await res.json();let best=null;
+    for(const e of (data||[]))for(const ph of ((e&&e.phonetics)||[])){if(ph&&ph.audio){let a=ph.audio;if(a.indexOf('//')===0)a='https:'+a;if(/-us\.mp3/i.test(a))return a;if(!best)best=a;}}
+    return best;
+  }catch(e){return null;}
+}
+function playAudioUrl(url){return new Promise(res=>{
+  try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}
+  const a=new Audio(url);wordAudio=a;let done=false;const ok=()=>{if(!done){done=true;res(true);}};
+  a.addEventListener('playing',ok);a.onerror=()=>{if(!done){done=true;res(false);}};
+  a.play().then(ok).catch(()=>{if(!done){done=true;res(false);}});
+});}
+// 🔊: 1) sözlük API insan sesi → 2) Cambridge (native) → 3) cihaz sesi.
+async function sayWord(t){
+  if(GT&&GT.stopWord)GT.stopWord();
+  try{const u=await fetchDictAudio(t);if(u&&await playAudioUrl(u))return;}catch(e){}
+  if(GT&&GT.speakWord){try{const r=await GT.speakWord({word:t});if(r&&r.ok)return;toast('İnsan sesi yok — '+((r&&r.reason)||'?'));}catch(e){toast('Ses hatası');}}
   speak(t);}
 
 let gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0),mode='test',cur=null,side=0;

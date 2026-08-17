@@ -46,7 +46,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
-</style><script src="progress.js"></script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses4</div><div class="wrap">
+</style><script src="progress.js"></script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses5</div><div class="wrap">
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
@@ -70,7 +70,7 @@ let LANG="en-US",RATE=0.8,GAP=500,voices=[],gi=(window.OX?Math.max(0,Math.min(OX
 function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
-let playing=false,looping=false,queue=[],cur=null,curCards=[],gapTimer=null,wordCard=null;
+let playing=false,looping=false,queue=[],cur=null,curCards=[],gapTimer=null,wordCard=null,wordAudio=null;
 // Native grup seslendirme eklentisi (varsa): kuyruk + döngü + ekran-kapalı okuma native tarafta.
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
@@ -90,13 +90,34 @@ if(GT&&GT.addListener){
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
-// Tek kelime 🔊: native ise önce Cambridge'in gerçek insan sesini dener, yoksa cihaz TTS'ine düşer.
-function one(t,card){if(synth)synth.cancel();stop();
-  if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});}
-    GT.speakWord({word:t}).then(r=>{if(!r||!r.ok){clrWord();toast('Cambridge sesi yok — '+((r&&r.reason)||'?'));speak(t,card);}}).catch(e=>{clrWord();toast('Cambridge hata: '+e);speak(t,card);});
-    return;}
-  speak(t,card);}
-function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}if(GT){GT.stop();if(GT.stopWord)GT.stopWord();}clrWord();if(synth)synth.cancel();clr();setPlayBtns();}
+// Sözlük API'sinden (dictionaryapi.dev) gerçek insan sesi URL'si bul (US tercih). Servis CORS açık.
+async function fetchDictAudio(word){
+  try{
+    const res=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word.toLowerCase().trim()));
+    if(!res.ok)return null;
+    const data=await res.json();let best=null;
+    for(const e of (data||[]))for(const ph of ((e&&e.phonetics)||[])){if(ph&&ph.audio){let a=ph.audio;if(a.indexOf('//')===0)a='https:'+a;if(/-us\.mp3/i.test(a))return a;if(!best)best=a;}}
+    return best;
+  }catch(e){return null;}
+}
+// Bir mp3 URL'sini çal; oynatma başladıysa true döner (yoksa false → sıradaki kaynağa geç).
+function playAudioUrl(url,card){return new Promise(res=>{
+  try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}
+  clrWord();if(card){wordCard=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});}
+  const a=new Audio(url);wordAudio=a;let done=false;const ok=()=>{if(!done){done=true;res(true);}};
+  a.addEventListener('playing',ok);a.onended=()=>clrWord();a.onerror=()=>{if(!done){done=true;clrWord();res(false);}};
+  a.play().then(ok).catch(()=>{if(!done){done=true;clrWord();res(false);}});
+});}
+// Tek kelime 🔊: 1) sözlük API insan sesi → 2) Cambridge (native) → 3) cihaz sesi.
+async function one(t,card){
+  if(synth)synth.cancel();stop();
+  try{const u=await fetchDictAudio(t);if(u&&await playAudioUrl(u,card))return;}catch(e){}
+  if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');}
+    try{const r=await GT.speakWord({word:t});if(r&&r.ok)return;toast('İnsan sesi yok — '+((r&&r.reason)||'?'));}catch(e){toast('Ses hatası');}
+    clrWord();}
+  speak(t,card);
+}
+function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}if(GT){GT.stop();if(GT.stopWord)GT.stopWord();}clrWord();if(synth)synth.cancel();clr();setPlayBtns();}
 // Grubu oku. loop=true ise bitince baştan başlar (sonsuz). GAP: kelimeler arası bekleme (ms).
 function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
   playing=true;looping=!!loop;setPlayBtns();

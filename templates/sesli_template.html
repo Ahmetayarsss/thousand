@@ -70,22 +70,30 @@ let LANG="en-US",RATE=0.8,GAP=500,voices=[],gi=(window.OX?Math.max(0,Math.min(OX
 function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
-let playing=false,looping=false,queue=[],cur=null,curCards=[],gapTimer=null;
+let playing=false,looping=false,queue=[],cur=null,curCards=[],gapTimer=null,wordCard=null;
 // Native grup seslendirme eklentisi (varsa): kuyruk + döngü + ekran-kapalı okuma native tarafta.
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
 function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
+function clrWord(){if(wordCard){wordCard.classList.remove('playing');wordCard=null;}}
 if(GT&&GT.addListener){
   // Her kelime başında native olay → ekran açıkken okunan kartı vurgula ve ona kaydır.
   GT.addListener('wordStart',ev=>{const i=ev&&ev.index;if(i==null)return;if(i>=0&&i<curCards.length){clr();cur=curCards[i];cur.classList.add('playing');cur.scrollIntoView({behavior:'smooth',block:'center'});}});
   // Döngüsüz okuma bitince butonları sıfırla.
   GT.addListener('done',()=>{playing=false;looping=false;clr();setPlayBtns();});
+  // Tek kelime (Cambridge) sesi bitince vurguyu kaldır.
+  GT.addListener('wordAudioDone',()=>clrWord());
 }
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
-function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
-function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}if(GT)GT.stop();if(synth)synth.cancel();clr();setPlayBtns();}
+// Tek kelime 🔊: native ise önce Cambridge'in gerçek insan sesini dener, yoksa cihaz TTS'ine düşer.
+function one(t,card){if(synth)synth.cancel();stop();
+  if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});}
+    GT.speakWord({word:t}).then(r=>{if(!r||!r.ok){clrWord();speak(t,card);}}).catch(()=>{clrWord();speak(t,card);});
+    return;}
+  speak(t,card);}
+function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}if(GT){GT.stop();if(GT.stopWord)GT.stopWord();}clrWord();if(synth)synth.cancel();clr();setPlayBtns();}
 // Grubu oku. loop=true ise bitince baştan başlar (sonsuz). GAP: kelimeler arası bekleme (ms).
 function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
   playing=true;looping=!!loop;setPlayBtns();

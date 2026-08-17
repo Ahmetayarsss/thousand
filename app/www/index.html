@@ -46,9 +46,12 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
-</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div class="wrap">
+.topbar{display:flex;align-items:center;gap:10px}
+.dictlink{flex:0 0 auto;text-decoration:none;background:#EAEDF2;color:var(--ink);font-weight:800;font-size:12.5px;padding:7px 11px;border-radius:10px}
+.dictlink:active{background:#dfe3ea}
+</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='sozluk.html';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div class="wrap">
 <header>
-  <div class="seclabel" id="seclabel"></div>
+  <div class="topbar"><a class="dictlink" href="sozluk.html">📖 Sözlük</a><div class="seclabel" id="seclabel"></div></div>
   <div class="controls">
     <label class="speed"><input id="gap" type="range" min="0" max="3" step="0.25" value="0.5" aria-label="Bekleme"></label>
     <div class="playbtns">

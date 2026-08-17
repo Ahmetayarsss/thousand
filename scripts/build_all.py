@@ -106,11 +106,12 @@ def render(groups):
         for g in groups
     ]
     # app_out: uygulama sayfası. swipe: (next, prev) yatay kaydırma hedefleri.
-    #   liste (index)  → sola: kartlar
+    #   sözlük         → sola: liste
+    #   liste (index)  → sola: kartlar | sağa: sözlük
     #   kartlar        → sola: istatistik | sağa: liste
     for tpl, data, out, app_out, swipe in [
         ("sesli_template.html", sesli_groups, "Oxford3000_30grup_sesli.html",
-         "app/www/index.html", ("kartlar.html", "")),
+         "app/www/index.html", ("kartlar.html", "sozluk.html")),
         ("kartlar_template.html", kart_groups, "Oxford3000_kartlar.html",
          "app/www/kartlar.html", ("istatistik.html", "index.html")),
     ]:
@@ -119,16 +120,30 @@ def render(groups):
         html = html.replace("__GROUPS_JSON__", blob)
 
         # 1) Bağımsız kök HTML (tarayıcıda çift tıkla aç)
-        (ROOT / out).write_text(html, encoding="utf-8")
-        print(f"{out}: {len(html)} bayt")
+        root_html = html.replace("__SOZLUK__", "Oxford3000_sozluk.html")
+        (ROOT / out).write_text(root_html, encoding="utf-8")
+        print(f"{out}: {len(root_html)} bayt")
 
         # 2) Android uygulaması sürümü: TTS köprüsü + yatay kaydırma navigasyonu
         inject = '<script src="tts-bridge.js"></script>' + swipe_script(*swipe) + "</head>"
-        app_html = html.replace("</head>", inject, 1)
+        app_html = html.replace("__SOZLUK__", "sozluk.html").replace("</head>", inject, 1)
         app_path = ROOT / app_out
         app_path.parent.mkdir(parents=True, exist_ok=True)
         app_path.write_text(app_html, encoding="utf-8")
         print(f"{app_out}: {len(app_html)} bayt")
+
+    # Sözlük sayfası: tüm 3000 kelime; boş, aranınca yalnız o kelimenin kartı.
+    sesli_blob = json.dumps(sesli_groups, ensure_ascii=False, separators=(",", ":"))
+    soz_tpl = (ROOT / "templates" / "sozluk_template.html").read_text(encoding="utf-8")
+    soz_tpl = soz_tpl.replace("__GROUPS_JSON__", sesli_blob)
+    root_soz = soz_tpl.replace("__BACK__", "Oxford3000_30grup_sesli.html")
+    (ROOT / "Oxford3000_sozluk.html").write_text(root_soz, encoding="utf-8")
+    print(f"Oxford3000_sozluk.html: {len(root_soz)} bayt")
+    app_soz = soz_tpl.replace("__BACK__", "index.html").replace(
+        "</head>", '<script src="tts-bridge.js"></script>' + swipe_script("index.html", "") + "</head>", 1
+    )
+    (ROOT / "app/www/sozluk.html").write_text(app_soz, encoding="utf-8")
+    print(f"app/www/sozluk.html: {len(app_soz)} bayt")
 
     # İstatistik / ilerleme sayfası (yalnız kelime listesi lazım: no, level, ws)
     stats_data = [

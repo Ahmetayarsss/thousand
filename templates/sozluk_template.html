@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oxford 3000 · Sözlük</title>
+<style>
+:root{--bg:#F5F6F8;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E7EAF0;--speak:#E5892B;--speak-d:#C9741A;
+--isim:#1E88E5;--fiil:#2E9E5B;--sifat:#8E44AD;--zarf:#E67E22;--diger:#5D6D7E;--tr:#B03A2E;--ok:#0E8074}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px 60px}
+header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 14px;margin:0 -14px 12px}
+.toprow{display:flex;align-items:center;gap:10px}
+.back{flex:0 0 auto;border:0;background:var(--ink);color:#fff;font-size:15px;font-weight:800;width:38px;height:38px;border-radius:10px;cursor:pointer;text-decoration:none;display:grid;place-items:center}
+.title{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.title small{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:1px}
+.search{width:100%;margin-top:10px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;font-size:15px}
+.hint{color:var(--muted);text-align:center;font-size:13.5px;margin-top:40px;line-height:1.6}
+.hint .big{font-size:34px;display:block;margin-bottom:8px}
+.count{color:var(--muted);font-size:12px;margin:2px 2px 8px}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--diger);border-radius:14px;padding:12px 14px;margin:9px 0}
+.row1{display:flex;align-items:center;gap:11px}
+.word{font-size:21px;font-weight:800;letter-spacing:-.01em}
+.tag{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.spk{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:0;cursor:pointer;background:var(--speak);color:#fff;font-size:19px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(229,137,43,.35)}
+.spk:active{transform:scale(.92)}
+.spk.playing{box-shadow:0 0 0 3px rgba(229,137,43,.35)}
+.ok{color:var(--ok);font-weight:700;font-size:14px;margin-top:7px}
+.tr{color:var(--tr);font-size:15px;margin-top:4px}
+.en{color:#33414F;font-size:13.5px;margin-top:4px}
+.ex{color:#5B6B7B;font-size:13.5px;font-style:italic;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+</style><script src="progress.js"></script></head><body><div class="wrap">
+<header>
+  <div class="toprow">
+    <a class="back" href="__BACK__" aria-label="Geri">←</a>
+    <div class="title">Sözlük <small>3000 kelime — İngilizce/Türkçe ara</small></div>
+  </div>
+  <input class="search" id="q" placeholder="Kelime ara… (ör. water / su)" autocomplete="off" autocapitalize="off" spellcheck="false">
+</header>
+<div id="hint" class="hint"><span class="big">📖</span>Aramak istediğin kelimeyi yaz.<br>Sadece o kelimenin kartı görünür.</div>
+<div id="list"></div>
+</div>
+<script>
+const GROUPS=__GROUPS_JSON__;
+const posTag={"isim":"isim","fiil":"fiil","sıfat":"sıfat","zarf":"zarf","edat":"edat","bağlaç":"bağlaç","zamir":"zamir","belirteç":"belirteç","ünlem":"ünlem","sayı":"sayı","kip fiili":"kip fiili","yardımcı fiil":"yard. fiil","artikel":"artikel","mastar":"mastar"};
+// Tüm 3000 kelimeyi tek listede topla.
+const WORDS=[];
+GROUPS.forEach(g=>g.items.forEach(it=>WORDS.push({w:it.w,tr:it.tr||'',ok:it.ok||'',en:it.en||'',ex:it.ex||[],pos:it.pos||'',level:g.level,s:(it.w+' '+(it.tr||'')).toLowerCase()})));
+
+let LANG="en-US",voices=[];const synth=window.speechSynthesis;
+function loadV(){voices=synth?synth.getVoices():[];}
+if(synth){loadV();synth.onvoiceschanged=loadV;}
+function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
+function speak(t){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=0.9;synth.speak(u);}
+function slugOf(w){var b=w.replace(/\(.*?\)/g,'').split(',')[0];return b.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+let wordAudio=null,curBtn=null;
+function clrBtn(){if(curBtn){curBtn.classList.remove('playing');curBtn=null;}}
+function playAudioUrl(url,btn){return new Promise(res=>{
+  try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}
+  clrBtn();if(btn){curBtn=btn;btn.classList.add('playing');}
+  const a=new Audio(url);wordAudio=a;let done=false;const ok=()=>{if(!done){done=true;res(true);}};
+  a.addEventListener('playing',ok);a.onended=()=>clrBtn();a.onerror=()=>{if(!done){done=true;clrBtn();res(false);}};
+  a.play().then(ok).catch(()=>{if(!done){done=true;clrBtn();res(false);}});
+});}
+// 🔊: uygulamaya gömülü Cambridge sesi → yoksa cihaz sesi.
+async function say(w,btn){
+  if(synth)synth.cancel();
+  try{if(await playAudioUrl('audio/'+slugOf(w)+'.mp3',btn))return;}catch(e){}
+  clrBtn();speak(w);
+}
+
+const listEl=document.getElementById('list'),hintEl=document.getElementById('hint');
+function render(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  if(!q){listEl.innerHTML='';hintEl.style.display='';return;}
+  hintEl.style.display='none';
+  const hits=WORDS.filter(d=>d.s.includes(q));
+  // Tam eşleşme / baştan eşleşme önce gelsin.
+  hits.sort((a,b)=>{const aw=a.w.toLowerCase(),bw=b.w.toLowerCase();
+    const ae=aw===q?0:(aw.startsWith(q)?1:2),be=bw===q?0:(bw.startsWith(q)?1:2);
+    return ae!==be?ae-be:aw.localeCompare(bw);});
+  const shown=hits.slice(0,60);
+  if(!shown.length){listEl.innerHTML='<div class="count">Eşleşme yok.</div>';return;}
+  let html=hits.length>shown.length?`<div class="count">${shown.length}/${hits.length} sonuç gösteriliyor — daha fazla harf yaz</div>`:'';
+  html+=shown.map((d,i)=>`<div class="card">
+    <div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''}${d.pos?' · ':''}${d.level}</span><button class="spk" data-i="${i}" aria-label="Dinle">🔊</button></div>
+    ${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
+    <div class="tr">${d.tr}</div>
+    ${d.en?`<div class="en">${d.en}</div>`:''}
+    ${(d.ex&&d.ex.length)?d.ex.map(s=>`<div class="ex">${s}</div>`).join(''):''}
+  </div>`).join('');
+  listEl.innerHTML=html;
+  const btns=listEl.querySelectorAll('.spk');
+  btns.forEach((b,i)=>{b.onclick=e=>{e.stopPropagation();say(shown[i].w,b);};});
+}
+document.getElementById('q').addEventListener('input',render);
+document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
+</script></body></html>

@@ -50,6 +50,7 @@ public class GroupTtsService extends Service {
     private final List<String> words = new ArrayList<>();
     private volatile boolean loop = false;
     private volatile boolean active = false;
+    private volatile int gapMs = 0;                 // kelimeler arası bekleme (ms)
     private float rate = 1.0f;
     private boolean ready = false;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -64,6 +65,7 @@ public class GroupTtsService extends Service {
         String[] ws = intent != null ? intent.getStringArrayExtra("words") : null;
         rate = intent != null ? intent.getFloatExtra("rate", 1.0f) : 1.0f;
         loop = intent != null && intent.getBooleanExtra("loop", false);
+        gapMs = intent != null ? Math.max(0, intent.getIntExtra("gap", 0)) : 0;
         main.removeCallbacksAndMessages(null);   // önceki turdan kalan döngü post'unu iptal et
         words.clear();
         if (ws != null) {
@@ -108,9 +110,10 @@ public class GroupTtsService extends Service {
                     // Döngü: yeni turu TTS callback'inin İÇİNDEN değil, ana thread'e
                     // post ederek başlat. Motorların çoğu, onDone içinden yapılan
                     // speak() çağrısını sessizce düşürür → döngü bir turdan sonra ölür.
-                    main.post(() -> {
+                    // postDelayed(gapMs): turlar arasında da kelime bekleme süresi kadar boşluk.
+                    main.postDelayed(() -> {
                         if (active && loop) enqueueAll();
-                    });
+                    }, gapMs);
                 } else {
                     Progress p = progress;
                     if (p != null) p.onDone();
@@ -133,12 +136,19 @@ public class GroupTtsService extends Service {
         if (tts == null || words.isEmpty()) return;
         tts.setSpeechRate(rate);
         int n = words.size();
+        int g = gapMs;
         for (int i = 0; i < n; i++) {
             String id = "w" + i;
             int mode = (i == 0) ? TextToSpeech.QUEUE_FLUSH : TextToSpeech.QUEUE_ADD;
             Bundle params = new Bundle();
             params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id);
             tts.speak(words.get(i), mode, params, id);
+            // Kelimeler arası bekleme: sessiz utterance (son kelimeden sonra yok;
+            // turlar arası boşluk döngüde postDelayed ile veriliyor). "s" önekli id
+            // → idx() null döner, vurgu/döngü mantığını etkilemez.
+            if (g > 0 && i < n - 1) {
+                tts.playSilentUtterance(g, TextToSpeech.QUEUE_ADD, "s" + i);
+            }
         }
     }
 

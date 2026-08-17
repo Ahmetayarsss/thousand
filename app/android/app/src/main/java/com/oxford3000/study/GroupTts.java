@@ -31,6 +31,8 @@ public class GroupTts extends Plugin {
         Float r = call.getFloat("rate", 1.0f);
         float rate = (r == null ? 1.0f : r);
         boolean loop = Boolean.TRUE.equals(call.getBoolean("loop", false));
+        Integer g = call.getInt("gap", 0);
+        int gap = (g == null ? 0 : g);
 
         List<String> words = new ArrayList<>();
         if (arr != null) {
@@ -62,6 +64,7 @@ public class GroupTts extends Plugin {
         i.putExtra("words", words.toArray(new String[0]));
         i.putExtra("rate", rate);
         i.putExtra("loop", loop);
+        i.putExtra("gap", gap);
         if (Build.VERSION.SDK_INT >= 26) {
             getContext().startForegroundService(i);
         } else {

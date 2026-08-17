@@ -51,6 +51,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
     <label class="speed">Hız <input id="rate" type="range" min="0.5" max="1" step="0.05" value="0.8"></label>
+    <label class="speed">Bekleme <input id="gap" type="range" min="0" max="3" step="0.25" value="0.5"><span id="gapval">0.5 sn</span></label>
     <div class="playbtns">
       <button class="playall" id="playall">▶ Grubu oku</button>
       <button class="playall" id="loopall">🔁 Döngü</button>
@@ -66,11 +67,11 @@ const GROUPS=__GROUPS_JSON__;
 const SECS=["İsimler","Fiiller","Sıfatlar","Zarflar","Diğer"];
 const SColor={"İsimler":"var(--isim)","Fiiller":"var(--fiil)","Sıfatlar":"var(--sifat)","Zarflar":"var(--zarf)","Diğer":"var(--diger)"};
 const posTag={"isim":"isim","fiil":"fiil","sıfat":"sıfat","zarf":"zarf","edat":"edat","bağlaç":"bağlaç","zamir":"zamir","belirteç":"belirteç","ünlem":"ünlem","sayı":"sayı","kip fiili":"kip fiili","yardımcı fiil":"yard. fiil","artikel":"artikel","mastar":"mastar"};
-let LANG="en-US",RATE=0.8,voices=[],gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0);const synth=window.speechSynthesis;
+let LANG="en-US",RATE=0.8,GAP=500,voices=[],gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0);const synth=window.speechSynthesis;
 function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
-let playing=false,looping=false,queue=[],cur=null,curCards=[];
+let playing=false,looping=false,queue=[],cur=null,curCards=[],gapTimer=null;
 // Native grup seslendirme eklentisi (varsa): kuyruk + döngü + ekran-kapalı okuma native tarafta.
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
@@ -86,27 +87,28 @@ function setPlayBtns(){const p=document.getElementById('playall'),l=document.get
   l.textContent=(playing&&looping)?"■ Durdur":"🔁 Döngü";l.classList.toggle('stop',playing&&looping);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
 function one(t,card){if(synth)synth.cancel();stop();speak(t,card);}
-function stop(){playing=false;looping=false;queue=[];if(GT)GT.stop();if(synth)synth.cancel();clr();setPlayBtns();}
-// Grubu oku. loop=true ise bitince baştan başlar (sonsuz).
+function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}if(GT)GT.stop();if(synth)synth.cancel();clr();setPlayBtns();}
+// Grubu oku. loop=true ise bitince baştan başlar (sonsuz). GAP: kelimeler arası bekleme (ms).
 function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
   playing=true;looping=!!loop;setPlayBtns();
-  if(GT){   // NATIVE: tüm kelimeler Android TTS kuyruğuna; döngü + ekran-kapalı okuma + kelime olayları native tarafta
+  if(GT){   // NATIVE: tüm kelimeler Android TTS kuyruğuna; döngü + bekleme + ekran-kapalı okuma + kelime olayları native tarafta
     curCards=cs;if(synth)synth.cancel();
-    GT.speakGroup({words:cs.map(c=>c.dataset.w),rate:RATE,loop:!!loop});
+    GT.speakGroup({words:cs.map(c=>c.dataset.w),rate:RATE,loop:!!loop,gap:GAP});
     return;
   }
-  // TARAYICI (fallback): tek seslendirme + kelime sınırı olayıyla vurgu.
+  // TARAYICI (fallback): kelime kelime oku; her kelimeden sonra GAP kadar bekle.
   if(!synth){stop();return;}
   synth.cancel();
-  const words=cs.map(c=>c.dataset.w),text=words.join('. ')+'.';
-  const starts=[];let pos=0;words.forEach(w=>{starts.push(pos);pos+=w.length+2;});   // her kelimenin metindeki başlangıcı (". "=2)
-  const u=new SpeechSynthesisUtterance(text);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;
-  let idx=-1;
-  // Kelime sınırı olayı destekleniyorsa (tarayıcı) okunan kartı vurgula ve ekranı ona kaydır. Telefonda tetiklenmese de ses sürer.
-  u.onboundary=e=>{if(e.name&&e.name!=='word')return;let i=0;while(i+1<starts.length&&starts[i+1]<=e.charIndex)i++;if(i!==idx){idx=i;clr();cur=cs[i];cs[i].classList.add('playing');cs[i].scrollIntoView({behavior:'smooth',block:'center'});}};
-  u.onend=()=>{if(playing&&looping){readGroup(true);}else{stop();}};   // döngü: bitince baştan
-  u.onerror=u.onend;
-  synth.speak(u);}
+  const words=cs.map(c=>c.dataset.w);let i=0;
+  (function next(){
+    if(!playing)return;
+    if(i>=words.length){if(looping){i=0;}else{stop();return;}}
+    const card=cs[i];clr();cur=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});
+    const u=new SpeechSynthesisUtterance(words[i]);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;
+    u.onend=()=>{if(!playing)return;i++;if(GAP>0){gapTimer=setTimeout(next,GAP);}else next();};
+    u.onerror=u.onend;
+    synth.speak(u);
+  })();}
 
 function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
 function renderGroup(){stop();const g=GROUPS[gi];const list=document.getElementById('list');list.innerHTML='';
@@ -125,6 +127,9 @@ list.appendChild(c);});});
 document.getElementById('search').value='';window.scrollTo({top:0});}
 
 document.getElementById('rate').addEventListener('input',e=>RATE=parseFloat(e.target.value));
+function setGap(v){GAP=Math.round(parseFloat(v)*1000);const el=document.getElementById('gapval');if(el)el.textContent=parseFloat(v).toString().replace('.',',')+' sn';}
+document.getElementById('gap').addEventListener('input',e=>setGap(e.target.value));
+setGap(document.getElementById('gap').value);
 document.getElementById('playall').addEventListener('click',()=>{(playing&&!looping)?stop():readGroup(false);});
 document.getElementById('loopall').addEventListener('click',()=>{(playing&&looping)?stop():readGroup(true);});
 document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});

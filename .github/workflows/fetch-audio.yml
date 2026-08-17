@@ -60,3 +60,13 @@ jobs:
           name: introduce-us-mp3
           path: introduce_us.mp3
           if-no-files-found: error
+
+      - name: Release'e koy (düz indirme linki)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: sesler
+          name: "Cambridge sesleri"
+          prerelease: true
+          files: introduce_us.mp3
+          body: |
+            Cambridge'den çekilen telaffuz sesleri.

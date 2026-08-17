@@ -35,11 +35,24 @@
         </provider>
 
         <!-- Grup seslendirme foreground servisi: ekran kapalıyken/arka planda
-             kesintisiz TTS ve döngü için. -->
+             kesintisiz ses + döngü için. MEDIA_BUTTON filtresi kulaklık düğmelerini alır. -->
         <service
             android:name=".GroupTtsService"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
+        <!-- Kulaklık/medya düğmelerini servise yönlendiren alıcı (androidx.media). -->
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- Permissions -->

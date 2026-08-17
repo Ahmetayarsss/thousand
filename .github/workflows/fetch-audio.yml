@@ -36,10 +36,19 @@ jobs:
           echo "Toplam mp3: $(ls -1 app/www/audio/*.mp3 2>/dev/null | wc -l)"
           du -sh app/www/audio 2>/dev/null || true
 
-      - name: Depoya işle
+      - name: Depoya işle (çakışmaya dayanıklı)
         run: |
+          BR=claude/oxford-3000-pronunciation-defs-inzs33
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add app/www/audio
-          git commit -m "Grup ${{ github.event.inputs.groups }} Cambridge US sesleri (uygulamaya gömüldü)" || echo "değişiklik yok"
-          git push origin HEAD:claude/oxford-3000-pronunciation-defs-inzs33 || echo "push atlandı"
+          git commit -m "Grup ${{ github.event.inputs.groups }} Cambridge US sesleri (uygulamaya gömüldü)" || { echo "değişiklik yok"; exit 0; }
+          ok=0
+          for i in 1 2 3 4 5 6; do
+            git fetch origin "$BR" || true
+            # yeni sesleri, uzağın en güncel ucunun ÜSTÜNE taşı (rebase); çakışırsa reset+recommit
+            git rebase "origin/$BR" || { git rebase --abort || true; git reset --soft "origin/$BR"; git add app/www/audio; git commit -m "Grup ${{ github.event.inputs.groups }} Cambridge US sesleri (uygulamaya gömüldü)" || true; }
+            if git push origin "HEAD:$BR"; then ok=1; break; fi
+            echo "push denemesi $i başarısız — dal ilerlemiş olabilir, tekrar..."; sleep 5
+          done
+          [ "$ok" = "1" ] || { echo "push 6 denemede de başarısız"; exit 1; }

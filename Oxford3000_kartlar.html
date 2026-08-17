@@ -61,7 +61,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 </style><script src="progress.js"></script></head><body><div id="app">
 <div class="top">
   <div class="moderow" id="moderow">
-    <button data-m="test" class="on">Test (çalışma)</button>
+    <button data-m="test" class="on">Test</button>
     <button data-m="exam">Sınav</button>
   </div>
   <div class="grouprow">
@@ -77,9 +77,8 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 <div class="stage" id="stage">
   <div class="card" id="card">
     <span class="lvl" id="lvl"></span>
-    <button class="spk" id="spk" aria-label="Dinle">🔊</button>
     <div class="q" id="q"></div>
-    <div class="tap" id="tap">Cevap için karta dokun</div>
+    <div class="tap" id="tap"></div>
     <div class="ansbox hidden" id="ansbox"></div>
   </div>
   <div class="controls hidden" id="ctrl">
@@ -144,8 +143,8 @@ function dirFor(){return Math.random()<0.5?'tr2en':'en2tr';}
 
 function renderPrompt(){
   const g=GROUPS[gi];document.getElementById('lvl').textContent=g.level;
-  side=0;const q=document.getElementById('q'),ans=document.getElementById('ansbox'),spk=document.getElementById('spk');
-  ans.classList.add('hidden');ans.innerHTML='';document.getElementById('tap').style.display='';document.getElementById('ctrl').classList.add('hidden');spk.classList.remove('show');
+  side=0;const q=document.getElementById('q'),ans=document.getElementById('ansbox');
+  ans.classList.add('hidden');ans.innerHTML='';document.getElementById('tap').style.display='';document.getElementById('ctrl').classList.add('hidden');
   const front=(cur._dir==='tr2en')?(cur.tr||'—'):cur.w;
   q.className='q'+((front&&front.length>18)?' small':'');
   q.textContent=front;
@@ -153,11 +152,11 @@ function renderPrompt(){
 }
 function reveal(){
   if(side===1)return;side=1;tReveal=performance.now();document.getElementById('tap').style.display='none';
-  const ans=document.getElementById('ansbox'),spk=document.getElementById('spk');let h='';
+  const ans=document.getElementById('ansbox');let h='';
   if(cur._dir==='tr2en'){h+=`<div class="mean en">${cur.w}</div>`;if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;}
   else{if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;h+=`<div class="mean tr">${cur.tr||'—'}</div>`;}
   if(cur.ex&&cur.ex.length)cur.ex.forEach(s=>{h+=`<div class="ex">${s}</div>`;});
-  ans.innerHTML=h;ans.classList.remove('hidden');spk.classList.add('show');
+  ans.innerHTML=h;ans.classList.remove('hidden');
   document.getElementById('ctrl').classList.remove('hidden');
 }
 
@@ -246,8 +245,7 @@ function showResult(big,small,msg,wlHtml,isTest){
 
 function start(){document.getElementById('resultbox').classList.add('hidden');(mode==='test'?startTest:startExam)();}
 document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
-document.getElementById('card').addEventListener('click',reveal);
-document.getElementById('spk').addEventListener('click',e=>{e.stopPropagation();sayWord(cur.w);});
+document.getElementById('card').addEventListener('click',()=>{reveal();sayWord(cur.w);});
 document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
 document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
 document.getElementById('r-again').addEventListener('click',start);

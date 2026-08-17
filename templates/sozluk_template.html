@@ -16,7 +16,9 @@ header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdro
 .hint{color:var(--muted);text-align:center;font-size:13.5px;margin-top:40px;line-height:1.6}
 .hint .big{font-size:34px;display:block;margin-bottom:8px}
 .count{color:var(--muted);font-size:12px;margin:2px 2px 8px}
-.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--diger);border-radius:14px;padding:12px 14px;margin:9px 0}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--diger);border-radius:14px;padding:12px 14px;margin:9px 0;cursor:pointer}
+.card.playing{box-shadow:0 0 0 2px var(--speak),0 6px 18px rgba(229,137,43,.18)}
+.card:active{transform:scale(.997)}
 .row1{display:flex;align-items:center;gap:11px}
 .word{font-size:21px;font-weight:800;letter-spacing:-.01em}
 .tag{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
@@ -29,7 +31,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdro
 .ex{color:#5B6B7B;font-size:13.5px;font-style:italic;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
 </style><script src="progress.js"></script></head><body><div class="wrap">
 <header>
-  <div class="title">📖 Sözlük</div>
+  <div class="title">Sözlük</div>
   <input class="search" id="q" placeholder="" autocomplete="off" autocapitalize="off" spellcheck="false">
 </header>
 <div id="hint" class="hint"><span class="big">📖</span></div>
@@ -77,15 +79,15 @@ function render(){
   const shown=hits.slice(0,60);
   if(!shown.length){listEl.innerHTML='';return;}
   let html=shown.map((d,i)=>`<div class="card">
-    <div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''}${d.pos?' · ':''}${d.level}</span><button class="spk" data-i="${i}" aria-label="Dinle">🔊</button></div>
+    <div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''}${d.pos?' · ':''}${d.level}</span></div>
     ${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
     <div class="tr">${d.tr}</div>
     ${d.en?`<div class="en">${d.en}</div>`:''}
     ${(d.ex&&d.ex.length)?d.ex.map(s=>`<div class="ex">${s}</div>`).join(''):''}
   </div>`).join('');
   listEl.innerHTML=html;
-  const btns=listEl.querySelectorAll('.spk');
-  btns.forEach((b,i)=>{b.onclick=e=>{e.stopPropagation();say(shown[i].w,b);};});
+  // Karta basınca o kelimeyi oku.
+  listEl.querySelectorAll('.card').forEach((c,i)=>{c.onclick=()=>say(shown[i].w,c);});
 }
 document.getElementById('q').addEventListener('input',render);
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});

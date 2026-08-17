@@ -29,13 +29,10 @@ header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdro
 .ex{color:#5B6B7B;font-size:13.5px;font-style:italic;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
 </style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='index.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div class="wrap">
 <header>
-  <div class="toprow">
-    <a class="back" href="index.html" aria-label="Geri">←</a>
-    <div class="title">Sözlük <small>3000 kelime — İngilizce/Türkçe ara</small></div>
-  </div>
-  <input class="search" id="q" placeholder="Kelime ara… (ör. water / su)" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <div class="title">📖 Sözlük</div>
+  <input class="search" id="q" placeholder="" autocomplete="off" autocapitalize="off" spellcheck="false">
 </header>
-<div id="hint" class="hint"><span class="big">📖</span>Aramak istediğin kelimeyi yaz.<br>Sadece o kelimenin kartı görünür.</div>
+<div id="hint" class="hint"><span class="big">📖</span></div>
 <div id="list"></div>
 </div>
 <script>
@@ -78,9 +75,8 @@ function render(){
     const ae=aw===q?0:(aw.startsWith(q)?1:2),be=bw===q?0:(bw.startsWith(q)?1:2);
     return ae!==be?ae-be:aw.localeCompare(bw);});
   const shown=hits.slice(0,60);
-  if(!shown.length){listEl.innerHTML='<div class="count">Eşleşme yok.</div>';return;}
-  let html=hits.length>shown.length?`<div class="count">${shown.length}/${hits.length} sonuç gösteriliyor — daha fazla harf yaz</div>`:'';
-  html+=shown.map((d,i)=>`<div class="card">
+  if(!shown.length){listEl.innerHTML='';return;}
+  let html=shown.map((d,i)=>`<div class="card">
     <div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''}${d.pos?' · ':''}${d.level}</span><button class="spk" data-i="${i}" aria-label="Dinle">🔊</button></div>
     ${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
     <div class="tr">${d.tr}</div>

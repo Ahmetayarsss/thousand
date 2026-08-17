@@ -23,8 +23,16 @@ OUT_DIR = "app/www/audio"
 US_RE = re.compile(r"/media/[\w./-]*?us_pron/[\w./-]+?\.mp3")
 
 
+def base(word):
+    # Parantez içi açıklamayı ("(similar)" gibi) ve virgülden sonrasını at → temel kelime.
+    b = re.sub(r"\(.*?\)", "", word)
+    b = b.split(",")[0]
+    return b.strip()
+
+
 def slug(word):
-    return re.sub(r"[^a-z0-9]+", "-", word.lower()).strip("-")
+    # Dosya adı = temel kelimenin slug'ı (JS'teki slugOf ile birebir aynı).
+    return re.sub(r"[^a-z0-9]+", "-", base(word).lower()).strip("-")
 
 
 def get(url, referer=None):
@@ -40,7 +48,7 @@ def get(url, referer=None):
 
 def fetch_word(word):
     """(bytes, None) başarılıysa; (None, sebep) değilse."""
-    page_slug = word.strip().lower().replace(" ", "-")
+    page_slug = base(word).lower().replace(" ", "-")
     page = "https://dictionary.cambridge.org/dictionary/english/" + urllib.parse.quote(page_slug)
     try:
         html = get(page).decode("utf-8", "ignore")

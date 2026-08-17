@@ -106,9 +106,11 @@ public class GroupTts extends Plugin {
     private final Map<String, String> urlCache = new ConcurrentHashMap<>();
     private MediaPlayer wordPlayer;
     private volatile String lastReason = "";   // teşhis: son başarısızlık nedeni
-    private static final Pattern MP3_US = Pattern.compile("(/media/english/us_pron/[^\"'()\\s]+?\\.mp3)");
-    private static final Pattern MP3_UK = Pattern.compile("(/media/english/uk_pron/[^\"'()\\s]+?\\.mp3)");
-    private static final Pattern MP3_ANY = Pattern.compile("(/media/[^\"'()\\s]+?\\.mp3)");
+    // Cambridge sayfasındaki telaffuz mp3'lerini yakala (yol biçimi zamanla değişebildiği
+    // için geniş tutuldu): us_pron / uk_pron içeren herhangi bir /media/....mp3, sonra genel.
+    private static final Pattern MP3_US = Pattern.compile("(/media/[\\w./-]*?us_pron/[\\w./-]+?\\.mp3)");
+    private static final Pattern MP3_UK = Pattern.compile("(/media/[\\w./-]*?uk_pron/[\\w./-]+?\\.mp3)");
+    private static final Pattern MP3_ANY = Pattern.compile("(/media/[\\w./-]+?\\.mp3)");
 
     @PluginMethod
     public void speakWord(final PluginCall call) {
@@ -149,7 +151,8 @@ public class GroupTts extends Plugin {
             c.setConnectTimeout(8000);
             c.setReadTimeout(8000);
             c.setRequestProperty("User-Agent",
-                "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Mobile Safari/537.36");
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            c.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
             c.setRequestProperty("Accept-Language", "en-US,en;q=0.9");
             int code = c.getResponseCode();
             if (code != 200) { lastReason = "http:" + code; return null; }
@@ -158,7 +161,7 @@ public class GroupTts extends Plugin {
                 String line;
                 while ((line = br.readLine()) != null) {
                     sb.append(line).append('\n');
-                    if (sb.length() > 1_500_000) break;   // güvenlik sınırı
+                    if (sb.length() > 3_000_000) break;   // güvenlik sınırı
                 }
             }
             String html = sb.toString();

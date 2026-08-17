@@ -46,7 +46,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
-</style><script src="progress.js"></script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses5</div><div class="wrap">
+</style><script src="progress.js"></script></head><body><div style="position:fixed;right:5px;bottom:3px;font-size:9px;color:#c2c8d2;z-index:5;pointer-events:none">ses6</div><div class="wrap">
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
@@ -90,30 +90,11 @@ if(GT&&GT.addListener){
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
-// Sözlük API'sinden (dictionaryapi.dev) gerçek insan sesi URL'si bul (US tercih). Servis CORS açık.
-async function fetchDictAudio(word){
-  try{
-    const res=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word.toLowerCase().trim()));
-    if(!res.ok)return null;
-    const data=await res.json();let best=null;
-    for(const e of (data||[]))for(const ph of ((e&&e.phonetics)||[])){if(ph&&ph.audio){let a=ph.audio;if(a.indexOf('//')===0)a='https:'+a;if(/-us\.mp3/i.test(a))return a;if(!best)best=a;}}
-    return best;
-  }catch(e){return null;}
-}
-// Bir mp3 URL'sini çal; oynatma başladıysa true döner (yoksa false → sıradaki kaynağa geç).
-function playAudioUrl(url,card){return new Promise(res=>{
-  try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}
-  clrWord();if(card){wordCard=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});}
-  const a=new Audio(url);wordAudio=a;let done=false;const ok=()=>{if(!done){done=true;res(true);}};
-  a.addEventListener('playing',ok);a.onended=()=>clrWord();a.onerror=()=>{if(!done){done=true;clrWord();res(false);}};
-  a.play().then(ok).catch(()=>{if(!done){done=true;clrWord();res(false);}});
-});}
-// Tek kelime 🔊: 1) sözlük API insan sesi → 2) Cambridge (native) → 3) cihaz sesi.
+// Tek kelime 🔊: 1) Cambridge'in gerçek insan sesi (native) → 2) cihaz sesi.
 async function one(t,card){
   if(synth)synth.cancel();stop();
-  try{const u=await fetchDictAudio(t);if(u&&await playAudioUrl(u,card))return;}catch(e){}
-  if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');}
-    try{const r=await GT.speakWord({word:t});if(r&&r.ok)return;toast('İnsan sesi yok — '+((r&&r.reason)||'?'));}catch(e){toast('Ses hatası');}
+  if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});}
+    try{const r=await GT.speakWord({word:t});if(r&&r.ok)return;toast('Cambridge sesi yok — '+((r&&r.reason)||'?'));}catch(e){toast('Cambridge hata: '+e);}
     clrWord();}
   speak(t,card);
 }

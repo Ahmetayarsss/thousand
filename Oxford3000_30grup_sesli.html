@@ -76,6 +76,9 @@ const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNative
 const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
 function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
 function clrWord(){if(wordCard){wordCard.classList.remove('playing');wordCard=null;}}
+// Geçici teşhis balonu: Cambridge sesi neden gelmedi görünsün.
+let toastEl=null,toastTimer=null;
+function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 if(GT&&GT.addListener){
   // Her kelime başında native olay → ekran açıkken okunan kartı vurgula ve ona kaydır.
   GT.addListener('wordStart',ev=>{const i=ev&&ev.index;if(i==null)return;if(i>=0&&i<curCards.length){clr();cur=curCards[i];cur.classList.add('playing');cur.scrollIntoView({behavior:'smooth',block:'center'});}});
@@ -90,7 +93,7 @@ function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtteran
 // Tek kelime 🔊: native ise önce Cambridge'in gerçek insan sesini dener, yoksa cihaz TTS'ine düşer.
 function one(t,card){if(synth)synth.cancel();stop();
   if(GT&&GT.speakWord){clrWord();if(card){wordCard=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});}
-    GT.speakWord({word:t}).then(r=>{if(!r||!r.ok){clrWord();speak(t,card);}}).catch(()=>{clrWord();speak(t,card);});
+    GT.speakWord({word:t}).then(r=>{if(!r||!r.ok){clrWord();toast('Cambridge sesi yok — '+((r&&r.reason)||'?'));speak(t,card);}}).catch(e=>{clrWord();toast('Cambridge hata: '+e);speak(t,card);});
     return;}
   speak(t,card);}
 function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}if(GT){GT.stop();if(GT.stopWord)GT.stopWord();}clrWord();if(synth)synth.cancel();clr();setPlayBtns();}

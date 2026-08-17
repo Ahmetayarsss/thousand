@@ -3,6 +3,7 @@ package com.oxford3000.study;
 import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 
 import com.getcapacitor.JSArray;
@@ -18,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,6 +105,7 @@ public class GroupTts extends Plugin {
     private final ExecutorService exec = Executors.newSingleThreadExecutor();
     private final Map<String, String> urlCache = new ConcurrentHashMap<>();
     private MediaPlayer wordPlayer;
+    private volatile String lastReason = "";   // teşhis: son başarısızlık nedeni
     private static final Pattern MP3_US = Pattern.compile("(/media/english/us_pron/[^\"'()\\s]+?\\.mp3)");
     private static final Pattern MP3_UK = Pattern.compile("(/media/english/uk_pron/[^\"'()\\s]+?\\.mp3)");
     private static final Pattern MP3_ANY = Pattern.compile("(/media/[^\"'()\\s]+?\\.mp3)");
@@ -120,7 +123,8 @@ public class GroupTts extends Plugin {
                 if (url != null) urlCache.put(word.toLowerCase(), url);
             }
             if (url == null) {
-                JSObject r = new JSObject(); r.put("ok", false); call.resolve(r);
+                JSObject r = new JSObject(); r.put("ok", false); r.put("reason", lastReason);
+                call.resolve(r);
                 return;
             }
             playUrl(url, call);
@@ -147,7 +151,8 @@ public class GroupTts extends Plugin {
             c.setRequestProperty("User-Agent",
                 "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Mobile Safari/537.36");
             c.setRequestProperty("Accept-Language", "en-US,en;q=0.9");
-            if (c.getResponseCode() != 200) return null;
+            int code = c.getResponseCode();
+            if (code != 200) { lastReason = "http:" + code; return null; }
             StringBuilder sb = new StringBuilder();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"))) {
                 String line;
@@ -160,9 +165,11 @@ public class GroupTts extends Plugin {
             String path = firstMatch(MP3_US, html);
             if (path == null) path = firstMatch(MP3_UK, html);
             if (path == null) path = firstMatch(MP3_ANY, html);
-            if (path == null) return null;
+            if (path == null) { lastReason = "no-audio(" + html.length() + ")"; return null; }
+            lastReason = "";
             return "https://dictionary.cambridge.org" + path;
         } catch (Exception e) {
+            lastReason = "exc:" + e.getClass().getSimpleName();
             return null;
         } finally {
             if (c != null) c.disconnect();
@@ -185,7 +192,12 @@ public class GroupTts extends Plugin {
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build());
-            mp.setDataSource(url);
+            // Cambridge medya sunucusu Referer/UA olmadan 403 verebilir → başlıkları geç.
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Referer", "https://dictionary.cambridge.org/");
+            headers.put("User-Agent",
+                "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Mobile Safari/537.36");
+            mp.setDataSource(getContext(), Uri.parse(url), headers);
             mp.setOnPreparedListener(m -> {
                 m.start();
                 if (resolved.compareAndSet(false, true)) {
@@ -198,7 +210,9 @@ public class GroupTts extends Plugin {
             });
             mp.setOnErrorListener((m, what, extra) -> {
                 if (resolved.compareAndSet(false, true)) {
-                    JSObject r = new JSObject(); r.put("ok", false); call.resolve(r);
+                    JSObject r = new JSObject(); r.put("ok", false);
+                    r.put("reason", "play:" + what + "/" + extra);
+                    call.resolve(r);
                 }
                 releaseWordPlayer();
                 return true;
@@ -206,7 +220,9 @@ public class GroupTts extends Plugin {
             mp.prepareAsync();
         } catch (Exception e) {
             if (resolved.compareAndSet(false, true)) {
-                JSObject r = new JSObject(); r.put("ok", false); call.resolve(r);
+                JSObject r = new JSObject(); r.put("ok", false);
+                r.put("reason", "playexc:" + e.getClass().getSimpleName());
+                call.resolve(r);
             }
             releaseWordPlayer();
         }

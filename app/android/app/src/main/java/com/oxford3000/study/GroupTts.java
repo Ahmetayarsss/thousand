@@ -83,10 +83,15 @@ public class GroupTts extends Plugin {
         i.putExtra("rate", rate);
         i.putExtra("loop", loop);
         i.putExtra("gap", gap);
-        if (Build.VERSION.SDK_INT >= 26) {
-            getContext().startForegroundService(i);
-        } else {
-            getContext().startService(i);
+        try {
+            if (Build.VERSION.SDK_INT >= 26) {
+                getContext().startForegroundService(i);
+            } else {
+                getContext().startService(i);
+            }
+        } catch (Exception e) {
+            call.reject("servis başlatılamadı: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            return;
         }
         call.resolve();
     }

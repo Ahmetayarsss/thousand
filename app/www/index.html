@@ -78,13 +78,17 @@ function clrWord(){if(wordCard){wordCard.classList.remove('playing');wordCard=nu
 // Geçici teşhis balonu: Cambridge sesi neden gelmedi görünsün.
 let toastEl=null,toastTimer=null;
 function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
+// Kalıcı teşhis çubuğu (üstte, dokununca kapanır). Toast'tan daha görünür.
+let diagEl=null;
+function diag(msg){if(!diagEl){diagEl=document.createElement('div');diagEl.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#8A2A1E;color:#fff;font-size:13px;font-weight:600;padding:12px 14px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.35);line-height:1.4';diagEl.onclick=()=>{diagEl.style.display='none';};document.body.appendChild(diagEl);}diagEl.textContent='🔎 '+msg+'  (kapatmak için dokun)';diagEl.style.display='block';}
+function diagClear(){if(diagEl)diagEl.style.display='none';}
 if(GT&&GT.addListener){
   // Her kelime başında native olay → ekran açıkken okunan kartı vurgula ve ona kaydır.
   GT.addListener('wordStart',ev=>{const i=ev&&ev.index;if(i==null)return;if(i>=0&&i<curCards.length){clr();cur=curCards[i];cur.classList.add('playing');cur.scrollIntoView({behavior:'smooth',block:'center'});}});
   // Döngüsüz okuma bitince butonları sıfırla.
   GT.addListener('done',()=>{playing=false;looping=false;clr();setPlayBtns();});
-  // Servisten teşhis/hata mesajı → ekranda balon.
-  GT.addListener('ttsError',ev=>{toast((ev&&ev.msg)?ev.msg:'Ses/bildirim hatası');});
+  // Servisten teşhis/hata mesajı → kalıcı çubuk.
+  GT.addListener('ttsError',ev=>{diag((ev&&ev.msg)?ev.msg:'Ses/bildirim hatası');});
 }
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}
@@ -108,11 +112,16 @@ function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(g
 // Grubu oku. loop=true ise bitince baştan başlar (sonsuz). GAP: kelimeler arası bekleme (ms).
 function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
   playing=true;looping=!!loop;setPlayBtns();
-  if(GT){   // NATIVE: her kelime için gömülü Cambridge mp3'ü (yoksa cihaz sesi), döngü + bekleme + ekran-kapalı native tarafta
-    curCards=cs;if(synth)synth.cancel();
-    GT.speakGroup({words:cs.map(c=>c.dataset.w),slugs:cs.map(c=>slugOf(c.dataset.w)),rate:RATE,loop:!!loop,gap:GAP});
+  if(GT&&GT.speakGroup){   // NATIVE: gömülü mp3 kuyruğu + servis (bildirim/kulaklık)
+    diagClear();curCards=cs;if(synth)synth.cancel();
+    try{
+      const r=GT.speakGroup({words:cs.map(c=>c.dataset.w),slugs:cs.map(c=>slugOf(c.dataset.w)),rate:RATE,loop:!!loop,gap:GAP});
+      if(r&&r.catch)r.catch(e=>diag('speakGroup reddedildi: '+(e&&e.message?e.message:JSON.stringify(e))));
+    }catch(e){diag('speakGroup istisna: '+e);}
     return;
   }
+  // Buraya düşerse native eklenti YOK → ses web üzerinden çalar; bildirim/kulaklık bu modda olmaz.
+  diag('Native eklenti çalışmıyor (GT yok) — ses web modunda; bildirim/kulaklık bu yüzden yok.');
   // TARAYICI (fallback): her kelimede önce gömülü mp3, yoksa TTS; sonra GAP bekle.
   if(!synth){stop();return;}
   synth.cancel();

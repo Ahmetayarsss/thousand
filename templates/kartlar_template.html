@@ -22,9 +22,13 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .bar i{display:block;height:100%}
 .counter{font-weight:800;color:var(--ink);flex:0 0 auto}
 
-.stage{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding-top:8px;perspective:1200px}
-.card{flex:1 1 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 26px rgba(20,30,50,.07);padding:22px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;user-select:none;position:relative;min-height:0;overflow:auto}
-.card:active{transform:scale(.996)}
+.stage{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding-top:8px}
+/* Deste: üst üste duran kartlar. Her slot konumu/eğimi taşır, içindeki flipper çevrilir. */
+.deck{flex:1 1 auto;position:relative;min-height:0;perspective:1300px;perspective-origin:50% 44%}
+.slot{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .36s cubic-bezier(.22,.61,.36,1),opacity .36s ease;will-change:transform}
+.flipper{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 10px 30px rgba(20,30,50,.11);padding:22px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:auto;cursor:pointer;user-select:none;transition:transform .26s cubic-bezier(.2,.75,.25,1);backface-visibility:hidden;will-change:transform}
+.flipper:empty{box-shadow:0 6px 18px rgba(20,30,50,.06)}
+.flipper:active{filter:brightness(.985)}
 .lvl{position:absolute;top:14px;right:16px;font-size:11px;font-weight:800;color:#fff;background:var(--accent);border-radius:6px;padding:2px 8px}
 .spk{position:absolute;top:12px;left:14px;width:40px;height:40px;border-radius:50%;border:0;background:var(--speak);color:#fff;font-size:18px;display:none;place-items:center;cursor:pointer;box-shadow:0 2px 6px rgba(229,137,43,.4)}
 .spk.show{display:grid}
@@ -75,12 +79,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 </div>
 
 <div class="stage" id="stage">
-  <div class="card" id="card">
-    <span class="lvl" id="lvl"></span>
-    <div class="q" id="q"></div>
-    <div class="tap" id="tap"></div>
-    <div class="ansbox hidden" id="ansbox"></div>
-  </div>
+  <div class="deck" id="deck"></div>
   <div class="controls hidden" id="ctrl">
     <button class="btn again" id="again"></button>
     <button class="btn know" id="know"></button>
@@ -135,66 +134,140 @@ async function sayWord(t){
 let gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0),mode='test',cur=null,side=0;
 let queue=[],testTotal=0,examList=[],examIdx=0,examWrong=[],examTotal=0,examScore=0;
 let tPrompt=0,tReveal=0,suspStreak=0;   // hile tespiti: soru gösterim / çevirme anı, art arda şüpheli sayısı
+const DEPTH=4;            // destede görünen kart sayısı (1 üst + 3 arka)
+let slots=[],topFlip=null,busy=false;   // slots[0]=en üstteki aktif kart; busy=animasyon sürüyor
 
 function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
 function drawBar(){const t=testTotal||GROUPS[gi].items.length,doneN=Math.max(0,t-queue.length);document.getElementById('bar').innerHTML=`<i style="width:${t?doneN/t*100:0}%;background:var(--green)"></i>`;}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function dirFor(){return Math.random()<0.5?'tr2en':'en2tr';}
+// Çevirme yönü: rastgele eksen (yatay Y / dikey X) + işaret → her çevirme farklı yöne.
+function randAxis(){const d=[['Y',1],['Y',-1],['X',1],['X',-1]];return d[(Math.random()*4)|0];}
+function tf(a,deg,sc){return 'rotate'+a[0]+'('+(deg*a[1])+'deg) scale('+sc+')';}
 
-function renderPrompt(){
-  const g=GROUPS[gi];document.getElementById('lvl').textContent=g.level;
-  side=0;const q=document.getElementById('q'),ans=document.getElementById('ansbox');
-  ans.classList.add('hidden');ans.innerHTML='';document.getElementById('tap').style.display='';document.getElementById('ctrl').classList.add('hidden');
-  const front=(cur._dir==='tr2en')?(cur.tr||'—'):cur.w;
-  q.className='q'+((front&&front.length>18)?' small':'');
-  q.textContent=front;
-  tPrompt=performance.now();   // soru gösterildi
-  flipIn(document.getElementById('card'));   // yeni kart çevrilerek gelsin
+/* ================= DESTE (üst üste kartlar) ================= */
+function rndTilt(){return (Math.random()*7-3.5);}   // -3.5°..3.5° hafif eğim
+function rndDx(){return (Math.random()*16-8);}       // -8..8 px hafif kayma
+function scaleAt(d){return 1-d*0.03;}
+// Bir slotu derinliğine göre yerleştir (d=0 en üst: düz; arka kartlar küçük+aşağı+eğik).
+function place(el,d){
+  const tilt=(d===0?0:(el._tilt||0)), dx=(d===0?0:(el._dx||0)), ty=d*10, sc=scaleAt(d);
+  el.style.zIndex=String(DEPTH-d);
+  el.style.transition='transform .36s cubic-bezier(.22,.61,.36,1),opacity .36s ease';
+  el.style.opacity='1';
+  el.style.transform='translate('+dx+'px,'+ty+'px) scale('+sc+') rotate('+tilt+'deg)';
 }
-// Kartı "öbür yüzünden" çevirerek içeri getir.
-function flipIn(card){
-  card.style.transition='none';card.style.transform='rotateY(-90deg)';
-  void card.offsetWidth;   // reflow
-  card.style.transition='transform .17s ease-out';card.style.transform='rotateY(0deg)';
+// Ön yüz (soru) HTML'i: yönüne göre Türkçe ya da İngilizce.
+function faceFront(item){
+  const front=(item._dir==='tr2en')?(item.tr||'—'):item.w;
+  const sm=(front&&front.length>18)?' small':'';
+  return '<span class="lvl">'+GROUPS[gi].level+'</span><div class="q'+sm+'"></div>';
 }
+function fillFront(fl,item){
+  fl.style.transition='none';fl.style.transform='none';
+  fl.innerHTML=faceFront(item);
+  fl.querySelector('.q').textContent=(item._dir==='tr2en')?(item.tr||'—'):item.w;
+}
+// Arka yüz (cevap) HTML'i.
+function faceBack(item){
+  let h='<span class="lvl">'+GROUPS[gi].level+'</span>';
+  if(item._dir==='tr2en'){h+='<div class="mean en">'+item.w+'</div>';if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';}
+  else{if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';h+='<div class="mean tr">'+(item.tr||'—')+'</div>';}
+  if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
+  return h;
+}
+function blankFace(el){const fl=el.querySelector('.flipper');fl.style.transition='none';fl.style.transform='none';fl.innerHTML='';}
+// Desteyi sıfırdan kur.
+function buildDeck(){
+  const deck=document.getElementById('deck');deck.innerHTML='';slots=[];
+  for(let d=0;d<DEPTH;d++){
+    const slot=document.createElement('div');slot.className='slot';
+    const fl=document.createElement('div');fl.className='flipper';slot.appendChild(fl);
+    slot._tilt=rndTilt();slot._dx=rndDx();
+    deck.appendChild(slot);slots.push(slot);
+  }
+  for(let d=0;d<DEPTH;d++){blankFace(slots[d]);place(slots[d],d);}
+}
+// Üst kartı aktif et: tıklama bağla, sayaç/çubuğu yenile.
+function bindTop(){
+  topFlip=slots[0].querySelector('.flipper');side=0;
+  document.getElementById('ctrl').classList.add('hidden');
+  if(mode==='test'){drawBar();document.getElementById('counter').textContent=queue.length+' kaldı';}
+  else document.getElementById('counter').textContent=Math.min(examIdx+1,examTotal)+'/'+examTotal;
+}
+// İlk kartı (fırlatma olmadan) göster.
+function showFirst(){
+  if(mode==='test'){ if(!queue.length)return testDone(); cur=queue.shift(); if(!cur._lockDir)cur._dir=dirFor(); }
+  else { if(examIdx>=examList.length)return examDone(); cur=examList[examIdx]; cur._dir=dirFor(); }
+  fillFront(slots[0].querySelector('.flipper'),cur);
+  tPrompt=performance.now();bindTop();
+}
+// Üstteki kartı çevirerek cevabı göster (arkadaki kart kenara dönünce görünür).
 function reveal(){
-  if(side===1)return;side=1;tReveal=performance.now();
-  const card=document.getElementById('card');
-  card.style.transition='transform .16s ease-in';card.style.transform='rotateY(90deg)';   // kenara dön
+  if(side===1||busy)return;side=1;tReveal=performance.now();
+  const fl=topFlip,a=randAxis();
+  fl.style.transition='transform .2s cubic-bezier(.55,.06,.9,.5)';
+  fl.style.transform=tf(a,90,.97);                       // kenara dön
   setTimeout(()=>{
-    document.getElementById('tap').style.display='none';
-    const ans=document.getElementById('ansbox');let h='';
-    if(cur._dir==='tr2en'){h+=`<div class="mean en">${cur.w}</div>`;if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;}
-    else{if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;h+=`<div class="mean tr">${cur.tr||'—'}</div>`;}
-    if(cur.ex&&cur.ex.length)cur.ex.forEach(s=>{h+=`<div class="ex">${s}</div>`;});
-    ans.innerHTML=h;ans.classList.remove('hidden');
+    fl.innerHTML=faceBack(cur);
     document.getElementById('ctrl').classList.remove('hidden');
-    flipIn(card);   // cevap yüzü çevrilerek gelsin
-  },160);
+    fl.style.transition='none';fl.style.transform=tf(a,-90,.97);
+    void fl.offsetWidth;
+    fl.style.transition='transform .28s cubic-bezier(.2,.75,.25,1)';
+    fl.style.transform=tf(a,0,1);                         // aynı yönde dönüşü tamamla → cevap
+  },200);
+}
+/* Üst kartı gönder + desteyi bir öne kaydır + sıradakini yükselt.
+   out: 'left'|'right' (fırlat) | 'sink' (destenin altına in). next: sıradaki kelime ya da null. */
+function advanceDeck(out,next){
+  if(busy)return;busy=true;
+  const leaving=slots[0];
+  if(next)fillFront(slots[1].querySelector('.flipper'),next);   // yükselen kart içeriği (yükselirken görünür)
+  leaving.style.transition='transform .5s cubic-bezier(.4,.1,.28,1),opacity .5s ease';
+  if(out==='sink'){ leaving.style.transform='translateY(46px) scale('+scaleAt(DEPTH)+')'; leaving.style.opacity='0'; }
+  else{ const s=(out==='left'?-1:1); leaving.style.transform='translate('+(s*135)+'%,-6%) rotate('+(s*22)+'deg)'; leaving.style.opacity='0'; }
+  for(let d=1;d<DEPTH;d++)place(slots[d],d-1);             // arkadakiler bir kademe öne
+  setTimeout(()=>{
+    slots.shift();                                        // giden kartı listeden çıkar
+    leaving.style.transition='none';blankFace(leaving);leaving.style.opacity='1';
+    leaving._tilt=rndTilt();leaving._dx=rndDx();
+    slots.push(leaving);place(leaving,DEPTH-1);           // en alta boş kart olarak ekle
+    busy=false;
+    if(next){cur=next;side=0;tPrompt=performance.now();bindTop();}
+    else{ mode==='test'?testDone():examDone(); }
+  },320);
 }
 
-/* ---- TEST (çalışma): grubun tüm kelimelerini serbest çalış — aralıklı tekrar/günlük limit yok ---- */
+/* ---- TEST (çalışma): grubun tüm kelimelerini serbest çalış ---- */
 function startTest(){mode='test';document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
   document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';
   const g=GROUPS[gi];queue=shuffle(g.items.slice());testTotal=queue.length;
-  drawBar();nextTest();}
-function nextTest(){drawBar();
-  document.getElementById('counter').textContent=queue.length+' kaldı';
-  if(!queue.length){return testDone();}
-  cur=queue.shift();cur._dir=dirFor();renderPrompt();}
-function gradeTest(know){if(checkSpeed())return;if(!know)queue.push(cur);nextTest();}   // "Tekrar" → bu turda sona ekle (kayıt yok)
+  queue.forEach(it=>{it._lockDir=false;});   // yeni test: yön kilitlerini sıfırla
+  busy=false;buildDeck();showFirst();}
+function gradeTest(know){
+  if(busy)return;if(checkSpeed())return;
+  if(!know)cur._lockDir=true;                 // bilemedin → yön kilitlenir, kart aynı yönle geri gelir
+  if(!know)queue.push(cur);                   // desteye geri (altına)
+  let next=null;
+  if(queue.length){next=queue.shift();if(!next._lockDir)next._dir=dirFor();}
+  // Bildim → sağa/sola fırlat; Bilemedim → destenin altına in.
+  advanceDeck(know?(Math.random()<.5?'left':'right'):'sink',next);
+}
 function testDone(){showResult(String(testTotal),'kelime çalışıldı','Bu bölümü baştan sona çalıştın. 👏',[],true);}
 
 /* ---- EXAM ---- */
 function startExam(){mode='exam';document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
   document.getElementById('again').textContent='Bilemedim';document.getElementById('know').textContent='Bildim';
   const g=GROUPS[gi];examList=shuffle(g.items.slice());examIdx=0;examWrong=[];examTotal=examList.length;examScore=0;
-  document.getElementById('bar').innerHTML='';nextExam();}
-function nextExam(){document.getElementById('counter').textContent=(examIdx+1)+'/'+examTotal;
-  if(examIdx>=examList.length)return examDone();
-  cur=examList[examIdx];cur._dir=dirFor();renderPrompt();}
-function gradeExam(correct){if(checkSpeed())return;
-  if(correct){examScore++;}else{examWrong.push(cur);}examIdx++;nextExam();}
+  document.getElementById('bar').innerHTML='';busy=false;buildDeck();showFirst();}
+function gradeExam(correct){
+  if(busy)return;if(checkSpeed())return;
+  if(correct){examScore++;}else{examWrong.push(cur);}examIdx++;
+  let next=null;
+  if(examIdx<examList.length){next=examList[examIdx];next._dir=dirFor();}
+  // Sınavda: bildim → sağa, bilemedim → sola (iki ayrı desteye ayrılır gibi).
+  advanceDeck(correct?'right':'left',next);
+}
 
 /* ---- Hile yakalama: test + sınavda geçerli; kademeli mesaj; 4.'ten itibaren mevcut turu sıfırlar (gelişim korunur) ---- */
 const CKEY="ox3000_cheat_v1";
@@ -258,13 +331,13 @@ function showResult(big,small,msg,wlHtml,isTest){
 
 function start(){document.getElementById('resultbox').classList.add('hidden');(mode==='test'?startTest:startExam)();}
 document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
-document.getElementById('card').addEventListener('click',()=>{reveal();sayWord(cur.w);});
+document.getElementById('deck').addEventListener('click',e=>{if(busy||side===1)return;if(slots[0]&&slots[0].contains(e.target)){reveal();sayWord(cur.w);}});
 document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
 document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
 document.getElementById('r-again').addEventListener('click',start);
 document.getElementById('r-study').addEventListener('click',()=>{mode='test';document.querySelectorAll('#moderow button').forEach(x=>x.classList.toggle('on',x.dataset.m==='test'));
-  queue=shuffle(examWrong.slice());testTotal=queue.length;document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
-  document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';nextTest();});
+  queue=shuffle(examWrong.slice());testTotal=queue.length;queue.forEach(it=>{it._lockDir=false;});document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
+  document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';busy=false;buildDeck();showFirst();});
 document.getElementById('r-next').addEventListener('click',()=>{location.href='index.html';});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
 // Tekrar butonundan gelindiyse (?exam=1) doğrudan sınav modunda başla

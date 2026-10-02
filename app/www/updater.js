@@ -16,7 +16,7 @@
  * sürümle sorunsuz çalışmaya devam eder. Tarayıcıda (native değil) hiçbir şey yapmaz.
  */
 (function () {
-  var VER = 1790951672;
+  var VER = 1790952525;
   var Cap = window.Capacitor;
   var native = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
   if (!native) return;
@@ -60,16 +60,35 @@
   } catch (e) {}
 
   // 2) Arka planda güncelleme kontrolü + indirme.
+  //    İki kaynak: raw.githubusercontent (commit'li dosya, CORS dostu, yönlendirme
+  //    yok) ÖNCE; olmazsa release varlığı. ?ts yok (release indirmesini bozuyordu).
+  var RAW = "https://raw.githubusercontent.com/Ahmetayarsss/thousand/refs/heads/claude/oxford-3000-pronunciation-defs-inzs33/";
   var REL = "https://github.com/Ahmetayarsss/thousand/releases/download/apk-latest/";
+  var lastResp = "";
 
-  async function httpGetText(Http, url) {
-    // Önce patched fetch (CapacitorHttp enabled → native, CORS yok); olmazsa eklenti API'si.
+  async function oneGet(url) {
     try {
-      var r = await fetch(url, { headers: { "Cache-Control": "no-cache" } });
-      if (r && r.ok) return await r.text();
+      var r = await fetch(url, { cache: "no-store" });
+      if (r && r.ok) { var t = await r.text(); if (t) return t; }
     } catch (e) {}
-    var res = await Http.request({ url: url, method: "GET", responseType: "text" });
-    return "" + (res && res.data != null ? res.data : "");
+    try {
+      var H = plugin("CapacitorHttp");
+      if (H) {
+        var res = await H.request({ url: url, method: "GET", responseType: "text", headers: { "Cache-Control": "no-cache" } });
+        var d = (res && res.data != null) ? ("" + res.data) : "";
+        if (d) return d;
+      }
+    } catch (e) {}
+    return "";
+  }
+  // name'i önce raw'dan, olmazsa release'ten çek; doğrulamadan geçeni döndür.
+  async function getText(name, validate) {
+    var srcs = [RAW + name, REL + name];
+    for (var i = 0; i < srcs.length; i++) {
+      var t = await oneGet(srcs[i]);
+      if (t) { lastResp = t; if (validate(t)) return t; }
+    }
+    return "";
   }
 
   function toast(msg, color) {
@@ -85,28 +104,29 @@
   async function check() {
     var reached = "başlangıç";
     try {
-      var Http = plugin("CapacitorHttp");
       var Fs = plugin("Filesystem");
-      if (!Http) { toast("Güncelleme: HTTP eklentisi yok", "#B83E38"); return; }
       if (!Fs) { toast("Güncelleme: Filesystem yok", "#B83E38"); return; }
 
-      reached = "sürüm sorgu";
-      var vtxt = await httpGetText(Http, REL + "web-version.txt?ts=" + Date.now());
+      reached = "sürüm";
+      var vtxt = await getText("web-version.txt", function (s) {
+        var n = parseInt(("" + s).trim(), 10); return n > 0 && ("" + s).trim().length < 24;
+      });
       var remote = parseInt((vtxt || "").trim(), 10);
-      if (!remote) { toast("Güncelleme: sürüm okunamadı", "#B83E38"); return; }
+      if (!remote) { toast("Sürüm okunamadı · gelen: «" + ("" + (lastResp || "boş")).slice(0, 40) + "»", "#B83E38"); return; }
 
       var applied = 0;
       try { var a = JSON.parse(localStorage.getItem("ox_webupd") || "{}"); applied = a.ver || 0; } catch (e) {}
       if (remote <= Math.max(VER, applied)) return; // zaten güncel (sessiz)
 
       toast("Güncelleme indiriliyor…");
-      reached = "paket indir";
-      var jtxt = await httpGetText(Http, REL + "web.json?ts=" + Date.now());
-      reached = "paket çöz";
+      reached = "paket";
+      var jtxt = await getText("web.json", function (s) { return ("" + s).charAt(0) === "{"; });
+      if (!jtxt) { toast("Paket inmedi · gelen: «" + ("" + (lastResp || "boş")).slice(0, 40) + "»", "#B83E38"); return; }
+      reached = "çöz";
       var files = JSON.parse(jtxt); // { "index.html": "...", ... }
       if (!files || !files["index.html"]) { toast("Güncelleme: paket bozuk", "#B83E38"); return; }
 
-      reached = "dosya yaz";
+      reached = "yaz";
       var dir = "webupd/v" + remote;
       for (var name in files) {
         if (!Object.prototype.hasOwnProperty.call(files, name)) continue;

@@ -118,6 +118,23 @@ jobs:
       - name: APK'yı sabit adlandır
         run: cp app/android/app/build/outputs/apk/debug/app-debug.apk Oxford3000.apk
 
+      - name: Web güncelleme paketini üret (web.json)
+        run: |
+          python3 - <<'PY'
+          import json, os
+          base = "app/www"
+          names = ["index.html","kartlar.html","sozluk.html","istatistik.html","tts-bridge.js","progress.js","updater.js"]
+          d = {}
+          for n in names:
+              p = os.path.join(base, n)
+              if os.path.exists(p):
+                  with open(p, encoding="utf-8") as f:
+                      d[n] = f.read()
+          with open("web.json", "w", encoding="utf-8") as f:
+              json.dump(d, f, ensure_ascii=False)
+          print("web.json:", os.path.getsize("web.json"), "bayt,", len(d), "dosya")
+          PY
+
       - name: Release olarak yayınla (apk-latest)
         uses: softprops/action-gh-release@v2
         with:
@@ -128,7 +145,7 @@ jobs:
           # tekrar kurmadan arayüzü günceller). build_all.py üretir, repoda tutulur.
           files: |
             Oxford3000.apk
-            web.json.gz
+            web.json
             web-version.txt
           body: |
             Otomatik derlenen debug APK (her push'ta güncellenir).

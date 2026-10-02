@@ -28,8 +28,21 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .slot{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .38s cubic-bezier(.22,.61,.36,1);will-change:transform}
 .flipper{position:absolute;inset:0;background:var(--card);border:1px solid #c7d2e3;border-radius:20px;box-shadow:0 7px 20px rgba(20,30,50,.13),0 1px 2px rgba(20,30,50,.09);overflow:hidden;cursor:pointer;user-select:none;transition:transform .26s cubic-bezier(.2,.9,.3,1.2);backface-visibility:hidden;will-change:transform}
 .flipper:active{filter:brightness(.98)}
-/* İç çerçeve: yazı karta "yapışık" dursun diye ince, karta gömülü bir çerçeve. */
-.frame{position:absolute;inset:11px;border:1px solid #e6ebf3;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;overflow:auto;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.6)}
+/* Dekoratif çerçeve: köşe motifli, çift çizgili süslü kenarlık (karta gömülü). */
+.frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink)}
+.frame .edge{position:absolute}
+.frame .edge.t{top:4px;height:5px;left:40px;right:40px;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+.frame .edge.b{bottom:4px;height:5px;left:40px;right:40px;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+.frame .edge.l{left:4px;width:5px;top:40px;bottom:40px;border-left:1.5px solid var(--ink);border-right:1.5px solid var(--ink)}
+.frame .edge.r{right:4px;width:5px;top:40px;bottom:40px;border-left:1.5px solid var(--ink);border-right:1.5px solid var(--ink)}
+.frame .corner{position:absolute;width:44px;height:44px}
+.frame .corner svg{width:100%;height:100%;display:block}
+.frame .corner.tl{top:0;left:0}
+.frame .corner.tr{top:0;right:0;transform:scaleX(-1)}
+.frame .corner.bl{bottom:0;left:0;transform:scaleY(-1)}
+.frame .corner.br{bottom:0;right:0;transform:scale(-1,-1)}
+/* Yazı alanı: çerçevenin içinde, sabit konumda. */
+.content{position:absolute;inset:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:auto}
 /* Karton kıvrılmalı fırlatma/indirme — düz plaka değil, hafif esner. */
 @keyframes flR{0%{transform:translate(0,0) rotate(0) scale(1);opacity:1}
   20%{transform:translate(-4%,-2%) rotate(-5deg) scale(1.025)}
@@ -43,7 +56,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .slot.fl-right{animation:flR .5s cubic-bezier(.42,.03,.3,1) forwards}
 .slot.fl-left{animation:flL .5s cubic-bezier(.42,.03,.3,1) forwards}
 .slot.fl-sink{animation:snk .46s cubic-bezier(.5,.04,.4,1) forwards}
-.lvl{position:absolute;top:14px;right:16px;font-size:11px;font-weight:800;color:#fff;background:var(--accent);border-radius:6px;padding:2px 8px}
+.lvl{position:absolute;top:2px;right:2px;font-size:11px;font-weight:800;color:#fff;background:var(--accent);border-radius:6px;padding:2px 8px}
 .spk{position:absolute;top:12px;left:14px;width:40px;height:40px;border-radius:50%;border:0;background:var(--speak);color:#fff;font-size:18px;display:none;place-items:center;cursor:pointer;box-shadow:0 2px 6px rgba(229,137,43,.4)}
 .spk.show{display:grid}
 .spk:active{transform:scale(.92)}
@@ -58,7 +71,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .controls{flex:0 0 auto;display:flex;gap:10px;margin-top:12px}
 .btn{flex:1;border:0;border-radius:14px;padding:16px 0;font-size:15.5px;font-weight:800;cursor:pointer;color:#fff}
 .btn:active{transform:translateY(1px)}
-.btn.again{background:var(--red)} .btn.know{background:var(--green)}
+.btn.again{background:var(--red)} .btn.know{background:var(--green)} .btn.open{background:var(--accent)}
 .hidden{display:none!important}
 .cheat{position:fixed;inset:0;z-index:9999;background:#fff;display:none;align-items:center;justify-content:center;padding:34px;text-align:center}
 .cheat.show{display:flex}
@@ -94,9 +107,10 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 
 <div class="stage" id="stage">
   <div class="deck" id="deck"></div>
-  <div class="controls hidden" id="ctrl">
-    <button class="btn again" id="again"></button>
-    <button class="btn know" id="know"></button>
+  <div class="controls" id="ctrl">
+    <button class="btn open" id="open">Aç</button>
+    <button class="btn again hidden" id="again"></button>
+    <button class="btn know hidden" id="know"></button>
   </div>
 </div>
 
@@ -170,7 +184,10 @@ function place(el,d){
   el.style.transition='transform .38s cubic-bezier(.22,.61,.36,1)';
   el.style.transform='translate('+dx+'px,'+ty+'px) scale('+sc+') rotate('+tilt+'deg)';
 }
-function frameOpen(){return '<div class="frame"><span class="lvl">'+GROUPS[gi].level+'</span>';}
+// Dekoratif çerçeve (köşe motifli, çift çizgili). Köşe SVG'si CSS ile döndürülür.
+var CORNER='<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M44 4 H17 C10 4 4 10 4 17 V44"/><path d="M44 9 H19.5 C14 9 9 14 9 19.5 V44"/><path d="M17 4 C17 10.5 12.5 15 7 16"/><circle cx="12.5" cy="12.5" r="2" stroke-width="1.2"/></svg>';
+var FRAME='<div class="frame"><span class="edge t"></span><span class="edge b"></span><span class="edge l"></span><span class="edge r"></span><span class="corner tl">'+CORNER+'</span><span class="corner tr">'+CORNER+'</span><span class="corner bl">'+CORNER+'</span><span class="corner br">'+CORNER+'</span></div>';
+function lvlTag(){return '<span class="lvl">'+GROUPS[gi].level+'</span>';}
 // Ön yüz (soru): yönüne göre Türkçe ya da İngilizce. Arka kartlar da bunu gösterir.
 function setFront(slot,item){
   const fl=slot.querySelector('.flipper');
@@ -178,16 +195,22 @@ function setFront(slot,item){
   if(!item){slot.style.visibility='hidden';fl.innerHTML='';slot._item=null;return;}
   slot.style.visibility='visible';slot._item=item;
   const front=(item._dir==='tr2en')?(item.tr||'—'):item.w;
-  fl.innerHTML=frameOpen()+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div></div>';
+  fl.innerHTML=FRAME+'<div class="content">'+lvlTag()+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div></div>';
   fl.querySelector('.q').textContent=front;
 }
 // Arka yüz (cevap).
 function setBack(fl,item){
-  let h=frameOpen();
+  let h='<div class="content">'+lvlTag();
   if(item._dir==='tr2en'){h+='<div class="mean en">'+item.w+'</div>';if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';}
   else{if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';h+='<div class="mean tr">'+(item.tr||'—')+'</div>';}
   if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
-  fl.innerHTML=h+'</div>';
+  fl.innerHTML=FRAME+h+'</div>';
+}
+// Buton satırı: açılmadan önce tek geniş "Aç"; açıldıktan sonra iki puan butonu.
+function setCtrl(revealed){
+  document.getElementById('open').classList.toggle('hidden', revealed);
+  document.getElementById('again').classList.toggle('hidden', !revealed);
+  document.getElementById('know').classList.toggle('hidden', !revealed);
 }
 function ensureDir(item){if(item&&!item._dir)item._dir=dirFor();return item;}
 // Belirli bir derinlikteki (ileriye bakış) kelime: k=0 üstteki, k>=1 arkadakiler.
@@ -204,7 +227,7 @@ function buildDeck(){
     slot._tilt=rndTilt();slot._dx=rndDx();deck.appendChild(slot);slots.push(slot);
   }
   for(let d=0;d<DEPTH;d++){setFront(slots[d],ensureDir(peek(d)));place(slots[d],d);}
-  side=0;topFlip=slots[0].querySelector('.flipper');document.getElementById('ctrl').classList.add('hidden');
+  side=0;topFlip=slots[0].querySelector('.flipper');setCtrl(false);
   tPrompt=performance.now();refreshStatus();
 }
 function refreshStatus(){
@@ -219,7 +242,7 @@ function reveal(){
   fl.style.transform=tf(a,90,.9,a[1]*7);                  // kenara dön + hafif kıvrıl
   setTimeout(()=>{
     setBack(fl,cur);
-    document.getElementById('ctrl').classList.remove('hidden');
+    setCtrl(true);
     fl.style.transition='none';fl.style.transform=tf(a,-90,.9,-a[1]*7);
     void fl.offsetWidth;
     fl.style.transition='transform .3s cubic-bezier(.2,.9,.3,1.25)';   // hafif yaylanma (esnek his)
@@ -243,7 +266,7 @@ function advanceDeck(out){
     setFront(leaving,back);
     slots.push(leaving);void leaving.offsetWidth;place(leaving,DEPTH-1);
     busy=false;
-    if(cur){side=0;topFlip=slots[0].querySelector('.flipper');document.getElementById('ctrl').classList.add('hidden');tPrompt=performance.now();refreshStatus();}
+    if(cur){side=0;topFlip=slots[0].querySelector('.flipper');setCtrl(false);tPrompt=performance.now();refreshStatus();}
     else{ mode==='test'?testDone():examDone(); }
   },470);
 }
@@ -344,6 +367,7 @@ function showResult(big,small,msg,wlHtml,isTest){
 function start(){document.getElementById('resultbox').classList.add('hidden');(mode==='test'?startTest:startExam)();}
 document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
 document.getElementById('deck').addEventListener('click',e=>{if(busy||!cur)return;if(slots[0]&&slots[0].contains(e.target)){if(side===0)reveal();sayWord(cur.w);}});
+document.getElementById('open').addEventListener('click',()=>{if(busy||!cur||side===1)return;reveal();sayWord(cur.w);});
 document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
 document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
 document.getElementById('r-again').addEventListener('click',start);

@@ -46,9 +46,17 @@ def write_web_bundle():
     upd = (ROOT / "templates" / "updater.js").read_text(encoding="utf-8")
     upd = upd.replace("__WEBVER__", str(ver))
     (ROOT / "app/www/updater.js").write_text(upd, encoding="utf-8")
+    # web.json: ses HARİÇ sayfaların {ad: içerik} JSON'u. Hem release'e yüklenir
+    # hem de repoda tutulur ki raw.githubusercontent'ten de çekilebilsin.
+    bundle = {}
+    for name in WEB_BUNDLE_FILES:
+        p = ROOT / "app/www" / name
+        if p.exists():
+            bundle[name] = p.read_text(encoding="utf-8")
+    (ROOT / "web.json").write_text(json.dumps(bundle, ensure_ascii=False), encoding="utf-8")
     (ROOT / "web-version.txt").write_text(str(ver), encoding="utf-8")
-    print(f"web paketi: sürüm {ver} (updater.js + web-version.txt; "
-          f"web.json CI'da üretilir, {len(WEB_BUNDLE_FILES)} dosya)")
+    print(f"web paketi: sürüm {ver}, web.json {(ROOT / 'web.json').stat().st_size} bayt, "
+          f"{len(bundle)} dosya")
 
 ENRICH_MODS = ["g2", "g3", "g4", "g5", "g6", "g7", "g8", "g9", "g11", "g12", "g13", "g14", "g15", "g16", "g17", "g18", "g19", "g20", "g21", "g22", "g23", "g24", "g25", "g26", "g27", "g28", "g29", "g30"]
 

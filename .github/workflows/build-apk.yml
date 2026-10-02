@@ -124,7 +124,12 @@ jobs:
           tag_name: apk-latest
           name: "Oxford 3000 — son APK"
           prerelease: true
-          files: Oxford3000.apk
+          # web.json.gz + web-version.txt: uygulama içi güncelleme paketi (APK'yı
+          # tekrar kurmadan arayüzü günceller). build_all.py üretir, repoda tutulur.
+          files: |
+            Oxford3000.apk
+            web.json.gz
+            web-version.txt
           body: |
             Otomatik derlenen debug APK (her push'ta güncellenir).
             Telefona kurmak için: indir → aç → "bilinmeyen kaynaklara izin ver".

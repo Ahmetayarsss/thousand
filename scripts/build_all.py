@@ -12,14 +12,49 @@
 Yeni bir grup zenginleştirildiğinde: scripts/enrich/gN.py oluştur ve
 aşağıdaki ENRICH_MODS listesine "gN" ekle, sonra bu scripti çalıştır.
 """
+import gzip
 import importlib
 import json
 import re
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts" / "enrich"))
+
+# Uygulama sayfalarının <head>'ine eklenenler (sıra önemli: güncelleyici en önce,
+# yönlendirme kararını diğer scriptlerden önce versin).
+APP_HEAD = '<script src="updater.js"></script><script src="tts-bridge.js"></script>'
+
+# Uygulama içi güncelleme paketine giren dosyalar (ses HARİÇ — ses APK'da gömülü).
+WEB_BUNDLE_FILES = [
+    "index.html", "kartlar.html", "sozluk.html", "istatistik.html",
+    "tts-bridge.js", "progress.js", "updater.js",
+]
+
+
+def write_web_bundle():
+    """updater.js (sürümlü) + web.json.gz + web-version.txt üretir.
+
+    web.json.gz: app/www'daki sayfaların (ses hariç) {ad: içerik} JSON'u, gzip'li.
+    Uygulama bunu indirip cihaza açar; yeni APK kurmadan arayüz güncellenir.
+    Sürüm (VER) her derlemede artan bir sayıdır (derleme zamanı, saniye).
+    """
+    ver = int(time.time())
+    upd = (ROOT / "templates" / "updater.js").read_text(encoding="utf-8")
+    upd = upd.replace("__WEBVER__", str(ver))
+    (ROOT / "app/www/updater.js").write_text(upd, encoding="utf-8")
+    bundle = {}
+    for name in WEB_BUNDLE_FILES:
+        p = ROOT / "app/www" / name
+        if p.exists():
+            bundle[name] = p.read_text(encoding="utf-8")
+    blob = json.dumps(bundle, ensure_ascii=False).encode("utf-8")
+    (ROOT / "web.json.gz").write_bytes(gzip.compress(blob, 9))
+    (ROOT / "web-version.txt").write_text(str(ver), encoding="utf-8")
+    print(f"web paketi: sürüm {ver}, {len(WEB_BUNDLE_FILES)} dosya, "
+          f"{len(blob)} bayt → {(ROOT / 'web.json.gz').stat().st_size} bayt (gz)")
 
 ENRICH_MODS = ["g2", "g3", "g4", "g5", "g6", "g7", "g8", "g9", "g11", "g12", "g13", "g14", "g15", "g16", "g17", "g18", "g19", "g20", "g21", "g22", "g23", "g24", "g25", "g26", "g27", "g28", "g29", "g30"]
 
@@ -124,9 +159,12 @@ def render(groups):
         (ROOT / out).write_text(root_html, encoding="utf-8")
         print(f"{out}: {len(root_html)} bayt")
 
-        # 2) Android uygulaması sürümü: TTS köprüsü + yatay kaydırma navigasyonu
-        inject = '<script src="tts-bridge.js"></script>' + swipe_script(*swipe) + "</head>"
+        # 2) Android uygulaması sürümü: güncelleyici + TTS köprüsü + yatay kaydırma
+        #    Ses yolu MUTLAK ('/audio/...') olur: hem gömülü hem güncellenmiş
+        #    (cihaz hafızasından yüklenen) sayfalarda APK içindeki sese erişir.
+        inject = APP_HEAD + swipe_script(*swipe) + "</head>"
         app_html = html.replace("__SOZLUK__", "sozluk.html").replace("</head>", inject, 1)
+        app_html = app_html.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
         app_path = ROOT / app_out
         app_path.parent.mkdir(parents=True, exist_ok=True)
         app_path.write_text(app_html, encoding="utf-8")
@@ -140,8 +178,9 @@ def render(groups):
     (ROOT / "Oxford3000_sozluk.html").write_text(root_soz, encoding="utf-8")
     print(f"Oxford3000_sozluk.html: {len(root_soz)} bayt")
     app_soz = soz_tpl.replace("__BACK__", "index.html").replace(
-        "</head>", '<script src="tts-bridge.js"></script>' + swipe_script("index.html", "") + "</head>", 1
+        "</head>", APP_HEAD + swipe_script("index.html", "") + "</head>", 1
     )
+    app_soz = app_soz.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
     (ROOT / "app/www/sozluk.html").write_text(app_soz, encoding="utf-8")
     print(f"app/www/sozluk.html: {len(app_soz)} bayt")
 
@@ -159,7 +198,7 @@ def render(groups):
     print(f"istatistik.html: {len(root_stats)} bayt")
     # Uygulama sürümü: geri = kartlar.html, sağa kaydır → kartlar
     app_stats = stats_tpl.replace("__BACK__", "kartlar.html").replace(
-        "</head>", swipe_script("", "kartlar.html") + "</head>", 1
+        "</head>", APP_HEAD + swipe_script("", "kartlar.html") + "</head>", 1
     )
     (ROOT / "app/www/istatistik.html").write_text(app_stats, encoding="utf-8")
     print(f"app/www/istatistik.html: {len(app_stats)} bayt")
@@ -177,6 +216,7 @@ def main():
     with open(ROOT / "data" / "all_groups.json", "w", encoding="utf-8") as f:
         json.dump(groups, f, ensure_ascii=False, indent=1)
     render(groups)
+    write_web_bundle()   # updater.js + web.json.gz + web-version.txt
     done = [g["no"] for g in groups if all(it.get("ok") for it in g["items"])]
     print("okunuşu tam gruplar:", done)
 

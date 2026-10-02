@@ -2,7 +2,7 @@
  * Uygulama içi güncelleme.
  *
  * APK BİR KEZ kurulur (ses dosyaları içinde gömülü kalır). Arayüz (HTML/JS/CSS)
- * daha sonra küçük bir web paketiyle (web.json.gz, ~birkaç yüz KB) güncellenir;
+ * daha sonra küçük bir web paketiyle (web.json, ~2 MB) güncellenir;
  * yeni APK kurmaya gerek kalmaz. Ses hiç yeniden inmez.
  *
  * Çalışma:
@@ -62,16 +62,14 @@
   // 2) Arka planda güncelleme kontrolü + indirme.
   var REL = "https://github.com/Ahmetayarsss/thousand/releases/download/apk-latest/";
 
-  function b64ToU8(b64) {
-    var bin = atob(b64), n = bin.length, a = new Uint8Array(n);
-    for (var i = 0; i < n; i++) a[i] = bin.charCodeAt(i);
-    return a;
-  }
-  async function gunzipToText(u8) {
-    var ds = new DecompressionStream("gzip");
-    var stream = new Blob([u8]).stream().pipeThrough(ds);
-    var buf = await new Response(stream).arrayBuffer();
-    return new TextDecoder("utf-8").decode(buf);
+  async function httpGetText(Http, url) {
+    // Önce patched fetch (CapacitorHttp enabled → native, CORS yok); olmazsa eklenti API'si.
+    try {
+      var r = await fetch(url, { headers: { "Cache-Control": "no-cache" } });
+      if (r && r.ok) return await r.text();
+    } catch (e) {}
+    var res = await Http.request({ url: url, method: "GET", responseType: "text" });
+    return "" + (res && res.data != null ? res.data : "");
   }
 
   function toast(msg, color) {
@@ -85,39 +83,36 @@
   }
 
   async function check() {
-    var reached = "";
+    var reached = "başlangıç";
     try {
       var Http = plugin("CapacitorHttp");
       var Fs = plugin("Filesystem");
-      if (!Http) { return; }
+      if (!Http) { toast("Güncelleme: HTTP eklentisi yok", "#B83E38"); return; }
       if (!Fs) { toast("Güncelleme: Filesystem yok", "#B83E38"); return; }
-      if (typeof DecompressionStream === "undefined") { toast("Güncelleme: tarayıcı çok eski", "#B83E38"); return; }
 
-      reached = "sürüm";
-      var vr = await Http.request({ url: REL + "web-version.txt?ts=" + Date.now(), method: "GET", responseType: "text" });
-      var remote = parseInt(("" + (vr && vr.data || "")).trim(), 10);
-      if (!remote) return;
+      reached = "sürüm sorgu";
+      var vtxt = await httpGetText(Http, REL + "web-version.txt?ts=" + Date.now());
+      var remote = parseInt((vtxt || "").trim(), 10);
+      if (!remote) { toast("Güncelleme: sürüm okunamadı", "#B83E38"); return; }
 
       var applied = 0;
       try { var a = JSON.parse(localStorage.getItem("ox_webupd") || "{}"); applied = a.ver || 0; } catch (e) {}
       if (remote <= Math.max(VER, applied)) return; // zaten güncel (sessiz)
 
       toast("Güncelleme indiriliyor…");
-      reached = "indir";
-      var zr = await Http.request({ url: REL + "web.json.gz?ts=" + Date.now(), method: "GET", responseType: "arraybuffer" });
-      if (!zr || zr.data == null) { toast("Güncelleme: indirme boş", "#B83E38"); return; }
-      reached = "aç";
-      var bytes = (typeof zr.data === "string") ? b64ToU8(zr.data) : new Uint8Array(zr.data);
-      var json = await gunzipToText(bytes);
-      var files = JSON.parse(json); // { "index.html": "...", ... }
+      reached = "paket indir";
+      var jtxt = await httpGetText(Http, REL + "web.json?ts=" + Date.now());
+      reached = "paket çöz";
+      var files = JSON.parse(jtxt); // { "index.html": "...", ... }
       if (!files || !files["index.html"]) { toast("Güncelleme: paket bozuk", "#B83E38"); return; }
 
-      reached = "yaz";
+      reached = "dosya yaz";
       var dir = "webupd/v" + remote;
       for (var name in files) {
         if (!Object.prototype.hasOwnProperty.call(files, name)) continue;
         await Fs.writeFile({ path: dir + "/" + name, data: String(files[name]), directory: "DATA", encoding: "utf8", recursive: true });
       }
+      reached = "konum";
       var uri = (await Fs.getUri({ directory: "DATA", path: dir })).uri;
       var base = Cap.convertFileSrc(uri);
       if (base.slice(-1) !== "/") base += "/";

@@ -22,7 +22,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .bar i{display:block;height:100%}
 .counter{font-weight:800;color:var(--ink);flex:0 0 auto}
 
-.stage{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding-top:8px}
+.stage{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding-top:8px;perspective:1200px}
 .card{flex:1 1 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 26px rgba(20,30,50,.07);padding:22px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;user-select:none;position:relative;min-height:0;overflow:auto}
 .card:active{transform:scale(.996)}
 .lvl{position:absolute;top:14px;right:16px;font-size:11px;font-weight:800;color:#fff;background:var(--accent);border-radius:6px;padding:2px 8px}
@@ -149,15 +149,28 @@ function renderPrompt(){
   q.className='q'+((front&&front.length>18)?' small':'');
   q.textContent=front;
   tPrompt=performance.now();   // soru gösterildi
+  flipIn(document.getElementById('card'));   // yeni kart çevrilerek gelsin
+}
+// Kartı "öbür yüzünden" çevirerek içeri getir.
+function flipIn(card){
+  card.style.transition='none';card.style.transform='rotateY(-90deg)';
+  void card.offsetWidth;   // reflow
+  card.style.transition='transform .17s ease-out';card.style.transform='rotateY(0deg)';
 }
 function reveal(){
-  if(side===1)return;side=1;tReveal=performance.now();document.getElementById('tap').style.display='none';
-  const ans=document.getElementById('ansbox');let h='';
-  if(cur._dir==='tr2en'){h+=`<div class="mean en">${cur.w}</div>`;if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;}
-  else{if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;h+=`<div class="mean tr">${cur.tr||'—'}</div>`;}
-  if(cur.ex&&cur.ex.length)cur.ex.forEach(s=>{h+=`<div class="ex">${s}</div>`;});
-  ans.innerHTML=h;ans.classList.remove('hidden');
-  document.getElementById('ctrl').classList.remove('hidden');
+  if(side===1)return;side=1;tReveal=performance.now();
+  const card=document.getElementById('card');
+  card.style.transition='transform .16s ease-in';card.style.transform='rotateY(90deg)';   // kenara dön
+  setTimeout(()=>{
+    document.getElementById('tap').style.display='none';
+    const ans=document.getElementById('ansbox');let h='';
+    if(cur._dir==='tr2en'){h+=`<div class="mean en">${cur.w}</div>`;if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;}
+    else{if(cur.ok)h+=`<div class="ok">Okunuş: ${cur.ok}</div>`;h+=`<div class="mean tr">${cur.tr||'—'}</div>`;}
+    if(cur.ex&&cur.ex.length)cur.ex.forEach(s=>{h+=`<div class="ex">${s}</div>`;});
+    ans.innerHTML=h;ans.classList.remove('hidden');
+    document.getElementById('ctrl').classList.remove('hidden');
+    flipIn(card);   // cevap yüzü çevrilerek gelsin
+  },160);
 }
 
 /* ---- TEST (çalışma): grubun tüm kelimelerini serbest çalış — aralıklı tekrar/günlük limit yok ---- */

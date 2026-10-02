@@ -29,7 +29,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdro
 .tr{color:var(--tr);font-size:15px;margin-top:4px}
 .en{color:#33414F;font-size:13.5px;margin-top:4px}
 .ex{color:#5B6B7B;font-size:13.5px;font-style:italic;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
-</style><script src="progress.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='index.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div class="wrap">
+</style><script src="progress.js"></script><script src="updater.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='index.html',P='';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div class="wrap">
 <header>
   <div class="title">Sözlük</div>
   <input class="search" id="q" placeholder="" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -62,7 +62,7 @@ function playAudioUrl(url,btn){return new Promise(res=>{
 // 🔊: uygulamaya gömülü Cambridge sesi → yoksa cihaz sesi.
 async function say(w,btn){
   if(synth)synth.cancel();
-  try{if(await playAudioUrl('audio/'+slugOf(w)+'.mp3',btn))return;}catch(e){}
+  try{if(await playAudioUrl('/audio/'+slugOf(w)+'.mp3',btn))return;}catch(e){}
   clrBtn();speak(w);
 }
 

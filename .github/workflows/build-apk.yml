@@ -38,6 +38,11 @@ jobs:
 
       - name: Android SDK kur
         uses: android-actions/setup-android@v3
+        with:
+          # Eylül 2025'te Google eski "tools" paketini depodan kaldırdı; action'ın
+          # varsayılanı onu kurmaya çalışıp patlıyordu. Boş bırakıyoruz; gerekli
+          # paketleri aşağıdaki adım (platform-tools / android-34 / build-tools) kurar.
+          packages: ""
 
       - name: Gerekli SDK paketlerini yükle
         run: |

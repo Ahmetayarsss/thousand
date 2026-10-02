@@ -12,3 +12,6 @@ app/android/captures/
 app/android/local.properties
 app/android/.idea/
 *.iml
+
+# CI teşhis çıktısı (geçici)
+ci-error.log

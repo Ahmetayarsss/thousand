@@ -27,13 +27,8 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .deck{flex:1 1 auto;position:relative;min-height:0;perspective:1400px;perspective-origin:50% 44%}
 .slot{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .38s cubic-bezier(.22,.61,.36,1);will-change:transform}
 /* flipper = 3B kap (iki yüzü taşır, döner). Yüzler (.face) kartın asıl yüzeyi. */
-.flipper{position:absolute;inset:0;transform-style:preserve-3d;cursor:pointer;user-select:none;transition:transform .26s cubic-bezier(.2,.9,.3,1.2);will-change:transform;border-radius:20px;box-shadow:0 8px 22px rgba(20,30,50,.14),0 1px 2px rgba(20,30,50,.09)}
-/* Yüz = saydam 3B kap; kart yüzeyi 3 ŞERİT (üst/orta/alt). Uçlar kavislenir. */
-.face{position:absolute;inset:0;transform-style:preserve-3d}
-.strip{position:absolute;left:0;width:100%;overflow:hidden;background:var(--card);backface-visibility:hidden;-webkit-backface-visibility:hidden;border-left:1px solid #c7d2e3;border-right:1px solid #c7d2e3}
-.strip.s0{border-top:1px solid #c7d2e3;border-radius:20px 20px 0 0;transform-origin:50% 100%}
-.strip.s2{border-bottom:1px solid #c7d2e3;border-radius:0 0 20px 20px;transform-origin:50% 0%}
-.strip .inner{position:absolute;left:0;width:100%}
+.flipper{position:absolute;inset:0;transform-style:preserve-3d;cursor:pointer;user-select:none;transition:transform .26s cubic-bezier(.2,.9,.3,1.2);will-change:transform}
+.face{position:absolute;inset:0;background:var(--card);border:1px solid #c7d2e3;border-radius:20px;box-shadow:0 8px 22px rgba(20,30,50,.14),0 1px 2px rgba(20,30,50,.09);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 /* Dekoratif çerçeve: köşe motifli, çift çizgili süslü kenarlık (karta gömülü). */
 .frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink)}
 .frame .edge{position:absolute}
@@ -208,29 +203,17 @@ function contentBack(item){
   if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
   return h+'</div>';
 }
-// Bir yüzü 3 şeride böler (üst/orta/alt). Her şerit kartın bir dilimini gösterir
-// (overflow:hidden + konum). Düzken kesintisiz birleşir; uçlar (s0/s2)
-// döndürülünce kart gerçekten kavislenir.
-var BAND=[[0,24],[24,52],[76,24]];
-function faceStrips(contentHTML){
-  var inner=FRAME+contentHTML, cls=['s0','s1','s2'], html='';
-  for(var i=0;i<3;i++){
-    var top=BAND[i][0], h=BAND[i][1], itop=-(top/h*100), ih=10000/h;
-    html+='<div class="strip '+cls[i]+'" style="top:'+top+'%;height:'+h+'%">'
-        + '<div class="inner" style="top:'+itop.toFixed(3)+'%;height:'+ih.toFixed(3)+'%">'+inner+'</div></div>';
-  }
-  return html;
-}
-// Kartı kur: iki GERÇEK yüz (her biri 3 şerit). Ön=soru; arka=cevap(reveal'da dolar).
+// Kartı kur: iki GERÇEK yüz. Ön=soru görünür; arka=cevap (reveal'da dolar),
+// 180° ön-döndürülmüş (backface-visibility ile başta gizli).
 function setFront(slot,item){
   const fl=slot.querySelector('.flipper');
   fl.style.transition='none';fl.style.transform='none';fl.style.transformOrigin='center';
   if(!item){slot.style.visibility='hidden';fl.innerHTML='';slot._item=null;return;}
   slot.style.visibility='visible';slot._item=item;
-  fl.innerHTML='<div class="face front">'+faceStrips(contentFront(item))+'</div>'
-             +'<div class="face back" style="transform:rotateX(180deg)"></div>';
-  const w=(item._dir==='tr2en')?(item.tr||'—'):item.w;
-  fl.querySelectorAll('.face.front .q').forEach(function(q){q.textContent=w;});
+  fl.innerHTML='<div class="face front">'+FRAME+contentFront(item)+'</div>'
+             +'<div class="face back" style="transform:rotateX(180deg)">'+FRAME+'</div>';
+  const q=fl.querySelector('.face.front .q');
+  if(q)q.textContent=(item._dir==='tr2en')?(item.tr||'—'):item.w;
 }
 // Buton satırı: açılmadan önce tek geniş "Aç"; açıldıktan sonra iki puan butonu.
 function setCtrl(revealed){
@@ -266,27 +249,26 @@ function refreshStatus(){
 function reveal(rx,ry){
   if(side===1||busy)return;side=1;tReveal=performance.now();
   const fl=topFlip, back=fl.querySelector('.face.back');
-  if(typeof ry!=='number')ry=0.5; ry=Math.max(0,Math.min(1,ry));
-  const dir=(ry>=0.5?1:-1);   // alt bas → öne takla, üst bas → geri takla (eksen: X)
-  // Arka yüzü (cevap) 3 şeritle kur + 180° ön-döndür (flipper 0°'da gizli).
-  back.innerHTML=faceStrips(contentBack(cur));
-  back.style.transition='none'; back.style.transform='rotateX(180deg)';
+  if(typeof rx!=='number')rx=0.5; if(typeof ry!=='number')ry=0.5;
+  rx=Math.max(0,Math.min(1,rx));ry=Math.max(0,Math.min(1,ry));
+  const dx=rx-0.5, dy=ry-0.5;
+  let axis,dir;
+  if(Math.abs(dy)>=Math.abs(dx)){ axis='X'; dir=(dy>=0?1:-1); }  // alt/üst dokunuş → dikey takla
+  else{ axis='Y'; dir=(dx>=0?-1:1); }                            // sağ/sol dokunuş → yatay dönüş
+  // Arka yüzü (cevap) doldur + eksene göre 180° ön-döndür (flipper 0°'da gizli).
+  back.innerHTML=FRAME+contentBack(cur);
+  back.style.transition='none'; back.style.transform='rotate'+axis+'(180deg)';
   void fl.offsetWidth;
-  const s0=fl.querySelectorAll('.strip.s0'), s2=fl.querySelectorAll('.strip.s2');
-  const curl=34;   // uçların kavis açısı
-  // FAZ 1: tam takla 0→90 + UÇLAR KAVİSLENİR (kart bombeli hâle gelir) + GÖLGE koyulaşır.
-  fl.style.transition='transform .95s cubic-bezier(.5,.03,.6,.65), box-shadow .95s ease';
-  fl.style.transform='rotateX('+(dir*90)+'deg)';
-  fl.style.boxShadow='0 30px 52px rgba(20,30,50,.34)';
-  s0.forEach(el=>{el.style.transition='transform .95s cubic-bezier(.4,0,.5,1)';el.style.transform='rotateX('+curl+'deg)';});
-  s2.forEach(el=>{el.style.transition='transform .95s cubic-bezier(.4,0,.5,1)';el.style.transform='rotateX('+(-curl)+'deg)';});
+  const faces=fl.querySelectorAll('.face');
+  // FAZ 1: tam takla 0→90 — GÖLGE koyulaşır (kalkma hissi).
+  fl.style.transition='transform .95s cubic-bezier(.5,.03,.6,.65)';
+  fl.style.transform='rotate'+axis+'('+(dir*90)+'deg)';
+  faces.forEach(f=>{f.style.transition='box-shadow .95s ease';f.style.boxShadow='0 28px 48px rgba(20,30,50,.34)';});
   setTimeout(()=>{
-    // FAZ 2: 90→180 + uçlar düzelir (kart yeniden düz oturur) + gölge söner.
-    fl.style.transition='transform .95s cubic-bezier(.35,.4,.3,1), box-shadow .95s ease';
-    fl.style.transform='rotateX('+(dir*180)+'deg)';
-    fl.style.boxShadow='';
-    s0.forEach(el=>{el.style.transform='rotateX(0deg)';});
-    s2.forEach(el=>{el.style.transform='rotateX(0deg)';});
+    // FAZ 2: 90→180 — kart oturur, gölge söner. Arka yüz (cevap) öne gelir.
+    fl.style.transition='transform .95s cubic-bezier(.35,.4,.3,1)';
+    fl.style.transform='rotate'+axis+'('+(dir*180)+'deg)';
+    faces.forEach(f=>{f.style.boxShadow='';});
   },950);
   setTimeout(()=>{ setCtrl(true); }, 1870);
 }

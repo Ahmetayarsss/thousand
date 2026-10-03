@@ -26,8 +26,9 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 /* Deste: üst üste duran kartlar. Slot konumu/eğimi taşır; içindeki flipper çevrilir. */
 .deck{flex:1 1 auto;position:relative;min-height:0;perspective:1400px;perspective-origin:50% 44%}
 .slot{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .38s cubic-bezier(.22,.61,.36,1);will-change:transform}
-.flipper{position:absolute;inset:0;background:var(--card);border:1px solid #c7d2e3;border-radius:20px;box-shadow:0 7px 20px rgba(20,30,50,.13),0 1px 2px rgba(20,30,50,.09);overflow:hidden;cursor:pointer;user-select:none;transition:transform .26s cubic-bezier(.2,.9,.3,1.2);backface-visibility:hidden;will-change:transform}
-.flipper:active{filter:brightness(.98)}
+/* flipper = 3B kap (iki yüzü taşır, döner). Yüzler (.face) kartın asıl yüzeyi. */
+.flipper{position:absolute;inset:0;transform-style:preserve-3d;cursor:pointer;user-select:none;transition:transform .26s cubic-bezier(.2,.9,.3,1.2);will-change:transform}
+.face{position:absolute;inset:0;background:var(--card);border:1px solid #c7d2e3;border-radius:20px;box-shadow:0 8px 22px rgba(20,30,50,.14),0 1px 2px rgba(20,30,50,.09);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 /* Dekoratif çerçeve: köşe motifli, çift çizgili süslü kenarlık (karta gömülü). */
 .frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink)}
 .frame .edge{position:absolute}
@@ -190,23 +191,29 @@ function place(el,d){
 var CORNER='<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M44 4 H17 C10 4 4 10 4 17 V44"/><path d="M44 9 H19.5 C14 9 9 14 9 19.5 V44"/><path d="M17 4 C17 10.5 12.5 15 7 16"/><circle cx="12.5" cy="12.5" r="2" stroke-width="1.2"/></svg>';
 var FRAME='<div class="frame"><span class="edge t"></span><span class="edge b"></span><span class="edge l"></span><span class="edge r"></span><span class="corner tl">'+CORNER+'</span><span class="corner tr">'+CORNER+'</span><span class="corner bl">'+CORNER+'</span><span class="corner br">'+CORNER+'</span></div>';
 function lvlTag(){return '<span class="lvl">'+GROUPS[gi].level+'</span>';}
-// Ön yüz (soru): yönüne göre Türkçe ya da İngilizce. Arka kartlar da bunu gösterir.
+// Yüz içerikleri.
+function contentFront(item){
+  const front=(item._dir==='tr2en')?(item.tr||'—'):item.w;
+  return '<div class="content">'+lvlTag()+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div></div>';
+}
+function contentBack(item){
+  let h='<div class="content">'+lvlTag();
+  if(item._dir==='tr2en'){h+='<div class="mean en">'+item.w+'</div>';if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';}
+  else{if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';h+='<div class="mean tr">'+(item.tr||'—')+'</div>';}
+  if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
+  return h+'</div>';
+}
+// Kartı kur: iki GERÇEK yüz — ön (soru) görünür, arka (cevap) 180° ön-döndürülmüş
+// (başta gizli). Arka yüzün içeriği açılırken (reveal) doldurulur.
 function setFront(slot,item){
   const fl=slot.querySelector('.flipper');
   fl.style.transition='none';fl.style.transform='none';fl.style.transformOrigin='center';
   if(!item){slot.style.visibility='hidden';fl.innerHTML='';slot._item=null;return;}
   slot.style.visibility='visible';slot._item=item;
-  const front=(item._dir==='tr2en')?(item.tr||'—'):item.w;
-  fl.innerHTML=FRAME+'<div class="content">'+lvlTag()+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div></div>';
-  fl.querySelector('.q').textContent=front;
-}
-// Arka yüz (cevap).
-function setBack(fl,item){
-  let h='<div class="content">'+lvlTag();
-  if(item._dir==='tr2en'){h+='<div class="mean en">'+item.w+'</div>';if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';}
-  else{if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';h+='<div class="mean tr">'+(item.tr||'—')+'</div>';}
-  if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
-  fl.innerHTML=FRAME+h+'</div>';
+  fl.innerHTML='<div class="face front">'+FRAME+contentFront(item)+'</div>'
+             +'<div class="face back" style="transform:rotateX(180deg)">'+FRAME+'</div>';
+  const q=fl.querySelector('.face.front .q');
+  if(q)q.textContent=(item._dir==='tr2en')?(item.tr||'—'):item.w;
 }
 // Buton satırı: açılmadan önce tek geniş "Aç"; açıldıktan sonra iki puan butonu.
 function setCtrl(revealed){
@@ -236,36 +243,26 @@ function refreshStatus(){
   if(mode==='test'){drawBar();document.getElementById('counter').textContent=queue.length+' kaldı';}
   else document.getElementById('counter').textContent=Math.min(examIdx+1,examTotal)+'/'+examTotal;
 }
-// Üstteki kartı aç — GERÇEK KART GİBİ: bastığın KENAR kalkar, menteşe KARŞI kenardadır.
-// Yavaş (net görülsün) + hafif karton bükülmesi + kalkan kenarda gölge.
-// rx,ry: karta göre dokunma oranı (0..1).
+// Üstteki kartı aç — GERÇEK İKİ YÜZLÜ KART, TAM TAKLA (180°). Kart yerinde döner
+// (menteşe merkez), arka yüzü (cevap) öne gelir. Çok yavaş (net görülsün).
+// rx,ry: dokunma yerine göre takla ekseni/yönü (dikey dokunuş→X takla, yatay→Y).
 function reveal(rx,ry){
   if(side===1||busy)return;side=1;tReveal=performance.now();
-  const fl=topFlip;
+  const fl=topFlip, back=fl.querySelector('.face.back');
   if(typeof rx!=='number')rx=0.5; if(typeof ry!=='number')ry=0.5;
   rx=Math.max(0,Math.min(1,rx));ry=Math.max(0,Math.min(1,ry));
   const dx=rx-0.5, dy=ry-0.5;
-  let a, origin;
-  if(Math.abs(dx)>=Math.abs(dy)){           // yatay: dikey eksende (Y) çevir
-    a=['Y', dx>=0?1:-1];                     // bastığın yan (sağ/sol) kalkar
-    origin = dx>=0 ? '0% 50%' : '100% 50%';  // menteşe = KARŞI dikey kenar
-  }else{                                     // dikey: yatay eksende (X) çevir
-    a=['X', dy>=0?-1:1];                      // bastığın (alt/üst) kenar kalkar
-    origin = dy>=0 ? '50% 0%' : '50% 100%';   // menteşe = KARŞI yatay kenar
-  }
-  fl.style.transformOrigin=origin;
-  // 1) bastığın kenar kalkar (kenara dik gelene kadar) — çok yavaş, hafif büküm + gölge.
-  fl.style.transition='transform 1s cubic-bezier(.45,.05,.55,.98), box-shadow 1s ease';
-  fl.style.boxShadow='0 22px 38px rgba(20,30,50,.30)';
-  fl.style.transform=tf(a,90,.97,a[1]*5);
-  setTimeout(()=>{
-    setBack(fl,cur);                          // tam dik anında arka yüze geç
-    setCtrl(true);
-    // 2) düz konuma inerek açılır (arka yüz görünür) — çok yavaş, gölge sönerek.
-    fl.style.transition='transform 1.05s cubic-bezier(.2,.72,.25,1), box-shadow 1.05s ease';
-    fl.style.boxShadow='';
-    fl.style.transform=tf(a,0,1,0);
-  },1000);
+  let axis,dir;
+  if(Math.abs(dy)>=Math.abs(dx)){ axis='X'; dir=(dy>=0?1:-1); }  // alt/üst dokunuş → öne/geri takla
+  else{ axis='Y'; dir=(dx>=0?-1:1); }                            // sağ/sol dokunuş → yatay dönüş
+  // Arka yüzü doldur + eksene göre 180° ön-döndür (flipper 0°'da gizli kalır).
+  back.innerHTML=FRAME+contentBack(cur);
+  back.style.transition='none'; back.style.transform='rotate'+axis+'(180deg)';
+  void fl.offsetWidth;
+  // TAM TAKLA: 180° — çok yavaş.
+  fl.style.transition='transform 1.9s cubic-bezier(.5,.05,.2,1)';
+  fl.style.transform='rotate'+axis+'('+(dir*180)+'deg)';
+  setTimeout(()=>{ setCtrl(true); }, 1850);
 }
 /* Üst kartı gönder (fırlat/indir) + arkadakileri bir öne kaydır + en alta yeni kart.
    Veri (cur/queue/examIdx) ÇAĞRIDAN ÖNCE güncellenir; peek() yeni durumu verir. */

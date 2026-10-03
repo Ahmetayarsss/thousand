@@ -91,7 +91,7 @@
     } catch (e) {}
     return "";
   }
-  function toVer(s) { var n = parseInt(("" + (s || "")).trim(), 10); return (n > 0 && ("" + s).trim().length < 24) ? n : 0; }
+  function toVer(s) { var t = ("" + (s || "")).trim(); return /^\d{1,20}$/.test(t) ? parseInt(t, 10) : 0; } // sadece saf sayı (404 sayfası vb. elenir)
 
   // Sürüm: API (taze) + raw + release → geçerli sayıların EN BÜYÜĞÜ (bayat kaynak eler).
   async function getRemoteVer() {

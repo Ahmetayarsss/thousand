@@ -35,20 +35,16 @@
   /* Köşe ornamenti — tek tasarım, transform ile 4 köşeye simetrik yansır.
      İç border'ın içine, çizgilere çakışmadan yerleşir. */
   .frame .cnr{position:absolute;width:22px;height:22px}
-  .frame .cnr.tl{top:11px;left:11px}
-  .frame .cnr.tr{top:11px;right:11px;transform:scaleX(-1)}
-  .frame .cnr.bl{bottom:11px;left:11px;transform:scaleY(-1)}
-  .frame .cnr.br{bottom:11px;right:11px;transform:scale(-1,-1)}
+  .frame .cnr.tl{top:5px;left:3px}
+  .frame .cnr.tr{top:5px;right:3px;transform:scaleX(-1)}
+  .frame .cnr.bl{bottom:5px;left:3px;transform:scaleY(-1)}
+  .frame .cnr.br{bottom:5px;right:3px;transform:scale(-1,-1)}
   /* çapraz ince yay (flourish): köşeyi kapatan içbükey süs */
   .frame .cnr::before{content:"";position:absolute;top:0;left:0;width:18px;height:18px;
     border-bottom:1.4px solid var(--ink);border-right:1.4px solid var(--ink);border-bottom-right-radius:18px}
   /* dolu nokta — çeyrek çemberin (yayın) tam ortasında, 45° noktasında */
   .frame .cnr b{position:absolute;top:10.7px;left:10.7px;width:4.4px;height:4.4px;
     background:var(--ink);border-radius:50%}
-  .frame .cnr.tl{top:0;left:0}
-  .frame .cnr.tr{top:0;right:0;transform:scaleX(-1)}
-  .frame .cnr.bl{bottom:0;left:0;transform:scaleY(-1)}
-  .frame .cnr.br{bottom:0;right:0;transform:scale(-1,-1)}
 
   /* ---- İÇERİK ---- */
   .lvl{position:absolute;top:28px;right:28px;background:var(--badge);color:#fff;

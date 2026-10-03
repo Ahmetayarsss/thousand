@@ -259,8 +259,8 @@ function reveal(rx,ry){
   back.innerHTML=FRAME+contentBack(cur);
   back.style.transition='none'; back.style.transform='rotate'+axis+'(180deg)';
   void fl.offsetWidth;
-  const other=(axis==='X'?'Y':'X'), bend=dir*6, faces=fl.querySelectorAll('.face');
-  // FAZ 1: 0→90 — kart dik gelene kadar; hafif KARTON BÜKÜLMESİ + GÖLGE koyulaşır.
+  const other=(axis==='X'?'Y':'X'), bend=dir*24, faces=fl.querySelectorAll('.face');
+  // FAZ 1: 0→90 — kart dik gelene kadar; BELİRGİN KARTON BÜKÜLMESİ + GÖLGE koyulaşır.
   fl.style.transition='transform .95s cubic-bezier(.5,.03,.6,.65)';
   fl.style.transform='rotate'+axis+'('+(dir*90)+'deg) rotate'+other+'('+bend+'deg)';
   faces.forEach(f=>{f.style.transition='box-shadow .95s ease';f.style.boxShadow='0 28px 48px rgba(20,30,50,.36)';});

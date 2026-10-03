@@ -263,14 +263,33 @@ function faceCSS(){
 function captureFace(innerHTML,W,H,dpr){
   return new Promise(function(res,rej){
     var dt=document.documentElement.getAttribute('data-theme');
+    // Yazı tipi body'den miras geliyor; foreignObject'te body olmadığından
+    // açıkça sarmalayıcıya veririz (yoksa varsayılan serif'e düşer).
+    var cs=getComputedStyle(document.body);
+    var ff=(cs.fontFamily||'system-ui,sans-serif').replace(/"/g,"'");
+    var col=cs.color||'#1B2430';
     var body='<div xmlns="http://www.w3.org/1999/xhtml" class="capwrap"'+(dt?' data-theme="'+dt+'"':'')
-      +' style="width:'+W+'px;height:'+H+'px;position:relative;overflow:hidden;background:transparent">'
+      +' style="width:'+W+'px;height:'+H+'px;position:relative;overflow:hidden;background:transparent;font-family:'+ff+';color:'+col+';-webkit-font-smoothing:antialiased">'
       +'<style>'+faceCSS()+'</style>'
       +'<div class="flipper" style="position:absolute;inset:0;transform:none">'
       +'<div class="face front" style="position:absolute;inset:0;transform:none;backface-visibility:visible;-webkit-backface-visibility:visible">'
       +innerHTML+'</div></div></div>';
+    // Çerçeve (düz çift kenarlar + köşe motifleri) ÜST SEVİYE SVG olarak çizilir.
+    // foreignObject içindeki iç-içe SVG WebView'de resimleşmediği için köşeler
+    // kaybolmasın diye frame burada, foreignObject'in üstüne konur (kenarlar birebir
+    // örtüşür, köşeler güvenle görünür). Renk --ink'ten alınır.
+    var ink=(getComputedStyle(document.documentElement).getPropertyValue('--ink')||'#1B2430').trim()||'#1B2430';
+    var CI='<path d="M44 4 H17 C10 4 4 10 4 17 V44"/><path d="M44 9 H19.5 C14 9 9 14 9 19.5 V44"/><path d="M17 4 C17 10.5 12.5 15 7 16"/><circle cx="12.5" cy="12.5" r="2" stroke-width="1.2"/>';
+    function L(a,b,c,d){return '<line x1="'+a+'" y1="'+b+'" x2="'+c+'" y2="'+d+'"/>';}
+    var edges=L(53,17,W-53,17)+L(53,22,W-53,22)+L(53,H-17,W-53,H-17)+L(53,H-22,W-53,H-22)
+      +L(17,53,17,H-53)+L(22,53,22,H-53)+L(W-17,53,W-17,H-53)+L(W-22,53,W-22,H-53);
+    var cor='<g transform="translate(13,13)">'+CI+'</g>'
+      +'<g transform="translate('+(W-13)+',13) scale(-1,1)">'+CI+'</g>'
+      +'<g transform="translate(13,'+(H-13)+') scale(1,-1)">'+CI+'</g>'
+      +'<g transform="translate('+(W-13)+','+(H-13)+') scale(-1,-1)">'+CI+'</g>';
+    var frame='<g fill="none" stroke="'+ink+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+edges+cor+'</g>';
     var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'">'
-      +'<foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+body+'</foreignObject></svg>';
+      +'<foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+body+'</foreignObject>'+frame+'</svg>';
     var img=new Image();
     img.onload=function(){
       try{var cv=document.createElement('canvas');cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);

@@ -28,7 +28,8 @@
   /* Kesintisiz ÇİFT yuvarlak çerçeve: iki iç-içe border. Birleşim yeri yok. */
   .frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink);
          border:1.6px solid var(--ink);border-radius:18px}
-  .frame::before{content:"";position:absolute;inset:5px;
+  /* inset: üst/alt 5px (değişmedi), sol/sağ 3px → dikey çizgiler birbirine yakın */
+  .frame::before{content:"";position:absolute;inset:5px 3px;
          border:1.6px solid var(--ink);border-radius:13px}
 
   /* Köşe ornamenti — tek tasarım, transform ile 4 köşeye simetrik yansır.
@@ -42,7 +43,7 @@
   .frame .cnr::before{content:"";position:absolute;top:0;left:0;width:18px;height:18px;
     border-bottom:1.4px solid var(--ink);border-right:1.4px solid var(--ink);border-bottom-right-radius:18px}
   /* dış köşe çaprazında küçük nokta (iki çizgi arasında) */
-  .frame .cnr b{position:absolute;top:-8px;left:-8px;width:3.6px;height:3.6px;
+  .frame .cnr b{position:absolute;top:-3px;left:-3px;width:3.6px;height:3.6px;
     border:1.2px solid var(--ink);border-radius:50%;background:var(--card)}
   .frame .cnr.tl{top:0;left:0}
   .frame .cnr.tr{top:0;right:0;transform:scaleX(-1)}

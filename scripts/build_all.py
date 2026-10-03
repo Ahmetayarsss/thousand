@@ -30,7 +30,7 @@ APP_HEAD = '<script src="updater.js"></script><script src="tts-bridge.js"></scri
 # Uygulama içi güncelleme paketine giren dosyalar (ses HARİÇ — ses APK'da gömülü).
 WEB_BUNDLE_FILES = [
     "index.html", "kartlar.html", "sozluk.html", "istatistik.html",
-    "tts-bridge.js", "progress.js", "updater.js",
+    "tts-bridge.js", "progress.js", "updater.js", "three.min.js",
 ]
 
 
@@ -164,7 +164,8 @@ def render(groups):
         # 2) Android uygulaması sürümü: güncelleyici + TTS köprüsü + yatay kaydırma
         #    Ses yolu MUTLAK ('/audio/...') olur: hem gömülü hem güncellenmiş
         #    (cihaz hafızasından yüklenen) sayfalarda APK içindeki sese erişir.
-        inject = APP_HEAD + swipe_script(*swipe) + "</head>"
+        three = '<script src="three.min.js"></script>' if tpl == "kartlar_template.html" else ""
+        inject = three + APP_HEAD + swipe_script(*swipe) + "</head>"
         app_html = html.replace("__SOZLUK__", "sozluk.html").replace("</head>", inject, 1)
         app_html = app_html.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
         app_path = ROOT / app_out

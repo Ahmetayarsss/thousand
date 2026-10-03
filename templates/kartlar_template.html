@@ -304,7 +304,10 @@ function captureFace(innerHTML,W,H,dpr){
 }
 function mkTex(cv,maxA,back){
   var t=new THREE.CanvasTexture(cv);
-  t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;t.generateMipmaps=false;t.anisotropy=maxA;
+  // Anizotropik mipmap: kart kıvrılınca kenarda doku sıkışsa da çizgiler net/ince
+  // kalır (mipmap kapalıyken o bölge aliasing'den kalın görünüyordu).
+  t.minFilter=THREE.LinearMipmapLinearFilter;t.magFilter=THREE.LinearFilter;
+  t.generateMipmaps=true;t.anisotropy=maxA;
   if(back){t.wrapS=THREE.RepeatWrapping;t.repeat.x=-1;t.offset.x=1;}  // arka yüz yatay aynalanmasın
   return t;
 }
@@ -338,7 +341,7 @@ function glFlip(item,rx){
       g.cv.style.left=(r.left-dr.left)+'px';g.cv.style.top=(r.top-dr.top)+'px';g.cv.style.width=W+'px';g.cv.style.height=H+'px';
       g.rn.setPixelRatio(dpr);g.rn.setSize(W,H,false);
       if(g.grp){g.sc.remove(g.grp);if(g.geo)g.geo.dispose();if(g.mesh)g.mesh.material.dispose();}
-      g.geo=new THREE.PlaneGeometry(W,H,30,1);g.base=g.geo.attributes.position.array.slice();
+      g.geo=new THREE.PlaneGeometry(W,H,64,1);g.base=g.geo.attributes.position.array.slice();  // daha çok parça → pürüzsüz kavis
       var mat=new THREE.MeshBasicMaterial({map:tF,side:THREE.DoubleSide,transparent:true});
       g.mesh=new THREE.Mesh(g.geo,mat);
       var hingeLeft=(rx>=0.5),s=hingeLeft?-1:1;   // sağ'a bas → sol menteşe

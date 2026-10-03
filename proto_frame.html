@@ -24,24 +24,26 @@
     box-shadow:0 10px 26px rgba(20,30,50,.16);
   }
 
-  /* ---- SAF CSS SÜSLÜ ÇERÇEVE (hiç SVG yok) ---- */
+  /* ---- SAF CSS SÜSLÜ ÇERÇEVE (hiç SVG yok, 4 köşe tam simetrik) ---- */
   /* Kesintisiz ÇİFT yuvarlak çerçeve: iki iç-içe border. Birleşim yeri yok. */
   .frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink);
-         border:1.5px solid var(--ink);border-radius:17px}
+         border:1.6px solid var(--ink);border-radius:18px}
   .frame::before{content:"";position:absolute;inset:5px;
-         border:1.5px solid var(--ink);border-radius:12px}
-  /* Köşe süsü: iki çizgi arasında küçük nokta (4 köşe) */
-  .frame .cnr{position:absolute;width:0;height:0}
-  .frame .cnr b{position:absolute;width:4px;height:4px;border:1.2px solid var(--ink);
-         border-radius:50%;background:var(--card)}
-  .frame .cnr.tl b{top:0;left:0}
-  .frame .cnr.tr b{top:0;right:0}
-  .frame .cnr.bl b{bottom:0;left:0}
-  .frame .cnr.br b{bottom:0;right:0}
-  .frame .cnr.tl{top:1px;left:1px}       /* iki border köşesinin arasına denk gelir */
-  .frame .cnr.tr{top:1px;right:1px}
-  .frame .cnr.bl{bottom:1px;left:1px}
-  .frame .cnr.br{bottom:1px;right:1px}
+         border:1.6px solid var(--ink);border-radius:13px}
+
+  /* Köşe ornamenti — tek tasarım, transform ile 4 köşeye simetrik yansır.
+     İç border'ın içine, çizgilere çakışmadan yerleşir. */
+  .frame .cnr{position:absolute;width:22px;height:22px}
+  .frame .cnr.tl{top:11px;left:11px}
+  .frame .cnr.tr{top:11px;right:11px;transform:scaleX(-1)}
+  .frame .cnr.bl{bottom:11px;left:11px;transform:scaleY(-1)}
+  .frame .cnr.br{bottom:11px;right:11px;transform:scale(-1,-1)}
+  /* çapraz ince yay (flourish): köşeyi kapatan içbükey süs */
+  .frame .cnr::before{content:"";position:absolute;top:0;left:0;width:18px;height:18px;
+    border-bottom:1.4px solid var(--ink);border-right:1.4px solid var(--ink);border-bottom-right-radius:18px}
+  /* dış köşe çaprazında küçük nokta (iki çizgi arasında) */
+  .frame .cnr b{position:absolute;top:-8px;left:-8px;width:3.6px;height:3.6px;
+    border:1.2px solid var(--ink);border-radius:50%;background:var(--card)}
   .frame .cnr.tl{top:0;left:0}
   .frame .cnr.tr{top:0;right:0;transform:scaleX(-1)}
   .frame .cnr.bl{bottom:0;left:0;transform:scaleY(-1)}

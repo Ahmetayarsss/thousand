@@ -335,7 +335,7 @@ function glFlip(item,rx){
       g.cam.aspect=W/H;g.cam.updateProjectionMatrix();g.cam.position.set(0,0,D);g.cam.lookAt(0,0,0);
       g.cv.style.display='block';fl.style.visibility='hidden';
       var N=g.geo.attributes.position.count,pos=g.geo.attributes.position.array;
-      var T=1700,PHI=0.75,t0=performance.now(),swapped=false;
+      var T=650,PHI=0.75,t0=performance.now(),swapped=false;
       cancelAnimationFrame(g.raf);
       (function frame(now){
         var p=(now-t0)/T;if(p>1)p=1;

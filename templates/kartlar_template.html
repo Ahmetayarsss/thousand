@@ -179,7 +179,9 @@ function rndDx(){return (Math.random()*16-8);}       // -8..8 px hafif kayma
 function scaleAt(d){return 1-d*0.03;}
 // Bir slotu derinliğine göre yerleştir (d=0 en üst: düz; arka kartlar küçük+aşağı+eğik).
 function place(el,d){
-  const tilt=(d===0?0:(el._tilt||0)), dx=(d===0?0:(el._dx||0)), ty=d*10, sc=scaleAt(d);
+  // Üst kart da kendi eğimini korur (öne gelince düzleşmez); yalnız yatay kayma
+  // (dx) üstte sıfırlanır ki kart ortada dursun.
+  const tilt=(el._tilt||0), dx=(d===0?0:(el._dx||0)), ty=d*10, sc=scaleAt(d);
   el.style.zIndex=String(DEPTH-d);
   el.style.transition='transform .38s cubic-bezier(.22,.61,.36,1)';
   el.style.transform='translate('+dx+'px,'+ty+'px) scale('+sc+') rotate('+tilt+'deg)';
@@ -252,18 +254,18 @@ function reveal(rx,ry){
     origin = dy>=0 ? '50% 0%' : '50% 100%';   // menteşe = KARŞI yatay kenar
   }
   fl.style.transformOrigin=origin;
-  // 1) bastığın kenar kalkar (kenara dik gelene kadar) — yavaş, hafif büküm + gölge.
-  fl.style.transition='transform .6s cubic-bezier(.45,.05,.55,.98), box-shadow .6s ease';
+  // 1) bastığın kenar kalkar (kenara dik gelene kadar) — çok yavaş, hafif büküm + gölge.
+  fl.style.transition='transform 1s cubic-bezier(.45,.05,.55,.98), box-shadow 1s ease';
   fl.style.boxShadow='0 22px 38px rgba(20,30,50,.30)';
   fl.style.transform=tf(a,90,.97,a[1]*5);
   setTimeout(()=>{
     setBack(fl,cur);                          // tam dik anında arka yüze geç
     setCtrl(true);
-    // 2) düz konuma inerek açılır (arka yüz görünür) — yavaş, gölge sönerek.
-    fl.style.transition='transform .62s cubic-bezier(.2,.72,.25,1), box-shadow .62s ease';
+    // 2) düz konuma inerek açılır (arka yüz görünür) — çok yavaş, gölge sönerek.
+    fl.style.transition='transform 1.05s cubic-bezier(.2,.72,.25,1), box-shadow 1.05s ease';
     fl.style.boxShadow='';
     fl.style.transform=tf(a,0,1,0);
-  },600);
+  },1000);
 }
 /* Üst kartı gönder (fırlat/indir) + arkadakileri bir öne kaydır + en alta yeni kart.
    Veri (cur/queue/examIdx) ÇAĞRIDAN ÖNCE güncellenir; peek() yeni durumu verir. */

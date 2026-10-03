@@ -259,10 +259,18 @@ function reveal(rx,ry){
   back.innerHTML=FRAME+contentBack(cur);
   back.style.transition='none'; back.style.transform='rotate'+axis+'(180deg)';
   void fl.offsetWidth;
-  // TAM TAKLA: 180° — çok yavaş.
-  fl.style.transition='transform 1.9s cubic-bezier(.5,.05,.2,1)';
-  fl.style.transform='rotate'+axis+'('+(dir*180)+'deg)';
-  setTimeout(()=>{ setCtrl(true); }, 1850);
+  const other=(axis==='X'?'Y':'X'), bend=dir*6, faces=fl.querySelectorAll('.face');
+  // FAZ 1: 0→90 — kart dik gelene kadar; hafif KARTON BÜKÜLMESİ + GÖLGE koyulaşır.
+  fl.style.transition='transform .95s cubic-bezier(.5,.03,.6,.65)';
+  fl.style.transform='rotate'+axis+'('+(dir*90)+'deg) rotate'+other+'('+bend+'deg)';
+  faces.forEach(f=>{f.style.transition='box-shadow .95s ease';f.style.boxShadow='0 28px 48px rgba(20,30,50,.36)';});
+  setTimeout(()=>{
+    // FAZ 2: 90→180 — büküm düzelir, kart oturur; gölge söner. Arka yüz öne gelir.
+    fl.style.transition='transform .95s cubic-bezier(.35,.4,.3,1)';
+    fl.style.transform='rotate'+axis+'('+(dir*180)+'deg)';
+    faces.forEach(f=>{f.style.boxShadow='';});
+  },950);
+  setTimeout(()=>{ setCtrl(true); }, 1870);
 }
 /* Üst kartı gönder (fırlat/indir) + arkadakileri bir öne kaydır + en alta yeni kart.
    Veri (cur/queue/examIdx) ÇAĞRIDAN ÖNCE güncellenir; peek() yeni durumu verir. */

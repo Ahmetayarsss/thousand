@@ -16,7 +16,7 @@
  * sürümle sorunsuz çalışmaya devam eder. Tarayıcıda (native değil) hiçbir şey yapmaz.
  */
 (function () {
-  var VER = 1791020677;
+  var VER = 1791022188;
   var Cap = window.Capacitor;
   var native = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
   if (!native) return;
@@ -51,7 +51,7 @@
         try {
           var t = document.createElement("div");
           t.textContent = "Uygulama güncellendi ✓";
-          t.style.cssText = "position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#2E9E5B;color:#fff;font:600 12px system-ui;padding:8px 14px;border-radius:18px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3)";
+          t.style.cssText = "position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#2E9E5B;color:#fff;font:600 12px system-ui;padding:8px 14px;border-radius:18px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none";
           document.body.appendChild(t);
           setTimeout(function () { t.style.transition = "opacity .5s"; t.style.opacity = "0"; }, 2500);
         } catch (e) {}
@@ -64,16 +64,6 @@
   var API = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/contents/";   // taze, önbeleksiz
   var RAW = "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/refs/heads/" + BRANCH + "/";
   var REL = "https://github.com/" + OWNER + "/" + REPO + "/releases/download/apk-latest/";
-
-  function toast(msg, color, ms) {
-    try {
-      var t = document.createElement("div");
-      t.textContent = msg;
-      t.style.cssText = "position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:" + (color || "#1B2430") + ";color:#fff;font:600 12px system-ui;padding:8px 14px;border-radius:18px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3);max-width:92%;text-align:center";
-      (document.body || document.documentElement).appendChild(t);
-      setTimeout(function () { t.style.transition = "opacity .5s"; t.style.opacity = "0"; }, ms || 3000);
-    } catch (e) {}
-  }
 
   async function oneGet(url, headers) {
     try {
@@ -112,46 +102,34 @@
     return "";
   }
 
+  // Sessiz çalışır: indirip cihaza yazar, bir SONRAKİ açılışta uygulanır ve o zaman
+  // yalnızca yeşil "Uygulama güncellendi ✓" balonu gösterilir (yukarıdaki bölüm).
   async function check() {
-    var reached = "başlangıç";
     try {
       var Fs = plugin("Filesystem");
-      if (!Fs) { toast("Güncelleme: Filesystem yok", "#B83E38", 6000); return; }
-
-      reached = "sürüm";
+      if (!Fs) return;
       var rv = await getRemoteVer();
+      if (!rv.ver) return;
       var applied = 0;
       try { var a = JSON.parse(localStorage.getItem("ox_webupd") || "{}"); applied = a.ver || 0; } catch (e) {}
-      var local = Math.max(VER, applied);
-      // TEŞHİS: her açılışta yerel + sunucu sürümünü göster (sorun netleşsin).
-      toast("Yerel: v" + local + " · Sunucu: v" + (rv.ver || "?") + " (" + rv.src + ")", "#1B2430", 6000);
-      if (!rv.ver) return;
-      if (rv.ver <= local) return; // güncel
+      if (rv.ver <= Math.max(VER, applied)) return; // zaten güncel
 
-      toast("Güncelleme indiriliyor… v" + rv.ver, "#3B6EA5", 5000);
-      reached = "paket";
       var jtxt = await getBundle();
-      if (!jtxt) { toast("Paket inmedi", "#B83E38", 6000); return; }
-      reached = "çöz";
+      if (!jtxt) return;
       var files = JSON.parse(jtxt);
-      if (!files || !files["index.html"]) { toast("Güncelleme: paket bozuk", "#B83E38", 6000); return; }
+      if (!files || !files["index.html"]) return;
 
-      reached = "yaz";
       var dir = "webupd/v" + rv.ver;
       for (var name in files) {
         if (!Object.prototype.hasOwnProperty.call(files, name)) continue;
         await Fs.writeFile({ path: dir + "/" + name, data: String(files[name]), directory: "DATA", encoding: "utf8", recursive: true });
       }
-      reached = "konum";
       var uri = (await Fs.getUri({ directory: "DATA", path: dir })).uri;
       var base = Cap.convertFileSrc(uri);
       if (base.slice(-1) !== "/") base += "/";
       localStorage.setItem("ox_webupd", JSON.stringify({ ver: rv.ver, base: base }));
       localStorage.setItem("ox_webupd_new", "1");
-      toast("Güncellendi ✓ — yeniden açınca aktif", "#2E9E5B", 6000);
-    } catch (e) {
-      toast("Güncelleme hatası (" + reached + "): " + (e && e.message ? e.message : e), "#B83E38", 7000);
-    }
+    } catch (e) { /* sessiz: gömülü sürümle devam */ }
   }
 
   if (document.readyState === "complete") setTimeout(check, 600);

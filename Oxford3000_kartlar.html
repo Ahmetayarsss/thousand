@@ -68,7 +68,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .mean{font-size:22px;font-weight:800;margin-top:4px}
 .mean.tr{color:var(--tr)} .mean.en{color:var(--ink)}
 .ex{color:#5B6B7B;font-size:14px;font-style:italic;margin-top:10px}
-.controls{flex:0 0 auto;display:flex;gap:10px;margin-top:12px}
+.controls{flex:0 0 auto;display:flex;gap:10px;margin-top:12px;min-height:52px}
 .btn{flex:1;border:0;border-radius:14px;padding:16px 0;font-size:15.5px;font-weight:800;cursor:pointer;color:#fff}
 .btn:active{transform:translateY(1px)}
 .btn.again{background:var(--red)} .btn.know{background:var(--green)} .btn.open{background:var(--accent)}
@@ -108,7 +108,6 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 <div class="stage" id="stage">
   <div class="deck" id="deck"></div>
   <div class="controls" id="ctrl">
-    <button class="btn open" id="open">Aç</button>
     <button class="btn again hidden" id="again"></button>
     <button class="btn know hidden" id="know"></button>
   </div>
@@ -191,7 +190,7 @@ function lvlTag(){return '<span class="lvl">'+GROUPS[gi].level+'</span>';}
 // Ön yüz (soru): yönüne göre Türkçe ya da İngilizce. Arka kartlar da bunu gösterir.
 function setFront(slot,item){
   const fl=slot.querySelector('.flipper');
-  fl.style.transition='none';fl.style.transform='none';
+  fl.style.transition='none';fl.style.transform='none';fl.style.transformOrigin='center';
   if(!item){slot.style.visibility='hidden';fl.innerHTML='';slot._item=null;return;}
   slot.style.visibility='visible';slot._item=item;
   const front=(item._dir==='tr2en')?(item.tr||'—'):item.w;
@@ -206,9 +205,8 @@ function setBack(fl,item){
   if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
   fl.innerHTML=FRAME+h+'</div>';
 }
-// Buton satırı: açılmadan önce tek geniş "Aç"; açıldıktan sonra iki puan butonu.
+// Buton satırı: açılmadan önce boş (yeri korunur); açıldıktan sonra iki puan butonu.
 function setCtrl(revealed){
-  document.getElementById('open').classList.toggle('hidden', revealed);
   document.getElementById('again').classList.toggle('hidden', !revealed);
   document.getElementById('know').classList.toggle('hidden', !revealed);
 }
@@ -234,20 +232,27 @@ function refreshStatus(){
   if(mode==='test'){drawBar();document.getElementById('counter').textContent=queue.length+' kaldı';}
   else document.getElementById('counter').textContent=Math.min(examIdx+1,examTotal)+'/'+examTotal;
 }
-// Üstteki kartı çevirerek cevabı göster — hafif karton kıvrılmasıyla; arkadaki kart görünür.
-function reveal(){
+// Üstteki kartı çevirerek cevabı göster — DOKUNULAN NOKTADAN kıvrılarak açılır.
+// rx,ry: karta göre dokunma oranı (0..1). Eksen ve menteşe dokunma yerine göre.
+function reveal(rx,ry){
   if(side===1||busy)return;side=1;tReveal=performance.now();
-  const fl=topFlip,a=randAxis();
-  fl.style.transition='transform .19s cubic-bezier(.5,0,.85,.5)';
-  fl.style.transform=tf(a,90,.9,a[1]*7);                  // kenara dön + hafif kıvrıl
+  const fl=topFlip;
+  if(typeof rx!=='number')rx=0.5; if(typeof ry!=='number')ry=0.5;
+  rx=Math.max(0,Math.min(1,rx));ry=Math.max(0,Math.min(1,ry));
+  fl.style.transformOrigin=(rx*100).toFixed(1)+'% '+(ry*100).toFixed(1)+'%';  // menteşe = dokunma noktası
+  const dx=rx-0.5, dy=ry-0.5;
+  // Baskın yöne göre eksen: yatay dokunuşta Y, dikeyde X; işaret dokunulan tarafa doğru.
+  const a=(Math.abs(dx)>=Math.abs(dy))?['Y',(dx>=0?-1:1)]:['X',(dy>=0?1:-1)];
+  fl.style.transition='transform .2s cubic-bezier(.5,0,.85,.5)';
+  fl.style.transform=tf(a,90,.94,a[1]*5);                 // dokunma noktasından kıvrıl
   setTimeout(()=>{
     setBack(fl,cur);
     setCtrl(true);
-    fl.style.transition='none';fl.style.transform=tf(a,-90,.9,-a[1]*7);
+    fl.style.transition='none';fl.style.transform=tf(a,-90,.94,-a[1]*5);
     void fl.offsetWidth;
-    fl.style.transition='transform .3s cubic-bezier(.2,.9,.3,1.25)';   // hafif yaylanma (esnek his)
+    fl.style.transition='transform .32s cubic-bezier(.2,.9,.3,1.2)';   // hafif yaylanma (esnek his)
     fl.style.transform=tf(a,0,1,0);
-  },190);
+  },200);
 }
 /* Üst kartı gönder (fırlat/indir) + arkadakileri bir öne kaydır + en alta yeni kart.
    Veri (cur/queue/examIdx) ÇAĞRIDAN ÖNCE güncellenir; peek() yeni durumu verir. */
@@ -366,8 +371,10 @@ function showResult(big,small,msg,wlHtml,isTest){
 
 function start(){document.getElementById('resultbox').classList.add('hidden');(mode==='test'?startTest:startExam)();}
 document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
-document.getElementById('deck').addEventListener('click',e=>{if(busy||!cur)return;if(slots[0]&&slots[0].contains(e.target)){if(side===0)reveal();sayWord(cur.w);}});
-document.getElementById('open').addEventListener('click',()=>{if(busy||!cur||side===1)return;reveal();sayWord(cur.w);});
+document.getElementById('deck').addEventListener('click',e=>{if(busy||!cur)return;if(slots[0]&&slots[0].contains(e.target)){
+  if(side===0){var r=topFlip.getBoundingClientRect();reveal((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);}
+  sayWord(cur.w);
+}});
 document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
 document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
 document.getElementById('r-again').addEventListener('click',start);

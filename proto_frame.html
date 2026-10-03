@@ -28,7 +28,7 @@
   /* Kesintisiz ÇİFT yuvarlak çerçeve: iki iç-içe border. Birleşim yeri yok. */
   .frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink);
          border:1.6px solid var(--ink);border-radius:18px}
-  /* inset: üst/alt 5px (değişmedi), sol/sağ 3px → dikey çizgiler birbirine yakın */
+  /* boşluk: üst/alt 5px, sol/sağ 3px */
   .frame::before{content:"";position:absolute;inset:5px 3px;
          border:1.6px solid var(--ink);border-radius:13px}
 

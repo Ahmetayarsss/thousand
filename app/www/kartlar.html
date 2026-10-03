@@ -108,6 +108,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 <div class="stage" id="stage">
   <div class="deck" id="deck"></div>
   <div class="controls" id="ctrl">
+    <button class="btn open" id="open">Aç</button>
     <button class="btn again hidden" id="again"></button>
     <button class="btn know hidden" id="know"></button>
   </div>
@@ -205,8 +206,9 @@ function setBack(fl,item){
   if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
   fl.innerHTML=FRAME+h+'</div>';
 }
-// Buton satırı: açılmadan önce boş (yeri korunur); açıldıktan sonra iki puan butonu.
+// Buton satırı: açılmadan önce tek geniş "Aç"; açıldıktan sonra iki puan butonu.
 function setCtrl(revealed){
+  document.getElementById('open').classList.toggle('hidden', revealed);
   document.getElementById('again').classList.toggle('hidden', !revealed);
   document.getElementById('know').classList.toggle('hidden', !revealed);
 }
@@ -232,27 +234,36 @@ function refreshStatus(){
   if(mode==='test'){drawBar();document.getElementById('counter').textContent=queue.length+' kaldı';}
   else document.getElementById('counter').textContent=Math.min(examIdx+1,examTotal)+'/'+examTotal;
 }
-// Üstteki kartı çevirerek cevabı göster — DOKUNULAN NOKTADAN kıvrılarak açılır.
-// rx,ry: karta göre dokunma oranı (0..1). Eksen ve menteşe dokunma yerine göre.
+// Üstteki kartı aç — GERÇEK KART GİBİ: bastığın KENAR kalkar, menteşe KARŞI kenardadır.
+// Yavaş (net görülsün) + hafif karton bükülmesi + kalkan kenarda gölge.
+// rx,ry: karta göre dokunma oranı (0..1).
 function reveal(rx,ry){
   if(side===1||busy)return;side=1;tReveal=performance.now();
   const fl=topFlip;
   if(typeof rx!=='number')rx=0.5; if(typeof ry!=='number')ry=0.5;
   rx=Math.max(0,Math.min(1,rx));ry=Math.max(0,Math.min(1,ry));
-  fl.style.transformOrigin=(rx*100).toFixed(1)+'% '+(ry*100).toFixed(1)+'%';  // menteşe = dokunma noktası
   const dx=rx-0.5, dy=ry-0.5;
-  // Baskın yöne göre eksen: yatay dokunuşta Y, dikeyde X; işaret dokunulan tarafa doğru.
-  const a=(Math.abs(dx)>=Math.abs(dy))?['Y',(dx>=0?-1:1)]:['X',(dy>=0?1:-1)];
-  fl.style.transition='transform .2s cubic-bezier(.5,0,.85,.5)';
-  fl.style.transform=tf(a,90,.94,a[1]*5);                 // dokunma noktasından kıvrıl
+  let a, origin;
+  if(Math.abs(dx)>=Math.abs(dy)){           // yatay: dikey eksende (Y) çevir
+    a=['Y', dx>=0?1:-1];                     // bastığın yan (sağ/sol) kalkar
+    origin = dx>=0 ? '0% 50%' : '100% 50%';  // menteşe = KARŞI dikey kenar
+  }else{                                     // dikey: yatay eksende (X) çevir
+    a=['X', dy>=0?-1:1];                      // bastığın (alt/üst) kenar kalkar
+    origin = dy>=0 ? '50% 0%' : '50% 100%';   // menteşe = KARŞI yatay kenar
+  }
+  fl.style.transformOrigin=origin;
+  // 1) bastığın kenar kalkar (kenara dik gelene kadar) — yavaş, hafif büküm + gölge.
+  fl.style.transition='transform .6s cubic-bezier(.45,.05,.55,.98), box-shadow .6s ease';
+  fl.style.boxShadow='0 22px 38px rgba(20,30,50,.30)';
+  fl.style.transform=tf(a,90,.97,a[1]*5);
   setTimeout(()=>{
-    setBack(fl,cur);
+    setBack(fl,cur);                          // tam dik anında arka yüze geç
     setCtrl(true);
-    fl.style.transition='none';fl.style.transform=tf(a,-90,.94,-a[1]*5);
-    void fl.offsetWidth;
-    fl.style.transition='transform .32s cubic-bezier(.2,.9,.3,1.2)';   // hafif yaylanma (esnek his)
+    // 2) düz konuma inerek açılır (arka yüz görünür) — yavaş, gölge sönerek.
+    fl.style.transition='transform .62s cubic-bezier(.2,.72,.25,1), box-shadow .62s ease';
+    fl.style.boxShadow='';
     fl.style.transform=tf(a,0,1,0);
-  },200);
+  },600);
 }
 /* Üst kartı gönder (fırlat/indir) + arkadakileri bir öne kaydır + en alta yeni kart.
    Veri (cur/queue/examIdx) ÇAĞRIDAN ÖNCE güncellenir; peek() yeni durumu verir. */
@@ -375,6 +386,7 @@ document.getElementById('deck').addEventListener('click',e=>{if(busy||!cur)retur
   if(side===0){var r=topFlip.getBoundingClientRect();reveal((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);}
   sayWord(cur.w);
 }});
+document.getElementById('open').addEventListener('click',()=>{if(busy||!cur||side===1)return;reveal(0.5,0.12);sayWord(cur.w);});
 document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
 document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
 document.getElementById('r-again').addEventListener('click',start);

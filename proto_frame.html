@@ -42,9 +42,9 @@
   /* çapraz ince yay (flourish): köşeyi kapatan içbükey süs */
   .frame .cnr::before{content:"";position:absolute;top:0;left:0;width:18px;height:18px;
     border-bottom:1.4px solid var(--ink);border-right:1.4px solid var(--ink);border-bottom-right-radius:18px}
-  /* dış köşe çaprazında küçük nokta (iki çizgi arasında) */
-  .frame .cnr b{position:absolute;top:-3px;left:-3px;width:3.6px;height:3.6px;
-    border:1.2px solid var(--ink);border-radius:50%;background:var(--card)}
+  /* dolu nokta — çeyrek çemberin (yayın) tam ortasında, 45° noktasında */
+  .frame .cnr b{position:absolute;top:10.7px;left:10.7px;width:4.4px;height:4.4px;
+    background:var(--ink);border-radius:50%}
   .frame .cnr.tl{top:0;left:0}
   .frame .cnr.tr{top:0;right:0;transform:scaleX(-1)}
   .frame .cnr.bl{bottom:0;left:0;transform:scaleY(-1)}

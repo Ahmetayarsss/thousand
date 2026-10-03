@@ -265,6 +265,9 @@ function captureFace(innerHTML,W,H,dpr){
     var dt=document.documentElement.getAttribute('data-theme');
     // Yazı tipi body'den miras geliyor; foreignObject'te body olmadığından
     // açıkça sarmalayıcıya veririz (yoksa varsayılan serif'e düşer).
+    // .frame'i foreignObject içinden çıkar: çerçeveyi SADECE üst seviye SVG çizer,
+    // yoksa CSS kenarlıkları + SVG kenarları üst üste binip çizgi kalınlaşır.
+    try{var _t=document.createElement('div');_t.innerHTML=innerHTML;var _f=_t.querySelector('.frame');if(_f){_f.parentNode.removeChild(_f);innerHTML=_t.innerHTML;}}catch(_e){}
     var cs=getComputedStyle(document.body);
     var ff=(cs.fontFamily||'system-ui,sans-serif').replace(/"/g,"'");
     var col=cs.color||'#1B2430';

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS Çerçeve Prototip</title>
+<style>
+  :root{
+    --ink:#1B2430; --card:#ffffff; --badge:#3B6EA5;
+    --ok:#0E8074; --tr:#B03A2E; --ex:#5B6B7B; --bg:#eef1f5;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#20242b}}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);
+       display:flex;flex-direction:column;align-items:center;gap:22px;padding:28px 16px 60px}
+  h1{font-size:16px;font-weight:800;margin:4px 0 0;opacity:.75}
+  .note{font-size:13px;color:#6b7280;max-width:360px;text-align:center;line-height:1.5}
+
+  /* ---- KART ---- */
+  .card{
+    position:relative;width:300px;height:470px;background:var(--card);
+    border:1px solid #c7d2e3;border-radius:20px;overflow:hidden;
+    box-shadow:0 10px 26px rgba(20,30,50,.16);
+  }
+
+  /* ---- SAF CSS SÜSLÜ ÇERÇEVE (hiç SVG yok) ---- */
+  /* Kesintisiz ÇİFT yuvarlak çerçeve: iki iç-içe border. Birleşim yeri yok. */
+  .frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink);
+         border:1.5px solid var(--ink);border-radius:17px}
+  .frame::before{content:"";position:absolute;inset:5px;
+         border:1.5px solid var(--ink);border-radius:12px}
+  /* Köşe süsü: iki çizgi arasında küçük nokta (4 köşe) */
+  .frame .cnr{position:absolute;width:0;height:0}
+  .frame .cnr b{position:absolute;width:4px;height:4px;border:1.2px solid var(--ink);
+         border-radius:50%;background:var(--card)}
+  .frame .cnr.tl b{top:0;left:0}
+  .frame .cnr.tr b{top:0;right:0}
+  .frame .cnr.bl b{bottom:0;left:0}
+  .frame .cnr.br b{bottom:0;right:0}
+  .frame .cnr.tl{top:1px;left:1px}       /* iki border köşesinin arasına denk gelir */
+  .frame .cnr.tr{top:1px;right:1px}
+  .frame .cnr.bl{bottom:1px;left:1px}
+  .frame .cnr.br{bottom:1px;right:1px}
+  .frame .cnr.tl{top:0;left:0}
+  .frame .cnr.tr{top:0;right:0;transform:scaleX(-1)}
+  .frame .cnr.bl{bottom:0;left:0;transform:scaleY(-1)}
+  .frame .cnr.br{bottom:0;right:0;transform:scale(-1,-1)}
+
+  /* ---- İÇERİK ---- */
+  .lvl{position:absolute;top:28px;right:28px;background:var(--badge);color:#fff;
+       font:800 11px system-ui;padding:3px 9px;border-radius:7px;letter-spacing:.3px}
+  .content{position:absolute;inset:26px;display:flex;flex-direction:column;
+           align-items:center;justify-content:center;text-align:center;gap:10px}
+  .word{font-size:34px;font-weight:800}
+  .okunus{color:var(--ok);font-weight:800;font-size:15px}
+  .mean{color:var(--tr);font-weight:800;font-size:24px}
+  .ex{color:var(--ex);font-style:italic;font-size:14px}
+</style>
+</head>
+<body>
+  <h1>CSS Çerçeve Prototipi (SVG yok)</h1>
+
+  <!-- ÖN YÜZ: kelime -->
+  <div class="card">
+    <div class="frame">
+      <span class="edge t"></span><span class="edge b"></span>
+      <span class="edge l"></span><span class="edge r"></span>
+      <span class="cnr tl"><b></b></span><span class="cnr tr"><b></b></span>
+      <span class="cnr bl"><b></b></span><span class="cnr br"><b></b></span>
+    </div>
+    <span class="lvl">A1</span>
+    <div class="content"><div class="word">style</div></div>
+  </div>
+
+  <!-- ARKA YÜZ: cevap -->
+  <div class="card">
+    <div class="frame">
+      <span class="edge t"></span><span class="edge b"></span>
+      <span class="edge l"></span><span class="edge r"></span>
+      <span class="cnr tl"><b></b></span><span class="cnr tr"><b></b></span>
+      <span class="cnr bl"><b></b></span><span class="cnr br"><b></b></span>
+    </div>
+    <span class="lvl">A1</span>
+    <div class="content">
+      <div class="okunus">Okunuş: STAYL</div>
+      <div class="mean">tarz, stil</div>
+      <div class="ex">I like your style of dressing.</div>
+    </div>
+  </div>
+
+  <p class="note">Bu çerçeve tamamen border + border‑radius ile çizildi — hiç SVG yok.
+  Yani foreignObject "fotoğrafı" bunu birebir çeker → kıvrımda bile sıfır fark.
+  Köşe motifi: iki iç‑içe yuvarlak köşe + küçük nokta.</p>
+</body>
+</html>

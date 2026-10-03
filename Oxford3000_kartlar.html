@@ -29,14 +29,6 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 /* flipper = 3B kap (iki yüzü taşır, döner). Yüzler (.face) kartın asıl yüzeyi. */
 .flipper{position:absolute;inset:0;transform-style:preserve-3d;cursor:pointer;user-select:none;transition:transform .26s cubic-bezier(.2,.9,.3,1.2);will-change:transform}
 .face{position:absolute;inset:0;background:var(--card);border:1px solid #c7d2e3;border-radius:20px;box-shadow:0 8px 22px rgba(20,30,50,.14),0 1px 2px rgba(20,30,50,.09);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-/* Kavisli mod (yalnız dönen kart): yüz saydam, kart yüzeyi çok şeritli silindir
-   yayı → pürüzsüz bombeleşir. Şeritler kenar kenara bağlanır (boşluk/ek yok). */
-.flipper.curved{border-radius:20px;box-shadow:0 8px 22px rgba(20,30,50,.14),0 1px 2px rgba(20,30,50,.09)}
-.face.curved{background:transparent;border:0;box-shadow:none;overflow:visible;transform-style:preserve-3d}
-.strip{position:absolute;left:0;width:100%;overflow:hidden;background:var(--card);backface-visibility:hidden;-webkit-backface-visibility:hidden;transform-origin:50% 50%;will-change:transform}
-.strip.first{border-top:1px solid #c7d2e3;border-radius:20px 20px 0 0}
-.strip.last{border-bottom:1px solid #c7d2e3;border-radius:0 0 20px 20px}
-.strip .inner{position:absolute;left:0;width:100%}
 /* Dekoratif çerçeve: köşe motifli, çift çizgili süslü kenarlık (karta gömülü). */
 .frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink)}
 .frame .edge{position:absolute}
@@ -211,34 +203,10 @@ function contentBack(item){
   if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
   return h+'</div>';
 }
-// Bir yüzü N şeride böler (px tabanlı). Düzken kesintisiz birleşir; reveal'da
-// silindir yayına yerleştirilince pürüzsüz bombeleşir.
-function buildStrips(faceEl, contentHTML, N, H){
-  var h=H/N, inner=FRAME+contentHTML, html='';
-  for(var i=0;i<N;i++){
-    var cls='strip'+(i===0?' first':'')+(i===N-1?' last':'');
-    html+='<div class="'+cls+'" style="top:0;height:'+h+'px">'
-        + '<div class="inner" style="top:'+(-i*h)+'px;height:'+H+'px">'+inner+'</div></div>';
-  }
-  faceEl.innerHTML=html;
-}
-// Şerit i'nin silindir yayı dönüşümü — KENAR-KENARA (ortak köşe) bağlı, boşluksuz.
-// phi=toplam yay açısı (rad). phi→0'da düz yığına iner.
-function stripTf(i,N,H,phi){
-  var h=H/N;
-  if(phi<1e-4) return 'translateY('+(i*h)+'px)';
-  var R=H/phi, d=phi/N;
-  var b0=(i-N/2)*d, b1=(i+1-N/2)*d;                 // facet i'nin iki köşe açısı
-  var ym=R*(Math.sin(b0)+Math.sin(b1))/2;           // chord ortası (y)
-  var zm=R*(Math.cos(b0)+Math.cos(b1))/2 - R;       // chord ortası (z)
-  var t=H/2+ym-h/2, rot=(b0+b1)/2*180/Math.PI;
-  return 'translateY('+t.toFixed(2)+'px) translateZ('+zm.toFixed(2)+'px) rotateX('+rot.toFixed(3)+'deg)';
-}
 // Kartı kur: iki GERÇEK yüz. Ön=soru görünür; arka=cevap (reveal'da dolar),
 // 180° ön-döndürülmüş (backface-visibility ile başta gizli).
 function setFront(slot,item){
   const fl=slot.querySelector('.flipper');
-  fl.classList.remove('curved');
   fl.style.transition='none';fl.style.transform='none';fl.style.transformOrigin='center';
   if(!item){slot.style.visibility='hidden';fl.innerHTML='';slot._item=null;return;}
   slot.style.visibility='visible';slot._item=item;
@@ -280,32 +248,29 @@ function refreshStatus(){
 // rx,ry: dokunma yerine göre takla ekseni/yönü (dikey dokunuş→X takla, yatay→Y).
 function reveal(rx,ry){
   if(side===1||busy)return;side=1;tReveal=performance.now();
-  const fl=topFlip, front=fl.querySelector('.face.front'), back=fl.querySelector('.face.back');
-  if(typeof ry!=='number')ry=0.5; ry=Math.max(0,Math.min(1,ry));
-  const dir=(ry>=0.5?1:-1);                 // alt bas → öne takla, üst bas → geri (eksen X)
-  const H=fl.getBoundingClientRect().height, N=12;
-  // Üst kartı kavisli moda al: iki yüzü de N şeritle kur (pürüzsüz silindir).
-  buildStrips(front, contentFront(cur), N, H);
-  const w=(cur._dir==='tr2en')?(cur.tr||'—'):cur.w;
-  front.querySelectorAll('.q').forEach(q=>{q.textContent=w;});
-  buildStrips(back, contentBack(cur), N, H);
-  fl.classList.add('curved'); front.classList.add('curved'); back.classList.add('curved');
-  back.style.transform='rotateX(180deg)';   // arka yüz başta gizli
-  const fs=front.querySelectorAll('.strip'), bs=back.querySelectorAll('.strip');
-  const T=1900, PHI=0.72;                    // süre + tepe kavis açısı (rad)
-  const t0=performance.now();
-  (function frame(now){
-    let p=(now-t0)/T; if(p>1)p=1;
-    const ease=p<0.5?(2*p*p):(1-Math.pow(-2*p+2,2)/2);   // easeInOutQuad (tam takla)
-    const flip=dir*180*ease;
-    const phi=Math.sin(p*Math.PI)*PHI;        // kavis: 0→tepe→0
-    fl.style.transform='rotateX('+flip+'deg)';
-    const sc=Math.sin(p*Math.PI);             // gölge kavisle koyulaşır
-    fl.style.boxShadow='0 '+(8+sc*34).toFixed(0)+'px '+(22+sc*34).toFixed(0)+'px rgba(20,30,50,'+(0.14+sc*0.2).toFixed(3)+')';
-    for(let i=0;i<N;i++){ const tr=stripTf(i,N,H,phi); fs[i].style.transform=tr; bs[i].style.transform=tr; }
-    if(p<1) requestAnimationFrame(frame);
-    else setCtrl(true);
-  })(t0);
+  const fl=topFlip, back=fl.querySelector('.face.back');
+  if(typeof rx!=='number')rx=0.5; if(typeof ry!=='number')ry=0.5;
+  rx=Math.max(0,Math.min(1,rx));ry=Math.max(0,Math.min(1,ry));
+  const dx=rx-0.5, dy=ry-0.5;
+  let axis,dir;
+  if(Math.abs(dy)>=Math.abs(dx)){ axis='X'; dir=(dy>=0?1:-1); }  // alt/üst dokunuş → dikey takla
+  else{ axis='Y'; dir=(dx>=0?-1:1); }                            // sağ/sol dokunuş → yatay dönüş
+  // Arka yüzü (cevap) doldur + eksene göre 180° ön-döndür (flipper 0°'da gizli).
+  back.innerHTML=FRAME+contentBack(cur);
+  back.style.transition='none'; back.style.transform='rotate'+axis+'(180deg)';
+  void fl.offsetWidth;
+  const faces=fl.querySelectorAll('.face');
+  // FAZ 1: tam takla 0→90 — GÖLGE koyulaşır (kalkma hissi).
+  fl.style.transition='transform .95s cubic-bezier(.5,.03,.6,.65)';
+  fl.style.transform='rotate'+axis+'('+(dir*90)+'deg)';
+  faces.forEach(f=>{f.style.transition='box-shadow .95s ease';f.style.boxShadow='0 28px 48px rgba(20,30,50,.34)';});
+  setTimeout(()=>{
+    // FAZ 2: 90→180 — kart oturur, gölge söner. Arka yüz (cevap) öne gelir.
+    fl.style.transition='transform .95s cubic-bezier(.35,.4,.3,1)';
+    fl.style.transform='rotate'+axis+'('+(dir*180)+'deg)';
+    faces.forEach(f=>{f.style.boxShadow='';});
+  },950);
+  setTimeout(()=>{ setCtrl(true); }, 1870);
 }
 /* Üst kartı gönder (fırlat/indir) + arkadakileri bir öne kaydır + en alta yeni kart.
    Veri (cur/queue/examIdx) ÇAĞRIDAN ÖNCE güncellenir; peek() yeni durumu verir. */

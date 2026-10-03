@@ -16,7 +16,7 @@
  * sürümle sorunsuz çalışmaya devam eder. Tarayıcıda (native değil) hiçbir şey yapmaz.
  */
 (function () {
-  var VER = 1791039096;
+  var VER = 1791040373;
   var Cap = window.Capacitor;
   var native = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
   if (!native) return;

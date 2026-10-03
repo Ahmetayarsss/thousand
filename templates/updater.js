@@ -102,8 +102,9 @@
     return "";
   }
 
-  // Sessiz çalışır: indirip cihaza yazar, bir SONRAKİ açılışta uygulanır ve o zaman
-  // yalnızca yeşil "Uygulama güncellendi ✓" balonu gösterilir (yukarıdaki bölüm).
+  // İndirip cihaza yazar ve HEMEN uygular (bir sonraki açılışı beklemeden): gömülü
+  // sayfadaysak indirilen pakete yönleniriz, yeşil "güncellendi ✓" balonu çıkar.
+  // Tek açılışta güncelleme olur — "iki kez kapat-aç" gerekmez.
   async function check() {
     try {
       var Fs = plugin("Filesystem");
@@ -129,6 +130,11 @@
       if (base.slice(-1) !== "/") base += "/";
       localStorage.setItem("ox_webupd", JSON.stringify({ ver: rv.ver, base: base }));
       localStorage.setItem("ox_webupd_new", "1");
+      // Hemen uygula: gömülü sayfadaysak indirilen pakete yönlen (tek açılışta güncelle).
+      if (!inUpdate) {
+        var page = location.pathname.split("/").pop() || "index.html";
+        location.replace(base + page + location.search + location.hash);
+      }
     } catch (e) { /* sessiz: gömülü sürümle devam */ }
   }
 

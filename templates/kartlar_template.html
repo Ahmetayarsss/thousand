@@ -29,21 +29,9 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 /* flipper = 3B kap (iki yüzü taşır, döner). Yüzler (.face) kartın asıl yüzeyi. */
 .flipper{position:absolute;inset:0;transform-style:preserve-3d;cursor:pointer;user-select:none;transition:transform .26s cubic-bezier(.2,.9,.3,1.2);will-change:transform}
 .face{position:absolute;inset:0;background:var(--card);border:1px solid #c7d2e3;border-radius:20px;box-shadow:0 8px 22px rgba(20,30,50,.14),0 1px 2px rgba(20,30,50,.09);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-/* Dekoratif çerçeve: SAF CSS (border+radius, SVG yok) → foreignObject birebir
-   fotoğraflar, kıvrımda bile sıfır fark. Çift yuvarlak çerçeve: yan 3px / üst-alt 5px. */
-.frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink);
-       border:1.6px solid var(--ink);border-radius:18px}
-.frame::before{content:"";position:absolute;inset:5px 3px;
-       border:1.6px solid var(--ink);border-radius:13px}
-.frame .cnr{position:absolute;width:22px;height:22px}
-.frame .cnr.tl{top:5px;left:3px}
-.frame .cnr.tr{top:5px;right:3px;transform:scaleX(-1)}
-.frame .cnr.bl{bottom:5px;left:3px;transform:scaleY(-1)}
-.frame .cnr.br{bottom:5px;right:3px;transform:scale(-1,-1)}
-.frame .cnr::before{content:"";position:absolute;top:0;left:0;width:18px;height:18px;
-  border-bottom:1.4px solid var(--ink);border-right:1.4px solid var(--ink);border-bottom-right-radius:18px}
-.frame .cnr b{position:absolute;top:0.5px;left:0.5px;width:4.4px;height:4.4px;
-  background:var(--ink);border-radius:50%}
+/* Çerçeve: iç içe iki dikdörtgen, arası dolu siyah (kalın bant). Saf CSS. */
+.frame{position:absolute;inset:14px;pointer-events:none;
+       border:5px solid var(--ink);border-radius:16px}
 /* Yazı alanı: çerçevenin içinde, sabit konumda. */
 .content{position:absolute;inset:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:auto}
 /* Karton kıvrılmalı fırlatma/indirme — düz plaka değil, hafif esner. */
@@ -188,8 +176,8 @@ function place(el,d){
   el.style.transition='transform .38s cubic-bezier(.22,.61,.36,1)';
   el.style.transform='translate('+dx+'px,'+ty+'px) scale('+sc+') rotate('+tilt+'deg)';
 }
-// Dekoratif çerçeve — SAF CSS (SVG yok): çift yuvarlak çizgi + köşe yayı + dolu nokta.
-var FRAME='<div class="frame"><span class="cnr tl"><b></b></span><span class="cnr tr"><b></b></span><span class="cnr bl"><b></b></span><span class="cnr br"><b></b></span></div>';
+// Çerçeve — iç içe iki dikdörtgen, arası dolu siyah bant (saf CSS).
+var FRAME='<div class="frame"></div>';
 function lvlTag(){return '<span class="lvl">'+GROUPS[gi].level+'</span>';}
 // Yüz içerikleri.
 function contentFront(item){

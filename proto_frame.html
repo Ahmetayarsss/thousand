@@ -26,10 +26,9 @@
 
   /* ---- SAF CSS SÜSLÜ ÇERÇEVE (hiç SVG yok, 4 köşe tam simetrik) ---- */
   /* Kesintisiz ÇİFT yuvarlak çerçeve: iki iç-içe border. Birleşim yeri yok. */
-  .frame{position:absolute;inset:13px;pointer-events:none;color:var(--ink);
-         border:1.6px solid var(--ink);border-radius:18px}
+  .frame{position:absolute;inset:14px;pointer-events:none;border:5px solid var(--ink);border-radius:16px}
   /* boşluk: üst/alt 5px, sol/sağ 3px */
-  .frame::before{content:"";position:absolute;inset:5px 3px;
+  .frame::before{display:none;content:"";position:absolute;inset:5px 3px;
          border:1.6px solid var(--ink);border-radius:13px}
 
   /* Köşe ornamenti — tek tasarım, transform ile 4 köşeye simetrik yansır.
@@ -55,6 +54,7 @@
   .okunus{color:var(--ok);font-weight:800;font-size:15px}
   .mean{color:var(--tr);font-weight:800;font-size:24px}
   .ex{color:var(--ex);font-style:italic;font-size:14px}
+.frame .cnr{display:none}
 </style>
 </head>
 <body>

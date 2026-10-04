@@ -1,0 +1,77 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+:root{--ink:#1B2430;--card:#fff;--gold:#9a7b3f;--accent:#3B6EA5}
+*{box-sizing:border-box}
+body{margin:0;background:#eceff3;font-family:system-ui,Arial;display:flex;flex-wrap:wrap;gap:20px;padding:22px;justify-content:center}
+.tile{width:250px}
+.num{font-weight:800;font-size:17px;color:#1B2430;text-align:center;margin-bottom:6px}
+.sub{font-weight:600;font-size:12px;color:#6b7280;text-align:center;margin-bottom:8px}
+.card{position:relative;width:250px;height:250px;background:var(--card);border:1px solid #c7d2e3;border-radius:18px;overflow:hidden;box-shadow:0 8px 20px rgba(20,30,50,.14)}
+
+/* ========== D1: Boncuklu (noktalı hat) + baklava köşeler ========== */
+.d1 .f{position:absolute;inset:14px;border:1.6px solid var(--ink);border-radius:15px}
+.d1 .f::after{content:"";position:absolute;inset:5px;border:2px dotted var(--ink);border-radius:9px;opacity:.9}
+.d1 .dia{position:absolute;width:8px;height:8px;background:var(--card);border:1.5px solid var(--ink);transform:rotate(45deg)}
+.d1 .dia.tl{top:10px;left:10px}.d1 .dia.tr{top:10px;right:10px}.d1 .dia.bl{bottom:10px;left:10px}.d1 .dia.br{bottom:10px;right:10px}
+
+/* ========== D2: Art-Deco basamaklı köşeler (keskin çift hat) ========== */
+.d2 .f{position:absolute;inset:14px;border:1.6px solid var(--ink)}
+.d2 .f::after{content:"";position:absolute;inset:5px;border:1px solid var(--ink)}
+.d2 .st{position:absolute;width:34px;height:34px}
+.d2 .st::before,.d2 .st::after{content:"";position:absolute;border-top:1.4px solid var(--ink);border-left:1.4px solid var(--ink)}
+.d2 .st::before{inset:9px auto auto 9px;width:26px;height:26px}
+.d2 .st::after{inset:14px auto auto 14px;width:20px;height:20px}
+.d2 .st.tl{top:14px;left:14px}
+.d2 .st.tr{top:14px;right:14px;transform:scaleX(-1)}
+.d2 .st.bl{bottom:14px;left:14px;transform:scaleY(-1)}
+.d2 .st.br{bottom:14px;right:14px;transform:scale(-1,-1)}
+
+/* ========== D3: Köşe madalyonları (eş merkezli halkalar) + çift hat ========== */
+.d3 .f{position:absolute;inset:16px;border:1.5px solid var(--ink);border-radius:14px}
+.d3 .f::after{content:"";position:absolute;inset:4px;border:1.5px solid var(--ink);border-radius:10px}
+.d3 .med{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--card);border:1.5px solid var(--ink)}
+.d3 .med::before{content:"";position:absolute;inset:3.5px;border-radius:50%;border:1.3px solid var(--ink)}
+.d3 .med::after{content:"";position:absolute;inset:8.5px;border-radius:50%;background:var(--ink)}
+.d3 .med.tl{top:5px;left:5px}.d3 .med.tr{top:5px;right:5px}.d3 .med.bl{bottom:5px;left:5px}.d3 .med.br{bottom:5px;right:5px}
+
+/* ========== D4: Halat/örgü kenar (repeating-linear border-image) ========== */
+.d4 .f{position:absolute;inset:13px;border:7px solid transparent;border-radius:16px;
+  border-image:repeating-linear-gradient(45deg,var(--ink) 0 2.5px,transparent 2.5px 6px) 7}
+.d4 .f::after{content:"";position:absolute;inset:2px;border:1.4px solid var(--ink);border-radius:9px}
+
+/* ========== D5: Taçlı — kesik+noktalı iki hat + köşe yıldızları ========== */
+.d5 .f{position:absolute;inset:14px;border:1.5px dashed var(--ink);border-radius:13px}
+.d5 .f::after{content:"";position:absolute;inset:6px;border:1.4px solid var(--ink);border-radius:8px}
+.d5 .star{position:absolute;width:14px;height:14px;color:var(--ink);font:900 15px system-ui;line-height:14px;text-align:center}
+.d5 .star::before{content:"✦"}
+.d5 .star.tl{top:7px;left:7px}.d5 .star.tr{top:7px;right:7px}.d5 .star.bl{bottom:7px;left:7px}.d5 .star.br{bottom:7px;right:7px}
+
+/* ========== D6: Testere/bilet kenar (radial çentikler) + iç hat ========== */
+.d6 .f{position:absolute;inset:12px;border-radius:14px;
+  background:
+   radial-gradient(circle at 50% 0,transparent 4px,var(--ink) 4px 5.2px,transparent 5.4px) top/14px 8px repeat-x,
+   radial-gradient(circle at 50% 100%,transparent 4px,var(--ink) 4px 5.2px,transparent 5.4px) bottom/14px 8px repeat-x,
+   radial-gradient(circle at 0 50%,transparent 4px,var(--ink) 4px 5.2px,transparent 5.4px) left/8px 14px repeat-y,
+   radial-gradient(circle at 100% 50%,transparent 4px,var(--ink) 4px 5.2px,transparent 5.4px) right/8px 14px repeat-y}
+.d6 .f::after{content:"";position:absolute;inset:9px;border:1.5px solid var(--ink);border-radius:7px}
+</style></head><body>
+
+<div class="tile"><div class="num">1</div><div class="sub">Boncuklu + baklava köşe</div>
+  <div class="card d1"><div class="f"></div><span class="dia tl"></span><span class="dia tr"></span><span class="dia bl"></span><span class="dia br"></span></div></div>
+
+<div class="tile"><div class="num">2</div><div class="sub">Art-Deco basamaklı köşe</div>
+  <div class="card d2"><div class="f"></div><span class="st tl"></span><span class="st tr"></span><span class="st bl"></span><span class="st br"></span></div></div>
+
+<div class="tile"><div class="num">3</div><div class="sub">Köşe madalyonu</div>
+  <div class="card d3"><div class="f"></div><span class="med tl"></span><span class="med tr"></span><span class="med bl"></span><span class="med br"></span></div></div>
+
+<div class="tile"><div class="num">4</div><div class="sub">Halat/örgü kenar</div>
+  <div class="card d4"><div class="f"></div></div></div>
+
+<div class="tile"><div class="num">5</div><div class="sub">Kesik+düz hat + yıldız köşe</div>
+  <div class="card d5"><div class="f"></div><span class="star tl"></span><span class="star tr"></span><span class="star bl"></span><span class="star br"></span></div></div>
+
+<div class="tile"><div class="num">6</div><div class="sub">Testere/bilet kenar</div>
+  <div class="card d6"><div class="f"></div></div></div>
+
+</body></html>

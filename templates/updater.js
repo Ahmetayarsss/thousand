@@ -38,7 +38,10 @@
           location.replace(u.base + page + location.search + location.hash);
           return;
         }
-        if (u.ver <= VER) { try { localStorage.removeItem("ox_webupd"); } catch (e) {} } // eskimiş işaret
+        // Yalnız GÖMÜLÜ sayfada ve gömülü sürüm işareti geçince temizle. Uygulanmış
+        // pakette (inUpdate) VER==u.ver olduğundan burada temizlersek işaret silinir
+        // ve kapat-aç sonrası eskiye döner — bu yüzden !inUpdate şart.
+        if (u.ver <= VER && !inUpdate) { try { localStorage.removeItem("ox_webupd"); } catch (e) {} }
       }
     }
   } catch (e) {}

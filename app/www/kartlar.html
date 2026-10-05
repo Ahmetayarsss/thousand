@@ -311,45 +311,33 @@ function glFlip(item,rx){
     function done(){fl.querySelector('.face.front').innerHTML=backHTML;fl.style.visibility='';g.cv.style.display='none';setCtrl(true);}
     Promise.all([captureFace(frontHTML,W,H,dpr),captureFace(backHTML,W,H,dpr)]).then(function(cvs){
       var maxA=(g.rn.capabilities.getMaxAnisotropy?g.rn.capabilities.getMaxAnisotropy():1);
-      var tF=mkTex(cvs[0],maxA,false),tB=mkTex(cvs[1],maxA,false);  // arka ayna aşağıda matrisle (çapraz)
+      var tF=mkTex(cvs[0],maxA,false),tB=mkTex(cvs[1],maxA,true);
       var CW=W+2*PAD,CH=H+2*PAD;
       g.cv.style.left=(r.left-PAD)+'px';g.cv.style.top=(r.top-PAD)+'px';g.cv.style.width=CW+'px';g.cv.style.height=CH+'px';
       g.rn.setPixelRatio(dpr);g.rn.setSize(CW,CH,false);
       if(g.grp){g.sc.remove(g.grp);if(g.geo)g.geo.dispose();if(g.mesh)g.mesh.material.dispose();}
-      g.geo=new THREE.PlaneGeometry(W,H,24,24);g.base=g.geo.attributes.position.array.slice();  // 2B ızgara → çapraz büküm pürüzsüz
+      g.geo=new THREE.PlaneGeometry(W,H,64,1);g.base=g.geo.attributes.position.array.slice();  // daha çok parça → pürüzsüz kavis
       var mat=new THREE.MeshBasicMaterial({map:tF,side:THREE.DoubleSide,transparent:true});
       g.mesh=new THREE.Mesh(g.geo,mat);
-      // ÇAPRAZ AÇILIŞ: menteşe SOL-ÜST köşede; SAĞ-ALT köşe kalkıp sol üste doğru açılır.
-      var L=Math.sqrt(W*W+H*H);
-      var ax=-H/L, ay=W/L;         // menteşe ekseni (çaprazın dikine)
-      var bx=W/L, by=H/L;          // büküm yönü (sağ-alt ↔ sol-üst çaprazı)
-      // 180° çapraz dönüşte arka yüz o eksende aynalanır → dokuyu o eksende önceden yansıt.
-      var al=Math.atan2(ay,ax),c2=Math.cos(2*al),s2=Math.sin(2*al);
-      tB.matrixAutoUpdate=false;
-      tB.matrix.set(c2,s2,0.5-0.5*c2-0.5*s2, s2,-c2,0.5-0.5*s2+0.5*c2, 0,0,1);
-      g.mesh.position.set(W/2,H/2,0);              // sol-üst köşe grup orijininde (menteşe)
+      var hingeLeft=(rx>=0.5),s=hingeLeft?-1:1;   // sağ'a bas → sol menteşe
+      g.mesh.position.x=-s*W/2;                    // menteşe kenarı grup orijininde
       g.grp=new THREE.Group();g.grp.add(g.mesh);g.sc.add(g.grp);
+      // Kamera büyütülmüş tuvali çerçeveler; W×H düzlem tam kart yerine denk gelir (pay şeffaf kalır).
       var D=(CH/2)/Math.tan(20*Math.PI/180);
       g.cam.aspect=CW/CH;g.cam.updateProjectionMatrix();g.cam.position.set(0,0,D);g.cam.lookAt(0,0,0);
       g.cv.style.display='block';fl.style.visibility='hidden';
       var N=g.geo.attributes.position.count,pos=g.geo.attributes.position.array;
       var T=650,PHI=0.75,t0=performance.now(),swapped=false;
-      var axisV=new THREE.Vector3(ax,ay,0),cornerV=new THREE.Vector3(W/2,H/2,0);
-      var q=new THREE.Quaternion(),cV=new THREE.Vector3();
       cancelAnimationFrame(g.raf);
       (function frame(now){
         var p=(now-t0)/T;if(p>1)p=1;
         var ease=smooth(p),ang=ease*Math.PI;
-        q.setFromAxisAngle(axisV,ang);g.grp.quaternion.copy(q);
+        g.grp.rotation.y=s*ang;
         var rec=smooth((p-0.5)/0.5);                 // sona doğru ortaya otur
-        cV.copy(cornerV).applyQuaternion(q);
-        g.grp.position.set((1-rec)*(-W/2)+rec*(-cV.x),(1-rec)*(-H/2)+rec*(-cV.y),rec*(-cV.z));
-        var phi=Math.sin(p*Math.PI)*PHI;             // serbest köşe kavislenir
+        g.grp.position.x=s*W*(0.5-rec);
+        var phi=Math.sin(p*Math.PI)*PHI;             // serbest kenar kavislenir
         if(phi<1e-4){for(var i=0;i<N*3;i++)pos[i]=g.base[i];}
-        else{var R=L/phi;for(var v=0;v<N;v++){var x0=g.base[v*3],y0=g.base[v*3+1];
-          var a0=x0*ax+y0*ay,u0=x0*bx+y0*by,th=(u0/L)*phi;
-          var nu=R*Math.sin(th),z=R*Math.cos(th)-R;
-          pos[v*3]=a0*ax+nu*bx;pos[v*3+1]=a0*ay+nu*by;pos[v*3+2]=z;}}
+        else{var R=W/phi;for(var v=0;v<N;v++){var x0=g.base[v*3];var th=(x0/W)*phi;pos[v*3]=R*Math.sin(th);pos[v*3+2]=R*Math.cos(th)-R;}}
         g.geo.attributes.position.needsUpdate=true;
         if(!swapped&&ang>=Math.PI/2){swapped=true;mat.map=tB;mat.needsUpdate=true;}
         g.rn.render(g.sc,g.cam);

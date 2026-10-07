@@ -30,7 +30,7 @@ APP_HEAD = '<script src="updater.js"></script><script src="tts-bridge.js"></scri
 # Uygulama içi güncelleme paketine giren dosyalar (ses HARİÇ — ses APK'da gömülü).
 WEB_BUNDLE_FILES = [
     "index.html", "kartlar.html", "sozluk.html", "istatistik.html",
-    "tts-bridge.js", "progress.js", "updater.js", "three.min.js",
+    "tts-bridge.js", "progress.js", "srs.js", "updater.js", "three.min.js",
 ]
 
 
@@ -207,9 +207,9 @@ def render(groups):
     print(f"app/www/istatistik.html: {len(app_stats)} bayt")
 
     # progress.js: kanonik kopya app/www'da; kök (tarayıcı) sürümü için kopyala
-    prog = (ROOT / "app/www/progress.js").read_text(encoding="utf-8")
-    (ROOT / "progress.js").write_text(prog, encoding="utf-8")
-    print("progress.js: köke kopyalandı")
+    for js in ("progress.js", "srs.js"):
+        (ROOT / js).write_text((ROOT / "app/www" / js).read_text(encoding="utf-8"), encoding="utf-8")
+        print(f"{js}: köke kopyalandı")
 
 
 def main():

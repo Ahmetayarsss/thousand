@@ -58,6 +58,9 @@ jobs:
           tail -n 40 /tmp/sdk.log || true
           [ "$ok" = "1" ] || { echo "SDK paketleri 5 denemede kurulamadı"; exit 1; }
 
+      - name: Tekrar sistemi testleri
+        run: TZ=Europe/Istanbul node tests/srs.test.js
+
       - name: Bağımlılıkları kur (npm ci)
         working-directory: app
         run: |
@@ -123,7 +126,7 @@ jobs:
           python3 - <<'PY'
           import json, os
           base = "app/www"
-          names = ["index.html","kartlar.html","sozluk.html","istatistik.html","tts-bridge.js","progress.js","updater.js","three.min.js"]
+          names = ["index.html","kartlar.html","sozluk.html","istatistik.html","tts-bridge.js","progress.js","srs.js","updater.js","three.min.js"]
           d = {}
           for n in names:
               p = os.path.join(base, n)

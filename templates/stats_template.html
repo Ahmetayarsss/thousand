@@ -89,8 +89,8 @@ SRS.setCatalog(SRS.catalogFromGroups(SG));
 const pc=(x,t)=>t?(x/t*100)+'%':'0%';
 
 function render(){
-  const lv=SRS.topLevel(100);
-  document.getElementById('seclabel').textContent='Döngüde '+SRS.inCycle()+(lv?' · '+lv:'');
+  const lv=SRS.topLevel();
+  document.getElementById('seclabel').textContent=SRS.inCycle()+(lv?' · '+lv:'');
 
   /* Genel */
   const T=SRS.totals();

@@ -157,17 +157,17 @@ async function sayWord(t){
   speak(t);}
 
 let mode='test',cur=null,side=0;
-let queue=[],testTotal=0,examList=[],examIdx=0,revCount=0,sess=null;   // examList: anahtarlar (önce tekrarlar, sonra yeniler)
+let queue=[],testTotal=0,examList=[],examIdx=0,revCount=0,sess=null;   // examList: anahtarlar (önce tekrarlar, sonra turun yenileri)
 let tPrompt=0,tReveal=0,suspStreak=0;   // hile tespiti: soru gösterim / çevirme anı, art arda şüpheli sayısı
 const DEPTH=4;            // destede görünen kart sayısı (1 üst + 3 arka)
 let slots=[],topFlip=null,busy=false;   // slots[0]=en üstteki aktif kart; busy=animasyon sürüyor
 
-// Başlık: döngüdeki kelime sayısı · ana sayfadaki 100'lük listenin en yüksek seviyesi. Her cevapta güncellenir.
-function setSecLabel(){const lv=SRS.topLevel(100);document.getElementById('seclabel').textContent='Döngüde '+SRS.inCycle()+(lv?' · '+lv:'');}
-// Çubuk: Test'te çalışılan oranı, Sınav'da tekrarların ilerleyişi.
+// Başlık: döngüdeki kelime sayısı · ana sayfadaki listenin en yüksek seviyesi. Her cevapta güncellenir.
+function setSecLabel(){const lv=SRS.topLevel();document.getElementById('seclabel').textContent=SRS.inCycle()+(lv?' · '+lv:'');}
+// Çubuk: Test'te çalışılan oranı, Sınav'da turun ilerleyişi.
 function drawBar(){let p=0;
   if(mode==='test'){const t=testTotal,doneN=Math.max(0,t-queue.length);p=t?doneN/t:0;}
-  else p=revCount?Math.min(1,examIdx/revCount):0;
+  else p=examList.length?Math.min(1,examIdx/examList.length):0;
   document.getElementById('bar').innerHTML=`<i style="width:${p*100}%;background:var(--green)"></i>`;}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function dirFor(){return Math.random()<0.5?'tr2en':'en2tr';}
@@ -242,7 +242,7 @@ function buildDeck(){
 }
 function refreshStatus(){drawBar();const c=document.getElementById('counter');
   if(mode==='test'){c.textContent=queue.length+' kaldı';return;}
-  c.textContent=(examIdx<revCount)?'Tekrar '+(examIdx+1)+'/'+revCount:'Yeni '+(examIdx-revCount+1);
+  c.textContent=(examIdx<revCount)?'Tekrar '+(examIdx+1)+'/'+revCount:'Yeni '+(examIdx-revCount+1)+'/'+(examList.length-revCount);
 }
 
 /* ===== WebGL kavisli takla (Three.js). Kart 2D canvas'a çizilir (doku),
@@ -415,7 +415,7 @@ function advanceDeck(out){
 
 function showStage(){document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');}
 
-/* ---- TEST (çalışma): ana sayfadaki 100 yeni kelimeyle serbest çalışma. İlerlemeyi değiştirmez. ---- */
+/* ---- TEST (çalışma): ana sayfadaki yeni kelimelerle serbest çalışma. İlerlemeyi değiştirmez. ---- */
 function startTestFrom(order){
   mode='test';showStage();document.getElementById('finish').classList.add('hidden');
   document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';
@@ -424,9 +424,9 @@ function startTestFrom(order){
   cur=order[0];queue=order.slice(1);testTotal=order.length;
   busy=false;buildDeck();
 }
-function startTest(){startTestFrom(shuffle(SRS.newList(100).map(k=>BYK[k]).filter(Boolean)));}
+function startTest(){startTestFrom(shuffle(SRS.newList(SRS.listSize()).map(k=>BYK[k]).filter(Boolean)));}
 function gradeTest(know){
-  if(busy)return;if(checkSpeed())return;
+  if(busy)return;
   const leaving=cur;
   if(!know){leaving._lockDir=true;queue.push(leaving);}   // bilemedin → yön kilitli, desteye geri
   cur=queue.length?queue.shift():null;                     // yeni üst (zaten arkada görünüyordu)
@@ -435,8 +435,10 @@ function gradeTest(know){
 }
 function testDone(){showResult(String(testTotal),'kelime çalışıldı','Listeyi baştan sona çalıştın. 👏','',true);}
 
-/* ---- SINAV: önce vadesi gelen tekrarlar (yüksek kutu önce, eşitse en çok geciken), sonra yeni
-   kelimeler (ana sayfadaki sırayla). Sınır yok: "Bitir" ile ya da kelime kalmayınca biter.
+/* ---- SINAV: önce vadesi gelen tekrarlar (yüksek kutu önce, aynı kutudakiler karışık), sonra
+   turun yeni kelimeleri (karışık; tur = başladığı andaki ana sayfa listesi). Günlük sınır yok:
+   "Bitir" ile bırakılır, yeniden açılınca kalan tur kelimeleriyle sürer; tekrarlar ve tur
+   bitince sınav kendiliğinden biter, sonraki sınav listenin yeni haliyle başlar.
    Her cevap anında kaydedilir; yanlış bilinen aynı sınavda tekrar gelmez. ---- */
 function startExam(){mode='exam';showStage();document.getElementById('finish').classList.remove('hidden');
   document.getElementById('again').textContent='Bilemedim';document.getElementById('know').textContent='Bildim';
@@ -461,13 +463,14 @@ function gradeExam(correct){
   advanceDeck(correct?'right':'left');
 }
 
-/* ---- Hile yakalama: test + sınavda geçerli; kademeli mesaj; 4.'ten itibaren mevcut turu sıfırlar (gelişim korunur) ---- */
+/* ---- Hile yakalama: yalnız sınavda; kademeli mesaj (ceza henüz yok). Geliştirici ayarından kapatılabilir. ---- */
 const CKEY="ox3000_cheat_v1";
 // Sayacı bu sürümde bir kez sıfırla (flag sayesinde tekrar sıfırlamaz).
 try{if(!localStorage.getItem('ox3000_cheat_migr_v4')){localStorage.removeItem(CKEY);localStorage.setItem('ox3000_cheat_migr_v4','1');}}catch(e){}
 function cheatN(){try{return (parseInt(localStorage.getItem(CKEY),10))||0;}catch(e){return 0;}}
 // true dönerse: mevcut sınav/test turu yeniden başlatıldı → çağıran devam etmemeli.
 function checkSpeed(){
+  if(mode!=='exam'||SRS.dev().noCheat)return false;
   const flip=tReveal-tPrompt, decide=performance.now()-tReveal;
   if(flip>0&&flip<300&&decide<350){ if(++suspStreak>=2){ suspStreak=0; return cheatCaught(); } }
   else suspStreak=0;
@@ -487,17 +490,21 @@ function showCheat(msg,restart){
   setTimeout(()=>{o.classList.remove('show');tPrompt=performance.now();if(restart)restartRound();},dur);
 }
 function examDone(){
-  const n=sess.rev+sess.nw,ok=sess.revOk+sess.nwOk;
+  const n=sess.rev+sess.nw,ok=sess.revOk+sess.nwOk,all=examList.length>0&&examIdx>=examList.length;
   if(n){try{const L=JSON.parse(localStorage.getItem(SKEY)||'[]');
-    L.push({t:now(),n:n,ok:ok,rev:sess.rev,revOk:sess.revOk,nw:sess.nw,nwOk:sess.nwOk});
+    L.push({t:SRS.now(),n:n,ok:ok,rev:sess.rev,revOk:sess.revOk,nw:sess.nw,nwOk:sess.nwOk});
     localStorage.setItem(SKEY,JSON.stringify(L.slice(-300)));}catch(e){}}
   const left=SRS.dueList().length,nd=SRS.nextDue();
   const nxt=left?'Bugün daha '+left+' tekrar var.':(nd==null?'':'Sonraki tekrar '+(nd===1?'yarın':nd+' gün sonra')+'.');
   let msg;
-  if(!n)msg=((left||SRS.newList(1).length)?'Henüz cevap yok.':'Bugün sorulacak kelime yok. 🎉')+(nxt?' '+nxt:'');
+  if(all){const nl=SRS.newList(1).length;
+    msg='Bu turun bütün kelimeleri bitti. '+(nl?'Ana sayfada yeni kelimeler seni bekliyor; çalışınca sınava dönebilirsin. ':'')+(nxt?nxt:'');
+    if(n)msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:''].filter(Boolean).join(' · ')+'. '+msg;}
+  else if(!n)msg=((left||SRS.newList(1).length)?'Henüz cevap yok.':'Bugün sorulacak kelime yok. 🎉')+(nxt?' '+nxt:'');
   else msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:''].filter(Boolean).join(' · ')+'. '+(sess.nw?sess.nw+' kelime döngüye girdi. ':'')+nxt;
   const wl=sess.wrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
   showResult(n?ok+'/'+n:'0',n?'doğru':'kelime cevaplandı',msg,wl,false);
+  document.getElementById('r-again').textContent=all?'Yeni tur':'Sınava devam';
 }
 
 function showResult(big,small,msg,wlHtml,isTest){
@@ -506,7 +513,7 @@ function showResult(big,small,msg,wlHtml,isTest){
   document.getElementById('rmsg').textContent=msg;
   document.getElementById('wronglist').innerHTML=wlHtml||'';
   document.getElementById('r-again').textContent=isTest?'Tekrar çalış':'Sınava devam';
-  document.getElementById('finish').classList.add('hidden');setSecLabel();
+  document.getElementById('finish').classList.add('hidden');setSecLabel();drawBar();
   if(!isTest)document.getElementById('counter').textContent='';
 }
 

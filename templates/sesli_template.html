@@ -46,6 +46,10 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
+/* 3000 kelimenin hepsi döngüye girince: küçük havai fişek gösterisi + OLMİŞDUR */
+.cele{position:relative;height:62vh;min-height:320px;border-radius:20px;overflow:hidden;background:#141B26;margin-top:6px;cursor:pointer}
+.cele canvas{position:absolute;inset:0;width:100%;height:100%}
+.cele .olm{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:44px;font-weight:900;letter-spacing:.04em;text-shadow:0 2px 18px rgba(255,200,80,.55);pointer-events:none}
 </style><script src="srs.js"></script></head><body><div class="wrap">
 <header>
   <div class="seclabel" id="seclabel"></div>
@@ -69,7 +73,6 @@ let LANG="en-US",RATE=0.8,GAP=500,voices=[];const synth=window.speechSynthesis;
 // Kelime bazlı tekrar: tüm kelimeler sırasıyla katalog; her kelimeye anahtarı (d._k) iliştirilir.
 SRS.setCatalog(SRS.catalogFromGroups(GROUPS));
 const BYK={};GROUPS.forEach(g=>g.items.forEach(d=>{BYK[d._k]={d:d,g:g};}));
-const LIST_N=100;   // ana sayfada hep hazır duran yeni kelime sayısı
 function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
@@ -143,13 +146,40 @@ function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter
   })();}
 
 // Başlık: döngüdeki kelime sayısı · listedeki en yüksek seviye.
-function setSecLabel(){const lv=SRS.topLevel(LIST_N);
-  document.getElementById('seclabel').textContent='Döngüde '+SRS.inCycle()+(lv?' · '+lv:'');}
-// 100'lük yeni kelime listesi, sınavın soracağı sırayla (en üstteki ilk sorulur).
+function setSecLabel(){const lv=SRS.topLevel();
+  document.getElementById('seclabel').textContent=SRS.inCycle()+(lv?' · '+lv:'');}
+// Havai fişek: koyu panelde roketler yükselip patlar (~7 sn), ortada OLMİŞDUR. Dokununca tekrar.
+let celeRaf=0;
+function celebrate(list){
+  list.innerHTML='<div class="cele"><canvas></canvas><div class="olm">OLMİŞDUR</div></div>';
+  const box=list.firstChild,cv=box.querySelector('canvas'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,3);
+  let W=0,H=0,parts=[],rockets=[],t0=0,last=0;
+  function size(){W=box.clientWidth;H=box.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+  function launch(){rockets.push({x:W*(.15+Math.random()*.7),y:H,vy:-(H*.018+Math.random()*H*.006),ty:H*(.15+Math.random()*.35),h:Math.random()*360});}
+  function burst(r){const n=60+(Math.random()*40|0);for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=1+Math.random()*3.6;
+    parts.push({x:r.x,y:r.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:1,h:r.h+Math.random()*40-20});}}
+  function frame(t){
+    if(!t0){t0=t;last=t;}
+    if(t-t0<7000&&t-last>420+Math.random()*300){launch();if(Math.random()<.35)launch();last=t;}
+    ctx.fillStyle='rgba(20,27,38,.22)';ctx.fillRect(0,0,W,H);
+    rockets=rockets.filter(r=>{const y0=r.y;r.y+=r.vy;ctx.strokeStyle='hsl('+r.h+',90%,75%)';ctx.lineWidth=2;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(r.x,y0);ctx.lineTo(r.x,r.y);ctx.stroke();if(r.y<=r.ty){burst(r);return false;}return true;});
+    parts=parts.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.045;p.vx*=.985;p.vy*=.985;p.l-=.012;
+      if(p.l<=0)return false;ctx.globalAlpha=p.l;ctx.fillStyle='hsl('+p.h+',95%,62%)';ctx.beginPath();ctx.arc(p.x,p.y,1.8,0,7);ctx.fill();ctx.globalAlpha=1;return true;});
+    if(t-t0<7000||rockets.length||parts.length)celeRaf=requestAnimationFrame(frame);
+    else{ctx.clearRect(0,0,W,H);}
+  }
+  size();cancelAnimationFrame(celeRaf);celeRaf=requestAnimationFrame(frame);
+  box.onclick=()=>{cancelAnimationFrame(celeRaf);t0=0;parts=[];rockets=[];ctx.clearRect(0,0,W,H);celeRaf=requestAnimationFrame(frame);};
+}
+// Yeni kelime listesi (ayarlardaki sayı kadar), sınavın soracağı sırayla.
 // Sınavda cevaplanan kelime listeden düşer, alttan sıradaki eklenir.
-function renderList(){stop();const list=document.getElementById('list');list.innerHTML='';
-const keys=SRS.newList(LIST_N);
-if(!keys.length){list.innerHTML='<div class="hint">Tüm kelimeler döngüde. 🎉</div>';return;}
+const FORCE_CELE=(()=>{try{return new URLSearchParams(location.search).get('kutla')==='1';}catch(e){return false;}})();
+function renderList(){stop();cancelAnimationFrame(celeRaf);const list=document.getElementById('list');list.innerHTML='';
+const keys=SRS.newList(SRS.listSize());
+const cele=!keys.length||FORCE_CELE;
+document.querySelector('header .controls').style.display=cele?'none':'';document.getElementById('search').style.display=cele?'none':'';
+if(cele){celebrate(list);return;}
 keys.forEach(k=>{const e=BYK[k];if(!e)return;const d=e.d;
 const c=document.createElement('div');c.className='card';c.style.borderLeftColor=SColor[d.sec]||'var(--diger)';c.dataset.w=d.w;c.dataset.k=k;c.dataset.s=(d.w+' '+(d.tr||'')).toLowerCase();
 c.innerHTML=`<div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''} · ${e.g.level}</span></div>

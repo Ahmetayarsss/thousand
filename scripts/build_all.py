@@ -29,7 +29,7 @@ APP_HEAD = '<script src="updater.js"></script><script src="tts-bridge.js"></scri
 
 # Uygulama içi güncelleme paketine giren dosyalar (ses HARİÇ — ses APK'da gömülü).
 WEB_BUNDLE_FILES = [
-    "index.html", "kartlar.html", "sozluk.html", "istatistik.html", "ayarlar.html",
+    "index.html", "kartlar.html", "sozluk.html", "istatistik.html", "ayarlar.html", "analiz.html",
     "tts-bridge.js", "progress.js", "srs.js", "updater.js", "three.min.js",
 ]
 
@@ -136,7 +136,20 @@ def apply_multi_examples(groups):
                 it["ex"] = list(sents)
 
 
+# Grup içi sıra (ana sayfa, sınav, ilerleme hepsi aynı sırayı kullanır):
+# isimler → fiiller → sıfatlar → zarflar → diğer, her biri alfabetik.
+SEC_ORDER = ["İsimler", "Fiiller", "Sıfatlar", "Zarflar", "Diğer"]
+
+
+def sort_items(groups):
+    def k(it):
+        sec = it.get("sec")
+        return (SEC_ORDER.index(sec) if sec in SEC_ORDER else len(SEC_ORDER), it["w"].lower())
+    return [dict(g, items=sorted(g["items"], key=k)) for g in groups]
+
+
 def render(groups):
+    groups = sort_items(groups)
     sesli_groups = groups
     kart_groups = [
         {
@@ -197,18 +210,29 @@ def render(groups):
     # Ayarlar sayfası (Sözlük'ün üstü): Sözlük'te en üstte aşağı çekince açılır,
     # burada yukarı itince Sözlük'e döner. İçerik sonra eklenecek.
     ay_tpl = (ROOT / "templates" / "ayarlar_template.html").read_text(encoding="utf-8")
-    (ROOT / "ayarlar.html").write_text(ay_tpl.replace("__SOZLUK__", "Oxford3000_sozluk.html"), encoding="utf-8")
-    app_ay = ay_tpl.replace("__SOZLUK__", "sozluk.html").replace(
-        "</head>", APP_HEAD + swipe_script("", "", "", "sozluk.html") + "</head>", 1
+    (ROOT / "ayarlar.html").write_text(ay_tpl.replace("__SOZLUK__", "Oxford3000_sozluk.html")
+                                       .replace("__INDEX__", "Oxford3000_30grup_sesli.html"), encoding="utf-8")
+    app_ay = ay_tpl.replace("__SOZLUK__", "sozluk.html").replace("__INDEX__", "index.html").replace(
+        "</head>", APP_HEAD + swipe_script("analiz.html", "", "", "sozluk.html") + "</head>", 1
     )
     (ROOT / "app/www/ayarlar.html").write_text(app_ay, encoding="utf-8")
     print(f"app/www/ayarlar.html: {len(app_ay)} bayt")
 
-    # İstatistik / ilerleme sayfası (yalnız kelime listesi lazım: no, level, ws)
+    # İstatistik / ilerleme sayfaları (kelime listesi + Türkçe: no, level, ws, tr)
     stats_data = [
-        {"no": g["no"], "level": g["level"], "ws": [it["w"] for it in g["items"]]}
+        {"no": g["no"], "level": g["level"], "ws": [it["w"] for it in g["items"]],
+         "tr": [it["tr"] for it in g["items"]]}
         for g in groups
     ]
+    # Ayrıntılı istatistik (Ayarlar'ın sağı; yalnız Ayarlar'dan sola kaydırınca açılır)
+    an_tpl = (ROOT / "templates" / "analiz_template.html").read_text(encoding="utf-8")
+    an_tpl = an_tpl.replace("__GROUPS_JSON__", json.dumps(stats_data, ensure_ascii=False, separators=(",", ":")))
+    (ROOT / "analiz.html").write_text(an_tpl.replace("__AYARLAR__", "ayarlar.html"), encoding="utf-8")
+    app_an = an_tpl.replace("__AYARLAR__", "ayarlar.html").replace(
+        "</head>", APP_HEAD + swipe_script("", "ayarlar.html") + "</head>", 1
+    )
+    (ROOT / "app/www/analiz.html").write_text(app_an, encoding="utf-8")
+    print(f"app/www/analiz.html: {len(app_an)} bayt")
     stats_tpl = (ROOT / "templates" / "stats_template.html").read_text(encoding="utf-8")
     stats_blob = json.dumps(stats_data, ensure_ascii=False, separators=(",", ":"))
     stats_tpl = stats_tpl.replace("__GROUPS_JSON__", stats_blob)

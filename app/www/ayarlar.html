@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oxford 3000 · Ayarlar</title>
+<style>
+:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+body{min-height:100vh}
+.wrap{max-width:600px;margin:0 auto;padding:8px 14px calc(24px + env(safe-area-inset-bottom));min-height:100vh;display:flex;flex-direction:column}
+h1{font-size:20px;font-weight:800;margin:6px 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 20px rgba(20,30,50,.06);padding:16px}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:26px 0}
+.down{margin-top:auto;align-self:center;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:800;padding:14px 20px 4px}
+.down span{font-size:20px;line-height:1}
+</style>
+<script src="updater.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='',P='',U='',D='sozluk.html';var x0=0,y0=0,t0=0,ok=false,top=false,bot=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;var se=document.scrollingElement||document.documentElement;top=se.scrollTop<=0;bot=se.scrollTop+innerHeight>=se.scrollHeight-2;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dy)>=90&&Math.abs(dy)>Math.abs(dx)*1.8){if(dy>0&&U&&top)location.href=U;else if(dy<0&&D&&bot)location.href=D;return;}if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head>
+<body>
+<div class="wrap">
+  <h1>Ayarlar</h1>
+  <div class="card"><div class="empty">Ayarlar yakında burada olacak.</div></div>
+  <a class="down" href="sozluk.html">Sözlük<span>⌄</span></a>
+</div>
+</body></html>

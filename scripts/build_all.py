@@ -29,7 +29,7 @@ APP_HEAD = '<script src="updater.js"></script><script src="tts-bridge.js"></scri
 
 # Uygulama içi güncelleme paketine giren dosyalar (ses HARİÇ — ses APK'da gömülü).
 WEB_BUNDLE_FILES = [
-    "index.html", "kartlar.html", "sozluk.html", "istatistik.html",
+    "index.html", "kartlar.html", "sozluk.html", "istatistik.html", "ayarlar.html",
     "tts-bridge.js", "progress.js", "srs.js", "updater.js", "three.min.js",
 ]
 
@@ -63,21 +63,28 @@ ENRICH_MODS = ["g2", "g3", "g4", "g5", "g6", "g7", "g8", "g9", "g11", "g12", "g1
 # Android uygulaması: menü yok. Sayfa sırası liste ⇄ kartlar ⇄ istatistik.
 # Yatay kaydırma: sola → NEXT sayfa, sağa → PREV sayfa (boş ise o yön no-op).
 # Slider/buton/link/select üzerindeki dokunuşlar hariç (yanlış tetiklenmesin).
-def swipe_script(next_t, prev_t):
+def swipe_script(next_t, prev_t, up_t="", down_t=""):
+    """Yatay kaydırma: sola → next_t, sağa → prev_t.
+    Dikey: sayfa en üstteyken aşağı çekince → up_t (üstteki sayfa),
+    sayfa en alttayken yukarı itince → down_t (alttaki sayfa)."""
     return (
-        "<script>(function(){var N=%r,P=%r;var x0=0,y0=0,t0=0,ok=false;"
+        "<script>(function(){var N=%r,P=%r,U=%r,D=%r;var x0=0,y0=0,t0=0,ok=false,top=false,bot=false;"
         "addEventListener('touchstart',function(e){"
         "if(e.touches.length!==1){ok=false;return;}"
         "var el=e.target;"
         "if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}"
-        "var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});"
+        "var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;"
+        "var se=document.scrollingElement||document.documentElement;"
+        "top=se.scrollTop<=0;bot=se.scrollTop+innerHeight>=se.scrollHeight-2;},{passive:true});"
         "addEventListener('touchend',function(e){if(!ok)return;ok=false;"
         "var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;"
         "if(Date.now()-t0>800)return;"
+        "if(Math.abs(dy)>=90&&Math.abs(dy)>Math.abs(dx)*1.8){"
+        "if(dy>0&&U&&top)location.href=U;else if(dy<0&&D&&bot)location.href=D;return;}"
         "if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;"
         "if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});"
         "})();</script>"
-    ) % (next_t, prev_t)
+    ) % (next_t, prev_t, up_t, down_t)
 
 
 def load_groups():
@@ -181,11 +188,21 @@ def render(groups):
     (ROOT / "Oxford3000_sozluk.html").write_text(root_soz, encoding="utf-8")
     print(f"Oxford3000_sozluk.html: {len(root_soz)} bayt")
     app_soz = soz_tpl.replace("__BACK__", "index.html").replace(
-        "</head>", APP_HEAD + swipe_script("index.html", "") + "</head>", 1
+        "</head>", APP_HEAD + swipe_script("index.html", "", "ayarlar.html") + "</head>", 1
     )
     app_soz = app_soz.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
     (ROOT / "app/www/sozluk.html").write_text(app_soz, encoding="utf-8")
     print(f"app/www/sozluk.html: {len(app_soz)} bayt")
+
+    # Ayarlar sayfası (Sözlük'ün üstü): Sözlük'te en üstte aşağı çekince açılır,
+    # burada yukarı itince Sözlük'e döner. İçerik sonra eklenecek.
+    ay_tpl = (ROOT / "templates" / "ayarlar_template.html").read_text(encoding="utf-8")
+    (ROOT / "ayarlar.html").write_text(ay_tpl.replace("__SOZLUK__", "Oxford3000_sozluk.html"), encoding="utf-8")
+    app_ay = ay_tpl.replace("__SOZLUK__", "sozluk.html").replace(
+        "</head>", APP_HEAD + swipe_script("", "", "", "sozluk.html") + "</head>", 1
+    )
+    (ROOT / "app/www/ayarlar.html").write_text(app_ay, encoding="utf-8")
+    print(f"app/www/ayarlar.html: {len(app_ay)} bayt")
 
     # İstatistik / ilerleme sayfası (yalnız kelime listesi lazım: no, level, ws)
     stats_data = [

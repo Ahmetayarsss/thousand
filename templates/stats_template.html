@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oxford 3000 · İlerleme</title>
-<script src="progress.js"></script>
+<script src="srs.js"></script>
 <style>
 :root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--amber:#E5892B;--neu:#C7D0DB;--green-bg:#E7F5EC;--amber-bg:#FCF0E1;--secgray:#EDF0F4;--secgray-ink:#9AA6B4;--gold:#C9A227;--gold-bg:#FBF3D6}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -34,32 +34,34 @@ h1{font-size:20px;font-weight:800;margin:0}
 .ex-row .p{flex:0 0 auto;font-weight:800;font-size:15px}
 .ex-row .p.hi{color:var(--green)} .ex-row .p.mid{color:var(--amber)} .ex-row .p.lo{color:#D9544D}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:14px 0}
+.sub{font-size:14px;font-weight:800;color:var(--muted);margin:2px 0 0}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.sec{position:relative;border-radius:14px;padding:10px 8px;border:1.5px solid var(--line);background:var(--secgray);min-height:64px;display:flex;flex-direction:column;justify-content:space-between}
-.sec .snum{font-size:20px;font-weight:800;line-height:1;color:var(--secgray-ink)}
-.sec .slvl{align-self:flex-start;margin-top:6px;font-size:10px;font-weight:800;color:#fff;background:var(--accent);border-radius:5px;padding:1px 6px}
-.sec.green{background:var(--green-bg);border-color:var(--green)} .sec.green .snum{color:var(--green)}
-.sec.yellow{background:var(--amber-bg);border-color:var(--amber)} .sec.yellow .snum{color:var(--amber)}
-.sec.gold{background:var(--gold-bg);border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)} .sec.gold .snum{color:var(--gold)}
-.sec .badge{position:absolute;top:6px;right:8px;font-size:13px}
-.sec.cur{box-shadow:0 0 0 3px rgba(59,110,165,.35)}
-.sec .curtag{position:absolute;top:-8px;left:7px;background:var(--accent);color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:1px 6px}
-.tekrar{margin-top:7px;border:0;background:var(--amber);color:#fff;font-weight:800;font-size:11.5px;border-radius:8px;padding:6px 0;width:100%;cursor:pointer}
-.tekrar:active{transform:scale(.96)}
+.sec{border-radius:14px;padding:9px 8px 8px;border:1.5px solid var(--line);background:var(--secgray)}
+.sec.on{background:#fff}
+.sec.done{background:var(--green-bg);border-color:var(--green)}
+.sec .top{display:flex;align-items:center;justify-content:space-between}
+.sec .snum{font-size:12px;font-weight:800;color:var(--ink)}
+.sec .slvl{font-size:10px;font-weight:800;color:#fff;background:var(--accent);border-radius:5px;padding:1px 6px}
+.sec .cnt{display:flex;justify-content:space-between;margin:7px 0 6px;font-size:15px;font-weight:800}
+.sec .cnt .k{color:var(--green)} .sec .cnt .a{color:var(--amber)} .sec .cnt .z{color:var(--secgray-ink)}
+.sec .mini{height:5px;border-radius:3px;background:var(--neu);overflow:hidden;display:flex}
+.sec .mini i{display:block;height:100%} .sec .mini .k{background:var(--green)} .sec .mini .a{background:var(--amber)}
+.legend{display:flex;gap:12px;font-size:11px;font-weight:700;color:var(--muted);margin:-4px 0 10px}
+.legend b{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="bar-top">
-    <h1>İlerleme</h1>
+    <div><h1>İlerleme</h1><div class="sub" id="seclabel"></div></div>
   </div>
 
   <div class="card">
     <h2>Genel</h2>
     <div class="big">
-      <div class="cell"><div class="n k" id="n-known">0</div><div class="l">Öğrenildi</div></div>
+      <div class="cell"><div class="n k" id="n-known">0</div><div class="l">Olgun</div></div>
       <div class="cell"><div class="n a" id="n-learn">0</div><div class="l">Öğreniliyor</div></div>
-      <div class="cell"><div class="n" id="n-neu">0</div><div class="l">Başlanmadı</div></div>
+      <div class="cell"><div class="n" id="n-neu">0</div><div class="l">Yeni</div></div>
     </div>
     <div class="pbar"><i class="k" id="pb-k"></i><i class="a" id="pb-a"></i></div>
   </div>
@@ -70,7 +72,8 @@ h1{font-size:20px;font-weight:800;margin:0}
   </div>
 
   <div class="card">
-    <h2>Bölümler</h2>
+    <h2>Kısımlar</h2>
+    <div class="legend"><span><b style="background:var(--green)"></b>olgun</span><span><b style="background:var(--amber)"></b>öğreniliyor</span><span><b style="background:var(--neu)"></b>yeni</span></div>
     <div class="grid" id="secgrid"></div>
   </div>
 
@@ -82,68 +85,52 @@ h1{font-size:20px;font-weight:800;margin:0}
 
 <script>
 const SG=__GROUPS_JSON__;
+SRS.setCatalog(SRS.catalogFromGroups(SG));
+const pc=(x,t)=>t?(x/t*100)+'%':'0%';
 
-/* --- Bölümler haritası (30 kart) --- */
-(function(){
-  const cur=window.OX?OX.current():0;
+function render(){
+  const lv=SRS.topLevel(100);
+  document.getElementById('seclabel').textContent='Döngüde '+SRS.inCycle()+(lv?' · '+lv:'');
+
+  /* Genel */
+  const T=SRS.totals();
+  document.getElementById('n-known').textContent=T.mature;
+  document.getElementById('n-learn').textContent=T.learning;
+  document.getElementById('n-neu').textContent=T.fresh;
+  document.getElementById('pb-k').style.width=pc(T.mature,T.total);
+  document.getElementById('pb-a').style.width=pc(T.learning,T.total);
+
+  /* Kısımlar + seviyeler */
+  const byLvl={};
   document.getElementById('secgrid').innerHTML=SG.map((g,i)=>{
-    const st=window.OX?OX.status(g.no):'gray';
-    const badge=st==='green'?'✓':st==='yellow'?'🔁':st==='gold'?'⭐':'';
-    return '<div class="sec '+st+(i===cur?' cur':'')+'">'
-      +(i===cur?'<span class="curtag">şu an</span>':'')
-      +(badge?'<span class="badge">'+badge+'</span>':'')
-      +'<div class="snum">'+g.no+'</div>'
-      +'<span class="slvl">'+g.level+'</span>'
-      +(st==='yellow'?'<button class="tekrar" data-i="'+i+'">Tekrar</button>':'')
-      +'</div>';
+    const c=SRS.groupCounts(i);
+    const L=byLvl[g.level]||(byLvl[g.level]={total:0,mature:0});L.total+=c.total;L.mature+=c.mature;
+    const cls=c.mature===c.total?' done':(c.fresh<c.total?' on':'');
+    return '<div class="sec'+cls+'"><div class="top"><span class="snum">Kısım '+g.no+'</span><span class="slvl">'+g.level+'</span></div>'
+      +'<div class="cnt"><span class="k">'+c.mature+'</span><span class="a">'+c.learning+'</span><span class="z">'+c.fresh+'</span></div>'
+      +'<div class="mini"><i class="k" style="width:'+pc(c.mature,c.total)+'"></i><i class="a" style="width:'+pc(c.learning,c.total)+'"></i></div></div>';
   }).join('');
-  document.getElementById('secgrid').addEventListener('click',e=>{
-    const b=e.target.closest('.tekrar'); if(!b)return;
-    const i=+b.dataset.i; if(window.OX)OX.startReview(i);
-    location.href='kartlar.html?exam=1';
-  });
-})();
+  document.getElementById('levels').innerHTML=['A1','A2','B1','B2'].filter(l=>byLvl[l]).map(l=>{
+    const d=byLvl[l];
+    return '<div class="lvl-row"><span class="tag">'+l+'</span>'
+      +'<span class="track"><i style="width:'+pc(d.mature,d.total)+'"></i></span>'
+      +'<span class="num">'+d.mature+'/'+d.total+'</span></div>';
+  }).join('');
 
-const exams=JSON.parse(localStorage.getItem('ox3000_exams_v1')||'[]');
-const curIdx=window.OX?OX.current():-1;
-
-// Sınavı geçilen (yeşil/sarı) bölümün kelimeleri = öğrenildi; şu an çalışılan = öğreniliyor.
-let total=0,known=0,learn=0,neu=0;
-const byLvl={};
-SG.forEach((g,i)=>{
-  const L=byLvl[g.level]||(byLvl[g.level]={total:0,known:0});
-  const n=g.ws.length; total+=n; L.total+=n;
-  const passed=window.OX?OX.status(g.no)!=='gray':false;
-  if(passed){known+=n; L.known+=n;}
-  else if(i===curIdx){learn+=n;}
-  else{neu+=n;}
-});
-
-document.getElementById('n-known').textContent=known;
-document.getElementById('n-learn').textContent=learn;
-document.getElementById('n-neu').textContent=neu;
-document.getElementById('pb-k').style.width=(known/total*100)+'%';
-document.getElementById('pb-a').style.width=(learn/total*100)+'%';
-
-const order=['A1','A2','B1','B2'];
-document.getElementById('levels').innerHTML=order.filter(l=>byLvl[l]).map(l=>{
-  const d=byLvl[l];const pct=d.total?Math.round(d.known/d.total*100):0;
-  return '<div class="lvl-row"><span class="tag">'+l+'</span>'
-    +'<span class="track"><i style="width:'+pct+'%"></i></span>'
-    +'<span class="num">'+d.known+'/'+d.total+'</span></div>';
-}).join('');
-
+  /* Son sınavlar */
+  let ss=[];try{ss=JSON.parse(localStorage.getItem('ox3000_sessions_v1')||'[]');}catch(e){}
+  ss=ss.slice(-30).reverse();
+  document.getElementById('exams').innerHTML=ss.length
+    ? ss.map(e=>{const p=e.n?Math.round(e.ok/e.n*100):0,c=p>=90?'hi':p>=70?'mid':'lo';
+        const parts=[e.rev?'Tekrar '+e.revOk+'/'+e.rev:'',e.nw?'Yeni '+e.nwOk+'/'+e.nw:''].filter(Boolean).join(' · ');
+        return '<div class="ex-row"><span class="g">'+e.ok+'/'+e.n+'</span>'
+          +'<span class="d">'+fmtDate(e.t)+' · '+parts+'</span>'
+          +'<span class="p '+c+'">%'+p+'</span></div>';}).join('')
+    : '<div class="empty">Henüz sınav yapmadın. Çalışma sayfasında “Sınav”ı dene.</div>';
+}
 function fmtDate(t){const d=new Date(t);const p=n=>('0'+n).slice(-2);
   return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());}
-const ex=exams.slice().sort((a,b)=>b.t-a.t);
-document.getElementById('exams').innerHTML = ex.length
-  ? ex.map(e=>{
-      const pc=e.pct>=90?'hi':e.pct>=70?'mid':'lo';
-      const gno=('0'+(e.no||(e.g+1))).slice(-2);
-      return '<div class="ex-row"><span class="g">Grup '+gno+' · '+(e.level||'')+'</span>'
-        +'<span class="d">'+fmtDate(e.t)+' · '+e.score+'/'+e.total+'</span>'
-        +'<span class="p '+pc+'">%'+e.pct+'</span></div>';
-    }).join('')
-  : '<div class="empty">Henüz sınav yapmadın. Kartlar ekranında “Sınav”ı dene.</div>';
+render();
+window.addEventListener('pageshow',e=>{if(e.persisted)render();});
 </script>
 </body></html>

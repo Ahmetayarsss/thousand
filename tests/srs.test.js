@@ -99,12 +99,70 @@ t("sınav sırası: yüksek kutu önce, eşitse en çok geciken", () => {
   assert.deepStrictEqual(S.dueList(at(1)), [a]);   // vadesi gelmeyen girmez
 });
 
-t("sınav kuyruğu: önce tekrarlar sonra yeniler", () => {
-  S.answer(k1, false, null, at(0));
-  const q = S.examQueue(at(1));
-  assert.deepStrictEqual(q.reviews, [k1]);
-  assert.strictEqual(q.news[0], k2);
-  assert.strictEqual(q.news.length, 2999);
+t("sınav kuyruğu: tekrarlar kutu yüksekten düşüğe, sonra turun yenileri", () => {
+  const ks = S.newList(6);
+  S.answer(ks[0], false, null, at(0));                                        // kutu 1
+  S.answer(ks[1], false, null, at(0));                                        // kutu 1
+  S.answer(ks[2], true, null, at(0));                                         // kutu 2
+  S.answer(ks[3], true, null, at(0)); S.answer(ks[3], true, null, at(3));     // kutu 3
+  const q = S.examQueue(at(30));
+  assert.strictEqual(q.reviews.length, 4);
+  assert.deepStrictEqual(q.reviews.map(S.level), [3, 2, 1, 1]);
+  assert.deepStrictEqual(new Set(q.reviews.slice(2)), new Set([ks[0], ks[1]]));
+  assert.strictEqual(q.news.length, 100);
+  assert.deepStrictEqual(new Set(q.news), new Set(S.newList(100)));
+});
+
+t("aynı kutudaki tekrarlar karışık gelir", () => {
+  const ks = S.newList(8);
+  ks.forEach(k => S.answer(k, false, null, at(0)));
+  const seen = new Set();
+  for (let i = 0; i < 40; i++) seen.add(S.examQueue(at(5)).reviews.join());
+  assert.ok(seen.size > 1);
+});
+
+t("tur: yarıda bırakılınca kalanlarla sürer, bitince yeni tur kurulur", () => {
+  S.setListSize(10);
+  const first = S.examQueue(at(0)).news;
+  assert.strictEqual(first.length, 10);
+  first.slice(0, 4).forEach(k => S.answer(k, true, null, at(0)));
+  const again = S.examQueue(at(0)).news;                                      // liste yenilendi ama tur aynı
+  assert.deepStrictEqual(new Set(again), new Set(first.slice(4)));
+  again.forEach(k => S.answer(k, true, null, at(0)));
+  const next = S.examQueue(at(0)).news;                                       // tur bitti → yeni tur = güncel liste
+  assert.deepStrictEqual(new Set(next), new Set(S.newList(10)));
+  assert.ok(next.every(k => !first.includes(k)));
+  S.setListSize(100);
+});
+
+t("liste sayısı ayarı: sınırlar, varsayılan 100, değişince tur sıfırlanır", () => {
+  assert.strictEqual(S.listSize(), 100);
+  assert.strictEqual(S.setListSize(30), 30);
+  assert.strictEqual(S.topLevel(), "A1");
+  assert.strictEqual(S.examQueue(at(0)).news.length, 30);
+  S.setListSize(12);
+  assert.strictEqual(S.examQueue(at(0)).news.length, 12);
+  assert.strictEqual(S.setListSize(1), S.LMIN);
+  assert.strictEqual(S.setListSize(9999), S.LMAX);
+  S.setListSize(100);
+});
+
+t("geliştirici: gün kaydırma vadeyi öne çeker", () => {
+  S.answer(k1, false, null);                                                  // bugün, kutu 1
+  assert.strictEqual(S.isDue(k1), false);
+  S.setDev({ off: 1 });
+  assert.strictEqual(S.isDue(k1), true);
+  assert.strictEqual(S.today(), S.today(Date.now()) + 1);
+  S.setDev({ off: 0 });
+});
+
+t("günlük özet: cevap, doğru ve yeni sayıları", () => {
+  S.answer(k1, true, null, at(0));
+  S.answer(k2, false, null, at(0));
+  S.answer(k1, true, null, at(3));
+  const d = S.daily();
+  assert.deepStrictEqual(d[S.today(at(0))], { n: 2, ok: 1, nw: 2 });
+  assert.deepStrictEqual(d[S.today(at(3))], { n: 1, ok: 1, nw: 0 });
 });
 
 t("gün değişimi yerel gece 00:00", () => {

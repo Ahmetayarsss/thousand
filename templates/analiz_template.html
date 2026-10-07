@@ -1,0 +1,309 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oxford 3000 · İstatistikler</title>
+<script src="srs.js"></script>
+<style>
+:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--ink2:#52514e;--muted:#7A8699;--line:#E6EAF1;
+--grid:#e9ecf1;--axis:#c3c9d3;--s1:#2a78d6;--s2:#eb6834;--o1:#86b6ef;--o2:#3987e5;--o3:#1c5cab;--o4:#0d366b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:600px;margin:0 auto;padding:8px 14px calc(24px + env(safe-area-inset-bottom))}
+.bar-top{display:flex;align-items:center;gap:6px;padding:6px 0 10px}
+.back{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink);font-weight:800;font-size:13px;padding:6px 10px 6px 0}
+.back span{font-size:20px;line-height:1;margin-right:3px}
+h1{font-size:20px;font-weight:800;margin:0}
+.sub{font-size:14px;font-weight:800;color:var(--muted);margin:2px 0 0}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 20px rgba(20,30,50,.06);padding:16px;margin-bottom:14px}
+.card h2{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;margin:0 0 4px}
+.card .desc{font-size:12px;color:var(--muted);margin:0 0 10px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:var(--bg);border-radius:12px;padding:11px 12px}
+.tile .l{font-size:11.5px;color:var(--muted);font-weight:700}
+.tile .v{font-size:24px;font-weight:800;line-height:1.15;margin-top:3px}
+.tile .d{font-size:11px;color:var(--muted);margin-top:2px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);font-weight:700;margin:0 0 6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart text{font-family:inherit}
+.chart [tabindex]:focus{outline:none}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--line);box-shadow:0 6px 18px rgba(20,30,50,.14);border-radius:10px;padding:7px 10px;font-size:12px;white-space:nowrap;opacity:0;transition:opacity .12s;z-index:5}
+.tip.show{opacity:1}
+.tip .tv{font-weight:800;font-size:13px;color:var(--ink)}
+.tip .tr{display:flex;align-items:center;gap:6px;color:var(--ink2);margin-top:2px}
+.tip .tr b{color:var(--ink)}
+.tip .key{display:inline-block;width:10px;height:2px;border-radius:1px}
+.tbtn{border:0;background:none;color:var(--s1);font-weight:800;font-size:12px;padding:8px 0 0;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+th{text-align:left;color:var(--muted);font-weight:700;font-size:11px;padding:5px 4px;border-bottom:1px solid var(--line)}
+td{padding:6px 4px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+td.num,th.num{text-align:right}
+td.tr{color:#B03A2E}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:12px 0}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar-top">
+    <a class="back" href="__AYARLAR__"><span>‹</span>Ayarlar</a>
+  </div>
+  <h1>İstatistikler</h1>
+  <div class="sub" id="seclabel"></div>
+  <div style="height:12px"></div>
+
+  <div class="card">
+    <h2>Genel</h2>
+    <div class="tiles" id="tiles"></div>
+  </div>
+
+  <div class="card">
+    <h2>Günlük cevaplar</h2>
+    <p class="desc">Son 30 gün, sınavda verilen cevaplar</p>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Doğru</span><span><i style="background:var(--s2)"></i>Yanlış</span></div>
+    <div class="chart" id="c-daily"></div>
+    <button class="tbtn" data-t="t-daily">Tabloyu göster</button>
+    <div class="hidden" id="t-daily"></div>
+  </div>
+
+  <div class="card">
+    <h2>Günlük doğruluk</h2>
+    <p class="desc">Son 30 gün, cevap verilen günler (%)</p>
+    <div class="chart" id="c-acc"></div>
+    <button class="tbtn" data-t="t-daily">Tabloyu göster</button>
+  </div>
+
+  <div class="card">
+    <h2>Kutu dağılımı</h2>
+    <p class="desc">Döngüdeki kelimelerin bulunduğu kutular</p>
+    <div class="chart" id="c-box"></div>
+  </div>
+
+  <div class="card">
+    <h2>Önümüzdeki 7 gün</h2>
+    <p class="desc">Her gün vadesi gelecek tekrar sayısı (bugün = gecikenler dahil)</p>
+    <div class="chart" id="c-due"></div>
+    <button class="tbtn" data-t="t-due">Tabloyu göster</button>
+    <div class="hidden" id="t-due"></div>
+  </div>
+
+  <div class="card">
+    <h2>En çok yanlış yapılanlar</h2>
+    <div id="wrong"></div>
+  </div>
+</div>
+<script>
+const SG=__GROUPS_JSON__;
+const CAT=SRS.catalogFromGroups(SG);SRS.setCatalog(CAT);
+// anahtar → {w, tr}: katalog, grupların kelimeleriyle aynı sırada.
+const WK={};{let i=0;SG.forEach(g=>g.ws.forEach((w,j)=>{WK[CAT[i++].k]={w:w,tr:(g.tr||[])[j]||''};}));}
+const NS='http://www.w3.org/2000/svg';
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const p2=n=>('0'+n).slice(-2);
+const DAYMS=86400000;
+// Gün numarası (yerel) → Date (o günün öğlesi; yalnız gösterim için)
+function dayDate(d){const t=SRS.now(),off=d-SRS.today();return new Date(t+off*DAYMS);}
+const dm=d=>{const x=dayDate(d);return p2(x.getDate())+'.'+p2(x.getMonth()+1);};
+const dmy=d=>{const x=dayDate(d);return p2(x.getDate())+'.'+p2(x.getMonth()+1)+'.'+x.getFullYear();};
+const WD=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+const fmtN=n=>n.toLocaleString('tr-TR');
+
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function txt(parent,x,y,s,o){const t=el('text',Object.assign({x:x,y:y,'font-size':11,fill:css('--muted')},o||{}),parent);t.textContent=s;return t;}
+// Veri ucu 4px yuvarlak, taban kare: yukarı doğru sütun / sağa doğru çubuk.
+function colPath(x,y,w,h,r){r=Math.min(r,w/2,h);return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`;}
+function rowPath(x,y,w,h,r){r=Math.min(r,h/2,w);return `M${x},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h-r}Q${x+w},${y+h} ${x+w-r},${y+h}H${x}Z`;}
+// Temiz eksen: adım 1/2/5×10^k, üst sınır adımın katı (0 / 5 / 10 / 15 …).
+function niceScale(v,n){const raw=Math.max(1,v)/n,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;
+  const step=Math.max(1,(m<=1?1:m<=2?2:m<=5?5:10)*p);return {step:step,max:Math.ceil(Math.max(1,v)/step)*step};}
+
+// Tek ipucu kutusu: değer önde, etiket arkada. İçerik textContent ile.
+function tipFor(box){let t=box.querySelector('.tip');if(!t){t=document.createElement('div');t.className='tip';box.appendChild(t);}return t;}
+function showTip(box,x,y,head,rows){
+  const t=tipFor(box);t.innerHTML='';
+  const h=document.createElement('div');h.className='tv';h.textContent=head;t.appendChild(h);
+  (rows||[]).forEach(r=>{const d=document.createElement('div');d.className='tr';
+    if(r.c){const k=document.createElement('span');k.className='key';k.style.background=r.c;d.appendChild(k);}
+    const b=document.createElement('b');b.textContent=r.v;d.appendChild(b);
+    const s=document.createElement('span');s.textContent=r.l;d.appendChild(s);t.appendChild(d);});
+  t.classList.add('show');
+  const bw=box.clientWidth,tw=t.offsetWidth,th=t.offsetHeight;
+  t.style.left=Math.max(0,Math.min(bw-tw,x-tw/2))+'px';t.style.top=Math.max(-6,y-th-10)+'px';
+}
+function hideTips(){document.querySelectorAll('.tip.show').forEach(t=>t.classList.remove('show'));lift(null);}
+// Dokunulan işaretin alanı hafifçe koyulaşır (tepki verdiği görülsün).
+function lift(r){document.querySelectorAll('.chart rect.hit').forEach(x=>x.setAttribute('fill','transparent'));if(r)r.setAttribute('fill','rgba(27,36,48,.05)');}
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.chart'))hideTips();});
+
+/* ---------- veriler ---------- */
+const T=SRS.today(),REC=SRS.records(),DL=SRS.daily();
+const recs=Object.keys(REC).filter(k=>WK[k]).map(k=>Object.assign({k:k},REC[k]));
+const days30=[];for(let d=T-29;d<=T;d++){const e=DL[d]||{n:0,ok:0,nw:0};days30.push({d:d,n:e.n,ok:e.ok,bad:e.n-e.ok,nw:e.nw||0});}
+
+function streaks(){
+  const act=Object.keys(DL).map(Number).filter(d=>DL[d]&&DL[d].n>0&&d<=T).sort((a,b)=>a-b);
+  let best=0,run=0,prev=null;act.forEach(d=>{run=(prev!=null&&d===prev+1)?run+1:1;best=Math.max(best,run);prev=d;});
+  const set=new Set(act);let cur=0,d=set.has(T)?T:T-1;while(set.has(d)){cur++;d--;}
+  return {cur:cur,best:best,today:set.has(T)};
+}
+function finishEstimate(){
+  const fresh=SRS.totals().fresh;if(!fresh)return {done:true};
+  let nw=0;for(let d=T-13;d<=T;d++)nw+=(DL[d]&&DL[d].nw)||0;
+  const per=nw/14;if(per<=0)return {none:true,fresh:fresh};
+  const days=Math.ceil(fresh/per);return {days:days,day:T+days,per:per,fresh:fresh};
+}
+
+/* ---------- Genel kutucuklar ---------- */
+function tiles(){
+  let n=0,ok=0;for(const d in DL){n+=DL[d].n;ok+=DL[d].ok;}
+  let n30=0,ok30=0;days30.forEach(x=>{n30+=x.n;ok30+=x.ok;});
+  const st=streaks(),fe=finishEstimate(),tot=SRS.totals();
+  const items=[
+    ['Toplam cevap',fmtN(n),'Son 30 gün: '+fmtN(n30)],
+    ['Doğruluk',n?'%'+Math.round(ok/n*100):'—',n30?'Son 30 gün: %'+Math.round(ok30/n30*100):'Son 30 gün: —'],
+    ['Çalışma serisi',st.cur+' gün',st.cur&&!st.today?'Bugün çalışırsan seri sürer':'Art arda sınav yapılan gün'],
+    ['En uzun seri',st.best+' gün',''],
+    ['Döngüde',fmtN(tot.mature+tot.learning),'Olgun: '+fmtN(tot.mature)],
+    ['Tahmini bitiş',fe.done?'Bitti':fe.none?'—':dmy(fe.day),
+      fe.done?'Tüm kelimeler döngüde':fe.none?'Son 14 günde yeni kelime yok':'≈'+fmtN(fe.days)+' gün · günde ort. '+fe.per.toFixed(1).replace('.',',')+' yeni']
+  ];
+  document.getElementById('tiles').innerHTML='';
+  items.forEach(([l,v,d])=>{const t=document.createElement('div');t.className='tile';
+    const a=document.createElement('div');a.className='l';a.textContent=l;
+    const b=document.createElement('div');b.className='v';b.textContent=v;
+    const c=document.createElement('div');c.className='d';c.textContent=d;
+    t.append(a,b,c);document.getElementById('tiles').appendChild(t);});
+}
+
+/* ---------- Günlük cevaplar: yığılmış sütun (doğru alt, yanlış üst) ---------- */
+function chartDaily(){
+  const box=document.getElementById('c-daily');box.innerHTML='';
+  const W=box.clientWidth,H=170,ml=30,mr=6,mt=8,mb=22,pw=W-ml-mr,ph=H-mt-mb;
+  const sc=niceScale(Math.max(...days30.map(x=>x.n)),4),mx=sc.max,y=v=>mt+ph-v/mx*ph;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,height:H,role:'img','aria-label':'Son 30 gün günlük cevaplar'},box);
+  for(let v=0;v<=mx;v+=sc.step){const yy=Math.round(y(v))+.5;
+    el('line',{x1:ml,x2:W-mr,y1:yy,y2:yy,stroke:v?css('--grid'):css('--axis'),'stroke-width':1},svg);
+    txt(svg,ml-6,yy+4,fmtN(v),{'text-anchor':'end','font-variant-numeric':'tabular-nums'});}
+  const band=pw/days30.length,bw=Math.max(3,Math.min(24,band-3));
+  days30.forEach((x,i)=>{const cx=ml+band*i+(band-bw)/2;
+    if(x.ok){const top=y(x.ok),h=mt+ph-top;el('path',{d:x.bad?`M${cx},${top}H${cx+bw}V${mt+ph}H${cx}Z`:colPath(cx,top,bw,h,4),fill:css('--s1')},svg);}
+    if(x.bad){const base=x.ok?y(x.ok)-2:mt+ph,top=y(x.n)-(x.ok?2:0),h=base-top;if(h>0)el('path',{d:colPath(cx,top,bw,h,4),fill:css('--s2')},svg);}
+    const hit=el('rect',{x:ml+band*i,y:mt,width:band,height:ph,fill:'transparent',tabindex:0,class:'hit'},svg);
+    const show=()=>showTip(box,ml+band*i+band/2,y(x.n),dm(x.d)+' · '+fmtN(x.n)+' cevap',
+      x.n?[{c:css('--s1'),v:fmtN(x.ok),l:'doğru'},{c:css('--s2'),v:fmtN(x.bad),l:'yanlış'},{v:'%'+Math.round(x.ok/x.n*100),l:'doğruluk'}]:[]);
+    const sh=show;hit.addEventListener('pointerdown',()=>{sh();lift(hit);});hit.addEventListener('pointerenter',()=>{sh();lift(hit);});hit.addEventListener('focus',()=>{sh();lift(hit);});
+  });
+  for(let i=days30.length-1;i>=0;i-=7){const cx=ml+band*i+band/2;
+    txt(svg,cx,H-6,i===days30.length-1?'Bugün':dm(days30[i].d),{'text-anchor':i===days30.length-1?'end':'middle'});}
+  if(!days30.some(x=>x.n))txt(svg,ml+pw/2,mt+ph/2,'Henüz sınav cevabı yok',{'text-anchor':'middle','font-size':12});
+  svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hideTips();});
+}
+
+/* ---------- Günlük doğruluk: çizgi (cevap olmayan günde kopar) ---------- */
+function chartAcc(){
+  const box=document.getElementById('c-acc');box.innerHTML='';
+  const W=box.clientWidth,H=150,ml=34,mr=34,mt=10,mb=22,pw=W-ml-mr,ph=H-mt-mb;
+  const x=i=>ml+pw*i/(days30.length-1),y=v=>mt+ph-v/100*ph;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,height:H,role:'img','aria-label':'Son 30 gün günlük doğruluk'},box);
+  [0,25,50,75,100].forEach(v=>{const yy=Math.round(y(v))+.5;
+    el('line',{x1:ml,x2:W-mr,y1:yy,y2:yy,stroke:v?css('--grid'):css('--axis'),'stroke-width':1},svg);
+    txt(svg,ml-6,yy+4,'%'+v,{'text-anchor':'end','font-variant-numeric':'tabular-nums'});});
+  const pts=days30.map((d,i)=>d.n?{i:i,v:d.ok/d.n*100,d:d}:null);
+  let path='';pts.forEach((p,i)=>{if(!p)return;path+=(i&&pts[i-1]?'L':'M')+x(i)+','+y(p.v);});
+  if(path)el('path',{d:path,fill:'none',stroke:css('--s1'),'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'},svg);
+  pts.forEach(p=>{if(p&&!(pts[p.i-1]||pts[p.i+1]))el('circle',{cx:x(p.i),cy:y(p.v),r:4,fill:css('--s1'),stroke:'#fff','stroke-width':2},svg);});
+  const last=[...pts].reverse().find(Boolean);
+  if(last){el('circle',{cx:x(last.i),cy:y(last.v),r:4,fill:css('--s1'),stroke:'#fff','stroke-width':2},svg);
+    txt(svg,x(last.i)+7,y(last.v)+4,'%'+Math.round(last.v),{fill:css('--ink'),'font-weight':700});}
+  for(let i=days30.length-1;i>=0;i-=7)txt(svg,x(i),H-6,i===days30.length-1?'Bugün':dm(days30[i].d),{'text-anchor':i===days30.length-1?'end':'middle'});
+  if(!last){txt(svg,ml+pw/2,mt+ph/2,'Henüz sınav cevabı yok',{'text-anchor':'middle','font-size':12});return;}
+  // İmleç çizgisi en yakın veri gününe oturur.
+  const cross=el('line',{y1:mt,y2:mt+ph,stroke:css('--axis'),'stroke-width':1,visibility:'hidden'},svg);
+  const dot=el('circle',{r:5,fill:css('--s1'),stroke:'#fff','stroke-width':2,visibility:'hidden'},svg);
+  const hit=el('rect',{x:ml-6,y:mt,width:pw+12,height:ph,fill:'transparent'},svg);
+  function move(e){const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)*W/r.width;
+    let best=null;pts.forEach(p=>{if(p&&(!best||Math.abs(x(p.i)-px)<Math.abs(x(best.i)-px)))best=p;});if(!best)return;
+    cross.setAttribute('x1',x(best.i));cross.setAttribute('x2',x(best.i));cross.setAttribute('visibility','visible');
+    dot.setAttribute('cx',x(best.i));dot.setAttribute('cy',y(best.v));dot.setAttribute('visibility','visible');
+    showTip(box,x(best.i),y(best.v),'%'+Math.round(best.v),[{c:css('--s1'),v:dm(best.d.d),l:'· '+best.d.ok+'/'+best.d.n+' doğru'}]);}
+  hit.addEventListener('pointerdown',move);hit.addEventListener('pointermove',move);
+  svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){hideTips();cross.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');}});
+}
+
+/* ---------- Kutu dağılımı: yatay çubuk, sıralı tek renk tonları ---------- */
+function chartBox(){
+  const box=document.getElementById('c-box');box.innerHTML='';
+  const c=[0,0,0,0];recs.forEach(r=>{c[Math.min(4,Math.max(1,r.b))-1]++;});
+  const tot=c.reduce((a,b)=>a+b,0);
+  const L=['Kutu 1 · 1 gün','Kutu 2 · 3 gün','Kutu 3 · 7 gün','Olgun · 7 gün'],C=['--o1','--o2','--o3','--o4'];
+  const W=box.clientWidth,rowH=34,bh=16,ml=104,mr=46,H=rowH*4+4,pw=W-ml-mr,mx=Math.max(1,...c);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,height:H,role:'img','aria-label':'Kutu dağılımı'},box);
+  el('line',{x1:ml+.5,x2:ml+.5,y1:2,y2:H-2,stroke:css('--axis'),'stroke-width':1},svg);
+  c.forEach((v,i)=>{const yy=4+i*rowH+(rowH-bh)/2,w=v/mx*pw;
+    txt(svg,ml-8,yy+bh/2+4,L[i],{'text-anchor':'end',fill:css('--ink2'),'font-size':12});
+    if(v)el('path',{d:rowPath(ml+1,yy,w,bh,4),fill:css(C[i])},svg);
+    txt(svg,ml+1+w+6,yy+bh/2+4,fmtN(v),{fill:css('--ink'),'font-weight':700,'font-size':12,'font-variant-numeric':'tabular-nums'});
+    const hit=el('rect',{x:0,y:4+i*rowH,width:W,height:rowH,fill:'transparent',tabindex:0,class:'hit'},svg);
+    const show=()=>showTip(box,ml+Math.max(w,30)/2,yy,fmtN(v)+' kelime',[{c:css(C[i]),v:tot?'%'+Math.round(v/tot*100):'%0',l:L[i]}]);
+    const sh=show;hit.addEventListener('pointerdown',()=>{sh();lift(hit);});hit.addEventListener('pointerenter',()=>{sh();lift(hit);});hit.addEventListener('focus',()=>{sh();lift(hit);});});
+  svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hideTips();});
+  if(!tot){box.insertAdjacentHTML('beforeend','<div class="empty">Henüz döngüde kelime yok</div>');}
+}
+
+/* ---------- Önümüzdeki 7 gün: tek seri sütun, değer tepede ---------- */
+const due7=[];for(let i=0;i<7;i++)due7.push({d:T+i,n:0});
+recs.forEach(r=>{const i=Math.max(0,r.due-T);if(i<7)due7[i].n++;});
+function dayName(i,d){return i===0?'Bugün':i===1?'Yarın':WD[dayDate(d).getDay()];}
+function chartDue(){
+  const box=document.getElementById('c-due');box.innerHTML='';
+  const W=box.clientWidth,H=150,ml=6,mr=6,mt=18,mb=22,pw=W-ml-mr,ph=H-mt-mb;
+  const mx=Math.max(1,...due7.map(x=>x.n)),y=v=>mt+ph-v/mx*ph;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,height:H,role:'img','aria-label':'Önümüzdeki 7 günün tekrar yükü'},box);
+  el('line',{x1:ml,x2:W-mr,y1:mt+ph+.5,y2:mt+ph+.5,stroke:css('--axis'),'stroke-width':1},svg);
+  const band=pw/7,bw=Math.min(24,band-8);
+  due7.forEach((x,i)=>{const cx=ml+band*i+(band-bw)/2,top=y(x.n);
+    if(x.n)el('path',{d:colPath(cx,top,bw,mt+ph-top,4),fill:css('--s1')},svg);
+    txt(svg,cx+bw/2,top-5,fmtN(x.n),{'text-anchor':'middle',fill:css('--ink'),'font-weight':700,'font-size':12});
+    txt(svg,cx+bw/2,H-6,dayName(i,x.d),{'text-anchor':'middle'});
+    const hit=el('rect',{x:ml+band*i,y:0,width:band,height:H,fill:'transparent',tabindex:0,class:'hit'},svg);
+    const show=()=>showTip(box,cx+bw/2,top,fmtN(x.n)+' tekrar',[{c:css('--s1'),v:dmy(x.d),l:dayName(i,x.d)}]);
+    const sh=show;hit.addEventListener('pointerdown',()=>{sh();lift(hit);});hit.addEventListener('pointerenter',()=>{sh();lift(hit);});hit.addEventListener('focus',()=>{sh();lift(hit);});});
+  svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hideTips();});
+}
+
+/* ---------- Tablolar ---------- */
+function table(id,head,rows,numCols){
+  const t=document.createElement('table'),tr=document.createElement('tr');
+  head.forEach((h,i)=>{const th=document.createElement('th');th.textContent=h;if(numCols.includes(i))th.className='num';tr.appendChild(th);});
+  t.appendChild(tr);
+  rows.forEach(r=>{const row=document.createElement('tr');r.forEach((c,i)=>{const td=document.createElement('td');td.textContent=c;
+    if(numCols.includes(i))td.className='num';row.appendChild(td);});t.appendChild(row);});
+  const box=document.getElementById(id);box.innerHTML='';box.appendChild(t);
+}
+function tables(){
+  const rows=days30.filter(x=>x.n).reverse().map(x=>[dmy(x.d),fmtN(x.n),fmtN(x.ok),fmtN(x.bad),'%'+Math.round(x.ok/x.n*100)]);
+  if(rows.length)table('t-daily',['Gün','Cevap','Doğru','Yanlış','Doğruluk'],rows,[1,2,3,4]);
+  else document.getElementById('t-daily').innerHTML='<div class="empty">Kayıt yok</div>';
+  table('t-due',['Gün','Tarih','Tekrar'],due7.map((x,i)=>[dayName(i,x.d),dmy(x.d),fmtN(x.n)]),[2]);
+  const top=recs.filter(r=>r.l>0).sort((a,b)=>(b.l-a.l)||(a.b-b.b)).slice(0,10);
+  if(!top.length){document.getElementById('wrong').innerHTML='<div class="empty">Henüz yanlış cevap yok</div>';return;}
+  table('wrong',['Kelime','Türkçe','Yanlış','Kutu'],top.map(r=>[WK[r.k].w,WK[r.k].tr,fmtN(r.l),r.b>=4?'Olgun':String(r.b)]),[2]);
+  document.querySelectorAll('#wrong td:nth-child(2)').forEach(td=>td.classList.add('tr'));
+}
+document.querySelectorAll('.tbtn').forEach(b=>b.addEventListener('click',()=>{
+  const t=document.getElementById(b.dataset.t),open=t.classList.toggle('hidden')===false;
+  document.querySelectorAll('.tbtn[data-t="'+b.dataset.t+'"]').forEach(x=>x.textContent=open?'Tabloyu gizle':'Tabloyu göster');
+  if(open&&b.closest('.card')!==t.closest('.card'))t.scrollIntoView({behavior:'smooth',block:'center'});
+}));
+
+function render(){
+  const lv=SRS.topLevel();
+  document.getElementById('seclabel').textContent=SRS.inCycle()+(lv?' · '+lv:'');
+  tiles();chartDaily();chartAcc();chartBox();chartDue();tables();
+}
+render();
+let rz=0;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{chartDaily();chartAcc();chartBox();chartDue();},150);});
+window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
+</script>
+</body></html>

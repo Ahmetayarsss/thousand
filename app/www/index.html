@@ -46,16 +46,16 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .cam:active{background:#D8E8F8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
-</style><script src="progress.js"></script><script src="updater.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='sozluk.html';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div class="wrap">
+</style><script src="srs.js"></script><script src="updater.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='kartlar.html',P='sozluk.html';var x0=0,y0=0,t0=0,ok=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div class="wrap">
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
     <label class="speed"><input id="gap" type="range" min="0" max="3" step="0.25" value="0.5" aria-label="Bekleme"></label>
     <div class="playbtns">
-      <button class="playall" id="playall">▶ Grubu oku</button>
+      <button class="playall" id="playall">▶ Listeyi oku</button>
     </div>
   </div>
-  <input class="search" id="search" placeholder="Bu grupta ara… (İngilizce/Türkçe)">
+  <input class="search" id="search" placeholder="Listede ara… (İngilizce/Türkçe)">
 </header>
 <div class="hint warn" id="warn">Bu tarayıcı sesli okumayı desteklemiyor gibi. Her karttaki <b>Cambridge</b> bağlantısını kullan.</div>
 <div id="list"></div>
@@ -65,7 +65,11 @@ const GROUPS=[{"no":1,"level":"A1","lo":1,"hi":100,"items":[{"w":"boring","pos":
 const SECS=["İsimler","Fiiller","Sıfatlar","Zarflar","Diğer"];
 const SColor={"İsimler":"var(--isim)","Fiiller":"var(--fiil)","Sıfatlar":"var(--sifat)","Zarflar":"var(--zarf)","Diğer":"var(--diger)"};
 const posTag={"isim":"isim","fiil":"fiil","sıfat":"sıfat","zarf":"zarf","edat":"edat","bağlaç":"bağlaç","zamir":"zamir","belirteç":"belirteç","ünlem":"ünlem","sayı":"sayı","kip fiili":"kip fiili","yardımcı fiil":"yard. fiil","artikel":"artikel","mastar":"mastar"};
-let LANG="en-US",RATE=0.8,GAP=500,voices=[],gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0);const synth=window.speechSynthesis;
+let LANG="en-US",RATE=0.8,GAP=500,voices=[];const synth=window.speechSynthesis;
+// Kelime bazlı tekrar: tüm kelimeler sırasıyla katalog; her kelimeye anahtarı (d._k) iliştirilir.
+SRS.setCatalog(SRS.catalogFromGroups(GROUPS));
+const BYK={};GROUPS.forEach(g=>g.items.forEach(d=>{BYK[d._k]={d:d,g:g};}));
+const LIST_N=100;   // ana sayfada hep hazır duran yeni kelime sayısı
 function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
@@ -91,7 +95,7 @@ if(GT&&GT.addListener){
   GT.addListener('ttsError',ev=>{diag((ev&&ev.msg)?ev.msg:'Ses/bildirim hatası');});
 }
 function setPlayBtns(){const p=document.getElementById('playall');
-  p.textContent=playing?"■ Durdur":"▶ Grubu oku";p.classList.toggle('stop',playing);}
+  p.textContent=playing?"■ Durdur":"▶ Listeyi oku";p.classList.toggle('stop',playing);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
 function slugOf(w){var b=w.replace(/\(.*?\)/g,'').split(',')[0];return b.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 // Bir mp3 (yerel/uzak) çal; oynatma başlarsa true, hata olursa false döner.
@@ -138,20 +142,24 @@ function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter
     u.onend=advance;u.onerror=advance;synth.speak(u);
   })();}
 
-function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
-function renderGroup(){stop();const g=GROUPS[gi];const list=document.getElementById('list');list.innerHTML='';
-const bs={};SECS.forEach(s=>bs[s]=[]);g.items.forEach(d=>bs[d.sec].push(d));
-SECS.forEach(s=>{const arr=bs[s].slice().sort((a,b)=>a.w.localeCompare(b.w));if(!arr.length)return;
-const bar=document.createElement('div');bar.className='secbar';bar.innerHTML=`<span class="dot" style="background:${SColor[s]}"></span>${s} <span class="count">${arr.length}</span>`;list.appendChild(bar);
-arr.forEach(d=>{const c=document.createElement('div');c.className='card';c.style.borderLeftColor=SColor[s];c.dataset.w=d.w;c.dataset.s=(d.w+' '+(d.tr||'')).toLowerCase();
-c.innerHTML=`<div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''} · ${g.level}</span></div>
+// Başlık: döngüdeki kelime sayısı · listedeki en yüksek seviye.
+function setSecLabel(){const lv=SRS.topLevel(LIST_N);
+  document.getElementById('seclabel').textContent='Döngüde '+SRS.inCycle()+(lv?' · '+lv:'');}
+// 100'lük yeni kelime listesi, sınavın soracağı sırayla (en üstteki ilk sorulur).
+// Sınavda cevaplanan kelime listeden düşer, alttan sıradaki eklenir.
+function renderList(){stop();const list=document.getElementById('list');list.innerHTML='';
+const keys=SRS.newList(LIST_N);
+if(!keys.length){list.innerHTML='<div class="hint">Tüm kelimeler döngüde. 🎉</div>';return;}
+keys.forEach(k=>{const e=BYK[k];if(!e)return;const d=e.d;
+const c=document.createElement('div');c.className='card';c.style.borderLeftColor=SColor[d.sec]||'var(--diger)';c.dataset.w=d.w;c.dataset.k=k;c.dataset.s=(d.w+' '+(d.tr||'')).toLowerCase();
+c.innerHTML=`<div class="row1"><span class="word">${d.w}</span><span class="tag">${posTag[d.pos]||''} · ${e.g.level}</span></div>
 ${d.ok?`<div class="ok">Okunuş: ${d.ok}</div>`:''}
 <div class="tr">${d.tr||''}</div>
 ${d.en?`<div class="en">${d.en}</div>`:''}
 ${(d.ex&&d.ex.length)?d.ex.map(s=>`<div class="ex">${s}</div>`).join(''):''}`;
 c.onclick=()=>one(d.w,c);   // karta basınca oku
-list.appendChild(c);});});
-document.getElementById('search').value='';window.scrollTo({top:0});}
+list.appendChild(c);});
+document.getElementById('search').value='';}
 
 function setGap(v){GAP=Math.round(parseFloat(v)*1000);}
 document.getElementById('gap').addEventListener('input',e=>setGap(e.target.value));
@@ -159,5 +167,7 @@ setGap(document.getElementById('gap').value);
 document.getElementById('playall').addEventListener('click',()=>{playing?stop():readGroup(true);});   // Grubu oku = sürekli döngü
 document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
-setSecLabel();renderGroup();
+function refresh(){setSecLabel();renderList();}
+refresh();
+window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
 </script></body></html>

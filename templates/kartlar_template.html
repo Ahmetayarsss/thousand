@@ -80,7 +80,11 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .ractions .prim{background:var(--ink);color:#fff;border-color:var(--ink)}
 .warn{font-size:11.5px;color:#8A6D3B;background:#FCF3E3;border:1px solid #F2E0BE;border-radius:9px;padding:8px 10px;margin-top:8px;display:none}
 .seclabel{flex:1;font-size:15px;font-weight:800;color:var(--ink)}
-</style><script src="progress.js"></script></head><body><div id="app">
+/* Sınavda kartın sol üstünde: tekrar (döngüdeki) / yeni kelime işareti. */
+.mk{position:absolute;top:2px;left:2px;font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:2px 8px}
+.mk.rev{background:#E5892B} .mk.new{background:#2E9E5B}
+.finish{flex:0 0 auto;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:6px 12px;cursor:pointer}
+</style><script src="srs.js"></script></head><body><div id="app">
 <div class="top">
   <div class="moderow" id="moderow">
     <button data-m="test" class="on">Test</button>
@@ -91,7 +95,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
   </div>
   <div class="progline">
     <span class="bar" id="bar"></span>
-    <span class="counter" id="counter"></span>
+    <span class="counter" id="counter"></span><button class="finish hidden" id="finish">Bitir</button>
   </div>
   <div class="warn" id="warn">İlerlemenin kaydı için dosyayı <b>tarayıcıda</b> (Chrome/Safari) aç. Sesi duymak için de tarayıcı gerekir.</div>
 </div>
@@ -112,8 +116,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
     <div class="wronglist" id="wronglist"></div>
     <div class="ractions">
       <button class="prim" id="r-again">Tekrar sına</button>
-      <button id="r-study">Yanlışları çalış</button>
-      <button id="r-next">Sonraki grup →</button>
+      <button id="r-next">Listeye dön</button>
     </div>
   </div>
 </div>
@@ -121,7 +124,10 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 <div class="cheat" id="cheat"><div class="cheat-msg"></div></div>
 <script>
 const GROUPS=__GROUPS_JSON__;
-const EKEY="ox3000_exams_v1";
+const SKEY="ox3000_sessions_v1";   // sınav oturumu kaydı (ilerleme sayfası için)
+// Kelime bazlı tekrar: tüm kelimeler sırasıyla katalog; her kelimeye anahtarı (_k) ve seviyesi (_lv).
+SRS.setCatalog(SRS.catalogFromGroups(GROUPS));
+const BYK={};GROUPS.forEach(g=>g.items.forEach(d=>{d._lv=g.level;BYK[d._k]=d;}));
 let storageOK=true;
 try{localStorage.setItem("t_","1");localStorage.removeItem("t_");}catch(e){storageOK=false;}
 const now=()=>Date.now();
@@ -136,7 +142,7 @@ function speak(t){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtt
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
 let toastEl=null,toastTimer=null;
-function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
+function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 let wordAudio=null;
 function slugOf(w){var b=w.replace(/\(.*?\)/g,'').split(',')[0];return b.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 function playAudioUrl(url){return new Promise(res=>{
@@ -150,14 +156,19 @@ async function sayWord(t){
   try{if(await playAudioUrl('audio/'+slugOf(t)+'.mp3'))return;}catch(e){}
   speak(t);}
 
-let gi=(window.OX?Math.max(0,Math.min(OX.current(),GROUPS.length-1)):0),mode='test',cur=null,side=0;
-let queue=[],testTotal=0,examList=[],examIdx=0,examWrong=[],examTotal=0,examScore=0;
+let mode='test',cur=null,side=0;
+let queue=[],testTotal=0,examList=[],examIdx=0,revCount=0,sess=null;   // examList: anahtarlar (önce tekrarlar, sonra yeniler)
 let tPrompt=0,tReveal=0,suspStreak=0;   // hile tespiti: soru gösterim / çevirme anı, art arda şüpheli sayısı
 const DEPTH=4;            // destede görünen kart sayısı (1 üst + 3 arka)
 let slots=[],topFlip=null,busy=false;   // slots[0]=en üstteki aktif kart; busy=animasyon sürüyor
 
-function setSecLabel(){const g=GROUPS[gi];document.getElementById('seclabel').textContent='Bölüm '+String(g.no).padStart(2,'0')+' · '+g.level;}
-function drawBar(){const t=testTotal||GROUPS[gi].items.length,doneN=Math.max(0,t-queue.length);document.getElementById('bar').innerHTML=`<i style="width:${t?doneN/t*100:0}%;background:var(--green)"></i>`;}
+// Başlık: döngüdeki kelime sayısı · ana sayfadaki 100'lük listenin en yüksek seviyesi. Her cevapta güncellenir.
+function setSecLabel(){const lv=SRS.topLevel(100);document.getElementById('seclabel').textContent='Döngüde '+SRS.inCycle()+(lv?' · '+lv:'');}
+// Çubuk: Test'te çalışılan oranı, Sınav'da tekrarların ilerleyişi.
+function drawBar(){let p=0;
+  if(mode==='test'){const t=testTotal,doneN=Math.max(0,t-queue.length);p=t?doneN/t:0;}
+  else p=revCount?Math.min(1,examIdx/revCount):0;
+  document.getElementById('bar').innerHTML=`<i style="width:${p*100}%;background:var(--green)"></i>`;}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function dirFor(){return Math.random()<0.5?'tr2en':'en2tr';}
 // Çevirme yönü: rastgele eksen (yatay Y / dikey X) + işaret → her çevirme farklı yöne.
@@ -178,14 +189,16 @@ function place(el,d){
 }
 // Çerçeve — iç içe iki dikdörtgen, arası dolu siyah bant (saf CSS).
 var FRAME='<div class="frame"></div>';
-function lvlTag(){return '<span class="lvl">'+GROUPS[gi].level+'</span>';}
+function lvlTag(item){return '<span class="lvl">'+((item&&item._lv)||'')+'</span>';}
+function mkTag(item){if(mode!=='exam'||!item)return '';const nw=SRS.isNew(item._k);
+  return '<span class="mk '+(nw?'new':'rev')+'">'+(nw?'Yeni':'Tekrar')+'</span>';}
 // Yüz içerikleri.
 function contentFront(item){
   const front=(item._dir==='tr2en')?(item.tr||'—'):item.w;
-  return '<div class="content">'+lvlTag()+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div></div>';
+  return '<div class="content">'+mkTag(item)+lvlTag(item)+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div></div>';
 }
 function contentBack(item){
-  let h='<div class="content">'+lvlTag();
+  let h='<div class="content">'+mkTag(item)+lvlTag(item);
   if(item._dir==='tr2en'){h+='<div class="mean en">'+item.w+'</div>';if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';}
   else{if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';h+='<div class="mean tr">'+(item.tr||'—')+'</div>';}
   if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
@@ -209,11 +222,11 @@ function setCtrl(revealed){
   document.getElementById('again').classList.toggle('hidden', !revealed);
   document.getElementById('know').classList.toggle('hidden', !revealed);
 }
-function ensureDir(item){if(item&&!item._dir)item._dir=dirFor();return item;}
+function ensureDir(item){if(item&&!item._dir)item._dir=((mode==='exam'&&SRS.dirOf(item._k))||dirFor());return item;}
 // Belirli bir derinlikteki (ileriye bakış) kelime: k=0 üstteki, k>=1 arkadakiler.
 function peek(k){
   if(mode==='test')return k===0?cur:(queue[k-1]||null);
-  return examList[examIdx+k]||null;
+  const key=examList[examIdx+k];return key?BYK[key]:null;
 }
 // Desteyi sıfırdan kur: ilk DEPTH kartı sıradaki kelimelerle doldur.
 function buildDeck(){
@@ -227,9 +240,9 @@ function buildDeck(){
   side=0;topFlip=slots[0].querySelector('.flipper');setCtrl(false);
   tPrompt=performance.now();refreshStatus();
 }
-function refreshStatus(){
-  if(mode==='test'){drawBar();document.getElementById('counter').textContent=queue.length+' kaldı';}
-  else document.getElementById('counter').textContent=Math.min(examIdx+1,examTotal)+'/'+examTotal;
+function refreshStatus(){drawBar();const c=document.getElementById('counter');
+  if(mode==='test'){c.textContent=queue.length+' kaldı';return;}
+  c.textContent=(examIdx<revCount)?'Tekrar '+(examIdx+1)+'/'+revCount:'Yeni '+(examIdx-revCount+1);
 }
 
 /* ===== WebGL kavisli takla (Three.js). Kart 2D canvas'a çizilir (doku),
@@ -400,15 +413,18 @@ function advanceDeck(out){
   },470);
 }
 
-/* ---- TEST (çalışma): grubun tüm kelimelerini serbest çalış ---- */
+function showStage(){document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');}
+
+/* ---- TEST (çalışma): ana sayfadaki 100 yeni kelimeyle serbest çalışma. İlerlemeyi değiştirmez. ---- */
 function startTestFrom(order){
-  mode='test';document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
+  mode='test';showStage();document.getElementById('finish').classList.add('hidden');
   document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';
   order.forEach(it=>{it._lockDir=false;it._dir=null;});   // yeni test: yön + kilit sıfırla
-  cur=order[0]||null;queue=order.slice(1);testTotal=order.length;
+  if(!order.length){showResult('🎉','yeni kelime kalmadı','Tüm kelimeler döngüde. Sınav sekmesinden tekrarlara devam et.','',true);return;}
+  cur=order[0];queue=order.slice(1);testTotal=order.length;
   busy=false;buildDeck();
 }
-function startTest(){startTestFrom(shuffle(GROUPS[gi].items.slice()));}
+function startTest(){startTestFrom(shuffle(SRS.newList(100).map(k=>BYK[k]).filter(Boolean)));}
 function gradeTest(know){
   if(busy)return;if(checkSpeed())return;
   const leaving=cur;
@@ -417,19 +433,31 @@ function gradeTest(know){
   // Bildim → sağa/sola fırlat; Bilemedim → destenin altına in.
   advanceDeck(know?(Math.random()<.5?'left':'right'):'sink');
 }
-function testDone(){showResult(String(testTotal),'kelime çalışıldı','Bu bölümü baştan sona çalıştın. 👏',[],true);}
+function testDone(){showResult(String(testTotal),'kelime çalışıldı','Listeyi baştan sona çalıştın. 👏','',true);}
 
-/* ---- EXAM ---- */
-function startExam(){mode='exam';document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');
+/* ---- SINAV: önce vadesi gelen tekrarlar (yüksek kutu önce, eşitse en çok geciken), sonra yeni
+   kelimeler (ana sayfadaki sırayla). Sınır yok: "Bitir" ile ya da kelime kalmayınca biter.
+   Her cevap anında kaydedilir; yanlış bilinen aynı sınavda tekrar gelmez. ---- */
+function startExam(){mode='exam';showStage();document.getElementById('finish').classList.remove('hidden');
   document.getElementById('again').textContent='Bilemedim';document.getElementById('know').textContent='Bildim';
-  const g=GROUPS[gi];examList=shuffle(g.items.slice());examList.forEach(it=>{it._dir=null;});
-  examIdx=0;examWrong=[];examTotal=examList.length;examScore=0;cur=examList[0]||null;
-  document.getElementById('bar').innerHTML='';busy=false;buildDeck();}
+  GROUPS.forEach(g=>g.items.forEach(it=>{it._dir=null;}));
+  const q=SRS.examQueue();
+  examList=q.reviews.concat(q.news);revCount=q.reviews.length;examIdx=0;
+  sess={rev:0,revOk:0,nw:0,nwOk:0,wrong:[]};
+  cur=examList.length?BYK[examList[0]]:null;
+  if(!cur){examDone();return;}
+  if(!revCount)toast('Bugün vadesi gelen tekrar yok — yeni kelimelerle başlıyoruz.');
+  busy=false;buildDeck();}
 function gradeExam(correct){
-  if(busy)return;if(checkSpeed())return;
-  if(correct){examScore++;}else{examWrong.push(cur);}examIdx++;
-  cur=examList[examIdx]||null;
-  // Sınavda: bildim → sağa, bilemedim → sola (iki ayrı desteye ayrılır gibi).
+  if(busy||!cur)return;if(checkSpeed())return;
+  const it=cur,wasNew=SRS.isNew(it._k);
+  SRS.answer(it._k,correct,it._dir);                      // kutu + vade + (yanlışta) yön kilidi
+  if(wasNew){sess.nw++;if(correct)sess.nwOk++;}else{sess.rev++;if(correct)sess.revOk++;}
+  if(!correct)sess.wrong.push(it);
+  examIdx++;cur=examList[examIdx]?BYK[examList[examIdx]]:null;
+  setSecLabel();
+  if(examIdx===revCount&&revCount>0&&cur)toast('Tekrarlar bitti — yeni kelimelere geçiliyor.');
+  // Bildim → sağa, Bilemedim → sola.
   advanceDeck(correct?'right':'left');
 }
 
@@ -448,14 +476,9 @@ function checkSpeed(){
 function restartRound(){ start(); }   // yalnız mevcut sınav/test turunu baştan başlatır; ilerleme (bölümler/seviye) DOKUNULMAZ
 function cheatCaught(){   // true dönerse mevcut tur yeniden başlatıldı
   let n=cheatN()+1;try{localStorage.setItem(CKEY,n);}catch(e){}
-  if(n<4){
-    showCheat(n===1?"hayiydiy gaydeş":(n===2?"Yaşayan en hızlı insan Barry Allen'ın bilinmeyen bı akrabası falan mısın bu ne hız":"son uyarım"),false);
-    return false;                          // sadece uyarı; sınav/test kaldığı yerden sürer
-  }
-  // 4. ve sonrası: SADECE mevcut sınav/test turu sıfırlanır (baştan başlar); gelişim/bölümler korunur.
-  if(n===4) showCheat("sen kaşındın",true);// yalnız 4.'te mesaj; kapanınca tur baştan
-  else restartRound();                     // 5. ve sonrası: mesajsız, hemen tur baştan
-  return true;
+  // Ceza henüz kararlaştırılmadı → şimdilik her seviyede yalnız uyarı; sınav/test kaldığı yerden sürer.
+  showCheat(n===1?"hayiydiy gaydeş":(n===2?"Yaşayan en hızlı insan Barry Allen'ın bilinmeyen bı akrabası falan mısın bu ne hız":(n===3?"son uyarım":"sen kaşındın")),false);
+  return false;
 }
 function showCheat(msg,restart){
   if(synth)synth.cancel();
@@ -463,37 +486,31 @@ function showCheat(msg,restart){
   const dur=Math.min(6000,Math.max(3000,msg.length*60));   // mesaj uzunluğuna göre okunabilir süre
   setTimeout(()=>{o.classList.remove('show');tPrompt=performance.now();if(restart)restartRound();},dur);
 }
-function examDone(){const pct=Math.round(examScore/examTotal*100);
-  const wasReview=!!(window.OX&&OX.review()!=null);   // examResult REV'i temizlemeden önce yakala
-  try{const ex=JSON.parse(localStorage.getItem(EKEY)||'[]');ex.push({t:now(),g:gi,no:GROUPS[gi].no,level:GROUPS[gi].level,score:examScore,total:examTotal,pct:pct});localStorage.setItem(EKEY,JSON.stringify(ex.slice(-100)));}catch(e){}
-  const pass=(examScore===examTotal);              // geçmek için %100 gerekli
-  const res=(window.OX?OX.examResult(gi,GROUPS[gi].no,pass):(pass?'green':'reopen'));
-  const gold=(res==='gold');                        // 4. tekrar geçildi → tam öğrenme
-  const wl=examWrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
-  const last=(gi>=GROUPS.length-1);
+function examDone(){
+  const n=sess.rev+sess.nw,ok=sess.revOk+sess.nwOk;
+  if(n){try{const L=JSON.parse(localStorage.getItem(SKEY)||'[]');
+    L.push({t:now(),n:n,ok:ok,rev:sess.rev,revOk:sess.revOk,nw:sess.nw,nwOk:sess.nwOk});
+    localStorage.setItem(SKEY,JSON.stringify(L.slice(-300)));}catch(e){}}
+  const left=SRS.dueList().length,nd=SRS.nextDue();
+  const nxt=left?'Bugün daha '+left+' tekrar var.':(nd==null?'':'Sonraki tekrar '+(nd===1?'yarın':nd+' gün sonra')+'.');
   let msg;
-  if(pass){
-    if(gold) msg='Tam öğrendin! ⭐ Bu bölüm altın oldu — artık tekrar istenmeyecek.';
-    else if(wasReview) msg='Tekrar tamamlandı! ✓ Bölüm tazelendi.';
-    else msg='Bölümü geçtin! ✓ '+(last?'Tüm bölümleri bitirdin! 🎉':'Sıradaki bölüm açıldı.');
-  }else{
-    msg='%'+pct+' — bu bölümü geçemedin. (Geçmek için hepsi doğru olmalı.) Bölüm gri kaldı, yeniden çalış.';
-  }
-  showResult(pass?(gold?'⭐':'✓'):'%'+pct,examScore+'/'+examTotal+' doğru',msg,wl,false);
-  document.getElementById('r-next').textContent=pass?((wasReview||last)?'Listeye dön':'Sonraki bölüm →'):'Listeye dön (yeniden çalış)';
-  document.getElementById('r-next').style.display='';}
+  if(!n)msg=((left||SRS.newList(1).length)?'Henüz cevap yok.':'Bugün sorulacak kelime yok. 🎉')+(nxt?' '+nxt:'');
+  else msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:''].filter(Boolean).join(' · ')+'. '+(sess.nw?sess.nw+' kelime döngüye girdi. ':'')+nxt;
+  const wl=sess.wrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
+  showResult(n?ok+'/'+n:'0',n?'doğru':'kelime cevaplandı',msg,wl,false);
+}
 
 function showResult(big,small,msg,wlHtml,isTest){
   document.getElementById('stage').classList.add('hidden');document.getElementById('resultbox').classList.remove('hidden');
   document.getElementById('score').innerHTML=big+'<small>'+small+'</small>';
   document.getElementById('rmsg').textContent=msg;
   document.getElementById('wronglist').innerHTML=wlHtml||'';
-  document.getElementById('r-again').textContent=isTest?'Tekrar çalış':'Tekrar sına';
-  document.getElementById('r-study').style.display=(wlHtml&&wlHtml.length)?'':'none';
-  if(isTest)document.getElementById('r-next').textContent='Listeye dön';
+  document.getElementById('r-again').textContent=isTest?'Tekrar çalış':'Sınava devam';
+  document.getElementById('finish').classList.add('hidden');setSecLabel();
+  if(!isTest)document.getElementById('counter').textContent='';
 }
 
-function start(){document.getElementById('resultbox').classList.add('hidden');(mode==='test'?startTest:startExam)();}
+function start(){(mode==='test'?startTest:startExam)();}
 document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
 document.getElementById('deck').addEventListener('click',e=>{if(busy||!cur)return;if(slots[0]&&slots[0].contains(e.target)){
   if(side===0){var r=topFlip.getBoundingClientRect();reveal((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);}
@@ -503,11 +520,11 @@ document.getElementById('open').addEventListener('click',()=>{if(busy||!cur||sid
 document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
 document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
 document.getElementById('r-again').addEventListener('click',start);
-document.getElementById('r-study').addEventListener('click',()=>{document.querySelectorAll('#moderow button').forEach(x=>x.classList.toggle('on',x.dataset.m==='test'));
-  startTestFrom(shuffle(examWrong.slice()));});
+document.getElementById('finish').addEventListener('click',()=>{if(busy||mode!=='exam')return;examDone();});
 document.getElementById('r-next').addEventListener('click',()=>{location.href='index.html';});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
 // Tekrar butonundan gelindiyse (?exam=1) doğrudan sınav modunda başla
 try{if(new URLSearchParams(location.search).get('exam')==='1'){mode='exam';document.querySelectorAll('#moderow button').forEach(x=>x.classList.toggle('on',x.dataset.m==='exam'));}}catch(e){}
 setSecLabel();start();
+window.addEventListener('pageshow',e=>{if(e.persisted)setSecLabel();});
 </script></body></html>

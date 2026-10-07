@@ -9,7 +9,8 @@
  *
  * Sınavda cevap:
  *   yeni kelime: doğru → 2, yanlış → 1 (artık döngüde, yeni sayılmaz)
- *   döngüdeki:   doğru → bir üst (en çok olgun), yanlış → bir alt (en az 1)
+ *   döngüdeki:   doğru → bir üst (en çok olgun), yanlış → bir alt (en az 1;
+ *                olgun → 2, çünkü olgun da Kutu 3 gibi 7 günlük)
  *   Yanlışta o anki yön (en2tr/tr2en) kilitlenir; doğruda kilit kalkar.
  *
  * Günler yerel saatle gece 00:00'da değişir. Anahtar: "grupNo|kelime"
@@ -71,7 +72,7 @@
   function answer(k, ok, dir, now) {
     var s = load(), r = s[k], t = today(now), from = r ? r.b : 0, to;
     if (!r) { to = ok ? 2 : 1; r = { b: to, n: 0, l: 0, f: t }; }
-    else { to = ok ? Math.min(4, r.b + 1) : Math.max(1, r.b - 1); r.b = to; }
+    else { to = ok ? Math.min(4, r.b + 1) : Math.max(1, Math.min(r.b, 3) - 1); r.b = to; }
     if (ok) { r.n++; delete r.d; } else { r.l++; if (dir) r.d = dir; }
     r.due = t + IV[to]; r.a = t;
     s[k] = r; save();

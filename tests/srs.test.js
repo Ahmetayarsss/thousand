@@ -75,10 +75,13 @@ t("yanlış → bir kutu aşağı (olgun → 2, 1'de 1 kalır)", () => {
   S.answer(k1, true, null, at(0));           // 2
   S.answer(k1, true, null, at(3));           // 3
   S.answer(k1, true, null, at(10));          // 4 olgun
-  assert.strictEqual(S.answer(k1, false, null, at(17)).to, 3);
-  assert.strictEqual(S.answer(k1, false, null, at(18)).to, 2);
-  assert.strictEqual(S.answer(k1, false, null, at(19)).to, 1);
+  let r = S.answer(k1, false, null, at(17));
+  assert.deepStrictEqual([r.to, r.due - S.today(at(17))], [2, 3]);
   assert.strictEqual(S.answer(k1, false, null, at(20)).to, 1);
+  assert.strictEqual(S.answer(k1, false, null, at(21)).to, 1);
+  S.answer(k2, true, null, at(0));           // 2
+  S.answer(k2, true, null, at(3));           // 3
+  assert.strictEqual(S.answer(k2, false, null, at(10)).to, 2);
 });
 
 t("doğru cevap yön kilidini kaldırır", () => {

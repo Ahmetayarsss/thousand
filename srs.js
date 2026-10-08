@@ -4,13 +4,13 @@
  * Her kelimenin seviyesi:
  *   0 = yeni (hiç sınavda cevaplanmadı, kayıt yok)
  *   1, 2, 3 = öğreniliyor (kutular)
- *   4 = olgun (3. kutuyu geçti, 7 günde bir sorulmaya devam eder)
- * Kutu aralıkları (gün): 1 → 1, 2 → 3, 3 → 7, olgun → 7.
+ *   4, 5, 6, 7 = olgun (3. kutuyu geçti; her doğru cevapta aralığı uzar)
+ * Aralıklar (gün): 1 → 1, 2 → 3, 3 → 7; olgun 4 → 7, 5 → 14, 6 → 30, 7 → 60.
  *
  * Sınavda cevap:
  *   yeni kelime: doğru → 2, yanlış → 1 (artık döngüde, yeni sayılmaz)
- *   döngüdeki:   doğru → bir üst (en çok olgun), yanlış → bir alt (en az 1;
- *                olgun → 2, çünkü olgun da Kutu 3 gibi 7 günlük)
+ *   döngüdeki:   doğru → bir üst (en çok 7, orada kalır), yanlış → bir alt (en az 1;
+ *                olgun hangi seviyede olursa olsun → 2, Kutu 3 gibi)
  *   Yanlışta o anki yön (en2tr/tr2en) kilitlenir; doğruda kilit kalkar.
  *
  * Sınav kuyruğu: önce vadesi gelen tekrarlar (yüksek kutu önce, aynı kutudakiler
@@ -27,7 +27,8 @@
  */
 (typeof window !== "undefined" ? window : globalThis).SRS = (function () {
   var KEY = "ox3000_srs_v1", DAYMS = 86400000;
-  var IV = [0, 1, 3, 7, 7];              // seviye → aralık (gün)
+  var IV = [0, 1, 3, 7, 7, 14, 30, 60];  // seviye → aralık (gün): kutu 1–3, olgun 4–7
+  var BMAX = IV.length - 1;              // en yüksek seviye (7: olgun, 60 gün)
   var LV = ["A1", "A2", "B1", "B2", "C1"];
   var SETK = "ox3000_settings_v1", DEVK = "ox3000_dev_v1";
   var BKEY = "ox3000_exam_batch_v1", DAYK = "ox3000_daily_v1";
@@ -107,7 +108,7 @@
   function answer(k, ok, dir, now) {
     var s = load(), r = s[k], t = today(now), from = r ? r.b : 0, to;
     if (!r) { to = ok ? 2 : 1; r = { b: to, n: 0, l: 0, f: t }; }
-    else { to = ok ? Math.min(4, r.b + 1) : Math.max(1, Math.min(r.b, 3) - 1); r.b = to; }
+    else { to = ok ? Math.min(BMAX, r.b + 1) : Math.max(1, Math.min(r.b, 3) - 1); r.b = to; }
     if (ok) { r.n++; delete r.d; } else { r.l++; if (dir) r.d = dir; }
     r.due = t + IV[to]; r.a = t;
     s[k] = r; save();
@@ -138,7 +139,7 @@
   function examQueue(now) {
     var s = load(), t = today(now), by = {}, reviews = [];
     for (var k in s) if (IDX[k] != null && s[k].due <= t) (by[s[k].b] || (by[s[k].b] = [])).push(k);
-    for (var b = 4; b >= 1; b--) if (by[b]) reviews = reviews.concat(shuffle(by[b]));
+    for (var b = BMAX; b >= 1; b--) if (by[b]) reviews = reviews.concat(shuffle(by[b]));
     var bt = getJ(BKEY, []);
     bt = (Array.isArray(bt) ? bt : []).filter(function (k) { return IDX[k] != null && !s[k]; });
     if (!bt.length) { bt = newList(listSize()); setJ(BKEY, bt); }
@@ -236,7 +237,7 @@
   function _reload() { st = null; }   // testler için
 
   return {
-    IV: IV, today: today, now: nowMs, key: key, shuffle: shuffle,
+    IV: IV, BMAX: BMAX, today: today, now: nowMs, key: key, shuffle: shuffle,
     dev: dev, setDev: setDev, listSize: listSize, setListSize: setListSize, opt: opt, setOpt: setOpt,
     LMIN: LMIN, LMAX: LMAX, records: records, daily: daily, catalogKey: catalogKey,
     norm: norm, answerSlots: answerSlots, checkTyped: checkTyped,

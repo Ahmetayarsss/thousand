@@ -202,4 +202,56 @@ t("sonraki vade günü", () => {
   assert.strictEqual(S.nextDue(at(0)), 3);
 });
 
+const W = w => { for (const g of groups) for (const it of g.items) if (it.w === w) return it; throw new Error(w); };
+const C = (w, dir, ins) => S.checkTyped(W(w), dir, ins);
+
+t("yazılı: kutu sayısı = anlam sayısı, parantezli not kutu açmaz", () => {
+  assert.strictEqual(S.answerSlots(W("live"), "en2tr").length, 2);       // yaşamak; canlı
+  assert.strictEqual(S.answerSlots(W("course"), "en2tr").length, 3);     // kurs; rota; yemek servisi
+  assert.strictEqual(S.answerSlots(W("reason"), "en2tr").length, 1);     // neden, sebep
+  assert.strictEqual(S.answerSlots(W("to"), "en2tr").length, 1);         // -e, -a; (mastar eki)
+  assert.strictEqual(S.answerSlots(W("live"), "tr2en").length, 1);
+});
+
+t("yazılı: harf büyüklüğü, noktalama, Türkçe harf farkı önemsiz", () => {
+  assert.ok(C("winter", "en2tr", ["KIŞ"]).ok);
+  assert.ok(C("winter", "en2tr", ["kis"]).ok);
+  assert.ok(C("winter", "en2tr", ["  Kış. "]).ok);
+  assert.ok(C("boring", "tr2en", ["Boring!"]).ok);
+  assert.ok(!C("winter", "en2tr", ["kiş yaz"]).ok);
+});
+
+t("yazılı: çok anlamlıda her anlam ayrı kutu, sıra serbest", () => {
+  assert.ok(C("live", "en2tr", ["yaşamak", "canlı"]).ok);
+  assert.ok(C("live", "en2tr", ["canli", "yasamak"]).ok);
+  const r = C("live", "en2tr", ["yaşamak", ""]);
+  assert.ok(!r.ok); assert.deepStrictEqual(r.marks, [true, false]);
+  assert.ok(!C("live", "en2tr", ["yaşamak", "yaşamak"]).ok);
+});
+
+t("yazılı: eş anlamlılardan biri yeterli, ikisi birlikte de olur", () => {
+  assert.ok(C("reason", "en2tr", ["sebep"]).ok);
+  assert.ok(C("reason", "en2tr", ["neden"]).ok);
+  assert.ok(C("reason", "en2tr", ["neden, sebep"]).ok);
+  assert.ok(!C("reason", "en2tr", ["neden, araba"]).ok);
+  assert.ok(C("paint", "en2tr", ["resim yapmak", "boya"]).ok);           // boya; boyamak, resim yapmak
+  assert.ok(C("grandparent", "en2tr", ["büyükbaba"]).ok);                // büyükanne/büyükbaba
+});
+
+t("yazılı: parantez ve tire yazılmasa da olur", () => {
+  assert.ok(C("he", "en2tr", ["o"]).ok);                                 // o (erkek)
+  assert.ok(C("he", "en2tr", ["o (erkek)"]).ok);
+  assert.ok(C("from", "en2tr", ["dan"]).ok);                             // -den, -dan
+  assert.ok(C("o'clock", "tr2en", ["oclock"]).ok);
+  assert.ok(C("a, an", "tr2en", ["an"]).ok);
+  assert.ok(C("ice cream", "tr2en", ["Ice-cream"]).ok);
+  assert.ok(C("last (final)", "tr2en", ["last"]).ok);
+});
+
+t("yazılı: başka kelimenin karşılığı ve yazım hatası kabul edilmez", () => {
+  assert.ok(!C("sick", "tr2en", ["ill"]).ok);
+  assert.ok(!C("receive", "tr2en", ["recieve"]).ok);
+  assert.ok(!C("winter", "en2tr", ["kışş"]).ok);
+});
+
 console.log(`\n${n} test geçti`);

@@ -83,8 +83,19 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 /* Sınavda kartın sol üstünde: tekrar (döngüdeki) / yeni kelime işareti. */
 .mk{position:absolute;top:2px;left:2px;font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:2px 8px}
 .mk.rev{background:#E5892B} .mk.new{background:#2E9E5B}
+/* Yazılı kart: altın renk (destede arkadayken de) + cevap kutuları. */
+.gold{position:absolute;inset:0;background:linear-gradient(150deg,#FCF1C8 0%,#F3D77E 42%,#E9C35A 68%,#F8E6A8 100%)}
+.yhint{margin-top:16px;font-size:12.5px;font-weight:800;color:#8A6A12;letter-spacing:.02em}
+.typed{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.tins{display:flex;flex-direction:column;gap:6px}
+.tin{width:100%;border:2px solid #E2C463;background:#FFFBEA;border-radius:12px;padding:12px 14px;font-size:17px;font-weight:700;color:var(--ink);outline:none;font-family:inherit}
+.tin:focus{border-color:#C9A227;box-shadow:0 0 0 3px rgba(201,162,39,.22)}
+.tin.good{border-color:var(--green);background:#E9F7EF}
+.tin.bad{border-color:var(--red);background:#FDECEA}
+.btn.check{background:#B8902C} .btn.check.know{background:var(--green)} .btn.check.again{background:var(--red)}
+.btn:disabled{cursor:default}
 .finish{flex:0 0 auto;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:6px 12px;cursor:pointer}
-</style><script src="srs.js"></script><script src="three.min.js"></script><script src="updater.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='istatistik.html',P='index.html',U='',D='';var x0=0,y0=0,t0=0,ok=false,top=false,bot=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;var se=document.scrollingElement||document.documentElement;top=se.scrollTop<=0;bot=se.scrollTop+innerHeight>=se.scrollHeight-2;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dy)>=90&&Math.abs(dy)>Math.abs(dx)*1.8){if(dy>0&&U&&top)location.href=U;else if(dy<0&&D&&bot)location.href=D;return;}if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div id="app">
+</style><script src="log.js"></script><script src="srs.js"></script><script src="three.min.js"></script><script src="updater.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='istatistik.html',P='index.html',U='',D='';var x0=0,y0=0,t0=0,ok=false,top=false,bot=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;var se=document.scrollingElement||document.documentElement;top=se.scrollTop<=0;bot=se.scrollTop+innerHeight>=se.scrollHeight-2;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dy)>=90&&Math.abs(dy)>Math.abs(dx)*1.8){if(dy>0&&U&&top)location.href=U;else if(dy<0&&D&&bot)location.href=D;return;}if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head><body><div id="app">
 <div class="top">
   <div class="moderow" id="moderow">
     <button data-m="test" class="on">Test</button>
@@ -106,6 +117,10 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
     <button class="btn open" id="open">Aç</button>
     <button class="btn again hidden" id="again"></button>
     <button class="btn know hidden" id="know"></button>
+  </div>
+  <div class="typed hidden" id="typed">
+    <div class="tins" id="tins"></div>
+    <button class="btn check" id="check">Kontrol et</button>
   </div>
 </div>
 
@@ -193,9 +208,11 @@ function lvlTag(item){return '<span class="lvl">'+((item&&item._lv)||'')+'</span
 function mkTag(item){if(mode!=='exam'||!item)return '';const nw=SRS.isNew(item._k);
   return '<span class="mk '+(nw?'new':'rev')+'">'+(nw?'Yeni':'Tekrar')+'</span>';}
 // Yüz içerikleri.
+function goldBg(item){return isTyped(item)?'<div class="gold"></div>':'';}
 function contentFront(item){
   const front=(item._dir==='tr2en')?(item.tr||'—'):item.w;
-  return '<div class="content">'+mkTag(item)+lvlTag(item)+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div></div>';
+  return '<div class="content">'+mkTag(item)+lvlTag(item)+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div>'
+    +(isTyped(item)?'<div class="yhint">✎ Cevabı aşağıya yaz</div>':'')+'</div>';
 }
 function contentBack(item){
   let h='<div class="content">'+mkTag(item)+lvlTag(item);
@@ -211,13 +228,18 @@ function setFront(slot,item){
   fl.style.transition='none';fl.style.transform='none';fl.style.transformOrigin='center';
   if(!item){slot.style.visibility='hidden';fl.innerHTML='';slot._item=null;return;}
   slot.style.visibility='visible';slot._item=item;
-  fl.innerHTML='<div class="face front">'+FRAME+contentFront(item)+'</div>'
-             +'<div class="face back" style="transform:rotateX(180deg)">'+FRAME+'</div>';
+  fl.innerHTML='<div class="face front">'+goldBg(item)+FRAME+contentFront(item)+'</div>'
+             +'<div class="face back" style="transform:rotateX(180deg)">'+goldBg(item)+FRAME+'</div>';
   const q=fl.querySelector('.face.front .q');
   if(q)q.textContent=(item._dir==='tr2en')?(item.tr||'—'):item.w;
 }
 // Buton satırı: açılmadan önce tek geniş "Aç"; açıldıktan sonra iki puan butonu.
+// Yazılı kartta: önce cevap kutuları + "Kontrol et", açıldıktan sonra sonuç + "Devam".
 function setCtrl(revealed){
+  const ty=isTyped(cur);
+  document.getElementById('ctrl').classList.toggle('hidden',ty);
+  document.getElementById('typed').classList.toggle('hidden',!ty);
+  if(ty){if(!revealed)buildTyped(cur);else typedRevealed();return;}
   document.getElementById('open').classList.toggle('hidden', revealed);
   document.getElementById('again').classList.toggle('hidden', !revealed);
   document.getElementById('know').classList.toggle('hidden', !revealed);
@@ -320,7 +342,7 @@ function glFlip(item,rx){
     var W=Math.round(r.width),H=Math.round(r.height),dpr=Math.min(window.devicePixelRatio||1,3);
     var PAD=64;   // 3B kabarma için tuval kartın dışına taşsın (kırpılmasın)
     var frontHTML=fl.querySelector('.face.front').innerHTML;   // o an görünen ön yüz
-    var backHTML=FRAME+contentBack(item);
+    var backHTML=goldBg(item)+FRAME+contentBack(item);
     function done(){fl.querySelector('.face.front').innerHTML=backHTML;fl.style.visibility='';g.cv.style.display='none';setCtrl(true);}
     Promise.all([captureFace(frontHTML,W,H,dpr),captureFace(backHTML,W,H,dpr)]).then(function(cvs){
       var maxA=(g.rn.capabilities.getMaxAnisotropy?g.rn.capabilities.getMaxAnisotropy():1);
@@ -375,7 +397,7 @@ function reveal(rx,ry){
   if(Math.abs(dy)>=Math.abs(dx)){ axis='X'; dir=(dy>=0?1:-1); }  // alt/üst dokunuş → dikey takla
   else{ axis='Y'; dir=(dx>=0?-1:1); }                            // sağ/sol dokunuş → yatay dönüş
   // Arka yüzü (cevap) doldur + eksene göre 180° ön-döndür (flipper 0°'da gizli).
-  back.innerHTML=FRAME+contentBack(cur);
+  back.innerHTML=goldBg(cur)+FRAME+contentBack(cur);
   back.style.transition='none'; back.style.transform='rotate'+axis+'(180deg)';
   void fl.offsetWidth;
   const faces=fl.querySelectorAll('.face');
@@ -415,6 +437,42 @@ function advanceDeck(out){
 
 function showStage(){document.getElementById('resultbox').classList.add('hidden');document.getElementById('stage').classList.remove('hidden');}
 
+/* ---- YAZILI KONTROL: sınav başında kuyruğun rastgele %10'u (yukarı yuvarlanır, en az 1) yazılı
+   sorulur; bu kartlar altın renkli (destede arkadayken de). Kendini puanlama yok: cevabı sistem
+   kontrol eder (kurallar srs.js checkTyped), doğruysa Bildim, değilse Bilemedim sayılır. ---- */
+let typedSet=new Set(),tyRes=null;
+function isTyped(item){return mode==='exam'&&!!item&&typedSet.has(item._k);}
+function typedVals(){return [...document.querySelectorAll('#tins .tin')].map(x=>x.value);}
+function updCheck(){if(tyRes)return;document.getElementById('check').textContent=typedVals().some(v=>v.trim())?'Kontrol et':'Bilmiyorum';}
+function buildTyped(item){
+  const box=document.getElementById('tins'),n=SRS.answerSlots(item,item._dir).length,en=item._dir==='tr2en';
+  box.innerHTML='';tyRes=null;
+  for(let i=0;i<n;i++){
+    const inp=document.createElement('input');inp.className='tin';inp.type='text';
+    inp.autocomplete='off';inp.spellcheck=false;inp.setAttribute('autocapitalize','off');inp.setAttribute('autocorrect','off');
+    inp.placeholder=en?'İngilizcesi':(n>1?(i+1)+'. anlam':'Türkçesi');
+    inp.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();
+      const nx=box.querySelectorAll('.tin')[i+1];nx?nx.focus():submitTyped();});
+    inp.addEventListener('input',updCheck);
+    box.appendChild(inp);
+  }
+  const b=document.getElementById('check');b.disabled=false;b.className='btn check';updCheck();
+  setTimeout(()=>{const f=box.querySelector('.tin');if(f&&isTyped(cur)&&side===0&&!tyRes)try{f.focus({preventScroll:true});}catch(e){}},80);
+}
+function submitTyped(){
+  if(busy||!cur||side===1||tyRes||!isTyped(cur))return;
+  const vals=typedVals(),r=SRS.checkTyped(cur,cur._dir,vals);
+  tyRes={ok:r.ok,vals:vals};
+  document.querySelectorAll('#tins .tin').forEach((x,i)=>{x.readOnly=true;x.classList.add(r.marks[i]?'good':'bad');});
+  const b=document.getElementById('check');b.disabled=true;b.className='btn check '+(r.ok?'know':'again');b.textContent=r.ok?'Doğru ✓':'Yanlış ✗';
+  // Klavye kapanıp yerleşim otursun, sonra kart açılsın (çevirme yanlış yerde başlamasın).
+  const ae=document.activeElement,typing=ae&&ae.classList&&ae.classList.contains('tin');
+  if(typing)ae.blur();
+  setTimeout(()=>{if(cur&&side===0){reveal(0.5,0.12);sayWord(cur.w);}},typing?280:0);
+}
+function typedRevealed(){const b=document.getElementById('check');b.disabled=false;
+  b.textContent=(tyRes&&tyRes.ok?'Doğru ✓':'Yanlış ✗')+'  ·  Devam';}
+
 /* ---- TEST (çalışma): ana sayfadaki yeni kelimelerle serbest çalışma. İlerlemeyi değiştirmez. ---- */
 function startTestFrom(order){
   mode='test';showStage();document.getElementById('finish').classList.add('hidden');
@@ -422,12 +480,14 @@ function startTestFrom(order){
   order.forEach(it=>{it._lockDir=false;it._dir=null;});   // yeni test: yön + kilit sıfırla
   if(!order.length){showResult('🎉','yeni kelime kalmadı','Tüm kelimeler döngüde. Sınav sekmesinden tekrarlara devam et.','',true);return;}
   cur=order[0];queue=order.slice(1);testTotal=order.length;
+  OXLOG.add('test_bas',{n:order.length});
   busy=false;buildDeck();
 }
 function startTest(){startTestFrom(shuffle(SRS.newList(SRS.listSize()).map(k=>BYK[k]).filter(Boolean)));}
 function gradeTest(know){
   if(busy)return;
   const leaving=cur;
+  OXLOG.add('test',{k:leaving._k,ok:know?1:0});
   if(!know){leaving._lockDir=true;queue.push(leaving);}   // bilemedin → yön kilitli, desteye geri
   cur=queue.length?queue.shift():null;                     // yeni üst (zaten arkada görünüyordu)
   // Bildim → sağa/sola fırlat; Bilemedim → destenin altına in.
@@ -445,16 +505,25 @@ function startExam(){mode='exam';showStage();document.getElementById('finish').c
   GROUPS.forEach(g=>g.items.forEach(it=>{it._dir=null;}));
   const q=SRS.examQueue();
   examList=q.reviews.concat(q.news);revCount=q.reviews.length;examIdx=0;
-  sess={rev:0,revOk:0,nw:0,nwOk:0,wrong:[]};
+  const nT=examList.length?Math.ceil(examList.length/10):0;            // %10 yazılı, en az 1
+  typedSet=new Set(shuffle(examList.slice()).slice(0,nT));tyRes=null;
+  sess={rev:0,revOk:0,nw:0,nwOk:0,ty:0,tyOk:0,wrong:[]};
+  OXLOG.add('sinav_bas',{rev:revCount,nw:examList.length-revCount,yz:nT});
   cur=examList.length?BYK[examList[0]]:null;
   if(!cur){examDone();return;}
   if(!revCount)toast('Bugün vadesi gelen tekrar yok — yeni kelimelerle başlıyoruz.');
   busy=false;buildDeck();}
 function gradeExam(correct){
-  if(busy||!cur)return;if(checkSpeed())return;
-  const it=cur,wasNew=SRS.isNew(it._k);
-  SRS.answer(it._k,correct,it._dir);                      // kutu + vade + (yanlışta) yön kilidi
+  if(busy||!cur)return;
+  const it=cur,ty=isTyped(it);
+  if(!ty&&checkSpeed())return;                            // hız kontrolü yalnız Bildim/Bilemedim kartlarında
+  const wasNew=SRS.isNew(it._k);
+  const res=SRS.answer(it._k,correct,it._dir);            // kutu + vade + (yanlışta) yön kilidi
   if(wasNew){sess.nw++;if(correct)sess.nwOk++;}else{sess.rev++;if(correct)sess.revOk++;}
+  if(ty){sess.ty++;if(correct)sess.tyOk++;}
+  OXLOG.add('cevap',{k:it._k,y:it._dir==='tr2en'?'te':'et',ok:correct?1:0,b:[res.from,res.to],
+    ms:Math.round(performance.now()-tPrompt),yz:ty?1:0,g:(ty&&tyRes)?tyRes.vals:undefined});
+  tyRes=null;
   if(!correct)sess.wrong.push(it);
   examIdx++;cur=examList[examIdx]?BYK[examList[examIdx]]:null;
   setSecLabel();
@@ -477,10 +546,13 @@ function checkSpeed(){
   return false;
 }
 function restartRound(){ start(); }   // yalnız mevcut sınav/test turunu baştan başlatır; ilerleme (bölümler/seviye) DOKUNULMAZ
-function cheatCaught(){   // true dönerse mevcut tur yeniden başlatıldı
+// Sırayla gösterilen uyarılar; sonuncusundan sonra artık hiçbir şey gösterilmez (yalnız kayda yazılır).
+const CHEAT_MSG=["hayiydiy gaydeş","Yaşayan en hızlı insan Barry Allen'ın bilinmeyen bı akrabası falan mısın bu ne hız",
+  "son uyarım","sen kaşındın","ceza bulamadım ama kendini kandırdığını bil"];
+function cheatCaught(){   // ceza yok: sınav kaldığı yerden sürer
   let n=cheatN()+1;try{localStorage.setItem(CKEY,n);}catch(e){}
-  // Ceza henüz kararlaştırılmadı → şimdilik her seviyede yalnız uyarı; sınav/test kaldığı yerden sürer.
-  showCheat(n===1?"hayiydiy gaydeş":(n===2?"Yaşayan en hızlı insan Barry Allen'ın bilinmeyen bı akrabası falan mısın bu ne hız":(n===3?"son uyarım":"sen kaşındın")),false);
+  OXLOG.add('hile',{n:n});
+  if(n<=CHEAT_MSG.length)showCheat(CHEAT_MSG[n-1],false);
   return false;
 }
 function showCheat(msg,restart){
@@ -492,16 +564,17 @@ function showCheat(msg,restart){
 function examDone(){
   const n=sess.rev+sess.nw,ok=sess.revOk+sess.nwOk,all=examList.length>0&&examIdx>=examList.length;
   if(n){try{const L=JSON.parse(localStorage.getItem(SKEY)||'[]');
-    L.push({t:SRS.now(),n:n,ok:ok,rev:sess.rev,revOk:sess.revOk,nw:sess.nw,nwOk:sess.nwOk});
+    L.push({t:SRS.now(),n:n,ok:ok,rev:sess.rev,revOk:sess.revOk,nw:sess.nw,nwOk:sess.nwOk,ty:sess.ty,tyOk:sess.tyOk});
     localStorage.setItem(SKEY,JSON.stringify(L.slice(-300)));}catch(e){}}
+  OXLOG.add('sinav_bit',{n:n,ok:ok,tum:all?1:0,yz:sess.ty,yzOk:sess.tyOk});
   const left=SRS.dueList().length,nd=SRS.nextDue();
   const nxt=left?'Bugün daha '+left+' tekrar var.':(nd==null?'':'Sonraki tekrar '+(nd===1?'yarın':nd+' gün sonra')+'.');
   let msg;
   if(all){const nl=SRS.newList(1).length;
     msg='Bu turun bütün kelimeleri bitti. '+(nl?'Ana sayfada yeni kelimeler seni bekliyor; çalışınca sınava dönebilirsin. ':'')+(nxt?nxt:'');
-    if(n)msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:''].filter(Boolean).join(' · ')+'. '+msg;}
+    if(n)msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:'',sess.ty?'Yazılı: '+sess.tyOk+'/'+sess.ty:''].filter(Boolean).join(' · ')+'. '+msg;}
   else if(!n)msg=((left||SRS.newList(1).length)?'Henüz cevap yok.':'Bugün sorulacak kelime yok. 🎉')+(nxt?' '+nxt:'');
-  else msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:''].filter(Boolean).join(' · ')+'. '+(sess.nw?sess.nw+' kelime döngüye girdi. ':'')+nxt;
+  else msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:'',sess.ty?'Yazılı: '+sess.tyOk+'/'+sess.ty:''].filter(Boolean).join(' · ')+'. '+(sess.nw?sess.nw+' kelime döngüye girdi. ':'')+nxt;
   const wl=sess.wrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
   showResult(n?ok+'/'+n:'0',n?'doğru':'kelime cevaplandı',msg,wl,false);
   document.getElementById('r-again').textContent=all?'Yeni tur':'Sınava devam';
@@ -520,12 +593,18 @@ function showResult(big,small,msg,wlHtml,isTest){
 function start(){(mode==='test'?startTest:startExam)();}
 document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
 document.getElementById('deck').addEventListener('click',e=>{if(busy||!cur)return;if(slots[0]&&slots[0].contains(e.target)){
+  if(side===0&&isTyped(cur)){   // yazılı kart dokunuşla açılmaz; boş kutuya odaklan
+    if(!tyRes){const ins=[...document.querySelectorAll('#tins .tin')],f=ins.find(x=>!x.value)||ins[0];if(f)f.focus();}
+    if(cur._dir!=='tr2en')sayWord(cur.w);
+    return;}
   if(side===0){var r=topFlip.getBoundingClientRect();reveal((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);}
   sayWord(cur.w);
 }});
 document.getElementById('open').addEventListener('click',()=>{if(busy||!cur||side===1)return;reveal(0.5,0.12);sayWord(cur.w);});
 document.getElementById('again').addEventListener('click',()=>{mode==='test'?gradeTest(false):gradeExam(false);});
 document.getElementById('know').addEventListener('click',()=>{mode==='test'?gradeTest(true):gradeExam(true);});
+document.getElementById('check').addEventListener('click',()=>{if(busy||!cur)return;
+  if(!tyRes)submitTyped();else if(side===1)gradeExam(tyRes.ok);});
 document.getElementById('r-again').addEventListener('click',start);
 document.getElementById('finish').addEventListener('click',()=>{if(busy||mode!=='exam')return;examDone();});
 document.getElementById('r-next').addEventListener('click',()=>{location.href='index.html';});

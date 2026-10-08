@@ -387,6 +387,7 @@ public class GroupTtsService extends Service {
     public int total() { try { return words.size(); } catch (Exception e) { return 0; } }
     public String currentWord() { try { return get(words, index); } catch (Exception e) { return ""; } }
     public void requestStop() { seq.post(this::stopEverything); }
+    public void applyGap(final int ms) { seq.post(() -> gapMs = Math.max(0, ms)); }
     public void applyOptions(final boolean lp, final boolean rt) {
         seq.post(() -> {
             loop = lp;

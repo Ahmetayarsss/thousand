@@ -21,6 +21,7 @@ import android.graphics.Typeface;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.media.MediaMetadataCompat;
@@ -44,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * "Listeyi oku" — Spotify tarzı okuma hizmeti (FOREGROUND SERVICE).
@@ -55,7 +58,11 @@ import java.util.Map;
  *
  * Bildirim + kilit ekranı: MediaStyle + MediaSession. Başlık = kelime, alt satır =
  * Türkçesi, "Liste · 12/30"; görsel = seviye rengi (A1 yeşil, A2 sarı, B1 pembe,
- * B2 mavi). Düğmeler: önceki · duraklat/devam · sonraki · kapat. Süre çubuğu yok.
+ * B2 mavi). Düğmeler: önceki · duraklat/devam · sonraki · kapat.
+ *
+ * Süre çubuğu: liste tek bir "parça" gibi. Toplam = listenin bir turunun okuma süresi
+ * (gömülü mp3 süreleri ölçülür + bekleme + varsa Türkçe), konum = turda gelinen yer.
+ * Çubuk sürüklenince o ana denk gelen kelimeye atlanır.
  *
  * Kulaklık: 1 basış duraklat/devam (kaldığı yerden), 2 basış sonraki, 3 basış önceki;
  * Bluetooth ileri/geri tuşları da çalışır. Kulaklık çıkınca/Bluetooth kopunca durur.
@@ -119,6 +126,17 @@ public class GroupTtsService extends Service {
     private boolean noisyRegistered = false;
     private final Map<String, Bitmap> artCache = new HashMap<>();
 
+    // ---- Süre çubuğu ----
+    private static final long EN_TTS_MS = 900;      // mp3'ü olmayan kelime (cihaz sesi) tahmini
+    private static final long EN_GUESS_MS = 1000;   // süresi henüz ölçülmemiş mp3
+    private static final long OVERHEAD_MS = 120;    // kelime başına hazırlık payı
+    private static final Map<String, Long> DUR = new ConcurrentHashMap<>();   // slug → mp3 süresi (ms; yoksa -1)
+    private long[] startMs = new long[0];   // her kelimenin turdaki başlangıç anı (ms)
+    private long totalMs = 0;
+    private long itemStartedAt = 0;         // SystemClock.elapsedRealtime(): kelimenin başladığı an
+    private long pausedAt = 0;
+    private volatile int durGen = 0;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -179,6 +197,9 @@ public class GroupTtsService extends Service {
         resumeOnFocus = false;
         active = true;
         paused = false;
+        itemStartedAt = pausedAt = SystemClock.elapsedRealtime();
+        computeTimeline();
+        measureDurations();
 
         updateMetadata();
         setState(true);
@@ -202,6 +223,7 @@ public class GroupTtsService extends Service {
         if (!active) return;
         if (words.isEmpty()) { stopEverything(); return; }
         if (readTr && ttsReady && !trOk) err("Telefonda Türkçe ses paketi yok — Türkçe anlamlar okunamıyor.");
+        computeTimeline();   // Türkçe ses durumu artık belli
         playIndex(index);
     }
 
@@ -213,9 +235,11 @@ public class GroupTtsService extends Service {
         index = i;
         phase = 0;
         mpPaused = false;
+        itemStartedAt = SystemClock.elapsedRealtime();
         Progress p = progress;
         if (p != null) { try { p.onWord(i, get(words, i)); } catch (Exception e) {} }
         updateMetadata();
+        setState(true);      // konum = bu kelimenin başı (çubuk kaymasın diye her kelimede düzeltilir)
         refreshNotification();
         String slug = get(slugs, i);
         if (!slug.isEmpty() && playMp3(slug, i)) return;
@@ -322,6 +346,7 @@ public class GroupTtsService extends Service {
 
     private void pause() {
         if (!active || paused) return;
+        pausedAt = SystemClock.elapsedRealtime();
         paused = true;
         resumeOnFocus = false;
         seq.removeCallbacksAndMessages(null);
@@ -338,6 +363,7 @@ public class GroupTtsService extends Service {
 
     private void resume() {
         if (!active || !paused) return;
+        itemStartedAt += SystemClock.elapsedRealtime() - pausedAt;   // duraklama süresi sayılmasın
         paused = false;
         resumeOnFocus = false;
         requestFocus();
@@ -376,6 +402,99 @@ public class GroupTtsService extends Service {
         playIndex(j);
     }
 
+    /** Çubuk sürüklendi: o ana denk gelen kelimeye geç (duraklatılmışsa duraklatılmış kalır). */
+    private void seekTo(long pos) {
+        if (!active || startMs.length == 0) return;
+        int j = 0;
+        for (int k = 0; k < startMs.length; k++) { if (startMs[k] <= pos) j = k; else break; }
+        seq.removeCallbacksAndMessages(null);
+        releasePlayer();
+        stopTts();
+        if (paused) {
+            index = j;
+            phase = 0;
+            mpPaused = false;
+            itemStartedAt = pausedAt = SystemClock.elapsedRealtime();
+            Progress p = progress;
+            if (p != null) { try { p.onWord(j, get(words, j)); } catch (Exception e) {} }
+            updateMetadata();
+            setState(false);
+            refreshNotification();
+            return;
+        }
+        playIndex(j);
+    }
+
+    // ---- Süre çubuğu hesapları ----
+    private void computeTimeline() {
+        int n = words.size();
+        long[] st = new long[n];
+        long t = 0;
+        for (int i = 0; i < n; i++) { st[i] = t; t += itemMs(i); }
+        startMs = st;
+        totalMs = t;
+    }
+
+    private long itemMs(int i) {
+        float r = Math.max(0.3f, rate);
+        String slug = get(slugs, i);
+        Long d = slug.isEmpty() ? Long.valueOf(-1) : DUR.get(slug);
+        long en = (d == null) ? EN_GUESS_MS : (d > 0 ? d : Math.round(EN_TTS_MS / r));
+        long tr = 0;
+        if (readTr && trOk) {
+            String sy = get(says, i);
+            if (!sy.isEmpty()) tr = TR_PAUSE_MS + Math.round((300 + sy.length() * 70) / r);
+        }
+        return en + OVERHEAD_MS + tr + gapMs;
+    }
+
+    private long currentPos() {
+        if (index < 0 || index >= startMs.length) return 0;
+        long base = startMs[index];
+        long end = (index + 1 < startMs.length) ? startMs[index + 1] : totalMs;
+        long ref = paused ? pausedAt : SystemClock.elapsedRealtime();
+        long el = Math.max(0, ref - itemStartedAt);
+        return base + Math.min(el, Math.max(0, end - base - 1));
+    }
+
+    /** Gömülü mp3 sürelerini arka planda ölç (bir kez; sonra önbellekten). */
+    private void measureDurations() {
+        final List<String> todo = new ArrayList<>();
+        for (String sl : slugs) if (!sl.isEmpty() && !DUR.containsKey(sl) && !todo.contains(sl)) todo.add(sl);
+        if (todo.isEmpty()) return;
+        final int gen = ++durGen;
+        new Thread(() -> {
+            MediaMetadataRetriever mr = new MediaMetadataRetriever();
+            try {
+                for (String sl : todo) {
+                    if (gen != durGen) break;
+                    long ms = -1;
+                    AssetFileDescriptor afd = null;
+                    try {
+                        afd = getAssets().openFd("public/audio/" + sl + ".mp3");
+                        mr.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                        String v = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                        if (v != null) ms = Long.parseLong(v.trim());
+                    } catch (Exception e) {
+                        ms = -1;
+                    } finally {
+                        close(afd);
+                    }
+                    DUR.put(sl, ms);
+                }
+            } finally {
+                try { mr.release(); } catch (Exception e) {}
+            }
+            seq.post(() -> { if (active && gen == durGen) refreshTimeline(); });
+        }, "oxford-sureler").start();
+    }
+
+    private void refreshTimeline() {
+        computeTimeline();
+        updateMetadata();
+        setState(!paused);
+    }
+
     private void stopIfIdle() {
         if (!active) stopSelf();
     }
@@ -387,12 +506,15 @@ public class GroupTtsService extends Service {
     public int total() { try { return words.size(); } catch (Exception e) { return 0; } }
     public String currentWord() { try { return get(words, index); } catch (Exception e) { return ""; } }
     public void requestStop() { seq.post(this::stopEverything); }
-    public void applyGap(final int ms) { seq.post(() -> gapMs = Math.max(0, ms)); }
+    public void applyGap(final int ms) {
+        seq.post(() -> { gapMs = Math.max(0, ms); if (active) refreshTimeline(); });
+    }
     public void applyOptions(final boolean lp, final boolean rt) {
         seq.post(() -> {
             loop = lp;
             readTr = rt;
             if (rt && ttsReady && !trOk) err("Telefonda Türkçe ses paketi yok — Türkçe anlamlar okunamıyor.");
+            if (active) refreshTimeline();
         });
     }
 
@@ -417,6 +539,7 @@ public class GroupTtsService extends Service {
         @Override public void onStop() { stopEverything(); }
         @Override public void onSkipToNext() { skip(1); }
         @Override public void onSkipToPrevious() { skip(-1); }
+        @Override public void onSeekTo(long pos) { seekTo(pos); }
         @Override public void onCustomAction(String action, Bundle extras) {
             if (CUSTOM_CLOSE.equals(action)) stopEverything();
         }
@@ -454,11 +577,12 @@ public class GroupTtsService extends Service {
         try {
             long actions = PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE
                     | PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_STOP
-                    | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
+                    | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                    | PlaybackStateCompat.ACTION_SEEK_TO;
             PlaybackStateCompat ps = new PlaybackStateCompat.Builder()
                     .setActions(actions)
                     .setState(playing ? PlaybackStateCompat.STATE_PLAYING : PlaybackStateCompat.STATE_PAUSED,
-                            PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, playing ? 1.0f : 0f)
+                            currentPos(), playing ? 1.0f : 0f, SystemClock.elapsedRealtime())
                     .addCustomAction(new PlaybackStateCompat.CustomAction.Builder(
                             CUSTOM_CLOSE, "Kapat", R.drawable.ic_tts_close).build())
                     .build();
@@ -466,7 +590,7 @@ public class GroupTtsService extends Service {
         } catch (Exception e) {}
     }
 
-    /** Başlık = kelime, sanatçı = Türkçesi, albüm = "Liste · 12/30". Süre YOK → süre çubuğu çıkmaz. */
+    /** Başlık = kelime, sanatçı = Türkçesi, albüm = "Liste · 12/30", süre = listenin bir turu. */
     private void updateMetadata() {
         if (session == null || words.isEmpty()) return;
         try {
@@ -481,6 +605,7 @@ public class GroupTtsService extends Service {
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, album)
                     .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, i + 1)
                     .putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, n);
+            if (totalMs > 0) b.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, totalMs);
             Bitmap art = artFor(get(levels, i));
             if (art != null) b.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, art);
             session.setMetadata(b.build());
@@ -782,6 +907,7 @@ public class GroupTtsService extends Service {
     private void stopEverything() {
         boolean was = active;
         active = false;
+        durGen++;   // süren süre ölçümünün sonucu yok sayılsın
         paused = false;
         resumeOnFocus = false;
         seq.removeCallbacksAndMessages(null);

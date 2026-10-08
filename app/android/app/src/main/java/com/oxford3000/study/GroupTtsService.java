@@ -53,9 +53,9 @@ import java.util.Map;
  * Ayarda açıksa ardından Türkçe anlamı TTS ile okunur. Liste bitince döngü açıksa
  * baştan başlar, kapalıysa durur.
  *
- * Bildirim + kilit ekranı: MediaStyle + MediaSession. Başlık = kelime, alt satır =
- * "12/30 · Türkçesi" (yeni Android'lerin medya kartı yalnız iki satır gösterir, sıra
- * bu yüzden alt satırın başında); görsel = seviye rengi (A1 yeşil, A2 sarı, B1 pembe,
+ * Bildirim + kilit ekranı: MediaStyle + MediaSession. Üst satır = "live · yaşamak; canlı",
+ * alt satır = "12/30" (yeni Android'lerin medya kartı yalnız iki satır gösterir);
+ * görsel = seviye rengi (A1 yeşil, A2 sarı, B1 pembe,
  * B2 mavi). Düğmeler: önceki · duraklat/devam · sonraki · kapat. Süre çubuğu yok.
  *
  * Kulaklık: 1 basış duraklat/devam (kaldığı yerden), 2 basış sonraki, 3 basış önceki;
@@ -467,19 +467,19 @@ public class GroupTtsService extends Service {
         } catch (Exception e) {}
     }
 
-    /** Başlık = kelime, alt satır = "12/30 · Türkçesi". Süre YOK → süre çubuğu çıkmaz. */
+    /** Üst satır = "kelime · Türkçesi", alt satır = "12/30". Süre YOK → süre çubuğu çıkmaz. */
     private void updateMetadata() {
         if (session == null || words.isEmpty()) return;
         try {
             int i = index, n = words.size();
             String w = get(words, i), tr = get(trs, i), pos = (i + 1) + "/" + n, album = "Liste · " + pos;
-            String sub = tr.isEmpty() ? pos : pos + " · " + tr;
+            String top = tr.isEmpty() ? w : w + " · " + tr;
             MediaMetadataCompat.Builder b = new MediaMetadataCompat.Builder()
-                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, w)
-                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, sub)
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, top)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, pos)
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, w)
-                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, sub)
+                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, top)
+                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, pos)
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, album)
                     .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, i + 1)
                     .putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, n);
@@ -646,8 +646,8 @@ public class GroupTtsService extends Service {
         PendingIntent stopPi = servicePendingIntent(ACTION_STOP, 0);
         NotificationCompat.Builder b = new NotificationCompat.Builder(this, CHANNEL)
                 .setSmallIcon(R.drawable.ic_stat_listen)
-                .setContentTitle(w)
-                .setContentText(get(trs, i))
+                .setContentTitle(get(trs, i).isEmpty() ? w : w + " · " + get(trs, i))
+                .setContentText(n > 0 ? (i + 1) + "/" + n : "")
                 .setOngoing(!paused)
                 .setOnlyAlertOnce(true)
                 .setShowWhen(false)
@@ -661,7 +661,6 @@ public class GroupTtsService extends Service {
                         paused ? "Devam" : "Duraklat", servicePendingIntent(ACTION_TOGGLE, 2))
                 .addAction(R.drawable.ic_tts_next, "Sonraki", servicePendingIntent(ACTION_NEXT, 4))
                 .addAction(R.drawable.ic_tts_close, "Kapat", stopPi);
-        if (n > 0) b.setSubText("Liste · " + (i + 1) + "/" + n);
         Bitmap art = artFor(get(levels, i));
         if (art != null) b.setLargeIcon(art);
         PendingIntent open = openPendingIntent();

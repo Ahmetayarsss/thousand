@@ -17,6 +17,7 @@
  */
 (function () {
   var VER = __WEBVER__;
+  window.OX_WEBVER = VER;   // kayıt dışa aktarımı için (log.js)
   var Cap = window.Capacitor;
   var native = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
   if (!native) return;

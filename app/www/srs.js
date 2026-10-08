@@ -177,6 +177,49 @@
     return best == null ? null : best - t;
   }
 
+  // ---- Yazılı cevap kontrolü (sınavdaki altın kartlar) ----
+  // Büyük/küçük harf, noktalama, boşluk ve Türkçe harf farkı (ı/i, ş/s, ç/c, ğ/g, ö/o, ü/u)
+  // önemsenmez; parantez içi yazılmasa da olur. Yazım hatası kabul edilmez.
+  function norm(s) {
+    return String(s || "").replace(/[İI]/g, "i").toLowerCase().replace(/ı/g, "i")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9]/g, "");
+  }
+  function alts(str) {
+    return String(str).replace(/\([^)]*\)/g, " ").split(/[,/]/).map(norm).filter(Boolean);
+  }
+  // Beklenen cevap kutuları: her kutu için kabul edilen yazımlar.
+  //   tr2en (Türkçe gösterilir): tek kutu, yalnız kartın kelimesi ("a, an" → a ya da an).
+  //   en2tr: her anlam (";") ayrı kutu; eş anlamlılardan (",") biri yeterli.
+  //   Yalnız parantezden oluşan anlam ("(mastar eki)") not sayılır, kutu açılmaz.
+  function answerSlots(item, dir) {
+    if (dir === "tr2en") return [alts(item.w)];
+    var out = [];
+    String(item.tr || "").split(";").forEach(function (m) { var a = alts(m); if (a.length) out.push(a); });
+    return out.length ? out : [[norm(item.tr)]];
+  }
+  // Kutudaki yazı bir anlama uyar: virgülle birden çok yazıldıysa hepsi o anlamın yazımı olmalı.
+  function fits(input, a) {
+    var parts = String(input || "").split(/[,/;]/).map(norm).filter(Boolean);
+    if (!parts.length) return false;
+    for (var i = 0; i < parts.length; i++) if (a.indexOf(parts[i]) < 0) return false;
+    return true;
+  }
+  // inputs: kutulardaki yazılar (sırası serbest). Dönen: {ok, marks[]} (her kutu doğru mu).
+  function checkTyped(item, dir, inputs) {
+    var slots = answerSlots(item, dir), n = slots.length, best = null, idx = [];
+    for (var i = 0; i < n; i++) idx.push(i);
+    (function perm(k) {
+      if (k === n) {
+        var m = idx.map(function (e, j) { return fits(inputs[j], slots[e]); }), c = m.filter(Boolean).length;
+        if (!best || c > best.c) best = { m: m, c: c };
+        return;
+      }
+      for (var j = k; j < n; j++) { var t = idx[k]; idx[k] = idx[j]; idx[j] = t; perm(k + 1); t = idx[k]; idx[k] = idx[j]; idx[j] = t; }
+    })(0);
+    return { ok: best.c === n, marks: best.m };
+  }
+
   // İstatistik için ham veriler.
   function records() { return load(); }
   function daily() { return getJ(DAYK, {}) || {}; }
@@ -192,6 +235,7 @@
     IV: IV, today: today, now: nowMs, key: key, shuffle: shuffle,
     dev: dev, setDev: setDev, listSize: listSize, setListSize: setListSize,
     LMIN: LMIN, LMAX: LMAX, records: records, daily: daily, catalogKey: catalogKey,
+    norm: norm, answerSlots: answerSlots, checkTyped: checkTyped,
     setCatalog: setCatalog, catalogFromGroups: catalogFromGroups,
     level: level, isNew: isNew, isDue: isDue, dirOf: dirOf, answer: answer,
     dueList: dueList, newList: newList, examQueue: examQueue,

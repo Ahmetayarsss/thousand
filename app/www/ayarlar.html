@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oxford 3000 · Ayarlar</title>
-<script src="srs.js"></script>
+<script src="log.js"></script><script src="srs.js"></script>
 <style>
 :root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--red:#D9544D;--dev:#8E44AD}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -37,7 +37,7 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px}
 .sw.on{background:var(--green)} .sw.on::after{left:23px}
 .down{margin-top:auto;align-self:center;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:800;padding:14px 20px 4px}
 .down span{font-size:20px;line-height:1}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;text-align:center;background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
 .toast.show{opacity:1}
 </style>
 <script src="updater.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='analiz.html',P='',U='',D='sozluk.html';var x0=0,y0=0,t0=0,ok=false,top=false,bot=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;var se=document.scrollingElement||document.documentElement;top=se.scrollTop<=0;bot=se.scrollTop+innerHeight>=se.scrollHeight-2;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dy)>=90&&Math.abs(dy)>Math.abs(dx)*1.8){if(dy>0&&U&&top)location.href=U;else if(dy<0&&D&&bot)location.href=D;return;}if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head>
@@ -76,6 +76,10 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px}
       <a class="btn" href="index.html?kutla=1" style="text-decoration:none">Göster</a>
     </div>
     <div class="row">
+      <div><div class="t">Kayıtlar</div><div class="s" id="logs"></div></div>
+      <div class="btns"><button class="btn" id="lexp">Dışa aktar</button><button class="btn ghost" id="lcopy">Kopyala</button></div>
+    </div>
+    <div class="row">
       <div><div class="t">İlerlemeyi sıfırla</div><div class="s">Tüm kelimeler yeniden "yeni" olur.</div></div>
       <button class="btn red" id="reset">Sıfırla</button>
     </div>
@@ -87,7 +91,7 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px}
 <script>
 const PRESETS=[10,20,30,50,100];
 let tt=0;
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1800);}
+function toast(m,ms){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),ms||1800);}
 function fmt(ms){const d=new Date(ms),p=n=>('0'+n).slice(-2);return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear();}
 function render(){
   const n=SRS.listSize();
@@ -96,16 +100,22 @@ function render(){
   const d=SRS.dev();
   document.getElementById('dday').textContent=fmt(SRS.now())+(d.off?' (+'+d.off+' gün)':' (gerçek)');
   document.getElementById('cheat').classList.toggle('on',!d.noCheat);
+  const kb=Math.max(1,Math.round(OXLOG.size()/1024));
+  document.getElementById('logs').textContent=OXLOG.count().toLocaleString('tr-TR')+' olay · '+kb+' KB · telefonda';
 }
-function setN(v){const n=SRS.setListSize(v);render();toast('Ana sayfada '+n+' kelime');}
+function setN(v){const n=SRS.setListSize(v);OXLOG.add('ayar',{liste:n});render();toast('Ana sayfada '+n+' kelime');}
 document.getElementById('minus').onclick=()=>setN(SRS.listSize()-5);
 document.getElementById('plus').onclick=()=>setN(SRS.listSize()+5);
 document.getElementById('chips').onclick=e=>{const b=e.target.closest('button');if(b)setN(+b.dataset.v);};
-document.getElementById('fwd').onclick=()=>{SRS.setDev({off:SRS.dev().off+1});render();toast('1 gün ileri sarıldı');};
-document.getElementById('today').onclick=()=>{SRS.setDev({off:0});render();toast('Gerçek tarihe dönüldü');};
-document.getElementById('cheat').onclick=()=>{SRS.setDev({noCheat:!SRS.dev().noCheat});render();toast('Hile tespiti '+(SRS.dev().noCheat?'kapalı':'açık'));};
+document.getElementById('fwd').onclick=()=>{SRS.setDev({off:SRS.dev().off+1});OXLOG.add('dev',{a:'gun+1',off:SRS.dev().off});render();toast('1 gün ileri sarıldı');};
+document.getElementById('today').onclick=()=>{SRS.setDev({off:0});OXLOG.add('dev',{a:'bugun'});render();toast('Gerçek tarihe dönüldü');};
+document.getElementById('cheat').onclick=()=>{SRS.setDev({noCheat:!SRS.dev().noCheat});OXLOG.add('dev',{a:'hile',acik:SRS.dev().noCheat?0:1});render();toast('Hile tespiti '+(SRS.dev().noCheat?'kapalı':'açık'));};
+document.getElementById('lexp').onclick=async()=>{const where=await OXLOG.exportFile();
+  toast(where?'Kaydedildi: '+where:'Dosya kaydedilemedi — "Kopyala"yı dene',4000);};
+document.getElementById('lcopy').onclick=async()=>{toast(await OXLOG.copy()?'Kayıtlar panoya kopyalandı':'Kopyalanamadı');};
 document.getElementById('reset').onclick=()=>{
   if(!confirm('Tüm ilerleme silinsin mi? (Kutular, sınav kayıtları, istatistikler)'))return;
+  OXLOG.add('dev',{a:'sifirla'});
   SRS.reset();SRS.setDev({off:0});
   ['ox3000_sessions_v1','ox3000_cheat_v1'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
   render();toast('İlerleme sıfırlandı');

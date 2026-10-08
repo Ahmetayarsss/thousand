@@ -59,19 +59,18 @@ t("cevaplanan listeden düşer, alttan sıradaki gelir", () => {
   assert.strictEqual(S.inCycle(), 1);
 });
 
-t("kutu yolculuğu 1→2→3→olgun, aralıklar 1/3/7/7", () => {
+t("kutu yolculuğu 1→2→3→olgun 4→5→6→7 (7'de kalır), aralıklar 1/3/7/7/14/30/60", () => {
   S.answer(k1, false, null, at(0));          // 1  vade +1
-  let r = S.answer(k1, true, null, at(1));   // 2  vade +3
-  assert.deepStrictEqual([r.to, r.due - S.today(at(1))], [2, 3]);
-  r = S.answer(k1, true, null, at(4));       // 3  vade +7
-  assert.deepStrictEqual([r.to, r.due - S.today(at(4))], [3, 7]);
-  r = S.answer(k1, true, null, at(11));      // olgun vade +7
-  assert.deepStrictEqual([r.to, r.due - S.today(at(11))], [4, 7]);
-  r = S.answer(k1, true, null, at(18));      // olgun kalır
-  assert.strictEqual(r.to, 4);
+  let d = 1;                                 // her doğru cevap tam vade gününde: [seviye, aralık]
+  for (const [to, iv] of [[2, 3], [3, 7], [4, 7], [5, 14], [6, 30], [7, 60], [7, 60]]) {
+    const r = S.answer(k1, true, null, at(d));
+    assert.deepStrictEqual([r.to, r.due - S.today(at(d))], [to, iv]);
+    d += iv;
+  }
+  assert.strictEqual(S.BMAX, 7);
 });
 
-t("yanlış → bir kutu aşağı (olgun → 2, 1'de 1 kalır)", () => {
+t("yanlış → bir kutu aşağı (olgun 4–7 → 2, 1'de 1 kalır)", () => {
   S.answer(k1, true, null, at(0));           // 2
   S.answer(k1, true, null, at(3));           // 3
   S.answer(k1, true, null, at(10));          // 4 olgun
@@ -82,6 +81,11 @@ t("yanlış → bir kutu aşağı (olgun → 2, 1'de 1 kalır)", () => {
   S.answer(k2, true, null, at(0));           // 2
   S.answer(k2, true, null, at(3));           // 3
   assert.strictEqual(S.answer(k2, false, null, at(10)).to, 2);
+  const k3 = S.newList(1)[0];                // 2→3→4→5→6→7 (olgun, 60 gün)
+  [0, 3, 10, 17, 31, 61].forEach(d => S.answer(k3, true, null, at(d)));
+  assert.strictEqual(S.level(k3), 7);
+  r = S.answer(k3, false, null, at(121));
+  assert.deepStrictEqual([r.from, r.to, r.due - S.today(at(121))], [7, 2, 3]);
 });
 
 t("doğru cevap yön kilidini kaldırır", () => {
@@ -111,6 +115,19 @@ t("sınav kuyruğu: tekrarlar kutu yüksekten düşüğe, sonra turun yenileri",
   assert.deepStrictEqual(new Set(q.reviews.slice(2)), new Set([ks[0], ks[1]]));
   assert.strictEqual(q.news.length, 100);
   assert.deepStrictEqual(new Set(q.news), new Set(S.newList(100)));
+});
+
+t("sınav kuyruğu: olgun 5–7 de gelir, seviye yüksekten düşüğe", () => {
+  const up = (k, b) => {                     // gün 0'da yeni; her vadesinde doğru → b seviyesine
+    let r = S.answer(k, b > 1, null, at(0));
+    while (r.to < b) r = S.answer(k, true, null, at(r.due - S.today(at(0))));
+  };
+  const ks = S.newList(10), lv = [5, 1, 7, 3, 6, 2, 4, 7, 5, 6];
+  ks.forEach((k, i) => up(k, lv[i]));
+  const q = S.examQueue(at(200));                                             // hepsinin vadesi geçti
+  assert.deepStrictEqual(q.reviews.map(S.level), [7, 7, 6, 6, 5, 5, 4, 3, 2, 1]);
+  assert.deepStrictEqual(new Set(q.reviews), new Set(ks));
+  assert.deepStrictEqual(S.examQueue(at(60)).reviews.map(S.level), [5, 5, 4, 3, 2, 1]);   // 6 (gün 61) ve 7 (gün 121) henüz değil
 });
 
 t("aynı kutudaki tekrarlar karışık gelir", () => {
@@ -188,6 +205,10 @@ t("kısım sayaçları: olgun · öğreniliyor · yeni", () => {
   assert.deepStrictEqual(S.groupCounts(0), { mature: 1, learning: 1, fresh: 98, total: 100 });
   assert.deepStrictEqual(S.groupCounts(1), { mature: 0, learning: 0, fresh: 100, total: 100 });
   assert.strictEqual(S.totals().fresh, 2998);
+  [17, 31, 61].forEach(d => S.answer(ks[1], true, null, at(d)));             // olgun 7 de olgun sayılır
+  assert.strictEqual(S.level(ks[1]), 7);
+  assert.deepStrictEqual(S.groupCounts(0), { mature: 1, learning: 1, fresh: 98, total: 100 });
+  assert.strictEqual(S.totals().mature, 1);
 });
 
 t("veri kalıcı (yeniden yükleme sonrası aynı)", () => {

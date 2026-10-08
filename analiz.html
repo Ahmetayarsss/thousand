@@ -236,7 +236,7 @@ function chartBox(){
   const box=document.getElementById('c-box');box.innerHTML='';
   const c=[0,0,0,0];recs.forEach(r=>{c[Math.min(4,Math.max(1,r.b))-1]++;});
   const tot=c.reduce((a,b)=>a+b,0);
-  const L=['Kutu 1 · 1 gün','Kutu 2 · 3 gün','Kutu 3 · 7 gün','Olgun · 7 gün'],C=['--o1','--o2','--o3','--o4'];
+  const L=['Kutu 1 · 1 gün','Kutu 2 · 3 gün','Kutu 3 · 7 gün','Olgun · 7–60 gün'],C=['--o1','--o2','--o3','--o4'];
   const W=box.clientWidth,rowH=34,bh=16,ml=104,mr=46,H=rowH*4+4,pw=W-ml-mr,mx=Math.max(1,...c);
   const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,height:H,role:'img','aria-label':'Kutu dağılımı'},box);
   el('line',{x1:ml+.5,x2:ml+.5,y1:2,y2:H-2,stroke:css('--axis'),'stroke-width':1},svg);

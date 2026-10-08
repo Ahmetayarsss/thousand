@@ -27,7 +27,7 @@ import java.util.List;
  * JS'te Capacitor.Plugins.GroupTts olarak görünür (sayfalar @capacitor/core
  * paketlemediği için registerPlugin YOK; Capacitor eklentiyi kendisi enjekte eder).
  *
- * Yöntemler: speakGroup, stop, getState, setOptions, openNotificationSettings.
+ * Yöntemler: speakGroup, stop, getState, setOptions, setGap, openNotificationSettings.
  * Olaylar: wordStart {index, word}, state {active, paused, index, word}, done, ttsError {msg}.
  */
 @CapacitorPlugin(name = "GroupTts")
@@ -148,6 +148,15 @@ public class GroupTts extends Plugin {
         Boolean loop = call.getBoolean("loop", true);
         Boolean readTr = call.getBoolean("readTr", false);
         if (s != null) s.applyOptions(loop == null || loop, readTr != null && readTr);
+        call.resolve();
+    }
+
+    /** Kelimeler arası bekleme (ms): okuma sürerken değişir, yeniden başlatmaz. */
+    @PluginMethod
+    public void setGap(PluginCall call) {
+        GroupTtsService s = GroupTtsService.instance;
+        Integer g = call.getInt("gap", 0);
+        if (s != null) s.applyGap(g == null ? 0 : g);
         call.resolve();
     }
 

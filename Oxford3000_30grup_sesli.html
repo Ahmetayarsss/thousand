@@ -104,7 +104,8 @@ if(GT&&GT.addListener){
   // Her kelime başında native olay → okunan kartı vurgula ve ona kaydır.
   GT.addListener('wordStart',ev=>{if(!ev)return;nativeOn=true;if(!playing){playing=true;setPlayBtns();}markCard(ev.word,ev.index,true);});
   // Duraklat/devam/kapat (bildirim, kulaklık, kilit ekranı) → düğme durumu.
-  GT.addListener('state',ev=>{if(!ev)return;if(ev.active){nativeOn=true;playing=true;}else{nativeOn=false;playing=false;clr();}setPlayBtns();});
+  GT.addListener('state',ev=>{if(!ev)return;if(ev.active){nativeOn=true;playing=true;}else{nativeOn=false;playing=false;clr();}setPlayBtns();
+    if(ev.active&&!ev.paused&&gapPending)applyGapLive();});
   // Döngü kapalıyken liste bitince.
   GT.addListener('done',()=>{nativeOn=false;playing=false;looping=false;clr();setPlayBtns();});
   // Servisten hata → kalıcı çubuk; bildirimler kapalıysa "Bildirimleri aç" düğmesi.
@@ -143,8 +144,10 @@ function stop(){nativeOn=false;if(GT){try{const r=GT.stop();if(r&&r.catch)r.catc
 // Türkçe okuma metni: parantez içi atılır, ";" virgül olur, ek tiresi okunmaz ("-den" → "den").
 function trSay(t){return String(t||'').replace(/\([^)]*\)/g,' ').replace(/;/g,',').replace(/(^|[\s,])-+/g,'$1').replace(/\s+,/g,',').replace(/\s+/g,' ').replace(/^[\s,]+|[\s,]+$/g,'');}
 // Listeyi oku. Döngü ve Türkçe okuma Ayarlar'dan (döngü varsayılan açık). GAP: kelimeler arası bekleme (ms).
-function readGroup(){const loop=!!SRS.opt('loop',true),readTr=!!SRS.opt('readTr',false);
+// startWord: verilirse okuma o kelimeden başlar (bekleme değişince kaldığı yerden sürmek için).
+function readGroup(startWord){const loop=!!SRS.opt('loop',true),readTr=!!SRS.opt('readTr',false);
   const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
+  let start=0;if(startWord){const j=cs.findIndex(c=>c.dataset.w===startWord);if(j>0)start=j;}
   playing=true;looping=loop;setPlayBtns();
   if(GT&&GT.speakGroup){   // NATIVE: gömülü mp3 kuyruğu + servis (bildirim/kulaklık)
     diagClear();curCards=cs;if(synth)synth.cancel();nativeOn=true;
@@ -153,7 +156,7 @@ function readGroup(){const loop=!!SRS.opt('loop',true),readTr=!!SRS.opt('readTr'
     try{
       const r=GT.speakGroup({words:cs.map(c=>c.dataset.w),slugs:cs.map(c=>slugOf(c.dataset.w)),
         trs:es.map(e=>e?(e.d.tr||''):''),says:es.map(e=>e?trSay(e.d.tr):''),levels:es.map(e=>e?e.g.level:''),
-        rate:RATE,loop:loop,readTr:readTr,gap:GAP});
+        rate:RATE,loop:loop,readTr:readTr,gap:GAP,start:start});
       if(r&&r.catch)r.catch(e=>diag('speakGroup reddedildi: '+(e&&e.message?e.message:JSON.stringify(e))));
     }catch(e){diag('speakGroup istisna: '+e);}
     return;
@@ -163,7 +166,7 @@ function readGroup(){const loop=!!SRS.opt('loop',true),readTr=!!SRS.opt('readTr'
   // TARAYICI (fallback): her kelimede önce gömülü mp3, yoksa TTS; sonra GAP bekle.
   if(!synth){stop();return;}
   synth.cancel();
-  let i=0;
+  let i=start;
   (async function next(){
     if(!playing)return;
     if(i>=cs.length){if(looping){i=0;}else{stop();return;}}
@@ -226,9 +229,24 @@ c.onclick=()=>one(d.w,c);   // karta basınca oku
 list.appendChild(c);});
 document.getElementById('search').value='';}
 
+// Bekleme sürgüsü: değer saklanır; okuma sürerken değişince HEMEN uygulanır.
 function setGap(v){GAP=Math.round(parseFloat(v)*1000);}
-document.getElementById('gap').addEventListener('input',e=>setGap(e.target.value));
-setGap(document.getElementById('gap').value);
+const gapEl=document.getElementById('gap');
+{const g=parseFloat(SRS.opt('gap',0.5));if(g>=0&&g<=3)gapEl.value=String(g);}
+setGap(gapEl.value);
+let gapT=0,gapPending=false;
+gapEl.addEventListener('input',e=>{setGap(e.target.value);SRS.setOpt('gap',parseFloat(e.target.value));
+  clearTimeout(gapT);gapT=setTimeout(()=>{applyGapLive();OXLOG.add('ayar',{bekleme:GAP});},400);});
+// Telefondaki okumaya yeni beklemeyi uygula: destekliyorsa doğrudan (setGap), değilse
+// okunan kelimeden yeniden başlat. Eski APK'da (getState yok) bir sonraki başlatmada geçerli olur.
+function applyGapLive(){
+  if(!GT||!nativeOn)return;
+  if(typeof GT.setGap==='function'){try{const r=GT.setGap({gap:GAP});if(r&&r.catch)r.catch(()=>{});}catch(e){}return;}
+  if(typeof GT.getState!=='function')return;
+  Promise.resolve(GT.getState()).then(st=>{if(!st||!st.active)return;
+    if(st.paused){gapPending=true;return;}   // duraklatılmışsa devam edince uygula
+    gapPending=false;readGroup(st.word);}).catch(()=>{});
+}
 document.getElementById('playall').addEventListener('click',()=>{playing?stop():readGroup();});
 document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});

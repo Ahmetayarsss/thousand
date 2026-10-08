@@ -16,6 +16,11 @@
   if (!Cap || typeof Cap.isNativePlatform !== "function" || !Cap.isNativePlatform()) {
     return; // Tarayıcı: dokunma.
   }
+  // "Listeyi oku" bildirimine dokununca (MainActivity → oxTtsOpen) başka sayfadaysak ana sayfaya geç.
+  window.addEventListener("oxTtsOpen", function () {
+    var p = location.pathname.split("/").pop() || "index.html";
+    if (p !== "index.html") location.href = "index.html";
+  });
   var TTS = (Cap.Plugins && Cap.Plugins.TextToSpeech) ||
             (typeof Cap.registerPlugin === "function" && Cap.registerPlugin("TextToSpeech"));
   if (!TTS) return; // Eklenti yoksa Web Speech'e bırak.

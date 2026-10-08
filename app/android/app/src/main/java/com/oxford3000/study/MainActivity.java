@@ -1,6 +1,7 @@
 package com.oxford3000.study;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,7 +13,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        registerPlugin(GroupTts.class);   // grup seslendirme (foreground servis + medya kontrolleri)
+        registerPlugin(GroupTts.class);   // "Listeyi oku" (foreground servis + medya kontrolleri)
         super.onCreate(savedInstanceState);
 
         // Android 13+ (API 33): bildirim gösterebilmek için çalışma-zamanı izni ŞART.
@@ -25,5 +26,16 @@ public class MainActivity extends BridgeActivity {
                 }
             } catch (Exception e) {}
         }
+    }
+
+    // Okuma bildirimine dokununca: açık sayfa ana sayfaya geçsin, okunan kelime işaretlensin.
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        try {
+            if (intent != null && intent.getBooleanExtra(GroupTtsService.EXTRA_FROM_TTS, false) && getBridge() != null) {
+                getBridge().triggerWindowJSEvent("oxTtsOpen");
+            }
+        } catch (Exception e) {}
     }
 }

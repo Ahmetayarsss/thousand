@@ -89,16 +89,36 @@ let toastEl=null,toastTimer=null;
 function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 // Kalıcı teşhis çubuğu (üstte, dokununca kapanır). Toast'tan daha görünür.
 let diagEl=null;
-function diag(msg){if(!diagEl){diagEl=document.createElement('div');diagEl.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#8A2A1E;color:#fff;font-size:13px;font-weight:600;padding:12px 14px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.35);line-height:1.4';diagEl.onclick=()=>{diagEl.style.display='none';};document.body.appendChild(diagEl);}diagEl.textContent='🔎 '+msg+'  (kapatmak için dokun)';diagEl.style.display='block';}
+function diag(msg,act){if(!diagEl){diagEl=document.createElement('div');diagEl.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#8A2A1E;color:#fff;font-size:13px;font-weight:600;padding:12px 14px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.35);line-height:1.4';diagEl.onclick=()=>{diagEl.style.display='none';};document.body.appendChild(diagEl);}diagEl.innerHTML='';const t=document.createElement('span');t.textContent='🔎 '+msg+'  (kapatmak için dokun)';diagEl.appendChild(t);
+  if(act){const b=document.createElement('button');b.textContent=act.label;b.style.cssText='display:block;margin-top:9px;border:0;border-radius:9px;background:#fff;color:#8A2A1E;font-weight:800;font-size:13px;padding:9px 14px';
+    b.onclick=e=>{e.stopPropagation();diagEl.style.display='none';try{act.fn();}catch(_){}};diagEl.appendChild(b);}
+  diagEl.style.display='block';}
 function diagClear(){if(diagEl)diagEl.style.display='none';}
+// Okunan kart: kelimeye göre bulunur (sayfa yenilense de doğru kart işaretlensin).
+function cardOf(w,i){if(w){const c=[...document.querySelectorAll('.card')].find(x=>x.dataset.w===w);if(c)return c;}
+  return (i!=null&&i>=0&&i<curCards.length)?curCards[i]:null;}
+function markCard(w,i,scroll){clr();const c=cardOf(w,i);if(!c)return;cur=c;c.classList.add('playing');
+  if(scroll&&!document.hidden)c.scrollIntoView({behavior:'smooth',block:'center'});}
+let nativeOn=false;   // okuma telefondaki hizmette sürüyor (sayfadan bağımsız, Spotify gibi)
 if(GT&&GT.addListener){
-  // Her kelime başında native olay → ekran açıkken okunan kartı vurgula ve ona kaydır.
-  GT.addListener('wordStart',ev=>{const i=ev&&ev.index;if(i==null)return;if(i>=0&&i<curCards.length){clr();cur=curCards[i];cur.classList.add('playing');cur.scrollIntoView({behavior:'smooth',block:'center'});}});
-  // Döngüsüz okuma bitince butonları sıfırla.
-  GT.addListener('done',()=>{playing=false;looping=false;clr();setPlayBtns();});
-  // Servisten teşhis/hata mesajı → kalıcı çubuk.
-  GT.addListener('ttsError',ev=>{const m=(ev&&ev.msg)?ev.msg:'Ses/bildirim hatası';OXLOG.add('okuma_hata',{m:m});diag(m);});
+  // Her kelime başında native olay → okunan kartı vurgula ve ona kaydır.
+  GT.addListener('wordStart',ev=>{if(!ev)return;nativeOn=true;if(!playing){playing=true;setPlayBtns();}markCard(ev.word,ev.index,true);});
+  // Duraklat/devam/kapat (bildirim, kulaklık, kilit ekranı) → düğme durumu.
+  GT.addListener('state',ev=>{if(!ev)return;if(ev.active){nativeOn=true;playing=true;}else{nativeOn=false;playing=false;clr();}setPlayBtns();});
+  // Döngü kapalıyken liste bitince.
+  GT.addListener('done',()=>{nativeOn=false;playing=false;looping=false;clr();setPlayBtns();});
+  // Servisten hata → kalıcı çubuk; bildirimler kapalıysa "Bildirimleri aç" düğmesi.
+  GT.addListener('ttsError',ev=>{const m=(ev&&ev.msg)?ev.msg:'Ses/bildirim hatası';OXLOG.add('okuma_hata',{m:m});
+    diag(m,(/Bildirim KAPALI/.test(m)&&typeof GT.openNotificationSettings==='function')?{label:'Bildirimleri aç',fn:()=>GT.openNotificationSettings()}:null);});
 }
+// Hizmetin durumunu sor: sayfa açılınca / uygulamaya dönünce düğme ve işaret doğru olsun.
+function syncNative(scroll){if(!GT||typeof GT.getState!=='function')return;
+  Promise.resolve(GT.getState()).then(st=>{
+    if(st&&st.active){nativeOn=true;playing=true;markCard(st.word,st.index,scroll);}
+    else if(nativeOn){nativeOn=false;playing=false;clr();}
+    setPlayBtns();}).catch(()=>{});}
+window.addEventListener('oxTtsOpen',()=>syncNative(true));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncNative(false);});
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Listeyi oku";p.classList.toggle('stop',playing);}
 function speak(t,card,after){if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;if(card){clr();cur=card;card.classList.add('playing');}u.onend=()=>{if(card)card.classList.remove('playing');if(after)after();};u.onerror=u.onend;synth.speak(u);}
@@ -117,14 +137,23 @@ async function one(t,card){
   try{if(await playAudioUrl('audio/'+slugOf(t)+'.mp3',card))return;}catch(e){}
   speak(t,card);
 }
-function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}if(GT)GT.stop();clrWord();if(synth)synth.cancel();clr();setPlayBtns();}
-// Grubu oku. loop=true ise bitince baştan başlar (sonsuz). GAP: kelimeler arası bekleme (ms).
-function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
-  playing=true;looping=!!loop;setPlayBtns();
+// stopLocal: yalnız sayfadaki sesi durdurur (telefondaki okuma sürer). stop: okumayı da kapatır.
+function stopLocal(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(gapTimer);gapTimer=null;}try{if(wordAudio){wordAudio.pause();wordAudio=null;}}catch(e){}clrWord();if(synth)synth.cancel();clr();setPlayBtns();}
+function stop(){nativeOn=false;if(GT){try{const r=GT.stop();if(r&&r.catch)r.catch(()=>{});}catch(e){}}stopLocal();}
+// Türkçe okuma metni: parantez içi atılır, ";" virgül olur, ek tiresi okunmaz ("-den" → "den").
+function trSay(t){return String(t||'').replace(/\([^)]*\)/g,' ').replace(/;/g,',').replace(/(^|[\s,])-+/g,'$1').replace(/\s+,/g,',').replace(/\s+/g,' ').replace(/^[\s,]+|[\s,]+$/g,'');}
+// Listeyi oku. Döngü ve Türkçe okuma Ayarlar'dan (döngü varsayılan açık). GAP: kelimeler arası bekleme (ms).
+function readGroup(){const loop=!!SRS.opt('loop',true),readTr=!!SRS.opt('readTr',false);
+  const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
+  playing=true;looping=loop;setPlayBtns();
   if(GT&&GT.speakGroup){   // NATIVE: gömülü mp3 kuyruğu + servis (bildirim/kulaklık)
-    diagClear();curCards=cs;if(synth)synth.cancel();OXLOG.add('okuma',{mod:'native',n:cs.length});
+    diagClear();curCards=cs;if(synth)synth.cancel();nativeOn=true;
+    OXLOG.add('okuma',{mod:'native',n:cs.length,dongu:loop?1:0,tr:readTr?1:0});
+    const es=cs.map(c=>BYK[c.dataset.k]);
     try{
-      const r=GT.speakGroup({words:cs.map(c=>c.dataset.w),slugs:cs.map(c=>slugOf(c.dataset.w)),rate:RATE,loop:!!loop,gap:GAP});
+      const r=GT.speakGroup({words:cs.map(c=>c.dataset.w),slugs:cs.map(c=>slugOf(c.dataset.w)),
+        trs:es.map(e=>e?(e.d.tr||''):''),says:es.map(e=>e?trSay(e.d.tr):''),levels:es.map(e=>e?e.g.level:''),
+        rate:RATE,loop:loop,readTr:readTr,gap:GAP});
       if(r&&r.catch)r.catch(e=>diag('speakGroup reddedildi: '+(e&&e.message?e.message:JSON.stringify(e))));
     }catch(e){diag('speakGroup istisna: '+e);}
     return;
@@ -140,11 +169,15 @@ function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter
     if(i>=cs.length){if(looping){i=0;}else{stop();return;}}
     const card=cs[i],w=cs[i].dataset.w;clr();cur=card;card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'center'});
     const advance=()=>{if(!playing)return;i++;if(GAP>0){gapTimer=setTimeout(next,GAP);}else next();};
+    // İngilizceden sonra (ayar açıksa) Türkçesi.
+    const afterEn=()=>{if(!playing)return;const e=BYK[card.dataset.k],say=(readTr&&e&&synth)?trSay(e.d.tr):'';
+      if(!say){advance();return;}
+      gapTimer=setTimeout(()=>{if(!playing)return;const u=new SpeechSynthesisUtterance(say);const v=pick('tr-TR');if(v)u.voice=v;u.lang='tr-TR';u.rate=RATE;u.onend=advance;u.onerror=advance;synth.speak(u);},400);};
     let played=false;
     try{played=await playAudioUrl('audio/'+slugOf(w)+'.mp3',null);}catch(e){}
-    if(played){if(wordAudio){wordAudio.onended=advance;wordAudio.onerror=advance;}else advance();return;}
+    if(played){if(wordAudio){wordAudio.onended=afterEn;wordAudio.onerror=afterEn;}else afterEn();return;}
     const u=new SpeechSynthesisUtterance(w);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=RATE;
-    u.onend=advance;u.onerror=advance;synth.speak(u);
+    u.onend=afterEn;u.onerror=afterEn;synth.speak(u);
   })();}
 
 // Başlık: döngüdeki kelime sayısı · listedeki en yüksek seviye.
@@ -177,7 +210,7 @@ function celebrate(list){
 // Yeni kelime listesi (ayarlardaki sayı kadar), sınavın soracağı sırayla.
 // Sınavda cevaplanan kelime listeden düşer, alttan sıradaki eklenir.
 const FORCE_CELE=(()=>{try{return new URLSearchParams(location.search).get('kutla')==='1';}catch(e){return false;}})();
-function renderList(){stop();cancelAnimationFrame(celeRaf);const list=document.getElementById('list');list.innerHTML='';
+function renderList(){stopLocal();cancelAnimationFrame(celeRaf);const list=document.getElementById('list');list.innerHTML='';
 const keys=SRS.newList(SRS.listSize());
 const cele=!keys.length||FORCE_CELE;
 document.querySelector('header .controls').style.display=cele?'none':'';document.getElementById('search').style.display=cele?'none':'';
@@ -196,10 +229,10 @@ document.getElementById('search').value='';}
 function setGap(v){GAP=Math.round(parseFloat(v)*1000);}
 document.getElementById('gap').addEventListener('input',e=>setGap(e.target.value));
 setGap(document.getElementById('gap').value);
-document.getElementById('playall').addEventListener('click',()=>{playing?stop():readGroup(true);});   // Grubu oku = sürekli döngü
+document.getElementById('playall').addEventListener('click',()=>{playing?stop():readGroup();});
 document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.card').forEach(c=>{c.style.display=c.dataset.s.includes(q)?'':'none';});});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
-function refresh(){setSecLabel();renderList();}
+function refresh(){setSecLabel();renderList();syncNative(true);}
 refresh();
 window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
 </script></body></html>

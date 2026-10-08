@@ -47,6 +47,10 @@
   function setDev(p) { var d = dev(); for (var k in p) d[k] = p[k]; setJ(DEVK, d); }
   function nowMs() { return Date.now() + dev().off * DAYMS; }
 
+  // Genel ayarlar (ox3000_settings_v1): opt("loop", true), opt("readTr", false) …
+  function opt(k, d) { var s = getJ(SETK, {}) || {}; return Object.prototype.hasOwnProperty.call(s, k) ? s[k] : d; }
+  function setOpt(k, v) { var s = getJ(SETK, {}) || {}; s[k] = v; setJ(SETK, s); return v; }
+
   // Ana sayfadaki yeni kelime sayısı (= bir sınav turundaki yeni kelime sayısı).
   function listSize() { var n = (getJ(SETK, {}) || {}).listN | 0; return n >= LMIN && n <= LMAX ? n : LDEF; }
   function setListSize(n) {
@@ -233,7 +237,7 @@
 
   return {
     IV: IV, today: today, now: nowMs, key: key, shuffle: shuffle,
-    dev: dev, setDev: setDev, listSize: listSize, setListSize: setListSize,
+    dev: dev, setDev: setDev, listSize: listSize, setListSize: setListSize, opt: opt, setOpt: setOpt,
     LMIN: LMIN, LMAX: LMAX, records: records, daily: daily, catalogKey: catalogKey,
     norm: norm, answerSlots: answerSlots, checkTyped: checkTyped,
     setCatalog: setCatalog, catalogFromGroups: catalogFromGroups,

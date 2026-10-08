@@ -155,7 +155,9 @@ function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||vo
 function speak(t){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=0.85;synth.speak(u);}
 // Native Cambridge sesi (varsa): 🔊 → gerçek insan sesi, yoksa cihaz TTS'i.
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
-const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
+// Eklenti nesnesi: Capacitor'un sayfaya enjekte ettiği Capacitor.Plugins.GroupTts (@capacitor/core
+// paketlenmediği için registerPlugin YOK — eskiden yalnız ona bakıldığından native okuma hiç çalışmıyordu).
+const GT=NATIVE?((window.Capacitor.Plugins&&Capacitor.Plugins.GroupTts)||(typeof Capacitor.registerPlugin==='function'&&Capacitor.registerPlugin('GroupTts'))||null):null;
 let toastEl=null,toastTimer=null;
 function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 let wordAudio=null;

@@ -79,7 +79,9 @@ function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||vo
 let playing=false,looping=false,queue=[],cur=null,curCards=[],gapTimer=null,wordCard=null,wordAudio=null;
 // Native grup seslendirme eklentisi (varsa): kuyruk + döngü + ekran-kapalı okuma native tarafta.
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
-const GT=(NATIVE&&window.Capacitor.registerPlugin)?Capacitor.registerPlugin('GroupTts'):null;
+// Eklenti nesnesi: Capacitor'un sayfaya enjekte ettiği Capacitor.Plugins.GroupTts (@capacitor/core
+// paketlenmediği için registerPlugin YOK — eskiden yalnız ona bakıldığından native okuma hiç çalışmıyordu).
+const GT=NATIVE?((window.Capacitor.Plugins&&Capacitor.Plugins.GroupTts)||(typeof Capacitor.registerPlugin==='function'&&Capacitor.registerPlugin('GroupTts'))||null):null;
 function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
 function clrWord(){if(wordCard){wordCard.classList.remove('playing');wordCard=null;}}
 // Geçici teşhis balonu: Cambridge sesi neden gelmedi görünsün.
@@ -95,7 +97,7 @@ if(GT&&GT.addListener){
   // Döngüsüz okuma bitince butonları sıfırla.
   GT.addListener('done',()=>{playing=false;looping=false;clr();setPlayBtns();});
   // Servisten teşhis/hata mesajı → kalıcı çubuk.
-  GT.addListener('ttsError',ev=>{diag((ev&&ev.msg)?ev.msg:'Ses/bildirim hatası');});
+  GT.addListener('ttsError',ev=>{const m=(ev&&ev.msg)?ev.msg:'Ses/bildirim hatası';OXLOG.add('okuma_hata',{m:m});diag(m);});
 }
 function setPlayBtns(){const p=document.getElementById('playall');
   p.textContent=playing?"■ Durdur":"▶ Listeyi oku";p.classList.toggle('stop',playing);}
@@ -120,7 +122,7 @@ function stop(){playing=false;looping=false;queue=[];if(gapTimer){clearTimeout(g
 function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter(c=>c.style.display!=='none');if(!cs.length)return;
   playing=true;looping=!!loop;setPlayBtns();
   if(GT&&GT.speakGroup){   // NATIVE: gömülü mp3 kuyruğu + servis (bildirim/kulaklık)
-    diagClear();curCards=cs;if(synth)synth.cancel();
+    diagClear();curCards=cs;if(synth)synth.cancel();OXLOG.add('okuma',{mod:'native',n:cs.length});
     try{
       const r=GT.speakGroup({words:cs.map(c=>c.dataset.w),slugs:cs.map(c=>slugOf(c.dataset.w)),rate:RATE,loop:!!loop,gap:GAP});
       if(r&&r.catch)r.catch(e=>diag('speakGroup reddedildi: '+(e&&e.message?e.message:JSON.stringify(e))));
@@ -128,7 +130,7 @@ function readGroup(loop){const cs=[...document.querySelectorAll('.card')].filter
     return;
   }
   // Buraya düşerse native eklenti YOK → ses web üzerinden çalar; bildirim/kulaklık bu modda olmaz.
-  diag('Native eklenti çalışmıyor (GT yok) — ses web modunda; bildirim/kulaklık bu yüzden yok.');
+  diag('Native eklenti çalışmıyor (GT yok) — ses web modunda; bildirim/kulaklık bu yüzden yok.');OXLOG.add('okuma',{mod:'web',n:cs.length});
   // TARAYICI (fallback): her kelimede önce gömülü mp3, yoksa TTS; sonra GAP bekle.
   if(!synth){stop();return;}
   synth.cancel();

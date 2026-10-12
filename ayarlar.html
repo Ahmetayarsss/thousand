@@ -138,6 +138,8 @@ const PRESETS=[10,20,30,50,100];
 let tt=0;
 function toast(m,ms){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),ms||1800);}
 function fmt(ms){const d=new Date(ms),p=n=>('0'+n).slice(-2);return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear();}
+function when(ms){const d=new Date(ms),p=n=>('0'+n).slice(-2),hm=p(d.getHours())+':'+p(d.getMinutes());
+  return d.toDateString()===new Date().toDateString()?hm:p(d.getDate())+'.'+p(d.getMonth()+1)+' '+hm;}
 function render(){
   const n=SRS.listSize();
   document.getElementById('lval').textContent=n;
@@ -148,8 +150,10 @@ function render(){
   document.getElementById('cheat').classList.toggle('on',!d.noCheat);
   document.getElementById('loop').classList.toggle('on',!!SRS.opt('loop',true));
   document.getElementById('readtr').classList.toggle('on',!!SRS.opt('readTr',false));
-  const kb=Math.max(1,Math.round(OXLOG.size()/1024));
-  document.getElementById('logs').textContent=OXLOG.count().toLocaleString('tr-TR')+' olay · '+kb+' KB · telefonda';
+  const kb=Math.max(1,Math.round(OXLOG.size()/1024)),ld=OXACC.logDurum();
+  // Hesap varsa kayıtlar sunucuya da gider (geliştirici görür); yoksa yalnız telefonda.
+  document.getElementById('logs').textContent=OXLOG.count().toLocaleString('tr-TR')+' olay · '+kb+' KB · '+
+    (!ld?'telefonda':ld.at?'sunucuya gönderildi '+when(ld.at):'sunucuya gönderilecek');
 }
 function setN(v){const n=SRS.setListSize(v);OXLOG.add('ayar',{liste:n});render();toast('Ana sayfada '+n+' kelime');}
 document.getElementById('minus').onclick=()=>setN(SRS.listSize()-5);

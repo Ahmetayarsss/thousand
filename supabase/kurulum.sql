@@ -221,3 +221,100 @@ revoke execute on function public.create_profile(text), public.set_nick(text), p
 grant execute on function public.create_profile(text), public.set_nick(text), public.new_recovery(), public.claim_account(text),
   public.delete_account(), public.push_stats(jsonb), public.push_backup(jsonb), public.get_backup(), public.send_request(text),
   public.respond_request(uuid, boolean), public.cancel_request(uuid), public.remove_friend(uuid), public.dashboard() to authenticated;
+
+-- ================= kullanım kayıtları (geliştirici için) =================
+-- Uygulamanın olay günlüğü (log.js) hesabı olan telefonlardan buraya gelir. Bakmak için:
+-- Table Editor → kayitlar_gorunum (en yeni üstte, Türkiye saati) ya da SQL Editor'de
+--   select * from kayitlar_gorunum limit 200;
+-- Kişi başı 24 saatte en çok ~5000 olay alınır; 60 günden eski kayıtlar her gönderimde azar azar silinir.
+create table if not exists public.kayitlar (
+  id         bigserial primary key,
+  user_id    uuid not null references public.profiles(id) on delete cascade on update cascade,
+  t          timestamptz not null,                  -- olay zamanı (telefon saati)
+  tur        text not null,                         -- olay türü: sayfa, cevap, hata, …
+  veri       jsonb,                                 -- olay ayrıntısı
+  surum      bigint,                                -- web sürümü (web-version.txt)
+  created_at timestamptz not null default now()     -- sunucuya geldiği an
+);
+create index if not exists kayitlar_user_created_idx on public.kayitlar (user_id, created_at);
+create index if not exists kayitlar_created_idx on public.kayitlar (created_at);
+
+-- Telefon başına bir satır: cihaz bilgisi ve alınan son olayın sıra numarası (log.js her olaya sıra verir).
+-- Cevabı kaybolan bir gönderim tekrarlanırsa aynı olaylar ikinci kez yazılmaz.
+create table if not exists public.kayit_cihaz (
+  user_id    uuid not null references public.profiles(id) on delete cascade on update cascade,
+  kimlik     text not null,                         -- log.js'teki rastgele cihaz kimliği
+  cihaz      text,                                  -- tarayıcı/WebView bilgisi (user agent)
+  surum      bigint,
+  son_sira   bigint not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, kimlik)
+);
+
+alter table public.kayitlar    enable row level security;
+alter table public.kayit_cihaz enable row level security;
+revoke all on public.kayitlar, public.kayit_cihaz from anon, authenticated;
+revoke all on sequence public.kayitlar_id_seq from anon, authenticated;
+
+-- p: {kimlik, sira, toplam, surum, cihaz, olaylar: [[ms, tür, veri?], …]}
+--   sira: ilk olayın sıra numarası, toplam: telefondaki son sıra. En çok 500 olay / 256 KB.
+-- Biçimi bozuk olay atlanır, büyük veri kısaltılır. Dönen: yazılan olay sayısı (daha önce alınanlar
+-- ve 24 saatlik sınırı aşanlar sessizce atlanır; telefon bunları tekrar göndermez).
+create or replace function public.push_logs(p jsonb) returns int
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := _me(); ev jsonb := p -> 'olaylar'; n int; kim text; x numeric; s0 bigint; top bigint; sv bigint;
+  son bigint; atla int := 0; hak int; yazilan int;
+begin
+  if p is null or jsonb_typeof(p) <> 'object' or pg_column_size(p) > 262144 then raise exception 'gecersiz'; end if;
+  if ev is null or jsonb_typeof(ev) <> 'array' then raise exception 'gecersiz'; end if;
+  n := jsonb_array_length(ev);
+  if n > 500 then raise exception 'gecersiz'; end if;
+  kim := coalesce(nullif(left(p ->> 'kimlik', 40), ''), '?');
+  x := case when jsonb_typeof(p -> 'sira') = 'number' then (p ->> 'sira')::numeric end;     s0 := case when x between 1 and 1e15 then x end;
+  x := case when jsonb_typeof(p -> 'toplam') = 'number' then (p ->> 'toplam')::numeric end; top := case when x between 0 and 1e15 then x end;
+  x := case when jsonb_typeof(p -> 'surum') = 'number' then (p ->> 'surum')::numeric end;   sv := case when x between 0 and 1e15 then x end;
+
+  -- cihaz satırı (yoksa açılır) kilitlenir: aynı telefondan eşzamanlı iki gönderim sırayla işlenir
+  insert into kayit_cihaz (user_id, kimlik) values (uid, kim) on conflict do nothing;
+  select son_sira into son from kayit_cihaz where user_id = uid and kimlik = kim for update;
+  if s0 is not null then
+    if top is not null and top < son then son := 0; end if;      -- telefondaki sayaç sıfırlanmış: baştan say
+    atla := greatest(0, least(n, son - s0 + 1));                 -- partinin başındaki bu kadar olay zaten alınmış
+    son := greatest(son, s0 + n - 1);
+  end if;
+  update kayit_cihaz set son_sira = son, cihaz = coalesce(left(p ->> 'cihaz', 300), cihaz), surum = coalesce(sv, surum),
+    updated_at = now() where user_id = uid and kimlik = kim;
+
+  -- 24 saatte en çok 5000 olay
+  select greatest(0, 5000 - count(*)) into hak from kayitlar where user_id = uid and created_at > now() - interval '24 hours';
+  insert into kayitlar (user_id, t, tur, veri, surum)
+  select uid, to_timestamp((e ->> 0)::float8 / 1000), e ->> 1,
+         case when jsonb_typeof(e -> 2) is null or jsonb_typeof(e -> 2) = 'null' then null
+              when pg_column_size(e -> 2) > 8192 then jsonb_build_object('kesik', pg_column_size(e -> 2))
+              else e -> 2 end, sv
+  from (select j.e, j.i from jsonb_array_elements(ev) with ordinality as j(e, i)
+        where j.i > atla and case when jsonb_typeof(j.e) <> 'array' then false
+                                  when jsonb_array_length(j.e) not between 2 and 3 then false
+                                  when jsonb_typeof(j.e -> 0) <> 'number' or jsonb_typeof(j.e -> 1) <> 'string' then false
+                                  when (j.e ->> 0)::numeric not between 946684800000 and 4102444800000 then false
+                                  else char_length(j.e ->> 1) between 1 and 40 end
+        order by j.i limit hak) o;
+  get diagnostics yazilan = row_count;
+
+  -- saklama: 60 günden eski kayıtlar (her çağrıda en çok 1000 satır; ücretsiz veritabanı dolmasın)
+  delete from kayitlar where id in
+    (select id from kayitlar where created_at < now() - interval '60 days' order by created_at limit 1000);
+  return yazilan;
+end $$;
+
+-- Geliştiricinin bakacağı görünüm (Supabase panelinde postgres olarak görünür; uygulamadan erişilemez).
+create or replace view public.kayitlar_gorunum with (security_invoker = true) as
+  select date_trunc('second', k.t at time zone 'Europe/Istanbul') as zaman, p.nick, p.code as kod, k.tur, k.veri, k.surum,
+         date_trunc('second', k.created_at at time zone 'Europe/Istanbul') as alindi, k.user_id, k.id
+  from public.kayitlar k join public.profiles p on p.id = k.user_id
+  order by k.t desc, k.id desc;
+revoke all on public.kayitlar_gorunum from anon, authenticated;
+
+revoke execute on function public.push_logs(jsonb) from public, anon;
+grant execute on function public.push_logs(jsonb) to authenticated;

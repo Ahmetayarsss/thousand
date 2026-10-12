@@ -5,6 +5,7 @@
  * takma ad seçer; arkadaş kodu ve kurtarma kodu verilir. Telefon değişince kurtarma koduyla
  * hesap, arkadaşlar ve ilerleme yedeği yeni telefona taşınır.
  * İlerleme özeti (bugün + toplam) dakikada en çok bir kez, yedek arada bir gönderilir.
+ * Kullanım kayıtları (log.js) da hesap varsa sunucuya gider (geliştirici için, sessizce).
  * Sunucu tarafı: supabase/kurulum.sql — yalnız oradaki fonksiyonlar çağrılır.
  */
 window.OXACC = (function () {
@@ -176,6 +177,63 @@ window.OXACC = (function () {
     y = getJ(YKEY, {}) || {}; y.b = h; y.bAt = Date.now(); setJ(YKEY, y);
     return true;
   }
+  // ---------------- kullanım kayıtları → sunucu ----------------
+  // log.js olayları hesap varsa sunucuya da gider (geliştirici Supabase'de kayitlar_gorunum'den bakar).
+  // Her olayın sıra numarası var (OXLOG.sira); gönderilen son sıra burada (GKEY) ve sunucuda cihaz başına
+  // tutulur: cevabı kaybolan parça (ör. sayfa değişirken) tekrar gelirse sunucu ikinci kez yazmaz.
+  // En çok 500 olayluk parçalar. Hatalar sessizdir ve OXLOG'a YAZILMAZ (yoksa kayıt kendini besler);
+  // hata olunca (internet yok, sunucuda fonksiyon henüz yok…) 30 dk sonra yeniden denenir.
+  var GKEY = "ox3000_log_gonder_v1", LOG_PARCA = 500, LOG_BAYT = 100000;
+  var logIs = null, leaving = false;   // leaving: sayfa değişiyor (bu sırada kopan istek hata sayılmaz)
+  try {
+    window.addEventListener("beforeunload", function () { leaving = true; setTimeout(function () { leaving = false; }, 5000); });
+    window.addEventListener("pagehide", function () { leaving = true; });
+    window.addEventListener("pageshow", function () { leaving = false; });
+  } catch (e) {}
+  function bytes(s) { try { return new TextEncoder().encode(s).length; } catch (e) { return s.length * 2; } }
+  function ago(t) { return Math.abs(Date.now() - (t || 0)); }   // saat geri alınsa da takılmasın
+  function pushLogs(force) {
+    if (!logIs) logIs = sendLogs(!!force).catch(function () { return false; }).finally(function () { logIs = null; });
+    return logIs;
+  }
+  async function sendLogs(force) {
+    var L = window.OXLOG;
+    if (!account() || !L || typeof L.sira !== "function") return false;
+    var g = getJ(GKEY, {}) || {};
+    if (!force && ((g.hata && ago(g.hata) < 1800000) || ago(g.at) < 120000)) return false;   // hatadan sonra 30 dk, gönderimler arası 2 dk
+    var top = L.sira(), ev = L.events(), sent = Math.min(+g.s || 0, top);
+    var u = Math.min(top - sent, ev.length);   // gönderilmemiş olaylar: tamponun sonundakiler (baştan silinenler gitmiş olabilir)
+    if (u <= 0) return 0;
+    var list = ev.slice(ev.length - u), first = top - u + 1, i = 0, n = 0;
+    while (i < list.length) {
+      var part = [], size = 0;
+      while (i < list.length && part.length < LOG_PARCA) {
+        var e = list[i], b = bytes(JSON.stringify(e));
+        if (b > 8000) { e = [e[0], e[1], { kesik: b }]; b = 40; }
+        if (part.length && size + b > LOG_BAYT) break;
+        part.push(e); size += b + 1; i++;
+      }
+      var s0 = first + i - part.length;
+      try {
+        await rpc("push_logs", { p: { kimlik: L.uid(), sira: s0, toplam: top, surum: window.OX_WEBVER || null,
+          cihaz: String(navigator.userAgent || "").slice(0, 300), olaylar: part } });
+      } catch (er) {
+        if (!leaving) { g = getJ(GKEY, {}) || {}; g.hata = Date.now(); g.m = String((er && er.message) || "").slice(0, 100); setJ(GKEY, g); }
+        return false;
+      }
+      n += part.length;
+      g = getJ(GKEY, {}) || {}; g.s = s0 + part.length - 1; g.at = Date.now(); delete g.hata; delete g.m; setJ(GKEY, g);
+    }
+    return n;
+  }
+  // Ayarlar için: gönderilmeyi bekleyen olay sayısı, son gönderim (hesap yoksa null).
+  function logDurum() {
+    var L = window.OXLOG;
+    if (!account() || !L || typeof L.sira !== "function") return null;
+    var g = getJ(GKEY, {}) || {}, top = L.sira();
+    return { bekleyen: Math.max(0, Math.min(top - Math.min(+g.s || 0, top), L.count())), at: g.at || 0, hata: g.hata || 0 };
+  }
+
   var syncTimer = 0;
   function syncSoon(force, withBackup) {
     if (!account()) return;
@@ -185,12 +243,13 @@ window.OXACC = (function () {
       if (withBackup) pushBackup(false).catch(function (e) { if (!e.net) log("hesap_hata", { f: "yedek", m: String(e.message).slice(0, 120) }); });
     }, force ? 300 : 1500);
   }
-  // Uygulama arka plana geçince: özeti ve (değiştiyse) yedeği gönder.
+  // Uygulama arka plana geçince (ya da sayfa değişince): özeti, (değiştiyse) yedeği ve yeni kayıtları gönder.
   try {
     document.addEventListener("visibilitychange", function () {
       if (document.hidden && account()) {
         pushStats(false).catch(function () {});
         pushBackup(false).catch(function () {});
+        if (!leaving) pushLogs(false);   // sayfa değişirken değil: yeni sayfa açılınca gerekirse gönderir
       }
     });
   } catch (e) {}
@@ -304,13 +363,20 @@ window.OXACC = (function () {
   }
   function askRecover(done) { stepRecover(done); }
 
-  // Sayfa açılınca: hesap varsa özeti (gerekirse) gönder.
-  try { setTimeout(function () { if (account()) syncSoon(false, false); }, 2000); } catch (e) {}
+  // Sayfa açılınca: hesap varsa özeti (gerekirse), son gönderimden 10 dk geçtiyse kayıtları gönder.
+  try {
+    setTimeout(function () {
+      if (!account()) return;
+      syncSoon(false, false);
+      if (ago((getJ(GKEY, {}) || {}).at) > 600000) pushLogs(false);
+    }, 2000);
+  } catch (e) {}
 
   return {
     account: account, onboard: onboard, askRecover: askRecover, close: close,
     create: create, claim: claim, restore: restore, setNick: setNick, newRecovery: newRecovery, deleteAccount: deleteAccount,
     stats: stats, todayStr: todayStr, pushStats: pushStats, pushBackup: pushBackup, syncSoon: syncSoon,
+    pushLogs: pushLogs, logDurum: logDurum,
     dashboard: dashboard, cachedDashboard: cachedDashboard, sendRequest: sendRequest, respond: respond,
     cancel: cancel, removeFriend: removeFriend, errText: errText, esc: esc, fmtRec: fmtRec
   };

@@ -1,6 +1,8 @@
 /*
- * log.js — Cihazda kullanım kaydı (olay günlüğü). Sunucu yok: kayıtlar telefonda
- * birikir, Ayarlar'dan dosya olarak dışa aktarılır (geliştirme için).
+ * log.js — Kullanım kaydı (olay günlüğü). Olaylar telefonda birikir; hesap varsa hesap.js
+ * bunları arada bir sunucuya da gönderir (Supabase: kayitlar tablosu — geliştirici
+ * kayitlar_gorunum'den bakar), hesap yoksa yalnız telefonda kalır. Ayarlar → Destek'ten
+ * dosya olarak da dışa aktarılır (geliştirme için).
  *
  * Her olay: [zaman(ms), tür, veri?]. Türler:
  *   sayfa {p}             sayfa açıldı
@@ -8,18 +10,30 @@
  *   sinav_bas {rev,nw,yz} Sınav başladı       cevap {k, y, ok, b, ms, yz, g?}
  *   sinav_bit {n,ok,tum}  Sınav bitti/bırakıldı
  *   hile {n}              hızlı cevap tespiti
+ *   okuma {…}             Listeyi oku         okuma_hata {m}
+ *   hesap {a}             hesap işlemi        hesap_hata {f, m}
  *   ayar {...}            ayar değişti        dev {a}        geliştirici işlemi
  *   hata {m, f, l}        yakalanmamış JS hatası
- * En fazla MAX olay tutulur (eskiler silinir). Kimlik: rastgele, anonim.
+ * En fazla MAX olay tutulur (eskiler silinir). Her olayın bir sıra numarası var: sira() şimdiye
+ * dek eklenen olay sayısı (silinenler dahil), son olayın numarası budur; sunucuya hangi olayların
+ * gittiği bununla izlenir. Kimlik: rastgele, anonim (cihaz kimliği).
  */
 (typeof window !== "undefined" ? window : globalThis).OXLOG = (function () {
-  var KEY = "ox3000_log_v1", UIDK = "ox3000_uid", MAX = 5000, buf = null;
+  var KEY = "ox3000_log_v1", UIDK = "ox3000_uid", SEQK = "ox3000_log_sira", MAX = 5000, buf = null, seq = -1;
 
   function load() {
     if (buf) return buf;
     try { buf = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { buf = []; }
     if (!Array.isArray(buf)) buf = [];
     return buf;
+  }
+  // Son olayın sıra numarası (= şimdiye dek eklenen olay sayısı). Sayaç yoksa (eski sürüm) eldeki olay sayısı.
+  function sira() {
+    if (seq >= 0) return seq;
+    var n = 0;
+    try { n = parseInt(localStorage.getItem(SEQK), 10) || 0; } catch (e) {}
+    seq = Math.max(n, load().length);
+    return seq;
   }
   function uid() {
     try {
@@ -30,14 +44,16 @@
   }
   function add(type, data) {
     try {
-      var b = load(), e = [Date.now(), type];
+      var b = load(), s = sira() + 1, e = [Date.now(), type];
       if (data != null) e.push(data);
-      b.push(e);
+      b.push(e); seq = s;
       if (b.length > MAX) b.splice(0, b.length - MAX);
       localStorage.setItem(KEY, JSON.stringify(b));
+      localStorage.setItem(SEQK, String(s));
     } catch (e) {}
   }
   function count() { return load().length; }
+  function events() { return load(); }   // salt okunur (hesap.js sunucuya gönderirken)
   function size() { try { return (localStorage.getItem(KEY) || "").length; } catch (e) { return 0; } }
   function clear() { buf = []; try { localStorage.removeItem(KEY); } catch (e) {} }
 
@@ -95,6 +111,8 @@
   // Sayfa açılışı + yakalanmamış hatalar otomatik kaydedilir.
   try {
     if (typeof window !== "undefined" && window.addEventListener) {
+      // Geri tuşuyla önbellekten dönen sayfa eski kopyayı yazmasın (arada başka sayfalar olay ekledi).
+      window.addEventListener("pageshow", function (e) { if (e.persisted) { buf = null; seq = -1; } });
       add("sayfa", { p: (location.pathname.split("/").pop() || "index.html").replace(".html", "") });
       window.addEventListener("error", function (e) {
         add("hata", { m: String(e.message || "").slice(0, 200), f: String(e.filename || "").split("/").pop(), l: e.lineno || 0 });
@@ -105,5 +123,6 @@
     }
   } catch (e) {}
 
-  return { add: add, count: count, size: size, clear: clear, snapshot: snapshot, exportFile: exportFile, copy: copy, uid: uid };
+  return { add: add, count: count, size: size, clear: clear, snapshot: snapshot, exportFile: exportFile, copy: copy, uid: uid,
+           sira: sira, events: events };
 })();

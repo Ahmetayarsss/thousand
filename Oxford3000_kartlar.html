@@ -183,9 +183,11 @@ let slots=[],topFlip=null,busy=false;   // slots[0]=en üstteki aktif kart; busy
 function setSecLabel(){const lv=SRS.topLevel();document.getElementById('seclabel').textContent=SRS.inCycle()+(lv?' · '+lv:'');}
 // Çubuk: Test'te çalışılan oranı, Sınav'da turun ilerleyişi.
 function drawBar(){let p=0;
-  if(mode==='test'){const t=testTotal,doneN=Math.max(0,t-queue.length);p=t?doneN/t:0;}
+  if(mode==='test'){const t=testTotal,doneN=Math.max(0,t-testLeft());p=t?doneN/t:0;}
   else p=examList.length?Math.min(1,examIdx/examList.length):0;
   document.getElementById('bar').innerHTML=`<i style="width:${p*100}%;background:var(--green)"></i>`;}
+// Test'te kalan: üstteki kart dahil (başta = listenin tamamı).
+function testLeft(){return queue.length+(cur?1:0);}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function dirFor(){return Math.random()<0.5?'tr2en':'en2tr';}
 // Çevirme yönü: rastgele eksen (yatay Y / dikey X) + işaret → her çevirme farklı yöne.
@@ -265,7 +267,7 @@ function buildDeck(){
   tPrompt=performance.now();refreshStatus();
 }
 function refreshStatus(){drawBar();const c=document.getElementById('counter');
-  if(mode==='test'){c.textContent=queue.length+' kaldı';return;}
+  if(mode==='test'){c.textContent=testLeft()+' kaldı';return;}
   c.textContent=(examIdx<revCount)?'Tekrar '+(examIdx+1)+'/'+revCount:'Yeni '+(examIdx-revCount+1)+'/'+(examList.length-revCount);
 }
 

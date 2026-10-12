@@ -9,8 +9,6 @@
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 body{min-height:100vh}
 .wrap{max-width:600px;margin:0 auto;padding:4px 14px calc(24px + env(safe-area-inset-bottom))}
-.up{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:800;padding:6px 20px 8px}
-.up span{font-size:20px;line-height:1}
 h1{font-size:20px;font-weight:800;margin:4px 0 12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 20px rgba(20,30,50,.06);padding:16px;margin-bottom:14px}
 .card h2{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;margin:0 0 12px;display:flex;align-items:center;gap:8px}
@@ -47,6 +45,7 @@ h1{font-size:20px;font-weight:800;margin:4px 0 12px}
 .fr .idle{color:var(--muted)}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:8px 0 4px;line-height:1.5}
 .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:4px}
+.foot:empty{display:none}
 .hidden{display:none}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;max-width:92%;text-align:center}
 .toast.show{opacity:1}
@@ -54,7 +53,6 @@ h1{font-size:20px;font-weight:800;margin:4px 0 12px}
 <script src="updater.js"></script><script src="tts-bridge.js"></script><script>(function(){var N='',P='',U='sozluk.html',D='';var x0=0,y0=0,t0=0,ok=false,top=false,bot=false;addEventListener('touchstart',function(e){if(e.touches.length!==1){ok=false;return;}var el=e.target;if(el.closest&&el.closest('input,select,button,a,textarea')){ok=false;return;}var t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=true;var se=document.scrollingElement||document.documentElement;top=se.scrollTop<=0;bot=se.scrollTop+innerHeight>=se.scrollHeight-2;},{passive:true});addEventListener('touchend',function(e){if(!ok)return;ok=false;var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;if(Date.now()-t0>800)return;if(Math.abs(dy)>=90&&Math.abs(dy)>Math.abs(dx)*1.8){if(dy>0&&U&&top)location.href=U;else if(dy<0&&D&&bot)location.href=D;return;}if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});})();</script></head>
 <body>
 <div class="wrap">
-  <a class="up" href="sozluk.html"><span>⌃</span>Sözlük</a>
   <h1>Arkadaşlar</h1>
 
   <div id="noacc" class="card hidden">
@@ -103,10 +101,9 @@ function toast(m,ms){const t=$('toast');t.textContent=m;t.classList.add('show');
 function ago(iso){if(!iso)return '';const s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
   if(s<90)return 'az önce';if(s<3600)return Math.round(s/60)+' dk önce';if(s<86400)return Math.round(s/3600)+' sa önce';
   const d=Math.round(s/86400);return d+' gün önce';}
-function hm(ms){const d=new Date(ms),p=n=>('0'+n).slice(-2);return p(d.getHours())+':'+p(d.getMinutes());}
 const n=x=>(x|0).toLocaleString('tr-TR');
 
-function render(d,fromCache){
+function render(d,offline){
   const a=OXACC.account();
   $('noacc').classList.toggle('hidden',!!a);$('main').classList.toggle('hidden',!a);
   if(!a)return;
@@ -133,7 +130,7 @@ function render(d,fromCache){
   $('outcard').classList.toggle('hidden',!out.length);
   $('outgoing').innerHTML=out.map(r=>`<div class="row"><div><div class="n">${esc(r.nick)}</div><div class="s">${esc(r.code)} · ${ago(r.at)} · cevap bekleniyor</div></div>
     <div class="btns"><button class="btn ghost" data-cancel="${esc(r.id)}">Geri çek</button></div></div>`).join('');
-  $('foot').textContent=(fromCache?'Bağlantı yok · ':'')+'Son güncelleme '+hm(d.at||Date.now())+' · dakikada bir yenilenir';
+  $('foot').textContent=offline?'Bağlantı yok':'';
 }
 
 let busy=false;
@@ -174,7 +171,7 @@ $('share').onclick=async()=>{const c=$('mycode').textContent,txt='Oxford 3000\'d
   try{await navigator.clipboard.writeText(txt);toast('Davet metni kopyalandı, istediğin yere yapıştır.');}catch(e){copyCode();}};
 $('mk').onclick=()=>OXACC.onboard(true,()=>refresh());
 
-render(OXACC.cachedDashboard(),true);
+render(OXACC.cachedDashboard(),false);
 if(!OXACC.account())OXACC.onboard(true,()=>refresh());
 refresh();
 setInterval(()=>{if(!document.hidden)refresh();},60000);

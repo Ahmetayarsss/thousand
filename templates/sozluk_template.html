@@ -29,10 +29,6 @@ header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdro
 .tr{color:var(--tr);font-size:15px;margin-top:4px}
 .en{color:#33414F;font-size:13.5px;margin-top:4px}
 .ex{color:#5B6B7B;font-size:13.5px;font-style:italic;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
-.wrap{min-height:100vh;display:flex;flex-direction:column}
-.downlink{margin-top:auto;align-self:center;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:800;padding:18px 20px 4px}
-.downlink span.ch{font-size:20px;line-height:1}
-.downlink .bdg{background:#D9544D;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px}
 </style><script src="log.js"></script><script src="hesap.js"></script></head><body><div class="wrap">
 <header>
   <div class="title">Sözlük</div>
@@ -40,7 +36,6 @@ header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdro
 </header>
 <div id="hint" class="hint"><span class="big">📖</span></div>
 <div id="list"></div>
-<a class="downlink" href="arkadaslar.html"><span>Arkadaşlar<span class="bdg" id="frbdg" style="display:none"></span></span><span class="ch">⌄</span></a>
 </div>
 <script>
 const GROUPS=__GROUPS_JSON__;
@@ -96,6 +91,5 @@ function render(){
 }
 document.getElementById('q').addEventListener('input',render);
 // Arkadaşlar bağlantısında bekleyen istek sayısı (son bilinen)
-(function(){const d=OXACC.cachedDashboard(),n=(d&&d.incoming)?d.incoming.length:0,b=document.getElementById('frbdg');if(n){b.textContent=n;b.style.display='';}})();
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
 </script></body></html>

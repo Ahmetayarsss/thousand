@@ -167,10 +167,31 @@ t("liste sayısı ayarı: sınırlar, varsayılan 100, değişince tur sıfırla
 t("geliştirici: gün kaydırma vadeyi öne çeker", () => {
   S.answer(k1, false, null);                                                  // bugün, kutu 1
   assert.strictEqual(S.isDue(k1), false);
-  S.setDev({ off: 1 });
+  S.setDev({ on: true, off: 1 });
   assert.strictEqual(S.isDue(k1), true);
   assert.strictEqual(S.today(), S.today(Date.now()) + 1);
-  S.setDev({ off: 0 });
+  S.setDev({ on: false, off: 0 });
+});
+
+t("geliştirici: mod kapalıyken gün kaydırma ve hile ayarı yok sayılır, açılınca geri gelir", () => {
+  const near = (a, b) => Math.abs(a - b) < 1000;
+  S.answer(k1, false, null);                                                  // bugün, kutu 1 (vade yarın)
+  localStorage.setItem("ox3000_dev_v1", JSON.stringify({ off: 3, noCheat: true }));   // eski sürümden kalan ("on" yok)
+  assert.deepStrictEqual(S.dev(), { on: false, off: 0, noCheat: false });
+  assert.ok(near(S.now(), Date.now()));
+  assert.strictEqual(S.today(), S.today(Date.now()));
+  assert.strictEqual(S.isDue(k1), false);
+  S.setDev({ on: true });                                                     // açılınca kayıtlı değerler geçerli
+  assert.deepStrictEqual(S.dev(), { on: true, off: 3, noCheat: true });
+  assert.ok(near(S.now(), Date.now() + 3 * D));
+  assert.strictEqual(S.isDue(k1), true);
+  S.setDev({ on: false });                                                    // kapatınca yine yok sayılır, değerler silinmez
+  assert.deepStrictEqual(S.dev(), { on: false, off: 0, noCheat: false });
+  assert.ok(near(S.now(), Date.now()));
+  assert.deepStrictEqual(JSON.parse(localStorage.getItem("ox3000_dev_v1")), { on: false, off: 3, noCheat: true });
+  S.setDev({ on: true });
+  assert.deepStrictEqual(S.dev(), { on: true, off: 3, noCheat: true });
+  S.setDev({ on: false, off: 0, noCheat: false });
 });
 
 t("günlük özet: cevap, doğru ve yeni sayıları", () => {

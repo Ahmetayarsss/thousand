@@ -42,10 +42,13 @@
     return a;
   }
 
-  // Geliştirici modu (geçici): off = gün kaydırma (test için "1 gün ileri sar"),
-  // noCheat = hile tespiti kapalı.
-  function dev() { var d = getJ(DEVK, {}) || {}; return { off: d.off | 0, noCheat: !!d.noCheat }; }
-  function setDev(p) { var d = dev(); for (var k in p) d[k] = p[k]; setJ(DEVK, d); }
+  // Geliştirici modu: on = açık (kullanıcılardan gizli; Ayarlar başlığına 7 kez hızlıca
+  // dokununca açılır/kapanır), off = gün kaydırma (test için "1 gün ileri sar"),
+  // noCheat = hile tespiti kapalı. Mod kapalıyken off ve noCheat yok sayılır (gerçek
+  // tarih, hile tespiti açık); kayıtlı değerler durur, mod yeniden açılınca geçerli olur.
+  function devStored() { var d = getJ(DEVK, {}) || {}; return { on: !!d.on, off: d.off | 0, noCheat: !!d.noCheat }; }
+  function dev() { var d = devStored(); return d.on ? d : { on: false, off: 0, noCheat: false }; }
+  function setDev(p) { var d = devStored(); for (var k in p) d[k] = p[k]; setJ(DEVK, d); }
   function nowMs() { return Date.now() + dev().off * DAYMS; }
 
   // Genel ayarlar (ox3000_settings_v1): opt("loop", true), opt("readTr", false) …

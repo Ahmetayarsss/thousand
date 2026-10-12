@@ -1,4 +1,6 @@
--- Oxford 3000 · Arkadaşlar — Supabase SQL Editor'de BİR KEZ çalıştırın (tekrar çalıştırmak da güvenli).
+-- Oxford 3000 · Arkadaşlar, yedek, kullanım kayıtları, bildirimler — Supabase SQL Editor'de çalıştırın.
+-- Tekrar çalıştırmak güvenli: tablolar ve veriler korunur, fonksiyonlar güncellenir. Dosya değişince
+-- (yeni sürüm) tamamını yeniden çalıştırın.
 -- Tablolara doğrudan erişim kapalı (RLS açık, politika yok); uygulama yalnız aşağıdaki fonksiyonları çağırır.
 
 create extension if not exists pgcrypto with schema extensions;
@@ -103,7 +105,8 @@ begin
 end $$;
 
 -- Yeni telefonda: kurtarma koduyla eski hesabı bu girişe taşı (arkadaşlar ve yedek de gelir).
--- Bu telefonda yeni açılmış bir hesap varsa o silinir.
+-- Bu telefonda yeni açılmış bir hesap varsa o silinir. Eski telefonun bildirim anahtarı geçersiz olur
+-- (bildirim_hash: aşağıda, bildirimler bölümünde); yeni telefon kendine yenisini alır.
 create or replace function public.claim_account(p_recovery text) returns json
 language plpgsql security definer set search_path = public, extensions as $$
 declare uid uuid := auth.uid(); old profiles;
@@ -113,7 +116,7 @@ begin
   if not found then return json_build_object('ok', false); end if;
   if old.id = uid then return json_build_object('ok', true, 'nick', old.nick, 'code', old.code); end if;
   delete from profiles where id = uid;
-  update profiles set id = uid, last_seen = now() where id = old.id;
+  update profiles set id = uid, last_seen = now(), bildirim_hash = null where id = old.id;
   return json_build_object('ok', true, 'nick', old.nick, 'code', old.code);
 end $$;
 
@@ -318,3 +321,39 @@ revoke all on public.kayitlar_gorunum from anon, authenticated;
 
 revoke execute on function public.push_logs(jsonb) from public, anon;
 grant execute on function public.push_logs(jsonb) to authenticated;
+
+-- ================= bildirimler (uygulama kapalıyken arkadaşlık isteği) =================
+-- Telefon arka planda (~15 dk'da bir) bildirim_kontrol'ü çağırır. Oturum (JWT) uygulamanın içinde kalır;
+-- arka plan için hesaba özel ayrı bir bildirim anahtarı kullanılır, sunucuda yalnız özeti (sha256) durur.
+alter table public.profiles add column if not exists bildirim_hash text;
+create unique index if not exists profiles_bildirim_hash_key on public.profiles (bildirim_hash);
+
+-- Yeni anahtar (200 bit) üret; eskisi geçersiz olur. Dönen: {anahtar} (yalnız burada görünür).
+create or replace function public.bildirim_anahtari() returns json
+language plpgsql security definer set search_path = public, extensions as $$
+declare uid uuid := _me(); s text := _rand_code(40);
+begin
+  update profiles set bildirim_hash = _hash(s) where id = uid;
+  return json_build_object('anahtar', s);
+end $$;
+
+-- Arka plan kontrolü (giriş gerekmez, anahtar yeter): p_sonra'dan sonra gelen istekler (en yeni önce,
+-- en çok 5) ve bekleyen istek sayısı. Anahtar bilinmiyorsa {ok:false} (telefon kontrolü bırakır).
+create or replace function public.bildirim_kontrol(p_anahtar text, p_sonra timestamptz default null) returns json
+language plpgsql stable security definer set search_path = public as $$
+declare uid uuid;
+begin
+  if p_anahtar is null or char_length(p_anahtar) not between 20 and 100 then return json_build_object('ok', false); end if;
+  select id into uid from profiles where bildirim_hash = _hash(p_anahtar);
+  if uid is null then return json_build_object('ok', false); end if;
+  return json_build_object('ok', true,
+    'yeni', coalesce((select json_agg(json_build_object('nick', x.nick, 'at', x.created_at) order by x.created_at desc)
+                      from (select p.nick, r.created_at from friend_requests r join profiles p on p.id = r.from_id
+                            where r.to_id = uid and (p_sonra is null or r.created_at > p_sonra)
+                            order by r.created_at desc limit 5) x), '[]'::json),
+    'bekleyen', (select count(*) from friend_requests where to_id = uid));
+end $$;
+
+revoke execute on function public.bildirim_anahtari(), public.bildirim_kontrol(text, timestamptz) from public, anon;
+grant execute on function public.bildirim_anahtari() to authenticated;
+grant execute on function public.bildirim_kontrol(text, timestamptz) to anon, authenticated;

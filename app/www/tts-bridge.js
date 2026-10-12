@@ -10,6 +10,9 @@
  *
  * Bu script <head>'e konur; sayfa sonundaki `const synth=window.speechSynthesis`
  * yakalamasından ÖNCE çalışır.
+ *
+ * Ayrıca (her uygulama sayfasında yüklendiği için): bildirime dokununca ilgili sayfaya geçiş
+ * ("Listeyi oku" → ana sayfa, arkadaşlık isteği → Arkadaşlar).
  */
 (function () {
   var Cap = window.Capacitor;
@@ -21,6 +24,23 @@
     var p = location.pathname.split("/").pop() || "index.html";
     if (p !== "index.html") location.href = "index.html";
   });
+  // Arkadaşlık isteği bildirimine dokununca o sayfaya (arkadaslar.html) geç. Uygulama kapalıydıysa sayfa
+  // açılırken launchTarget() verir, açıktıysa MainActivity "oxHedef" olayı gönderir; hedef native'de bir kez
+  // verilip silindiğinden sayfaya bir kez gidilir. Güncelleyici başka pakete yönlendiriyorsa orada bakılır.
+  var BL = Cap.Plugins && Cap.Plugins.Bildirim;
+  if (BL && typeof BL.launchTarget === "function") {
+    var hedef = function () {
+      if (window.OX_YONLENDIR) return;
+      Promise.resolve(BL.launchTarget()).then(function (r) {
+        var p = r && r.sayfa, cur = location.pathname.split("/").pop() || "index.html";
+        if (!p || !/^[a-z0-9_-]+\.html$/i.test(p)) return;
+        try { if (window.OXLOG) OXLOG.add("bildirim", { a: "ac", p: p.replace(".html", "") }); } catch (e) {}
+        if (cur !== p) location.href = p;
+      }).catch(function () {});
+    };
+    window.addEventListener("oxHedef", hedef);
+    hedef();
+  }
   var TTS = (Cap.Plugins && Cap.Plugins.TextToSpeech) ||
             (typeof Cap.registerPlugin === "function" && Cap.registerPlugin("TextToSpeech"));
   if (!TTS) return; // Eklenti yoksa Web Speech'e bırak.

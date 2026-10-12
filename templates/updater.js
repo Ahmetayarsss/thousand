@@ -36,6 +36,7 @@
       if (u && u.ver && u.base) {
         if (u.ver > VER && !inUpdate) {
           var page = location.pathname.split("/").pop() || "index.html";
+          window.OX_YONLENDIR = 1;   // bu sayfa terk ediliyor (tts-bridge bildirim hedefine yenisinde baksın)
           location.replace(u.base + page + location.search + location.hash);
           return;
         }

@@ -6,6 +6,7 @@
  * hesap, arkadaşlar ve ilerleme yedeği yeni telefona taşınır.
  * İlerleme özeti (bugün + toplam) dakikada en çok bir kez, yedek arada bir gönderilir.
  * Kullanım kayıtları (log.js) da hesap varsa sunucuya gider (geliştirici için, sessizce).
+ * Telefonda (yeni APK) arkadaşlık isteği gelince uygulama kapalıyken de bildirim gösterilir (Bildirim eklentisi).
  * Sunucu tarafı: supabase/kurulum.sql — yalnız oradaki fonksiyonlar çağrılır.
  */
 window.OXACC = (function () {
@@ -64,7 +65,11 @@ window.OXACC = (function () {
     }
     var ns = await signIn(), a = account();
     if (a && a.recovery) {
-      try { await http("/rest/v1/rpc/claim_account", { p_recovery: a.recovery }, ns.at); log("hesap", { a: "oturum_yenilendi" }); } catch (e) {}
+      try {
+        var cr = await http("/rest/v1/rpc/claim_account", { p_recovery: a.recovery }, ns.at);
+        log("hesap", { a: "oturum_yenilendi" });
+        if (cr && cr.ok) setTimeout(function () { bildirimHesapDegisti(true); }, 0);   // eski bildirim anahtarı geçersiz oldu
+      } catch (e) {}
     }
     return ns;
   }
@@ -96,6 +101,7 @@ window.OXACC = (function () {
     setJ(AKEY, a);
     log("hesap", { a: "olustur" });
     syncSoon(true);
+    bildirimHesapDegisti(true);   // yeni hesap: yeni bildirim anahtarı
     return a;
   }
   // Yeni telefonda kurtarma koduyla eski hesabı al; yedek varsa döner (restore ile yazılır).
@@ -105,6 +111,7 @@ window.OXACC = (function () {
     var a = { nick: r.nick, code: r.code, recovery: fmtRec(code), at: Date.now() };
     setJ(AKEY, a);
     setJ(YKEY, {});
+    bildirimHesapDegisti(true);   // taşınan hesabın eski bildirim anahtarı sunucuda silindi: bu telefona yenisi
     var b = null;
     try { b = await rpc("get_backup", {}); } catch (e) {}
     log("hesap", { a: "kurtar", yedek: b ? 1 : 0 });
@@ -134,6 +141,9 @@ window.OXACC = (function () {
     await rpc("delete_account", {});
     [SKEY, AKEY, YKEY, PKEY].forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
     log("hesap", { a: "sil" });
+    var B = nplug();
+    if (B && typeof B.disable === "function") { try { await B.disable(); } catch (e) {} }
+    nset(function (x) { delete x.anahtar; delete x.hata; });
   }
 
   // ---------------- ilerleme özeti + yedek ----------------
@@ -254,10 +264,110 @@ window.OXACC = (function () {
     });
   } catch (e) {}
 
+  // ---------------- bildirimler (uygulama kapalıyken arkadaşlık isteği) ----------------
+  // Native Bildirim eklentisi (yeni APK) arka planda ~15 dk'da bir sunucuya sorar (WorkManager). Uygulamanın
+  // oturumu (JWT) yerine hesaba özel bir bildirim anahtarı kullanılır: bildirim_anahtari ile alınır, burada
+  // saklanır, configure ile native'e verilir. Tarayıcıda, eski APK'da, internet yokken ya da sunucuda fonksiyon
+  // henüz yokken her şey sessizce atlanır (hata olursa 30 dk sonra, sonraki açılışta yeniden denenir).
+  var NKEY = "ox3000_bildirim_v1";   // {anahtar, kapali: {arkadas: true}, izin: 1 (bir kez soruldu), hata: ms}
+  function nativeMi() { try { var C = window.Capacitor; return !!(C && C.isNativePlatform && C.isNativePlatform()); } catch (e) { return false; } }
+  function nplug() { try { return (nativeMi() && window.Capacitor.Plugins && window.Capacitor.Plugins.Bildirim) || null; } catch (e) { return null; } }
+  function nget() { var n = getJ(NKEY, {}); return (n && typeof n === "object") ? n : {}; }
+  function nset(f) { var n = nget(); f(n); setJ(NKEY, n); return n; }
+  function nflag(v) { try { if (v) sessionStorage.setItem("oxbil_kur", "1"); else sessionStorage.removeItem("oxbil_kur"); } catch (e) {} }
+  // Gelen isteklerin en yenisinin zamanı (sunucunun metni aynen: native ondan yenilerini sorar).
+  function sonIstek(d) {
+    var m = null;
+    ((d && d.incoming) || []).forEach(function (r) { if (r && r.at && (!m || Date.parse(r.at) > Date.parse(m))) m = r.at; });
+    return m;
+  }
+  function sessiz(p) { try { if (p && p.catch) p.catch(function () {}); } catch (e) {} return p; }   // native sözü: hata yutulur
+  var nIs = null;
+  // Kur: anahtar yoksa (ya da yeni=true) sunucudan al, native'e ver. Aynı anda tek: sonraki çağrı sıraya girer.
+  function bildirimKur(yeni) {
+    var run = function () { return kur(!!yeni); };
+    var me = (nIs ? nIs.then(run, run) : run()).catch(function () { return false; });
+    nIs = me; me.then(function () { if (nIs === me) nIs = null; });
+    return me;
+  }
+  async function kur(yeni) {
+    var B = nplug();
+    if (!B || typeof B.configure !== "function" || !account()) return false;
+    var n = nget();
+    if (n.kapali && n.kapali.arkadas) { sessiz(B.disable()); nflag(true); return false; }   // kullanıcı kapattı
+    if (yeni || !n.anahtar) {
+      if (!yeni && n.hata && ago(n.hata) < 1800000) return false;
+      var r;
+      try { r = await rpc("bildirim_anahtari", {}); }
+      catch (e) { nset(function (x) { x.hata = Date.now(); }); return false; }   // ör. kurulum.sql henüz çalıştırılmadı
+      if (!r || !r.anahtar) return false;
+      n = nset(function (x) { x.anahtar = r.anahtar; delete x.hata; });
+    }
+    var res = await B.configure({ url: URL, key: KEY, secret: n.anahtar, son: sonIstek(cachedDashboard()) });
+    if (res && res.gecersiz) {   // sunucu bu anahtarı artık tanımıyor (hesap taşındı): yenisini al (bir kez)
+      nset(function (x) { delete x.anahtar; });
+      return yeni ? false : kur(true);
+    }
+    nflag(true);
+    return true;
+  }
+  // Hesap açıldı / taşındı / oturum kurtarma koduyla yenilendi: (gerekirse yeni anahtarla) yeniden kur.
+  function bildirimHesapDegisti(yeniAnahtar) {
+    if (yeniAnahtar) nset(function (x) { delete x.anahtar; });
+    nflag(false);
+    bildirimKur(!!yeniAnahtar);
+  }
+  // Uygulamada görülen en yeni istek: native aynı isteği bildirmesin.
+  function bildirimGordu(d) {
+    var B = nplug(), s = sonIstek(d);
+    if (B && s && typeof B.seen === "function") { try { sessiz(B.seen({ son: s })); } catch (e) {} }
+  }
+  // Bildirim izni: hesap açılınca bir kez, karar verilmemişse sorulur (Android 13+).
+  async function izinIlk() {
+    var B = nplug();
+    if (!B || typeof B.permission !== "function" || nget().izin) return;
+    nset(function (x) { x.izin = 1; });
+    try {
+      var p = await B.permission();
+      if (p && p.display === "prompt") { var q = await B.requestPermission(); log("bildirim", { a: "izin", d: q && q.display }); }
+    } catch (e) {}
+  }
+  // Ayarlar → "İzin ver": sorulabiliyorsa sor, değilse telefonun bildirim ayarlarını aç.
+  async function bildirimIzinIste() {
+    var B = nplug();
+    if (!B || typeof B.permission !== "function") return null;
+    nset(function (x) { x.izin = 1; });
+    try {
+      var p = await B.permission(), d = p && p.display;
+      if (d === "prompt") { var q = await B.requestPermission(); d = q && q.display; log("bildirim", { a: "izin", d: d }); }
+      else if (d !== "granted" && typeof B.openSettings === "function") await B.openSettings();
+      return d;
+    } catch (e) { return null; }
+  }
+  // Ayarlar kartı için durum. native: telefonda mı; var: eklenti var mı (yeni APK); acik: tür → açık mı.
+  async function bildirimDurum() {
+    var B = nplug(), k = nget().kapali || {}, izin = null;
+    if (B && typeof B.permission === "function") { try { var p = await B.permission(); izin = p && p.display; } catch (e) {} }
+    return { native: nativeMi(), var: !!B, hesap: !!account(), izin: izin, acik: { arkadas: !k.arkadas } };
+  }
+  // Ayarlar: bir bildirim türünü aç/kapat (şimdilik "arkadas"; ileride hatırlatıcılar da buraya).
+  async function bildirimAyarla(tur, acik) {
+    nset(function (x) { x.kapali = x.kapali || {}; if (acik) delete x.kapali[tur]; else x.kapali[tur] = true; });
+    log("ayar", { bildirim: tur, acik: acik ? 1 : 0 });
+    var B = nplug();
+    if (!B) return false;
+    if (tur === "arkadas") {
+      if (!acik) { try { await B.disable(); } catch (e) {} return true; }
+      await bildirimKur(false);
+      try { var p = await B.permission(); if (p && p.display === "prompt") await bildirimIzinIste(); } catch (e) {}
+    }
+    return true;
+  }
+
   // ---------------- arkadaşlar ----------------
   async function dashboard() {
     var d = await rpc("dashboard", {});
-    if (d) { d.at = Date.now(); setJ(PKEY, d); }
+    if (d) { d.at = Date.now(); setJ(PKEY, d); bildirimGordu(d); }
     return d;
   }
   function cachedDashboard() { return getJ(PKEY, null); }
@@ -334,7 +444,7 @@ window.OXACC = (function () {
       '<p>Telefonunu değiştirirsen hesabını, arkadaşlarını ve ilerlemeni bu kodla geri alırsın. ' +
       '<b>Ekran görüntüsü al</b> ya da bir yere yaz. Ayarlar\'da da görebilirsin.</p>' +
       '<button id="oxok">Kaydettim</button>');
-    b.querySelector("#oxok").onclick = function () { close(); if (done) done(a); };
+    b.querySelector("#oxok").onclick = function () { close(); izinIlk(); if (done) done(a); };
   }
   function stepRecover(done) {
     var b = el('<h2>Hesabını geri al</h2><p>Kurtarma kodunu yaz (ör. ABCD-EFGH-JKLM).</p>' +
@@ -353,7 +463,9 @@ window.OXACC = (function () {
         el('<h2>Tekrar hoş geldin, ' + esc(r.account.nick) + '!</h2><p>' +
           (r.backup ? "Hesabın, arkadaşların ve ilerlemen geri geldi." : "Hesabın ve arkadaşların geri geldi.") +
           '</p><button id="oxok">Devam</button>').querySelector("#oxok").onclick = function () {
-          close(); if (r.backup) location.reload(); else if (done) done(r.account);
+          close();
+          if (r.backup) { try { sessionStorage.setItem("oxbil_izin", "1"); } catch (e) {} location.reload(); }   // izin yenilenen sayfada sorulur
+          else { izinIlk(); if (done) done(r.account); }
         };
       }).catch(function (e) { go.disabled = false; go.textContent = "Tekrar dene"; er.textContent = errText(e); });
     }
@@ -363,12 +475,17 @@ window.OXACC = (function () {
   }
   function askRecover(done) { stepRecover(done); }
 
-  // Sayfa açılınca: hesap varsa özeti (gerekirse), son gönderimden 10 dk geçtiyse kayıtları gönder.
+  // Sayfa açılınca: hesap varsa özeti (gerekirse), son gönderimden 10 dk geçtiyse kayıtları gönder;
+  // bildirim ayarlarını uygulama açılışında (oturum başına) bir kez native'e ver (yeniden kurulumda iş yeniden kurulur).
   try {
     setTimeout(function () {
       if (!account()) return;
       syncSoon(false, false);
       if (ago((getJ(GKEY, {}) || {}).at) > 600000) pushLogs(false);
+      var kurulu = false; try { kurulu = !!sessionStorage.getItem("oxbil_kur"); } catch (e) {}
+      if (!kurulu) bildirimKur(false);
+      var izin = false; try { izin = !!sessionStorage.getItem("oxbil_izin"); sessionStorage.removeItem("oxbil_izin"); } catch (e) {}
+      if (izin) izinIlk();
     }, 2000);
   } catch (e) {}
 
@@ -377,6 +494,7 @@ window.OXACC = (function () {
     create: create, claim: claim, restore: restore, setNick: setNick, newRecovery: newRecovery, deleteAccount: deleteAccount,
     stats: stats, todayStr: todayStr, pushStats: pushStats, pushBackup: pushBackup, syncSoon: syncSoon,
     pushLogs: pushLogs, logDurum: logDurum,
+    bildirimKur: bildirimKur, bildirimDurum: bildirimDurum, bildirimAyarla: bildirimAyarla, bildirimIzinIste: bildirimIzinIste,
     dashboard: dashboard, cachedDashboard: cachedDashboard, sendRequest: sendRequest, respond: respond,
     cancel: cancel, removeFriend: removeFriend, errText: errText, esc: esc, fmtRec: fmtRec
   };

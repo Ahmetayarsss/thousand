@@ -16,7 +16,7 @@
  * sürümle sorunsuz çalışmaya devam eder. Tarayıcıda (native değil) hiçbir şey yapmaz.
  */
 (function () {
-  var VER = 1791844585;
+  var VER = 1791845693;
   window.OX_WEBVER = VER;   // kayıt dışa aktarımı için (log.js)
   var Cap = window.Capacitor;
   var native = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
@@ -36,6 +36,7 @@
       if (u && u.ver && u.base) {
         if (u.ver > VER && !inUpdate) {
           var page = location.pathname.split("/").pop() || "index.html";
+          window.OX_YONLENDIR = 1;   // bu sayfa terk ediliyor (tts-bridge bildirim hedefine yenisinde baksın)
           location.replace(u.base + page + location.search + location.hash);
           return;
         }

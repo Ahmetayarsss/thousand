@@ -35,6 +35,7 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
 .sw{position:relative;width:50px;height:30px;border-radius:15px;background:#C7D0DB;border:0;cursor:pointer;flex:0 0 auto;transition:background .2s}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s}
 .sw.on{background:var(--green)} .sw.on::after{left:23px}
+.sw:disabled{opacity:.45;cursor:default}
 .down{margin-top:auto;align-self:center;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:800;padding:14px 20px 4px}
 .down span{font-size:20px;line-height:1}
 .hidden{display:none!important}
@@ -95,6 +96,17 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
       <div><div class="t">Türkçesini de oku</div><div class="s">Her kelimeden sonra Türkçe anlamı okunur (telefonda Türkçe ses paketi gerekir).</div></div>
       <button class="sw" id="readtr" aria-label="Türkçesini de oku"></button>
     </div>
+  </div>
+
+  <!-- Yalnız telefonda (uygulamada). Yeni bildirim türleri (ör. tekrar hatırlatıcısı) BIL listesine eklenir. -->
+  <div class="card hidden" id="bilcard">
+    <h2>Bildirimler</h2>
+    <div id="bilrows"></div>
+    <div class="row hidden" id="bilizin">
+      <div><div class="t">Bildirim izni kapalı</div><div class="s">Telefon bu uygulamanın bildirim göstermesine izin vermiyor.</div></div>
+      <div class="btns"><button class="btn" id="bilizinbtn">İzin ver</button></div>
+    </div>
+    <div class="note" id="bilnote"></div>
   </div>
 
   <div class="card">
@@ -197,10 +209,11 @@ function renderAcc(){const a=OXACC.account();
   document.getElementById('acc-rec').textContent=recShown?(a.recovery||'— (Yenile ile yenisini al)'):'••••-••••-••••';
   document.getElementById('acc-showrec').textContent=recShown?'Gizle':'Göster';}
 async function accDo(btn,fn,ok){btn.disabled=true;try{const r=await fn();if(ok)toast(typeof ok==='function'?ok(r):ok,3000);}
-  catch(e){toast(OXACC.errText(e),3500);}finally{btn.disabled=false;renderAcc();}}
-document.getElementById('acc-make').onclick=()=>OXACC.onboard(true,renderAcc);
-document.getElementById('acc-recover0').onclick=()=>OXACC.askRecover(renderAcc);
-document.getElementById('acc-recover').onclick=()=>{if(confirm('Bu telefondaki hesap (arkadaşlarıyla) silinip kurtarma kodundaki hesaba geçilecek. Devam edilsin mi?'))OXACC.askRecover(renderAcc);};
+  catch(e){toast(OXACC.errText(e),3500);}finally{btn.disabled=false;renderAcc();renderBil();}}
+const accBil=()=>{renderAcc();renderBil();};
+document.getElementById('acc-make').onclick=()=>OXACC.onboard(true,accBil);
+document.getElementById('acc-recover0').onclick=()=>OXACC.askRecover(accBil);
+document.getElementById('acc-recover').onclick=()=>{if(confirm('Bu telefondaki hesap (arkadaşlarıyla) silinip kurtarma kodundaki hesaba geçilecek. Devam edilsin mi?'))OXACC.askRecover(accBil);};
 document.getElementById('acc-rename').onclick=e=>{const a=OXACC.account();const v=prompt('Yeni takma ad (3–16 karakter):',a?a.nick:'');
   if(v==null)return;accDo(e.target,()=>OXACC.setNick(v),n=>'Takma ad: '+n);};
 document.getElementById('acc-copycode').onclick=async()=>{const c=OXACC.account().code;try{await navigator.clipboard.writeText(c);toast('Kod kopyalandı: '+c);}catch(e){toast(c);}};
@@ -210,7 +223,26 @@ document.getElementById('acc-newrec').onclick=e=>{if(!confirm('Yeni kurtarma kod
 document.getElementById('acc-del').onclick=e=>{if(!confirm('Hesabın silinsin mi? Arkadaşlıkların ve yedeğin silinir; bu geri alınamaz.'))return;
   if(!confirm('Emin misin?'))return;accDo(e.target,()=>OXACC.deleteAccount(),'Hesap silindi');};
 
-render();renderAcc();
-window.addEventListener('pageshow',e=>{if(e.persisted){render();renderAcc();}});
+// ---- Bildirimler (telefonda; ileride başka türler de bu listeye eklenir) ----
+const BIL=[{k:'arkadas',t:'Arkadaşlık istekleri',s:'Biri sana istek gönderince haber verir, uygulama kapalıyken de.'}];
+async function renderBil(){const d=await OXACC.bildirimDurum();
+  document.getElementById('bilcard').classList.toggle('hidden',!d.native);   // tarayıcıda yok
+  if(!d.native)return;
+  document.getElementById('bilrows').innerHTML=BIL.map(b=>'<div class="row"><div><div class="t">'+b.t+'</div><div class="s">'+b.s+'</div></div>'+
+    '<button class="sw'+(d.var&&d.acik[b.k]?' on':'')+'" data-bil="'+b.k+'" aria-label="'+b.t+'"'+(d.var?'':' disabled')+'></button></div>').join('');
+  const izinYok=d.var&&d.izin&&d.izin!=='granted'&&BIL.some(b=>d.acik[b.k]);
+  document.getElementById('bilizin').classList.toggle('hidden',!izinYok);
+  document.getElementById('bilizinbtn').textContent=d.izin==='prompt'?'İzin ver':'Ayarları aç';
+  document.getElementById('bilnote').textContent=!d.var?'Bildirimler için uygulamanın yeni sürümünü (APK) kur.':
+    (!d.hesap&&d.acik.arkadas)?'Arkadaşlık istekleri için önce hesap oluştur.':'';}
+document.getElementById('bilrows').onclick=async e=>{const b=e.target.closest('[data-bil]');if(!b||b.disabled)return;
+  const on=!b.classList.contains('on'),t=(BIL.find(x=>x.k===b.dataset.bil)||{}).t||'';b.classList.toggle('on',on);b.disabled=true;
+  try{await OXACC.bildirimAyarla(b.dataset.bil,on);}finally{b.disabled=false;}toast(t+': '+(on?'açık':'kapalı'));renderBil();};
+document.getElementById('bilizinbtn').onclick=async()=>{await OXACC.bildirimIzinIste();renderBil();};
+// Telefonun ayarlarından dönünce izin durumu yenilensin.
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderBil();});
+
+render();renderAcc();renderBil();
+window.addEventListener('pageshow',e=>{if(e.persisted){render();renderAcc();renderBil();}});
 </script>
 </body></html>

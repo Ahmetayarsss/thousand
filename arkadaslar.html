@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oxford 3000 · Arkadaşlar</title>
+<script src="log.js"></script><script src="srs.js"></script><script src="hesap.js"></script>
+<style>
+:root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--red:#D9544D;--amber:#E5892B}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+body{min-height:100vh}
+.wrap{max-width:600px;margin:0 auto;padding:4px 14px calc(24px + env(safe-area-inset-bottom))}
+.up{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:800;padding:6px 20px 8px}
+.up span{font-size:20px;line-height:1}
+h1{font-size:20px;font-weight:800;margin:4px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 20px rgba(20,30,50,.06);padding:16px;margin-bottom:14px}
+.card h2{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.badge{background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;letter-spacing:0}
+.me{display:flex;align-items:center;gap:12px}
+.me .nick{font-size:18px;font-weight:800}
+.me .lbl{font-size:12px;color:var(--muted);font-weight:700}
+.me .code{font-size:24px;font-weight:900;letter-spacing:3px}
+.btn{border:0;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:800;cursor:pointer;background:var(--ink);color:#fff;white-space:nowrap}
+.btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.btn.green{background:var(--green)} .btn.red{background:var(--red)}
+.btn:disabled{opacity:.55}
+.btns{display:flex;gap:6px;margin-left:auto}
+.add{display:flex;gap:8px}
+.add input{flex:1;min-width:0;border:2px solid var(--line);border-radius:12px;padding:11px 12px;font-size:17px;font-weight:800;letter-spacing:2px;text-transform:uppercase;outline:none;font-family:inherit}
+.add input:focus{border-color:var(--accent)}
+.add input::placeholder{letter-spacing:0;text-transform:none;font-weight:600;font-size:15px}
+.msg:empty{display:none}
+.msg{font-size:13px;font-weight:700;margin-top:8px;min-height:18px}
+.msg.ok{color:var(--green)} .msg.bad{color:var(--red)}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0;padding-top:0}
+.row .n{font-size:15px;font-weight:800}
+.row .s{font-size:12px;color:var(--muted);margin-top:2px}
+.fr{padding:12px 0;border-top:1px solid var(--line)}
+.fr:first-child{border-top:0;padding-top:0}
+.fr .top{display:flex;align-items:center;gap:8px}
+.fr .n{font-size:16px;font-weight:800}
+.fr .seen{font-size:11.5px;color:var(--muted);margin-left:auto}
+.fr .more{border:0;background:none;color:var(--muted);font-size:18px;padding:0 2px 0 8px;cursor:pointer;line-height:1}
+.fr .line{font-size:13px;margin-top:5px;color:var(--ink)}
+.fr .line b{font-weight:800}
+.fr .line .k{color:var(--muted);font-weight:700;margin-right:4px}
+.fr .idle{color:var(--muted)}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:8px 0 4px;line-height:1.5}
+.foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:4px}
+.hidden{display:none}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;max-width:92%;text-align:center}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="up" href="Oxford3000_sozluk.html"><span>⌃</span>Sözlük</a>
+  <h1>Arkadaşlar</h1>
+
+  <div id="noacc" class="card hidden">
+    <div class="empty">Arkadaşlarını eklemek için önce bir takma ad seç.</div>
+    <button class="btn" id="mk" style="width:100%;margin-top:8px;padding:13px 0">Hesap oluştur</button>
+  </div>
+
+  <div id="main" class="hidden">
+    <div class="card">
+      <div class="me">
+        <div><div class="nick" id="mynick"></div><div class="lbl">Arkadaş kodun</div><div class="code" id="mycode"></div></div>
+        <div class="btns"><button class="btn ghost" id="copy">Kopyala</button><button class="btn" id="share">Paylaş</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Arkadaş ekle</h2>
+      <div class="add"><input id="code" maxlength="8" placeholder="Arkadaşının kodu" autocomplete="off"><button class="btn" id="send">İstek gönder</button></div>
+      <div class="msg" id="addmsg"></div>
+    </div>
+
+    <div class="card hidden" id="incard">
+      <h2>Gelen istekler <span class="badge" id="incount"></span></h2>
+      <div id="incoming"></div>
+    </div>
+
+    <div class="card">
+      <h2>Arkadaşlarım <span id="frcount" style="color:var(--muted)"></span></h2>
+      <div id="friends"></div>
+    </div>
+
+    <div class="card hidden" id="outcard">
+      <h2>Gönderilen istekler</h2>
+      <div id="outgoing"></div>
+    </div>
+
+    <div class="foot" id="foot"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=OXACC.esc;
+let tt=0;
+function toast(m,ms){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),ms||2200);}
+function ago(iso){if(!iso)return '';const s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
+  if(s<90)return 'az önce';if(s<3600)return Math.round(s/60)+' dk önce';if(s<86400)return Math.round(s/3600)+' sa önce';
+  const d=Math.round(s/86400);return d+' gün önce';}
+function hm(ms){const d=new Date(ms),p=n=>('0'+n).slice(-2);return p(d.getHours())+':'+p(d.getMinutes());}
+const n=x=>(x|0).toLocaleString('tr-TR');
+
+function render(d,fromCache){
+  const a=OXACC.account();
+  $('noacc').classList.toggle('hidden',!!a);$('main').classList.toggle('hidden',!a);
+  if(!a)return;
+  const me=(d&&d.me)||a;
+  $('mynick').textContent=me.nick||a.nick;$('mycode').textContent=me.code||a.code;
+  if(!d){$('friends').innerHTML='<div class="empty">Yükleniyor…</div>';return;}
+  const today=OXACC.todayStr();
+  // Gelen istekler
+  const inc=d.incoming||[];
+  $('incard').classList.toggle('hidden',!inc.length);$('incount').textContent=inc.length;
+  $('incoming').innerHTML=inc.map(r=>`<div class="row"><div><div class="n">${esc(r.nick)}</div><div class="s">${esc(r.code)} · ${ago(r.at)}</div></div>
+    <div class="btns"><button class="btn green" data-acc="${esc(r.id)}">Kabul</button><button class="btn ghost" data-rej="${esc(r.id)}">Reddet</button></div></div>`).join('');
+  // Arkadaşlar
+  const fr=d.friends||[];
+  $('frcount').textContent=fr.length?'('+fr.length+')':'';
+  $('friends').innerHTML=fr.length?fr.map(f=>{const s=f.stats||{},td=s.gun===today;
+    return `<div class="fr"><div class="top"><span class="n">${esc(f.nick)}</span><span class="seen">${ago(f.last_seen)}</span>
+      <button class="more" data-rm="${esc(f.id)}" data-nick="${esc(f.nick)}" aria-label="Seçenekler">⋯</button></div>
+      <div class="line"><span class="k">Bugün</span>${td&&s.cevap?`<b>${n(s.cevap)}</b> cevap · <b>${n(s.dogru)}</b> doğru · <b>${n(s.yeni)}</b> yeni`:'<span class="idle">henüz çalışmadı</span>'}</div>
+      <div class="line"><span class="k">Toplam</span><b>${n(s.dongu)}</b> döngüde · <b>${n(s.olgun)}</b> olgun${s.seri?` · 🔥 <b>${n(s.seri)}</b> gün`:''}</div></div>`;}).join('')
+    :'<div class="empty">Henüz arkadaşın yok.<br>Kodunu paylaş ya da arkadaşının kodunu yukarıya yaz.</div>';
+  // Giden istekler
+  const out=d.outgoing||[];
+  $('outcard').classList.toggle('hidden',!out.length);
+  $('outgoing').innerHTML=out.map(r=>`<div class="row"><div><div class="n">${esc(r.nick)}</div><div class="s">${esc(r.code)} · ${ago(r.at)} · cevap bekleniyor</div></div>
+    <div class="btns"><button class="btn ghost" data-cancel="${esc(r.id)}">Geri çek</button></div></div>`).join('');
+  $('foot').textContent=(fromCache?'Bağlantı yok · ':'')+'Son güncelleme '+hm(d.at||Date.now())+' · dakikada bir yenilenir';
+}
+
+let busy=false;
+async function refresh(){
+  if(!OXACC.account()){render(null);return;}
+  if(busy)return;busy=true;
+  try{await OXACC.pushStats(false).catch(()=>{});render(await OXACC.dashboard(),false);}
+  catch(e){const c=OXACC.cachedDashboard();render(c,true);if(!c)$('friends').innerHTML='<div class="empty">'+esc(OXACC.errText(e))+'</div>';}
+  finally{busy=false;}
+}
+// Eylemler
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b||b.disabled)return;
+  const act=async(fn,okMsg)=>{b.disabled=true;try{await fn();if(okMsg)toast(okMsg);await refresh();}catch(err){toast(OXACC.errText(err));}finally{b.disabled=false;}};
+  if(b.dataset.acc)act(()=>OXACC.respond(b.dataset.acc,true),'Artık arkadaşsınız 🎉');
+  else if(b.dataset.rej)act(()=>OXACC.respond(b.dataset.rej,false),'İstek reddedildi');
+  else if(b.dataset.cancel)act(()=>OXACC.cancel(b.dataset.cancel),'İstek geri çekildi');
+  else if(b.dataset.rm){if(confirm(b.dataset.nick+' arkadaşlıktan çıkarılsın mı?'))act(()=>OXACC.removeFriend(b.dataset.rm),'Arkadaşlıktan çıkarıldı');}
+});
+async function send(){
+  const c=$('code').value.trim();const m=$('addmsg');
+  if(c.replace(/[^A-Za-z0-9]/g,'').length<4){m.className='msg bad';m.textContent='Kodu eksiksiz yaz.';return;}
+  $('send').disabled=true;m.className='msg';m.textContent='Gönderiliyor…';
+  try{const r=await OXACC.sendRequest(c);
+    if(r&&r.ok){m.className='msg ok';m.textContent=r.msg==='arkadas_oldunuz'?('Artık '+r.nick+' ile arkadaşsınız 🎉'):('İstek gönderildi: '+r.nick);$('code').value='';await refresh();}
+    else{m.className='msg bad';m.textContent=OXACC.errText({message:r&&r.msg});}
+  }catch(e){m.className='msg bad';m.textContent=OXACC.errText(e);}
+  finally{$('send').disabled=false;}
+}
+$('send').onclick=send;
+$('code').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+async function copyCode(){const c=$('mycode').textContent;
+  try{await navigator.clipboard.writeText(c);toast('Kod kopyalandı: '+c);}
+  catch(e){const t=document.createElement('textarea');t.value=c;document.body.appendChild(t);t.select();try{document.execCommand('copy');toast('Kod kopyalandı: '+c);}catch(_){toast(c);}t.remove();}}
+$('copy').onclick=copyCode;
+$('share').onclick=async()=>{const c=$('mycode').textContent,txt='Oxford 3000\'de arkadaşım ol! Kodum: '+c;
+  if(navigator.share){try{await navigator.share({text:txt});return;}catch(e){}}
+  try{await navigator.clipboard.writeText(txt);toast('Davet metni kopyalandı, istediğin yere yapıştır.');}catch(e){copyCode();}};
+$('mk').onclick=()=>OXACC.onboard(true,()=>refresh());
+
+render(OXACC.cachedDashboard(),true);
+if(!OXACC.account())OXACC.onboard(true,()=>refresh());
+refresh();
+setInterval(()=>{if(!document.hidden)refresh();},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
+</script>
+</body></html>

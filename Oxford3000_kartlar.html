@@ -95,7 +95,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .btn.check{background:#B8902C} .btn.check.know{background:var(--green)} .btn.check.again{background:var(--red)}
 .btn:disabled{cursor:default}
 .finish{flex:0 0 auto;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:6px 12px;cursor:pointer}
-</style><script src="log.js"></script><script src="srs.js"></script></head><body><div id="app">
+</style><script src="log.js"></script><script src="srs.js"></script><script src="hesap.js"></script></head><body><div id="app">
 <div class="top">
   <div class="moderow" id="moderow">
     <button data-m="test" class="on">Test</button>
@@ -526,6 +526,7 @@ function gradeExam(correct){
   OXLOG.add('cevap',{k:it._k,y:it._dir==='tr2en'?'te':'et',ok:correct?1:0,b:[res.from,res.to],
     ms:Math.round(performance.now()-tPrompt),yz:ty?1:0,g:(ty&&tyRes)?tyRes.vals:undefined});
   tyRes=null;
+  OXACC.syncSoon(false);   // arkadaşların görsün (dakikada en çok bir)
   if(!correct)sess.wrong.push(it);
   examIdx++;cur=examList[examIdx]?BYK[examList[examIdx]]:null;
   setSecLabel();
@@ -569,6 +570,7 @@ function examDone(){
     L.push({t:SRS.now(),n:n,ok:ok,rev:sess.rev,revOk:sess.revOk,nw:sess.nw,nwOk:sess.nwOk,ty:sess.ty,tyOk:sess.tyOk});
     localStorage.setItem(SKEY,JSON.stringify(L.slice(-300)));}catch(e){}}
   OXLOG.add('sinav_bit',{n:n,ok:ok,tum:all?1:0,yz:sess.ty,yzOk:sess.tyOk});
+  if(n)OXACC.syncSoon(true,true);   // sınav bitince özet hemen, yedek (5 dk'da bir)
   const left=SRS.dueList().length,nd=SRS.nextDue();
   const nxt=left?'Bugün daha '+left+' tekrar var.':(nd==null?'':'Sonraki tekrar '+(nd===1?'yarın':nd+' gün sonra')+'.');
   let msg;

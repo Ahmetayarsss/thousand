@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oxford 3000 · Ayarlar</title>
-<script src="log.js"></script><script src="srs.js"></script>
+<script src="log.js"></script><script src="srs.js"></script><script src="hesap.js"></script>
 <style>
 :root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--red:#D9544D;--dev:#8E44AD}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -37,6 +37,11 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px}
 .sw.on{background:var(--green)} .sw.on::after{left:23px}
 .down{margin-top:auto;align-self:center;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:800;padding:14px 20px 4px}
 .down span{font-size:20px;line-height:1}
+.hidden{display:none!important}
+.acc .v{font-size:15px;font-weight:800}
+.acc .code{letter-spacing:2px}
+.acc .rec{letter-spacing:1.5px;font-family:ui-monospace,Menlo,monospace}
+.acc .danger{color:var(--red)}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;text-align:center;background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
 .toast.show{opacity:1}
 </style>
@@ -44,6 +49,29 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px}
 <body>
 <div class="wrap">
   <h1>Ayarlar</h1>
+
+  <div class="card acc">
+    <h2>Hesap</h2>
+    <div id="acc-none" class="hidden">
+      <div class="row"><div><div class="t">Henüz hesabın yok</div><div class="s">Arkadaş eklemek ve ilerlemeni yedeklemek için bir takma ad seç.</div></div>
+        <div class="btns"><button class="btn" id="acc-make">Hesap oluştur</button></div></div>
+      <div class="row"><div><div class="t">Hesabın var mı?</div><div class="s">Eski telefonundaki hesabı kurtarma koduyla getir.</div></div>
+        <div class="btns"><button class="btn ghost" id="acc-recover0">Kodu gir</button></div></div>
+    </div>
+    <div id="acc-has" class="hidden">
+      <div class="row"><div><div class="t">Takma ad</div><div class="v" id="acc-nick"></div></div>
+        <div class="btns"><button class="btn ghost" id="acc-rename">Değiştir</button></div></div>
+      <div class="row"><div><div class="t">Arkadaş kodun</div><div class="v code" id="acc-code"></div></div>
+        <div class="btns"><button class="btn ghost" id="acc-copycode">Kopyala</button></div></div>
+      <div class="row"><div><div class="t">Kurtarma kodu</div><div class="s">Telefon değişince hesabını bununla geri alırsın. Kimseyle paylaşma.</div>
+          <div class="v rec" id="acc-rec">••••-••••-••••</div></div>
+        <div class="btns"><button class="btn ghost" id="acc-showrec">Göster</button><button class="btn ghost" id="acc-newrec">Yenile</button></div></div>
+      <div class="row"><div><div class="t">Başka hesaba geç</div><div class="s">Kurtarma koduyla eski hesabını bu telefona getir.</div></div>
+        <div class="btns"><button class="btn ghost" id="acc-recover">Kodu gir</button></div></div>
+      <div class="row"><div><div class="t danger">Hesabı sil</div><div class="s">Takma ad, arkadaşlıklar ve yedek sunucudan silinir. Telefondaki ilerleme kalır.</div></div>
+        <div class="btns"><button class="btn red" id="acc-del">Sil</button></div></div>
+    </div>
+  </div>
 
   <div class="card">
     <h2>Çalışma</h2>
@@ -141,7 +169,29 @@ document.getElementById('reset').onclick=()=>{
   ['ox3000_sessions_v1','ox3000_cheat_v1'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
   render();toast('İlerleme sıfırlandı');
 };
-render();
-window.addEventListener('pageshow',e=>{if(e.persisted)render();});
+// ---- Hesap ----
+let recShown=false;
+function renderAcc(){const a=OXACC.account();
+  document.getElementById('acc-none').classList.toggle('hidden',!!a);document.getElementById('acc-has').classList.toggle('hidden',!a);
+  if(!a)return;
+  document.getElementById('acc-nick').textContent=a.nick;document.getElementById('acc-code').textContent=a.code;
+  document.getElementById('acc-rec').textContent=recShown?(a.recovery||'— (Yenile ile yenisini al)'):'••••-••••-••••';
+  document.getElementById('acc-showrec').textContent=recShown?'Gizle':'Göster';}
+async function accDo(btn,fn,ok){btn.disabled=true;try{const r=await fn();if(ok)toast(typeof ok==='function'?ok(r):ok,3000);}
+  catch(e){toast(OXACC.errText(e),3500);}finally{btn.disabled=false;renderAcc();}}
+document.getElementById('acc-make').onclick=()=>OXACC.onboard(true,renderAcc);
+document.getElementById('acc-recover0').onclick=()=>OXACC.askRecover(renderAcc);
+document.getElementById('acc-recover').onclick=()=>{if(confirm('Bu telefondaki hesap (arkadaşlarıyla) silinip kurtarma kodundaki hesaba geçilecek. Devam edilsin mi?'))OXACC.askRecover(renderAcc);};
+document.getElementById('acc-rename').onclick=e=>{const a=OXACC.account();const v=prompt('Yeni takma ad (3–16 karakter):',a?a.nick:'');
+  if(v==null)return;accDo(e.target,()=>OXACC.setNick(v),n=>'Takma ad: '+n);};
+document.getElementById('acc-copycode').onclick=async()=>{const c=OXACC.account().code;try{await navigator.clipboard.writeText(c);toast('Kod kopyalandı: '+c);}catch(e){toast(c);}};
+document.getElementById('acc-showrec').onclick=()=>{recShown=!recShown;renderAcc();};
+document.getElementById('acc-newrec').onclick=e=>{if(!confirm('Yeni kurtarma kodu üretilsin mi? Eski kod artık çalışmaz.'))return;
+  recShown=true;accDo(e.target,()=>OXACC.newRecovery(),r=>'Yeni kurtarma kodun: '+r+' — kaydetmeyi unutma');};
+document.getElementById('acc-del').onclick=e=>{if(!confirm('Hesabın silinsin mi? Arkadaşlıkların ve yedeğin silinir; bu geri alınamaz.'))return;
+  if(!confirm('Emin misin?'))return;accDo(e.target,()=>OXACC.deleteAccount(),'Hesap silindi');};
+
+render();renderAcc();
+window.addEventListener('pageshow',e=>{if(e.persisted){render();renderAcc();}});
 </script>
 </body></html>

@@ -50,7 +50,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
 .cele{position:relative;height:62vh;min-height:320px;border-radius:20px;overflow:hidden;background:#141B26;margin-top:6px;cursor:pointer}
 .cele canvas{position:absolute;inset:0;width:100%;height:100%}
 .cele .olm{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:44px;font-weight:900;letter-spacing:.04em;text-shadow:0 2px 18px rgba(255,200,80,.55);pointer-events:none}
-</style><script src="log.js"></script><script src="srs.js"></script></head><body><div class="wrap">
+</style><script src="log.js"></script><script src="srs.js"></script><script src="hesap.js"></script></head><body><div class="wrap">
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
@@ -253,4 +253,11 @@ document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV(
 function refresh(){setSecLabel();renderList();syncNative(true);}
 refresh();
 window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
+// Hesap: ilk açılışta takma ad (internet yoksa "Sonra"); hesap varsa yeni arkadaşlık isteklerini haber ver.
+setTimeout(()=>{if(FORCE_CELE)return;
+  if(!OXACC.account()){OXACC.onboard(false);return;}
+  OXACC.dashboard().then(d=>{const inc=(d&&d.incoming)||[];let seen=[];try{seen=JSON.parse(localStorage.getItem('ox3000_istek_gor')||'[]');}catch(e){}
+    const yeni=inc.filter(r=>!seen.includes(r.id));
+    if(yeni.length)toast('👥 '+(yeni.length===1?yeni[0].nick+' sana arkadaşlık isteği gönderdi':yeni.length+' yeni arkadaşlık isteği')+' — Sözlük\'ün altındaki Arkadaşlar sayfasında.');
+    try{localStorage.setItem('ox3000_istek_gor',JSON.stringify(inc.map(r=>r.id)));}catch(e){}}).catch(()=>{});},800);
 </script></body></html>

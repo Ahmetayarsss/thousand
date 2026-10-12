@@ -29,8 +29,8 @@ APP_HEAD = '<script src="updater.js"></script><script src="tts-bridge.js"></scri
 
 # Uygulama içi güncelleme paketine giren dosyalar (ses HARİÇ — ses APK'da gömülü).
 WEB_BUNDLE_FILES = [
-    "index.html", "kartlar.html", "sozluk.html", "istatistik.html", "ayarlar.html", "analiz.html",
-    "tts-bridge.js", "progress.js", "srs.js", "log.js", "updater.js", "three.min.js",
+    "index.html", "kartlar.html", "sozluk.html", "istatistik.html", "ayarlar.html", "analiz.html", "arkadaslar.html",
+    "tts-bridge.js", "progress.js", "srs.js", "log.js", "hesap.js", "updater.js", "three.min.js",
 ]
 
 
@@ -201,11 +201,21 @@ def render(groups):
     (ROOT / "Oxford3000_sozluk.html").write_text(root_soz, encoding="utf-8")
     print(f"Oxford3000_sozluk.html: {len(root_soz)} bayt")
     app_soz = soz_tpl.replace("__BACK__", "index.html").replace(
-        "</head>", APP_HEAD + swipe_script("index.html", "", "ayarlar.html") + "</head>", 1
+        "</head>", APP_HEAD + swipe_script("index.html", "", "ayarlar.html", "arkadaslar.html") + "</head>", 1
     )
     app_soz = app_soz.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
     (ROOT / "app/www/sozluk.html").write_text(app_soz, encoding="utf-8")
     print(f"app/www/sozluk.html: {len(app_soz)} bayt")
+
+    # Arkadaşlar sayfası (Sözlük'ün altı): Sözlük'ün en altında yukarı itince açılır,
+    # en üstte aşağı çekince Sözlük'e döner.
+    ar_tpl = (ROOT / "templates" / "arkadaslar_template.html").read_text(encoding="utf-8")
+    (ROOT / "arkadaslar.html").write_text(ar_tpl.replace("__SOZLUK__", "Oxford3000_sozluk.html"), encoding="utf-8")
+    app_ar = ar_tpl.replace("__SOZLUK__", "sozluk.html").replace(
+        "</head>", APP_HEAD + swipe_script("", "", "sozluk.html", "") + "</head>", 1
+    )
+    (ROOT / "app/www/arkadaslar.html").write_text(app_ar, encoding="utf-8")
+    print(f"app/www/arkadaslar.html: {len(app_ar)} bayt")
 
     # Ayarlar sayfası (Sözlük'ün üstü): Sözlük'te en üstte aşağı çekince açılır,
     # burada yukarı itince Sözlük'e döner. İçerik sonra eklenecek.
@@ -248,7 +258,7 @@ def render(groups):
     print(f"app/www/istatistik.html: {len(app_stats)} bayt")
 
     # progress.js: kanonik kopya app/www'da; kök (tarayıcı) sürümü için kopyala
-    for js in ("progress.js", "srs.js", "log.js"):
+    for js in ("progress.js", "srs.js", "log.js", "hesap.js"):
         (ROOT / js).write_text((ROOT / "app/www" / js).read_text(encoding="utf-8"), encoding="utf-8")
         print(f"{js}: köke kopyalandı")
 

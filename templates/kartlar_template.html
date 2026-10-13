@@ -22,7 +22,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .bar i{display:block;height:100%}
 .counter{font-weight:800;color:var(--ink);flex:0 0 auto}
 
-.stage{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding-top:8px}
+.stage{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding-top:8px;position:relative}
 /* Deste: üst üste duran kartlar. Slot konumu/eğimi taşır; içindeki flipper çevrilir. */
 .deck{flex:1 1 auto;position:relative;min-height:0;perspective:1400px;perspective-origin:50% 44%}
 .slot{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .38s cubic-bezier(.22,.61,.36,1);will-change:transform}
@@ -32,8 +32,10 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 /* Çerçeve: iç içe iki dikdörtgen, arası dolu siyah (kalın bant). Saf CSS. */
 .frame{position:absolute;inset:14px;pointer-events:none;
        border:5px solid var(--ink);border-radius:16px}
-/* Yazı alanı: çerçevenin içinde, sabit konumda. */
-.content{position:absolute;inset:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:auto}
+/* Yazı alanı: çerçevenin içinde. Düzen her kartta ve her yönde aynı: ana kelime hep aynı yükseklikte
+   (üstten sabit boşluk), altında okunuş, ayraç, Türkçe anlam, örnekler. */
+.content{position:absolute;inset:26px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;overflow:auto}
+.content .sp{flex:0 0 22%}
 /* Karton kıvrılmalı fırlatma/indirme — düz plaka değil, hafif esner. */
 @keyframes flR{0%{transform:translate(0,0) rotate(0) scale(1);opacity:1}
   20%{transform:translate(-4%,-2%) rotate(-5deg) scale(1.025)}
@@ -51,19 +53,22 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .spk{position:absolute;top:12px;left:14px;width:40px;height:40px;border-radius:50%;border:0;background:var(--speak);color:#fff;font-size:18px;display:none;place-items:center;cursor:pointer;box-shadow:0 2px 6px rgba(229,137,43,.4)}
 .spk.show{display:grid}
 .spk:active{transform:scale(.92)}
-.q{font-size:34px;font-weight:800;letter-spacing:-.01em;line-height:1.12}
+.q{font-size:34px;font-weight:800;letter-spacing:-.01em;line-height:1.12;color:var(--ink)}
 .q.small{font-size:27px}
+.q.tr{color:var(--tr)}
+.sep{flex:0 0 auto;width:44px;height:3px;border-radius:2px;background:#D5DCE7;margin:16px 0 14px}
 .tap{margin-top:18px;font-size:12px;color:var(--muted)}
 .ansbox{border-top:1px dashed var(--line);margin-top:18px;padding-top:16px;width:100%}
-.ok{color:var(--ok);font-weight:700;font-size:15px}
-.mean{font-size:22px;font-weight:800;margin-top:4px}
+.ok{color:var(--ok);font-weight:700;font-size:15px;margin-top:8px}
+.mean{font-size:22px;font-weight:800;line-height:1.25}
 .mean.tr{color:var(--tr)} .mean.en{color:var(--ink)}
-.ex{color:#5B6B7B;font-size:14px;font-style:italic;margin-top:10px}
+.ex{color:#5B6B7B;font-size:14px;font-style:italic;margin-top:12px}
 .controls{flex:0 0 auto;display:flex;gap:10px;margin-top:12px;min-height:52px}
 .btn{flex:1;border:0;border-radius:14px;padding:16px 0;font-size:15.5px;font-weight:800;cursor:pointer;color:#fff}
 .btn:active{transform:translateY(1px)}
 .btn.again{background:var(--red)} .btn.know{background:var(--green)} .btn.open{background:var(--accent)}
 .hidden{display:none!important}
+.vh{visibility:hidden}
 .cheat{position:fixed;inset:0;z-index:9999;background:#fff;display:none;align-items:center;justify-content:center;padding:34px;text-align:center}
 .cheat.show{display:flex}
 .cheat-msg{color:#111;font-size:30px;font-weight:900;line-height:1.3;max-width:620px}
@@ -85,13 +90,34 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .mk.rev{background:#E5892B} .mk.new{background:#2E9E5B}
 /* Yazılı kart: altın renk (destede arkadayken de) + cevap kutuları. */
 .gold{position:absolute;inset:0;background:linear-gradient(150deg,#FCF1C8 0%,#F3D77E 42%,#E9C35A 68%,#F8E6A8 100%)}
-.yhint{margin-top:16px;font-size:12.5px;font-weight:800;color:#8A6A12;letter-spacing:.02em}
-.typed{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.tins{display:flex;flex-direction:column;gap:6px}
-.tin{width:100%;border:2px solid #E2C463;background:#FFFBEA;border-radius:12px;padding:12px 14px;font-size:17px;font-weight:700;color:var(--ink);outline:none;font-family:inherit}
-.tin:focus{border-color:#C9A227;box-shadow:0 0 0 3px rgba(201,162,39,.22)}
+.yhint{font-size:12.5px;font-weight:800;color:#8A6A12;letter-spacing:.02em}
+.yhint{margin-top:16px}
+/* Uygulama içi klavye (yalnız altın kartta): telefon klavyesi hiç açılmaz → kart boyutu değişmez,
+   otomatik düzeltme/öneri yok. Panel destenin üstüne biner; kartlar yerinde kalır. */
+.kpanel{position:absolute;left:-12px;right:-12px;bottom:calc(-10px - env(safe-area-inset-bottom));z-index:9995;background:#D9E0EA;border-radius:18px 18px 0 0;box-shadow:0 -6px 18px rgba(20,30,50,.18);padding:10px 5px calc(8px + env(safe-area-inset-bottom));user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.tins{display:flex;gap:6px;padding:0 3px 9px}
+.tin{flex:1 1 0;min-width:0;height:46px;border:2px solid #E2C463;background:#FFFBEA;border-radius:12px;padding:0 11px;font-size:17px;font-weight:700;color:var(--ink);display:flex;align-items:center;overflow:hidden;white-space:nowrap;cursor:text}
+.tin.on{border-color:#C9A227;box-shadow:0 0 0 3px rgba(201,162,39,.25)}
+.tin span{white-space:pre}
+.tin .ph{color:#B6A266;font-weight:600;font-size:15px}
+.tin .car{flex:0 0 2px;height:22px;background:#8A6A12;margin-left:1px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
 .tin.good{border-color:var(--green);background:#E9F7EF}
 .tin.bad{border-color:var(--red);background:#FDECEA}
+.kb{display:flex;flex-direction:column;gap:7px}
+.kpanel.done .kb{display:none}
+.kr{display:flex;gap:4px}
+.kr i{flex:.5 1 0}
+.k{flex:1 1 0;min-width:0;height:44px;border:0;border-radius:7px;background:#fff;color:var(--ink);font-size:19px;font-weight:600;font-family:inherit;padding:0;box-shadow:0 1px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.k.pr{background:#B9C4D4}
+.k.fn{background:#AEB9C9;font-size:15px;font-weight:800}
+.k.fn.pr{background:#8E9BB0}
+.k.w15{flex:1.5 1 0}
+.k.sp{flex:5 1 0;font-size:13px;font-weight:700;color:var(--muted)}
+.k.go{flex:3.5 1 0;background:#B8902C;color:#fff;font-size:15px;font-weight:800}
+.k.go.pr{background:#977522}
+.k.off{visibility:hidden}
+.kpanel .btn{width:100%;margin:0 3px;width:calc(100% - 6px)}
 .btn.check{background:#B8902C} .btn.check.know{background:var(--green)} .btn.check.again{background:var(--red)}
 .btn:disabled{cursor:default}
 .finish{flex:0 0 auto;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:6px 12px;cursor:pointer}
@@ -118,9 +144,10 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
     <button class="btn again hidden" id="again"></button>
     <button class="btn know hidden" id="know"></button>
   </div>
-  <div class="typed hidden" id="typed">
+  <div class="kpanel hidden" id="kpanel">
     <div class="tins" id="tins"></div>
-    <button class="btn check" id="check">Kontrol et</button>
+    <div class="kb" id="kb"></div>
+    <button class="btn check hidden" id="check">Devam</button>
   </div>
 </div>
 
@@ -159,7 +186,12 @@ const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNative
 // paketlenmediği için registerPlugin YOK — eskiden yalnız ona bakıldığından native okuma hiç çalışmıyordu).
 const GT=NATIVE?((window.Capacitor.Plugins&&Capacitor.Plugins.GroupTts)||(typeof Capacitor.registerPlugin==='function'&&Capacitor.registerPlugin('GroupTts'))||null):null;
 let toastEl=null,toastTimer=null;
-function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
+function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';
+  placeToast();
+  if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
+// Klavye paneli açıksa bilgi balonu onun üstünde durur.
+function placeToast(){if(!toastEl)return;const kp=document.getElementById('kpanel');
+  toastEl.style.bottom=(kp&&!kp.classList.contains('hidden')&&kp.offsetHeight)?(kp.offsetHeight+12)+'px':'22px';}
 let wordAudio=null;
 function slugOf(w){var b=w.replace(/\(.*?\)/g,'').split(',')[0];return b.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 function playAudioUrl(url){return new Promise(res=>{
@@ -214,14 +246,18 @@ function mkTag(item){if(mode!=='exam'||!item)return '';const nw=SRS.isNew(item._
 // Yüz içerikleri.
 function goldBg(item){return isTyped(item)?'<div class="gold"></div>':'';}
 function contentFront(item){
-  const front=(item._dir==='tr2en')?(item.tr||'—'):item.w;
-  return '<div class="content">'+mkTag(item)+lvlTag(item)+'<div class="q'+((front&&front.length>16)?' small':'')+'"></div>'
+  const tr=item._dir==='tr2en',front=tr?(item.tr||'—'):item.w;
+  return '<div class="content">'+mkTag(item)+lvlTag(item)+'<div class="sp"></div>'
+    +'<div class="q'+((front&&front.length>16)?' small':'')+(tr?' tr':'')+'"></div>'
     +(isTyped(item)?'<div class="yhint">✎ Cevabı aşağıya yaz</div>':'')+'</div>';
 }
+// Arka yüz: yön ne olursa olsun hep aynı sıra — İngilizce kelime, okunuş, ayraç, Türkçe anlam, örnekler.
+// Ana kelime ön yüzdeki soruyla aynı yükseklikte durur.
 function contentBack(item){
-  let h='<div class="content">'+mkTag(item)+lvlTag(item);
-  if(item._dir==='tr2en'){h+='<div class="mean en">'+item.w+'</div>';if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';}
-  else{if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';h+='<div class="mean tr">'+(item.tr||'—')+'</div>';}
+  let h='<div class="content">'+mkTag(item)+lvlTag(item)+'<div class="sp"></div>'
+    +'<div class="q'+(item.w.length>16?' small':'')+'">'+item.w+'</div>';
+  if(item.ok)h+='<div class="ok">Okunuş: '+item.ok+'</div>';
+  h+='<div class="sep"></div><div class="mean tr">'+(item.tr||'—')+'</div>';
   if(item.ex&&item.ex.length)item.ex.forEach(s=>{h+='<div class="ex">'+s+'</div>';});
   return h+'</div>';
 }
@@ -241,9 +277,10 @@ function setFront(slot,item){
 // Yazılı kartta: önce cevap kutuları + "Kontrol et", açıldıktan sonra sonuç + "Devam".
 function setCtrl(revealed){
   const ty=isTyped(cur);
-  document.getElementById('ctrl').classList.toggle('hidden',ty);
-  document.getElementById('typed').classList.toggle('hidden',!ty);
-  if(ty){if(!revealed)buildTyped(cur);else typedRevealed();return;}
+  document.getElementById('ctrl').classList.toggle('vh',ty);       // altında yer kaplamaya devam eder → kart boyutu hiç değişmez
+  document.getElementById('kpanel').classList.toggle('hidden',!ty);
+  if(ty){if(!revealed)buildTyped(cur);else typedRevealed();placeToast();return;}
+  placeToast();
   document.getElementById('open').classList.toggle('hidden', revealed);
   document.getElementById('again').classList.toggle('hidden', !revealed);
   document.getElementById('know').classList.toggle('hidden', !revealed);
@@ -445,34 +482,78 @@ function showStage(){document.getElementById('resultbox').classList.add('hidden'
    sorulur; bu kartlar altın renkli (destede arkadayken de). Kendini puanlama yok: cevabı sistem
    kontrol eder (kurallar srs.js checkTyped), doğruysa Bildim, değilse Bilemedim sayılır. ---- */
 let typedSet=new Set(),tyRes=null;
+let tyVals=[],tyAct=0;   // kutulardaki yazılar + etkin kutu (uygulama içi klavye; telefon klavyesi hiç açılmaz)
 function isTyped(item){return mode==='exam'&&!!item&&typedSet.has(item._k);}
-function typedVals(){return [...document.querySelectorAll('#tins .tin')].map(x=>x.value);}
-function updCheck(){if(tyRes)return;document.getElementById('check').textContent=typedVals().some(v=>v.trim())?'Kontrol et':'Bilmiyorum';}
+function typedVals(){return tyVals.slice();}
+function tyLive(){return !busy&&!!cur&&isTyped(cur)&&side===0&&!tyRes;}
+function updCheck(){if(tyRes)return;document.getElementById('kgo').textContent=tyVals.some(v=>v.trim())?'Kontrol et':'Bilmiyorum';}
+function drawTins(){
+  document.querySelectorAll('#tins .tin').forEach((d,i)=>{
+    const v=tyVals[i]||'',on=!tyRes&&i===tyAct,car=()=>{const c=document.createElement('i');c.className='car';d.appendChild(c);};
+    d.classList.toggle('on',on);d.textContent='';
+    const t=document.createElement('span');
+    if(v){t.textContent=v;d.appendChild(t);if(on)car();}
+    else{if(on)car();t.className='ph';t.textContent=d.dataset.ph;d.appendChild(t);}
+    d.scrollLeft=on?d.scrollWidth:0;   // yazılan kutuda son, diğerlerinde baş görünür
+  });
+}
+function kType(ch){if(!tyLive())return;const v=tyVals[tyAct]||'';
+  if(v.length>=40||(ch===' '&&(!v||v.endsWith(' '))))return;
+  tyVals[tyAct]=v+ch;drawTins();updCheck();}
+function kDel(){if(!tyLive())return;const v=tyVals[tyAct]||'';if(!v)return;tyVals[tyAct]=v.slice(0,-1);drawTins();updCheck();}
+function kNext(){if(!tyLive()||tyVals.length<2)return;tyAct=(tyAct+1)%tyVals.length;drawTins();}
+// Türkçe Q düzeni. Harfe basılır basılmaz yazar (pointerdown); ⌫ basılı tutulunca art arda siler.
+const KROWS=['qwertyuıopğü','asdfghjklşi','zxcvbnmöç'];
+let kDelT=0,kDelI=0;
+function kUp(){clearTimeout(kDelT);clearInterval(kDelI);document.querySelectorAll('#kb .k.pr').forEach(x=>x.classList.remove('pr'));}
+function buildKb(){
+  const kb=document.getElementById('kb');if(kb.childElementCount)return;
+  const keys=t=>[...t].map(c=>'<button class="k" data-c="'+c+'">'+c+'</button>').join('');
+  kb.innerHTML='<div class="kr">'+keys(KROWS[0])+'</div>'
+    +'<div class="kr"><i></i>'+keys(KROWS[1])+'<i></i></div>'
+    +'<div class="kr"><i style="flex:1.5 1 0"></i>'+keys(KROWS[2])+'<button class="k fn w15" data-f="del" aria-label="Sil">⌫</button></div>'
+    +'<div class="kr"><button class="k fn" style="flex:2.5 1 0" data-f="next" id="knext">Sonraki ›</button>'
+    +'<button class="k sp" data-f="sp">boşluk</button><button class="k go" data-f="go" id="kgo">Kontrol et</button></div>';
+  kb.addEventListener('pointerdown',e=>{
+    const b=e.target.closest('.k');if(!b||b.classList.contains('off'))return;
+    e.preventDefault();kUp();b.classList.add('pr');
+    if(b.dataset.c)kType(b.dataset.c);
+    else if(b.dataset.f==='del'){kDel();kDelT=setTimeout(()=>{kDelI=setInterval(kDel,70);},420);}
+    else if(b.dataset.f==='sp')kType(' ');
+    else if(b.dataset.f==='next')kNext();
+    else if(b.dataset.f==='go')submitTyped();
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>kb.addEventListener(t,kUp));
+  document.getElementById('tins').addEventListener('pointerdown',e=>{
+    const d=e.target.closest('.tin');if(!d||!tyLive())return;e.preventDefault();tyAct=+d.dataset.i;drawTins();});
+  // Bilgisayarda deneme için fiziksel klavye de çalışır.
+  document.addEventListener('keydown',e=>{
+    if(!tyLive()||e.ctrlKey||e.metaKey||e.altKey)return;
+    if(e.key==='Enter'){e.preventDefault();submitTyped();}
+    else if(e.key==='Backspace'){e.preventDefault();kDel();}
+    else if(e.key==='Tab'){e.preventDefault();kNext();}
+    else if(e.key.length===1&&/[\p{L} ]/u.test(e.key)){e.preventDefault();kType(e.key.toLocaleLowerCase('tr-TR'));}
+  });
+}
 function buildTyped(item){
+  buildKb();
   const box=document.getElementById('tins'),n=SRS.answerSlots(item,item._dir).length,en=item._dir==='tr2en';
-  box.innerHTML='';tyRes=null;
-  for(let i=0;i<n;i++){
-    const inp=document.createElement('input');inp.className='tin';inp.type='text';
-    inp.autocomplete='off';inp.spellcheck=false;inp.setAttribute('autocapitalize','off');inp.setAttribute('autocorrect','off');
-    inp.placeholder=en?'İngilizcesi':(n>1?(i+1)+'. anlam':'Türkçesi');
-    inp.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();
-      const nx=box.querySelectorAll('.tin')[i+1];nx?nx.focus():submitTyped();});
-    inp.addEventListener('input',updCheck);
-    box.appendChild(inp);
-  }
-  const b=document.getElementById('check');b.disabled=false;b.className='btn check';updCheck();
-  setTimeout(()=>{const f=box.querySelector('.tin');if(f&&isTyped(cur)&&side===0&&!tyRes)try{f.focus({preventScroll:true});}catch(e){}},80);
+  tyVals=new Array(n).fill('');tyAct=0;tyRes=null;box.innerHTML='';
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='tin';d.dataset.i=i;
+    d.dataset.ph=en?'İngilizcesi':(n>1?(i+1)+'. anlam':'Türkçesi');box.appendChild(d);}
+  document.getElementById('kpanel').classList.remove('done');
+  document.getElementById('knext').classList.toggle('off',n<2);
+  const b=document.getElementById('check');b.className='btn check hidden';b.disabled=false;
+  kUp();drawTins();updCheck();
 }
 function submitTyped(){
-  if(busy||!cur||side===1||tyRes||!isTyped(cur))return;
+  if(!tyLive())return;
   const vals=typedVals(),r=SRS.checkTyped(cur,cur._dir,vals);
-  tyRes={ok:r.ok,vals:vals};
-  document.querySelectorAll('#tins .tin').forEach((x,i)=>{x.readOnly=true;x.classList.add(r.marks[i]?'good':'bad');});
+  tyRes={ok:r.ok,vals:vals};kUp();
+  document.querySelectorAll('#tins .tin').forEach((x,i)=>x.classList.add(r.marks[i]?'good':'bad'));
+  drawTins();document.getElementById('kpanel').classList.add('done');   // klavye iner, kutular + sonuç kalır
   const b=document.getElementById('check');b.disabled=true;b.className='btn check '+(r.ok?'know':'again');b.textContent=r.ok?'Doğru ✓':'Yanlış ✗';
-  // Klavye kapanıp yerleşim otursun, sonra kart açılsın (çevirme yanlış yerde başlamasın).
-  const ae=document.activeElement,typing=ae&&ae.classList&&ae.classList.contains('tin');
-  if(typing)ae.blur();
-  setTimeout(()=>{if(cur&&side===0){reveal(0.5,0.12);sayWord(cur.w);}},typing?280:0);
+  setTimeout(()=>{if(cur&&side===0){reveal(0.5,0.12);sayWord(cur.w);}},120);
 }
 function typedRevealed(){const b=document.getElementById('check');b.disabled=false;
   b.textContent=(tyRes&&tyRes.ok?'Doğru ✓':'Yanlış ✗')+'  ·  Devam';}
@@ -524,7 +605,7 @@ function gradeExam(correct){
   const wasNew=SRS.isNew(it._k);
   const res=SRS.answer(it._k,correct,it._dir);            // kutu + vade + (yanlışta) yön kilidi
   if(wasNew){sess.nw++;if(correct)sess.nwOk++;}else{sess.rev++;if(correct)sess.revOk++;}
-  if(ty){sess.ty++;if(correct)sess.tyOk++;}
+  if(ty){sess.ty++;if(correct)sess.tyOk++;document.getElementById('kpanel').classList.add('hidden');}
   OXLOG.add('cevap',{k:it._k,y:it._dir==='tr2en'?'te':'et',ok:correct?1:0,b:[res.from,res.to],
     ms:Math.round(performance.now()-tPrompt),yz:ty?1:0,g:(ty&&tyRes)?tyRes.vals:undefined});
   tyRes=null;
@@ -599,8 +680,7 @@ function showResult(big,small,msg,wlHtml,isTest){
 function start(){(mode==='test'?startTest:startExam)();}
 document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
 document.getElementById('deck').addEventListener('click',e=>{if(busy||!cur)return;if(slots[0]&&slots[0].contains(e.target)){
-  if(side===0&&isTyped(cur)){   // yazılı kart dokunuşla açılmaz; boş kutuya odaklan
-    if(!tyRes){const ins=[...document.querySelectorAll('#tins .tin')],f=ins.find(x=>!x.value)||ins[0];if(f)f.focus();}
+  if(side===0&&isTyped(cur)){   // yazılı kart dokunuşla açılmaz (cevap klavyeyle yazılır)
     if(cur._dir!=='tr2en')sayWord(cur.w);
     return;}
   if(side===0){var r=topFlip.getBoundingClientRect();reveal((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);}

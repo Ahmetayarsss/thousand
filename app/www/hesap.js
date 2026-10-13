@@ -431,6 +431,73 @@ window.OXACC = (function () {
       return d;
     } catch (e) { return null; }
   }
+  // ---- bildirim kurulumu (telefon ayarları) ----
+  // Bildirimlerin zamanında gelmesi için gereken izinler, her biri tek dokunuşla: bildirim izni, arka planda
+  // çalışma (pil), otomatik başlatma (yalnız uygulamaları kendiliğinden kapatan markalarda: Xiaomi, Huawei, Oppo…).
+  // Hesap açılınca ve ana sayfada bir kez kendiliğinden çıkar; Ayarlar → Bildirimler'den her zaman açılır.
+  var KKEY = "ox3000_kurulum_v1";   // {goster: 1 (kendiliğinden bir kez gösterildi), otobas: 1 (ekranı açıldı → yapıldı sayılır)}
+  async function kurulumDurum() {
+    var B = nplug();
+    if (!B || typeof B.cihaz !== "function") return null;   // tarayıcı ya da eski APK
+    var c = {}, izin = null, k = getJ(KKEY, {}) || {};
+    try { c = (await B.cihaz()) || {}; } catch (e) {}
+    try { var p = await B.permission(); izin = p && p.display; } catch (e) {}
+    var adim = [{ id: "izin", t: "Bildirim izni", s: "Bildirim gösterebilmesi için.", ok: izin === "granted", btn: "İzin ver" }];
+    if ((c.sdk || 0) >= 23) adim.push({ id: "pil", t: "Arka planda çalışma", s: "Uygulama kapalıyken de hatırlatabilmesi için.", ok: !!c.pil, btn: "İzin ver" });
+    if (c.otobas) adim.push({ id: "otobas", t: "Otomatik başlatma", s: "Açılan listede Oxford 3000'i aç.", ok: !!k.otobas, btn: "Aç" });
+    return { adim: adim, tamam: adim.every(function (a) { return a.ok; }), marka: c.marka || "" };
+  }
+  async function kurulumAdim(id) {
+    var B = nplug();
+    if (!B) return "";
+    try {
+      log("kurulum", { a: id });
+      if (id === "izin") { await bildirimIzinIste(); return ""; }
+      if (id === "pil") { await B.pilIzni(); return ""; }
+      if (id === "otobas") {
+        var r = await B.otomatikBaslatma(), k = getJ(KKEY, {}) || {};
+        k.otobas = 1; setJ(KKEY, k);
+        return (r && r.acildi) || "";
+      }
+    } catch (e) {}
+    return "";
+  }
+  var kurAcik = false;
+  // force: Ayarlar'dan açılınca. Değilse yalnız bir kez ve eksik adım varsa gösterir. Gösterildiyse true döner.
+  async function kurulum(force, done) {
+    var d = await kurulumDurum(), k = getJ(KKEY, {}) || {};
+    if (!d || kurAcik || (!force && (k.goster || d.tamam))) return false;
+    k.goster = 1; setJ(KKEY, k);
+    kurAcik = true;
+    var not = "";
+    function bitir() { kurAcik = false; document.removeEventListener("visibilitychange", vis); close(); if (done) done(); }
+    function ciz(d) {
+      var b = el('<h2>Bildirimleri ayarla 🔔</h2><p>Hatırlatmalar ve dürtmeler zamanında gelsin diye telefonunda ' +
+        (d.adim.length > 1 ? d.adim.length + ' küçük izin' : 'bir izin') + ' gerekiyor. Her biri tek dokunuş.</p>' +
+        d.adim.map(function (a, i) {
+          return '<div class="kst' + (a.ok ? ' ok' : '') + '"><span class="kn">' + (a.ok ? "✓" : (i + 1)) + '</span>' +
+            '<div class="kt"><b>' + a.t + '</b><small>' + a.s + '</small></div>' +
+            (a.ok ? '<span class="kok">Tamam</span>' : '<button data-k="' + a.id + '">' + a.btn + '</button>') + '</div>';
+        }).join('') + (not ? '<p class="knot">' + not + '</p>' : '') +
+        '<button id="oxok">' + (d.tamam ? "Bitti" : "Sonra") + '</button>');
+      b.querySelectorAll("[data-k]").forEach(function (x) {
+        x.onclick = async function () {
+          x.disabled = true;
+          var r = await kurulumAdim(x.dataset.k);
+          if (x.dataset.k === "otobas") not = r === "otobas" ? "" :
+            (r === "uygulama" ? "Açılan sayfada “Otomatik başlatma”yı bulup aç." : "Bu telefonda otomatik başlatma ayarı bulunamadı; gerekmeyebilir.");
+          yenile();
+        };
+      });
+      b.querySelector("#oxok").onclick = bitir;
+    }
+    async function yenile() { if (!kurAcik) return; var n = await kurulumDurum(); if (n && kurAcik) ciz(n); }
+    function vis() { if (!document.hidden) setTimeout(yenile, 400); }   // telefonun ayarlarından dönünce
+    document.addEventListener("visibilitychange", vis);
+    ciz(d);
+    log("kurulum", { a: "goster", tamam: d.tamam ? 1 : 0 });
+    return true;
+  }
   // Ayarlar kartı için durum. native: telefonda mı; var: eklenti yeni APK'daki gibi mi; ayar: açık/kapalı + saatler.
   async function bildirimDurum() {
     var B = nplug(), izin = null;
@@ -491,6 +558,12 @@ window.OXACC = (function () {
     ".oxacc .lnk{display:block;text-align:center;margin-top:14px;color:#3B6EA5;font-weight:700;font-size:14px;cursor:pointer}" +
     ".oxacc .code{font-size:30px;font-weight:900;letter-spacing:4px;text-align:center;background:#F4F6F9;border-radius:12px;padding:12px 0;margin:4px 0 12px}" +
     ".oxacc .rec{font-size:21px;letter-spacing:2px;background:#FFF6DD;border:2px dashed #E2C463}" +
+    ".oxacc .kst{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #E6EAF1}" +
+    ".oxacc .kn{flex:0 0 28px;height:28px;border-radius:50%;background:#E9EDF3;color:#1B2430;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center}" +
+    ".oxacc .kst.ok .kn{background:#2E9E5B;color:#fff}.oxacc .kt{flex:1;min-width:0;text-align:left}" +
+    ".oxacc .kt b{display:block;font-size:15px}.oxacc .kt small{display:block;color:#7A8699;font-size:12.5px;margin-top:2px;line-height:1.35}" +
+    ".oxacc .kst button{width:auto;flex:0 0 auto;margin:0;padding:10px 14px;font-size:14px;border-radius:10px;background:#3B6EA5}" +
+    ".oxacc .kok{color:#2E9E5B;font-weight:800;font-size:13px}.oxacc .knot{margin:8px 0 0;color:#B8902C;font-size:13px;font-weight:700}" +
     ".oxacc .lbl{font-size:12px;font-weight:800;color:#7A8699;text-transform:uppercase;letter-spacing:.04em}";
   var box = null;
   function el(html) {
@@ -535,7 +608,10 @@ window.OXACC = (function () {
       '<p>Telefonunu değiştirirsen hesabını, arkadaşlarını ve ilerlemeni bu kodla geri alırsın. ' +
       '<b>Ekran görüntüsü al</b> ya da bir yere yaz. Ayarlar\'da da görebilirsin.</p>' +
       '<button id="oxok">Kaydettim</button>');
-    b.querySelector("#oxok").onclick = function () { close(); izinIlk(); if (done) done(a); };
+    b.querySelector("#oxok").onclick = function () {
+      close(); if (done) done(a);
+      kurulum(false).then(function (g) { if (!g) izinIlk(); }, function () { izinIlk(); });
+    };
   }
   function stepRecover(done) {
     var b = el('<h2>Hesabını geri al</h2><p>Kurtarma kodunu yaz (ör. ABCD-EFGH-JKLM).</p>' +
@@ -588,6 +664,7 @@ window.OXACC = (function () {
     pushLogs: pushLogs, logDurum: logDurum,
     bildirimKur: bildirimKur, bildirimDurum: bildirimDurum, bildirimAyarla: bildirimAyarla, bildirimIzinIste: bildirimIzinIste,
     bildirimAyar: bilAyar, hatirlatmaPlani: hatirlatmaPlani, hatirlatmaPlanla: hatirlatmaPlanla, durt: durt,
+    kurulum: kurulum, kurulumDurum: kurulumDurum,
     dashboard: dashboard, cachedDashboard: cachedDashboard, sendRequest: sendRequest, respond: respond,
     cancel: cancel, removeFriend: removeFriend, errText: errText, esc: esc, fmtRec: fmtRec
   };

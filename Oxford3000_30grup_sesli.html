@@ -256,6 +256,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
 // Hesap: ilk açılışta takma ad (internet yoksa "Sonra"); hesap varsa yeni arkadaşlık isteklerini ve dürtmeleri haber ver.
 setTimeout(()=>{if(FORCE_CELE)return;
   if(!OXACC.account()){OXACC.onboard(false);return;}
+  OXACC.kurulum(false);   // telefon ayarları (bildirim izni, arka plan, otomatik başlatma): eksikse bir kez
   OXACC.dashboard().then(d=>{const inc=(d&&d.incoming)||[],msgs=[];let seen=[];try{seen=JSON.parse(localStorage.getItem('ox3000_istek_gor')||'[]');}catch(e){}
     const yeni=inc.filter(r=>!seen.includes(r.id));
     if(yeni.length)msgs.push('👥 '+(yeni.length===1?yeni[0].nick+' sana arkadaşlık isteği gönderdi':yeni.length+' yeni arkadaşlık isteği')+' — Sözlük\'ün altındaki Arkadaşlar sayfasında.');

@@ -100,6 +100,10 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
   <div class="card hidden" id="bilcard">
     <h2>Bildirimler</h2>
     <div id="bilrows"></div>
+    <div class="row hidden" id="bilkur">
+      <div><div class="t">Telefon ayarları</div><div class="s" id="bilkurs"></div></div>
+      <div class="btns"><button class="btn" id="bilkurbtn">Kur</button></div>
+    </div>
     <div class="row hidden" id="bilizin">
       <div><div class="t">Bildirim izni kapalı</div><div class="s">Telefon bu uygulamanın bildirim göstermesine izin vermiyor.</div></div>
       <div class="btns"><button class="btn" id="bilizinbtn">İzin ver</button></div>
@@ -229,7 +233,12 @@ async function renderBil(){const d=await OXACC.bildirimDurum(),a=d.ayar;
       (SAATLER.includes(v)?SAATLER:SAATLER.concat(v).sort()).map(x=>'<option'+(x===v?' selected':'')+'>'+x+'</option>').join('')+'</select>':'';
     return '<div class="row"><div><div class="t">'+b.t+'</div><div class="s">'+b.s+'</div>'+sel+'</div>'+
       '<button class="sw'+(on?' on':'')+'" data-bil="'+b.k+'" aria-label="'+b.t+'"'+(d.var?'':' disabled')+'></button></div>';}).join('');
-  const izinYok=d.var&&d.izin&&d.izin!=='granted'&&BIL.some(b=>a[b.k]);
+  // Telefon ayarları (yeni APK): bildirim izni + arka planda çalışma + otomatik başlatma tek ekranda.
+  const kd=await OXACC.kurulumDurum();
+  document.getElementById('bilkur').classList.toggle('hidden',!kd);
+  if(kd){document.getElementById('bilkurs').textContent=kd.tamam?'✓ Tamam, bildirimler zamanında gelir.':'Eksik: '+kd.adim.filter(x=>!x.ok).map(x=>x.t.toLocaleLowerCase('tr-TR')).join(', ')+'.';
+    document.getElementById('bilkurbtn').textContent=kd.tamam?'Aç':'Kur';}
+  const izinYok=!kd&&d.var&&d.izin&&d.izin!=='granted'&&BIL.some(b=>a[b.k]);
   document.getElementById('bilizin').classList.toggle('hidden',!izinYok);
   document.getElementById('bilizinbtn').textContent=d.izin==='prompt'?'İzin ver':'Ayarları aç';
   document.getElementById('bilnote').textContent=!d.var?'Bildirimler için uygulamanın yeni sürümünü (APK) kur.':
@@ -241,6 +250,7 @@ document.getElementById('bilrows').onclick=async e=>{const b=e.target.closest('[
 document.getElementById('bilrows').onchange=async e=>{const s=e.target.closest('select[data-saat]');if(!s)return;
   const b=BIL.find(x=>x.saat===s.dataset.saat);await OXACC.bildirimAyarla({[s.dataset.saat]:s.value});toast((b?b.t:'')+': '+s.value);};
 document.getElementById('bilizinbtn').onclick=async()=>{await OXACC.bildirimIzinIste();renderBil();};
+document.getElementById('bilkurbtn').onclick=()=>OXACC.kurulum(true,renderBil);
 // Telefonun ayarlarından dönünce izin durumu yenilensin.
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderBil();});
 

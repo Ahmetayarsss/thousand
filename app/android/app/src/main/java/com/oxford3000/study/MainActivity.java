@@ -3,19 +3,54 @@ package com.oxford3000.study;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
+
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+
+    private OnBackPressedCallback geriCb;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(GroupTts.class);   // "Listeyi oku" (foreground servis + medya kontrolleri)
         registerPlugin(Bildirim.class);   // bildirimler (arkadaşlık isteği; uygulama kapalıyken de)
+        registerPlugin(Uygulama.class);   // geri tuşu: sayfa onay sorduktan sonra eski davranış
         // Bildirime dokunarak açıldıysa (uygulama kapalıydı): açılacak sayfayı sakla, sayfa launchTarget() ile alır.
         if (savedInstanceState == null) takeTarget(getIntent());
         super.onCreate(savedInstanceState);
+        // Geri tuşu: önce sayfaya sorulur (window.oxGeri). Sayfa "x" derse kendisi ele alır (ör. sınav
+        // sürerken "Emin misin?" sorar, onaylanırsa Uygulama.geri() çağırır); yoksa eski davranış sürer.
+        geriCb = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                try {
+                    if (getBridge() == null) { varsayilanGeri(); return; }
+                    getBridge().eval("(window.oxGeri&&window.oxGeri())||''", v -> {
+                        if (!"\"x\"".equals(v)) varsayilanGeri();
+                    });
+                } catch (Exception e) {
+                    varsayilanGeri();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, geriCb);
         // Bildirim izni (Android 13+) açılışta sorulmaz: hesap açılınca bir kez (hesap.js) ve
         // "Listeyi oku" başlarken (GroupTts) sorulur; Ayarlar → Bildirimler'den de verilebilir.
+    }
+
+    /** Geri tuşunun eski davranışı: uygulamadan çık / arka plana al (Android'in kendi işlemi). */
+    public void varsayilanGeri() {
+        runOnUiThread(() -> {
+            try {
+                if (geriCb != null) geriCb.setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            } catch (Exception e) {
+                try { moveTaskToBack(true); } catch (Exception ignored) {}
+            } finally {
+                if (geriCb != null) geriCb.setEnabled(true);
+            }
+        });
     }
 
     @Override

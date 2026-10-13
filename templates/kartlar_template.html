@@ -69,6 +69,14 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .btn.again{background:var(--red)} .btn.know{background:var(--green)} .btn.open{background:var(--accent)}
 .hidden{display:none!important}
 .vh{visibility:hidden}
+.leave{position:fixed;inset:0;z-index:10000;background:rgba(20,27,38,.5);display:flex;align-items:center;justify-content:center;padding:22px}
+.leave .bx{width:100%;max-width:380px;background:#fff;border-radius:20px;padding:22px 18px 16px;box-shadow:0 18px 50px rgba(0,0,0,.3);text-align:center}
+.leave h3{margin:0 0 8px;font-size:21px;font-weight:900;color:var(--ink)}
+.leave p{margin:0 0 16px;color:#5B6B7B;font-size:14px;line-height:1.45}
+.leave .row{display:flex;gap:10px}
+.leave button{flex:1;border:0;border-radius:13px;padding:14px 0;font-size:15px;font-weight:800;cursor:pointer}
+.leave .stay{background:var(--ink);color:#fff}
+.leave .go{background:#FDECEA;color:var(--red-d)}
 .cheat{position:fixed;inset:0;z-index:9999;background:#fff;display:none;align-items:center;justify-content:center;padding:34px;text-align:center}
 .cheat.show{display:flex}
 .cheat-msg{color:#111;font-size:30px;font-weight:900;line-height:1.3;max-width:620px}
@@ -678,7 +686,36 @@ function showResult(big,small,msg,wlHtml,isTest){
 }
 
 function start(){(mode==='test'?startTest:startExam)();}
-document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;start();});
+/* ---- Sınav sürerken her çıkışta onay: sağa/sola kaydırma, Test'e geçiş, Bitir, geri tuşu, bildirime dokunma.
+   Cevaplar zaten anında kaydedildiği için çıkılırsa sınav sonra kaldığı yerden sürer. ---- */
+function sinavda(){return mode==='exam'&&!!cur&&!document.getElementById('stage').classList.contains('hidden');}
+let leaveBox=null;
+function closeLeave(){if(leaveBox){leaveBox.remove();leaveBox=null;}}
+function askLeave(what,act,go){
+  if(leaveBox)return;
+  leaveBox=document.createElement('div');leaveBox.className='leave';
+  leaveBox.innerHTML='<div class="bx"><h3>Emin misin?</h3><p></p><div class="row"><button class="stay">Sınava devam et</button><button class="go"></button></div></div>';
+  leaveBox.querySelector('p').textContent=what+' Cevapların kaydedildi; sonra kaldığın yerden devam edersin.';
+  leaveBox.querySelector('.go').textContent=act;
+  leaveBox.querySelector('.stay').onclick=closeLeave;
+  leaveBox.querySelector('.go').onclick=()=>{closeLeave();OXLOG.add('sinav_cik',{n:examIdx});go();};
+  leaveBox.addEventListener('click',e=>{if(e.target===leaveBox)closeLeave();});
+  document.body.appendChild(leaveBox);
+}
+window.oxCikisSor=function(go,u){
+  if(sinavda()&&u&&/^kartlar\.html\?exam=1/.test(u))return;   // hedef zaten bu sınav (ör. hatırlatmaya dokunuldu)
+  if(sinavda())askLeave('Sınavdan çıkıyorsun.','Çık',go);else go();};
+// Telefonun geri tuşu (MainActivity sorar): açık onayı kapatır; sınavdaysa sorar; değilse eski davranış (uygulamadan çık).
+window.oxGeriYakala=function(){
+  if(leaveBox){closeLeave();return true;}
+  if(!sinavda())return false;
+  askLeave('Sınavdan çıkıyorsun.','Çık',()=>{try{Capacitor.Plugins.Uygulama.geri();}catch(e){}});
+  return true;
+};
+document.getElementById('moderow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  const row=e.currentTarget,m=b.dataset.m;if(m==='exam'&&mode==='exam'&&sinavda())return;   // zaten sınavda: baştan başlatma
+  const sw=()=>{[...row.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=m;start();};
+  if(m==='test'&&sinavda())askLeave('Teste geçiyorsun.','Teste geç',sw);else sw();});
 document.getElementById('deck').addEventListener('click',e=>{if(busy||!cur)return;if(slots[0]&&slots[0].contains(e.target)){
   if(side===0&&isTyped(cur)){   // yazılı kart dokunuşla açılmaz (cevap klavyeyle yazılır)
     if(cur._dir!=='tr2en')sayWord(cur.w);
@@ -692,7 +729,7 @@ document.getElementById('know').addEventListener('click',()=>{mode==='test'?grad
 document.getElementById('check').addEventListener('click',()=>{if(busy||!cur)return;
   if(!tyRes)submitTyped();else if(side===1)gradeExam(tyRes.ok);});
 document.getElementById('r-again').addEventListener('click',start);
-document.getElementById('finish').addEventListener('click',()=>{if(busy||mode!=='exam')return;examDone();});
+document.getElementById('finish').addEventListener('click',()=>{if(busy||mode!=='exam')return;askLeave('Sınavı bitiriyorsun.','Bitir',()=>{if(mode==='exam')examDone();});});
 document.getElementById('r-next').addEventListener('click',()=>{location.href='index.html';});
 document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV();},{once:true});
 // Tekrar butonundan gelindiyse (?exam=1) doğrudan sınav modunda başla

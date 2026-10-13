@@ -19,10 +19,18 @@
   if (!Cap || typeof Cap.isNativePlatform !== "function" || !Cap.isNativePlatform()) {
     return; // Tarayıcı: dokunma.
   }
+  // Sayfa geçişi: sayfa isterse (ör. sınav sürerken) önce onay sorar (window.oxCikisSor).
+  function git(u) { if (typeof window.oxCikisSor === "function") window.oxCikisSor(function () { location.href = u; }, u); else location.href = u; }
+  // Telefonun geri tuşu: MainActivity önce bunu sorar; "x" dönerse sayfa ele aldı (ör. sınavda onay),
+  // aksi halde eski davranış (uygulamadan çıkış) sürer.
+  window.oxGeri = function () {
+    try { if (typeof window.oxGeriYakala === "function" && window.oxGeriYakala()) return "x"; } catch (e) {}
+    return "";
+  };
   // "Listeyi oku" bildirimine dokununca (MainActivity → oxTtsOpen) başka sayfadaysak ana sayfaya geç.
   window.addEventListener("oxTtsOpen", function () {
     var p = location.pathname.split("/").pop() || "index.html";
-    if (p !== "index.html") location.href = "index.html";
+    if (p !== "index.html") git("index.html");
   });
   // Bildirime dokununca ilgili sayfaya geç: arkadaşlık isteği → arkadaslar.html, dürtme / hatırlatma →
   // kartlar.html?exam=1. Uygulama kapalıydıysa sayfa açılırken launchTarget() verir, açıktıysa MainActivity
@@ -36,7 +44,7 @@
         var p = r && r.sayfa, cur = (location.pathname.split("/").pop() || "index.html") + location.search;
         if (!p || !/^[a-z0-9_-]+\.html(\?[a-z0-9_=&-]*)?$/i.test(p)) return;
         try { if (window.OXLOG) OXLOG.add("bildirim", { a: "ac", p: p.replace(".html", "") }); } catch (e) {}
-        if (cur !== p) location.href = p;
+        if (cur !== p) git(p);
       }).catch(function () {});
     };
     window.addEventListener("oxHedef", hedef);

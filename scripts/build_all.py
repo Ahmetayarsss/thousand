@@ -69,6 +69,8 @@ def swipe_script(next_t, prev_t, up_t="", down_t=""):
     sayfa en alttayken yukarı itince → down_t (alttaki sayfa)."""
     return (
         "<script>(function(){var N=%r,P=%r,U=%r,D=%r;var x0=0,y0=0,t0=0,ok=false,top=false,bot=false;"
+        # Sayfa isterse (ör. sınav sürerken) geçişten önce onay sorar: window.oxCikisSor(git).
+        "function go(u){if(window.oxCikisSor)window.oxCikisSor(function(){location.href=u;},u);else location.href=u;}"
         "addEventListener('touchstart',function(e){"
         "if(e.touches.length!==1){ok=false;return;}"
         "var el=e.target;"
@@ -80,9 +82,9 @@ def swipe_script(next_t, prev_t, up_t="", down_t=""):
         "var t=e.changedTouches[0];var dx=t.clientX-x0,dy=t.clientY-y0;"
         "if(Date.now()-t0>800)return;"
         "if(Math.abs(dy)>=90&&Math.abs(dy)>Math.abs(dx)*1.8){"
-        "if(dy>0&&U&&top)location.href=U;else if(dy<0&&D&&bot)location.href=D;return;}"
+        "if(dy>0&&U&&top)go(U);else if(dy<0&&D&&bot)go(D);return;}"
         "if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.8)return;"
-        "if(dx<0&&N)location.href=N;else if(dx>0&&P)location.href=P;},{passive:true});"
+        "if(dx<0&&N)go(N);else if(dx>0&&P)go(P);},{passive:true});"
         "})();</script>"
     ) % (next_t, prev_t, up_t, down_t)
 

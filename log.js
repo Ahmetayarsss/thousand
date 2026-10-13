@@ -13,6 +13,7 @@
  *   okuma {…}             Listeyi oku         okuma_hata {m}
  *   hesap {a}             hesap işlemi        hesap_hata {f, m}
  *   bildirim {a, …}       bildirim izni (a: izin, d) / bildirime dokunup açma (a: ac, p)
+ *   durt {s}              arkadaşını dürttü (s: gonderildi | bugun_durttun)
  *   ayar {...}            ayar değişti        dev {a}        geliştirici işlemi
  *   hata {m, f, l}        yakalanmamış JS hatası
  * En fazla MAX olay tutulur (eskiler silinir). Her olayın bir sıra numarası var: sira() şimdiye

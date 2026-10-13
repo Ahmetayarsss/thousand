@@ -39,6 +39,9 @@ h1{font-size:20px;font-weight:800;margin:4px 0 12px}
 .fr .n{font-size:16px;font-weight:800}
 .fr .seen{font-size:11.5px;color:var(--muted);margin-left:auto}
 .fr .more{border:0;background:none;color:var(--muted);font-size:18px;padding:0 2px 0 8px;cursor:pointer;line-height:1}
+.fr .durt{padding:6px 10px;font-size:12px;margin-left:8px}
+.fr .durt:disabled{opacity:1;background:var(--bg);color:var(--green);border:1px solid var(--line)}
+.fr .line.dm{color:var(--amber);font-weight:700}
 .fr .line{font-size:13px;margin-top:5px;color:var(--ink)}
 .fr .line b{font-weight:800}
 .fr .line .k{color:var(--muted);font-weight:700;margin-right:4px}
@@ -119,9 +122,13 @@ function render(d,offline){
   // Arkadaşlar
   const fr=d.friends||[];
   $('frcount').textContent=fr.length?'('+fr.length+')':'';
-  $('friends').innerHTML=fr.length?fr.map(f=>{const s=f.stats||{},td=s.gun===today;
+  // Son 24 saatte beni dürtenler (arkadaş başına en yenisi)
+  const dm={};(d.durtmeler||[]).forEach(x=>{if(!dm[x.from])dm[x.from]=x;});
+  $('friends').innerHTML=fr.length?fr.map(f=>{const s=f.stats||{},td=s.gun===today,dz=dm[f.id];
     return `<div class="fr"><div class="top"><span class="n">${esc(f.nick)}</span><span class="seen">${ago(f.last_seen)}</span>
+      <button class="btn durt" data-durt="${esc(f.id)}" data-nick="${esc(f.nick)}"${f.durtuldu?' disabled':''}>${f.durtuldu?'Dürtüldü ✓':'👉 Dürt'}</button>
       <button class="more" data-rm="${esc(f.id)}" data-nick="${esc(f.nick)}" aria-label="Seçenekler">⋯</button></div>
+      ${dz?`<div class="line dm">👉 Seni dürttü · ${ago(dz.at)}</div>`:''}
       <div class="line"><span class="k">Bugün</span>${td&&s.cevap?`<b>${n(s.cevap)}</b> cevap · <b>${n(s.dogru)}</b> doğru · <b>${n(s.yeni)}</b> yeni`:'<span class="idle">henüz çalışmadı</span>'}</div>
       <div class="line"><span class="k">Toplam</span><b>${n(s.dongu)}</b> döngüde · <b>${n(s.olgun)}</b> olgun${s.seri?` · 🔥 <b>${n(s.seri)}</b> gün`:''}</div></div>`;}).join('')
     :'<div class="empty">Henüz arkadaşın yok.<br>Kodunu paylaş ya da arkadaşının kodunu yukarıya yaz.</div>';
@@ -149,7 +156,15 @@ document.addEventListener('click',async e=>{
   else if(b.dataset.rej)act(()=>OXACC.respond(b.dataset.rej,false),'İstek reddedildi');
   else if(b.dataset.cancel)act(()=>OXACC.cancel(b.dataset.cancel),'İstek geri çekildi');
   else if(b.dataset.rm){if(confirm(b.dataset.nick+' arkadaşlıktan çıkarılsın mı?'))act(()=>OXACC.removeFriend(b.dataset.rm),'Arkadaşlıktan çıkarıldı');}
+  else if(b.dataset.durt)durt(b);
 });
+// Dürt: arkadaşına "Hadi çalış!" bildirimi (günde bir kez; sunucu sınırlar). Düğme gün boyu "Dürtüldü ✓" kalır.
+async function durt(b){b.disabled=true;const nick=b.dataset.nick;
+  try{const r=await OXACC.durt(b.dataset.durt),m=r&&r.msg;
+    if(m==='gonderildi'||m==='bugun_durttun'){b.textContent='Dürtüldü ✓';
+      toast(m==='gonderildi'?'👉 '+nick+' dürtüldü':'Bugün '+nick+' zaten dürtüldü');OXLOG.add('durt',{s:m});}
+    else{b.disabled=false;toast(m==='arkadas_degil'?'Artık arkadaş değilsiniz.':OXACC.errText({message:m}));refresh();}}
+  catch(e){b.disabled=false;toast(OXACC.errText(e));}}
 async function send(){
   const c=$('code').value.trim();const m=$('addmsg');
   if(c.replace(/[^A-Za-z0-9]/g,'').length<4){m.className='msg bad';m.textContent='Kodu eksiksiz yaz.';return;}

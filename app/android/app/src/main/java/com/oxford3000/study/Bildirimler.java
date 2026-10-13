@@ -16,24 +16,29 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Bildirim yardımcıları — {@link Bildirim} eklentisi ve arka plan işleri ({@link ArkadasWorker})
- * ortak kullanır; ileride tekrar/seri hatırlatıcıları da bunları kullanacak:
- * kanal oluşturma, bildirim gösterilebilir mi, dokununca uygulamada bir sayfayı açan bildirim,
- * dokunulan bildirimin hedef sayfası, ayarlar (SharedPreferences) ve ISO zaman karşılaştırma.
+ * Bildirim yardımcıları — {@link Bildirim} eklentisi ve arka plan işleri ({@link ArkadasWorker}:
+ * arkadaşlık isteği + dürtme, {@link HatirlatmaWorker}: seri/tekrar hatırlatması) ortak kullanır:
+ * kanallar, bildirim gösterilebilir mi, sessiz saatler (22:00–08:00), dokununca uygulamada bir sayfayı
+ * açan bildirim, dokunulan bildirimin hedef sayfası, ayarlar (SharedPreferences) ve ISO zaman karşılaştırma.
  */
 public final class Bildirimler {
     private Bildirimler() {}
 
     /** Bildirime dokununca açılacak sayfa (intent eki), ör. "arkadaslar.html". */
     public static final String EXTRA_TARGET = "oxHedef";
-    /** Arkadaşlık istekleri kanalı ve bildirim kimliği. */
-    public static final String CH_FRIENDS = "arkadaslik";
-    public static final int ID_FRIENDS = 4301;
+    /** Kanallar ve bildirim kimlikleri (aynı kimlik öncekinin yerine geçer). */
+    public static final String CH_FRIENDS = "arkadaslik";   // arkadaşlık istekleri
+    public static final String CH_NUDGE = "durtme";         // dürtmeler
+    public static final String CH_REMIND = "hatirlatma";    // seri / tekrar hatırlatmaları
+    public static final int ID_FRIENDS = 4301, ID_NUDGE = 4302, ID_STREAK = 4311, ID_REVIEW = 4312;
+    /** Sessiz saatler: bu aralıkta hiç bildirim yok (arkadaş bildirimleri sabaha kalır). */
+    public static final int QUIET_FROM = 22, QUIET_TO = 8;
     /** Ayarlar (url, key, secret, son, bad) değişirken kilit: eklenti ile arka plan işi aynı anda yazmasın. */
     public static final Object LOCK = new Object();
 
@@ -60,6 +65,29 @@ public final class Bildirimler {
                 NotificationManager.IMPORTANCE_DEFAULT);
     }
 
+    public static void ensureNudgeChannel(Context c) {
+        ensureChannel(c, CH_NUDGE, "Dürtmeler", "Bir arkadaşın seni dürtünce", NotificationManager.IMPORTANCE_DEFAULT);
+    }
+
+    public static void ensureRemindChannel(Context c) {
+        ensureChannel(c, CH_REMIND, "Hatırlatmalar", "Seri hatırlatması ve tekrar zamanı", NotificationManager.IMPORTANCE_DEFAULT);
+    }
+
+    /** Şu an sessiz saatlerde mi (telefonun yerel saati). */
+    public static boolean quiet() {
+        return quietAt(Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
+    }
+
+    public static boolean quietAt(int hour) {
+        return hour >= QUIET_FROM || hour < QUIET_TO;
+    }
+
+    /** Bugünün tarihi (yerel) "yyyy-MM-dd" — JS'in hatırlatma günüyle aynı biçim. */
+    public static String todayStr() {
+        Calendar k = Calendar.getInstance();
+        return String.format(Locale.US, "%04d-%02d-%02d", k.get(Calendar.YEAR), k.get(Calendar.MONTH) + 1, k.get(Calendar.DAY_OF_MONTH));
+    }
+
     /** Uygulama bildirim gösterebilir mi: izin (Android 13+) ve uygulamanın bildirimleri açık mı. */
     public static boolean enabled(Context c) {
         try {
@@ -83,8 +111,9 @@ public final class Bildirimler {
     }
 
     /**
-     * Bildirim göster. Dokununca uygulama açılır; {@code target} verilmişse o sayfaya geçilir
-     * (MainActivity → {@link #setTarget} → sayfada Bildirim.launchTarget()). Aynı {@code id} öncekinin yerine geçer.
+     * Bildirim göster. Dokununca uygulama açılır; {@code target} verilmişse o sayfaya geçilir, ör. "arkadaslar.html"
+     * ya da "kartlar.html?exam=1" (MainActivity → {@link #setTarget} → sayfada Bildirim.launchTarget()).
+     * Aynı {@code id} öncekinin yerine geçer. {@code text} boşsa yalnız başlık.
      */
     public static void post(Context c, String channel, int id, int icon, String category,
                             String title, String text, String target, int number) {
@@ -92,11 +121,10 @@ public final class Bildirimler {
             NotificationCompat.Builder b = new NotificationCompat.Builder(c, channel)
                     .setSmallIcon(icon)
                     .setContentTitle(title)
-                    .setContentText(text)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                     .setAutoCancel(true)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setColor(0xFF3B6EA5);
+            if (text != null && !text.isEmpty()) b.setContentText(text).setStyle(new NotificationCompat.BigTextStyle().bigText(text));
             if (category != null) b.setCategory(category);
             if (number > 0) b.setNumber(number);
             PendingIntent pi = openIntent(c, id, target);

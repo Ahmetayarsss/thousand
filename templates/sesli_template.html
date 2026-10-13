@@ -253,11 +253,17 @@ document.body.addEventListener('touchstart',()=>{if(synth&&!voices.length)loadV(
 function refresh(){setSecLabel();renderList();syncNative(true);}
 refresh();
 window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
-// Hesap: ilk açılışta takma ad (internet yoksa "Sonra"); hesap varsa yeni arkadaşlık isteklerini haber ver.
+// Hesap: ilk açılışta takma ad (internet yoksa "Sonra"); hesap varsa yeni arkadaşlık isteklerini ve dürtmeleri haber ver.
 setTimeout(()=>{if(FORCE_CELE)return;
   if(!OXACC.account()){OXACC.onboard(false);return;}
-  OXACC.dashboard().then(d=>{const inc=(d&&d.incoming)||[];let seen=[];try{seen=JSON.parse(localStorage.getItem('ox3000_istek_gor')||'[]');}catch(e){}
+  OXACC.dashboard().then(d=>{const inc=(d&&d.incoming)||[],msgs=[];let seen=[];try{seen=JSON.parse(localStorage.getItem('ox3000_istek_gor')||'[]');}catch(e){}
     const yeni=inc.filter(r=>!seen.includes(r.id));
-    if(yeni.length)toast('👥 '+(yeni.length===1?yeni[0].nick+' sana arkadaşlık isteği gönderdi':yeni.length+' yeni arkadaşlık isteği')+' — Sözlük\'ün altındaki Arkadaşlar sayfasında.');
-    try{localStorage.setItem('ox3000_istek_gor',JSON.stringify(inc.map(r=>r.id)));}catch(e){}}).catch(()=>{});},800);
+    if(yeni.length)msgs.push('👥 '+(yeni.length===1?yeni[0].nick+' sana arkadaşlık isteği gönderdi':yeni.length+' yeni arkadaşlık isteği')+' — Sözlük\'ün altındaki Arkadaşlar sayfasında.');
+    try{localStorage.setItem('ox3000_istek_gor',JSON.stringify(inc.map(r=>r.id)));}catch(e){}
+    // Görülmemiş dürtmeler (son 24 saat; aynı arkadaştan birden çoksa bir kez sayılır)
+    const dz=(d&&d.durtmeler)||[];let dg=[];try{dg=JSON.parse(localStorage.getItem('ox3000_durt_gor')||'[]');}catch(e){}
+    const kim=[];dz.filter(x=>!dg.includes(x.id)).forEach(x=>{if(!kim.some(y=>y.from===x.from))kim.push(x);});
+    if(kim.length)msgs.push('👉 '+kim[0].nick+(kim.length>1?' ve '+(kim.length-1)+' kişi daha':'')+' seni dürttü: Hadi çalış!');
+    try{localStorage.setItem('ox3000_durt_gor',JSON.stringify(dz.map(x=>x.id)));}catch(e){}
+    msgs.forEach((m,i)=>setTimeout(()=>toast(m),i*4300));}).catch(()=>{});},800);
 </script></body></html>

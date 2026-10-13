@@ -34,6 +34,8 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s}
 .sw.on{background:var(--green)} .sw.on::after{left:23px}
 .sw:disabled{opacity:.45;cursor:default}
+.saat{margin-top:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-weight:800;font-size:13px;border-radius:10px;padding:6px 8px;font-family:inherit}
+.saat:disabled{opacity:.5}
 .hidden{display:none!important}
 .acc .v{font-size:15px;font-weight:800}
 .acc .code{letter-spacing:2px}
@@ -94,7 +96,7 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
     </div>
   </div>
 
-  <!-- Yalnız telefonda (uygulamada). Yeni bildirim türleri (ör. tekrar hatırlatıcısı) BIL listesine eklenir. -->
+  <!-- Yalnız telefonda (uygulamada). Satırlar BIL listesinden çıkar; yeni tür: BIL + hesap.js (BVAR) + native. -->
   <div class="card hidden" id="bilcard">
     <h2>Bildirimler</h2>
     <div id="bilrows"></div>
@@ -162,8 +164,9 @@ function setN(v){const n=SRS.setListSize(v);OXLOG.add('ayar',{liste:n});render()
 document.getElementById('minus').onclick=()=>setN(SRS.listSize()-5);
 document.getElementById('plus').onclick=()=>setN(SRS.listSize()+5);
 document.getElementById('chips').onclick=e=>{const b=e.target.closest('button');if(b)setN(+b.dataset.v);};
-document.getElementById('fwd').onclick=()=>{SRS.setDev({off:SRS.dev().off+1});OXLOG.add('dev',{a:'gun+1',off:SRS.dev().off});render();toast('1 gün ileri sarıldı');};
-document.getElementById('today').onclick=()=>{SRS.setDev({off:0});OXLOG.add('dev',{a:'bugun'});render();toast('Gerçek tarihe dönüldü');};
+const planla=()=>{try{OXACC.hatirlatmaPlanla(true);}catch(e){}};   // gün/ilerleme değişince hatırlatmalar
+document.getElementById('fwd').onclick=()=>{SRS.setDev({off:SRS.dev().off+1});OXLOG.add('dev',{a:'gun+1',off:SRS.dev().off});render();planla();toast('1 gün ileri sarıldı');};
+document.getElementById('today').onclick=()=>{SRS.setDev({off:0});OXLOG.add('dev',{a:'bugun'});render();planla();toast('Gerçek tarihe dönüldü');};
 document.getElementById('cheat').onclick=()=>{SRS.setDev({noCheat:!SRS.dev().noCheat});OXLOG.add('dev',{a:'hile',acik:SRS.dev().noCheat?0:1});render();toast('Hile tespiti '+(SRS.dev().noCheat?'kapalı':'açık'));};
 // Geliştirici modu kullanıcılardan gizli: başlığa 3 sn içinde 7 kez dokununca açılır/kapanır.
 // Kapalıyken gün kaydırma ve hile ayarı yok sayılır (bkz. SRS.dev).
@@ -172,7 +175,7 @@ document.getElementById('title').addEventListener('click',()=>{
   const t=performance.now();devTaps=devTaps.filter(x=>t-x<3000);devTaps.push(t);
   if(devTaps.length<7)return;
   devTaps=[];const on=!SRS.dev().on;SRS.setDev({on:on});OXLOG.add('dev',{a:on?'ac':'kapat'});
-  render();toast(on?'Geliştirici modu açıldı 🛠':'Geliştirici modu kapandı');
+  render();planla();toast(on?'Geliştirici modu açıldı 🛠':'Geliştirici modu kapandı');
 });
 // Okuma ayarları: sürmekte olan okumaya da hemen uygulanır (yeni APK'da).
 const GT=(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.GroupTts)||null;
@@ -189,7 +192,7 @@ document.getElementById('reset').onclick=()=>{
   OXLOG.add('dev',{a:'sifirla'});
   SRS.reset();SRS.setDev({off:0});
   ['ox3000_sessions_v1','ox3000_cheat_v1'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
-  render();toast('İlerleme sıfırlandı');
+  render();planla();toast('İlerleme sıfırlandı');
 };
 // ---- Hesap ----
 let recShown=false;
@@ -214,21 +217,33 @@ document.getElementById('acc-newrec').onclick=e=>{if(!confirm('Yeni kurtarma kod
 document.getElementById('acc-del').onclick=e=>{if(!confirm('Hesabın silinsin mi? Arkadaşlıkların ve yedeğin silinir; bu geri alınamaz.'))return;
   if(!confirm('Emin misin?'))return;accDo(e.target,()=>OXACC.deleteAccount(),'Hesap silindi');};
 
-// ---- Bildirimler (telefonda; ileride başka türler de bu listeye eklenir) ----
-const BIL=[{k:'arkadas',t:'Arkadaşlık istekleri',s:'Biri sana istek gönderince haber verir, uygulama kapalıyken de.'}];
-async function renderBil(){const d=await OXACC.bildirimDurum();
+// ---- Bildirimler (telefonda). Yeni tür: BIL'e satır + hesap.js'te ayarı (BVAR) ve native tarafı. ----
+const BIL=[
+  {k:'seri',t:'Seri hatırlatma',s:'Çalışmadığın günlerde, serin bozulmasın diye.',saat:'seriSaat'},
+  {k:'tekrar',t:'Tekrar zamanı',s:'O gün tekrarı gelen kelime varsa.',saat:'tekrarSaat'},
+  {k:'arkadas',t:'Arkadaşlık istekleri',s:'Biri sana istek gönderince, uygulama kapalıyken de.'},
+  {k:'durt',t:'Dürtmeler',s:'Bir arkadaşın seni dürtünce.'}];
+// Saatler 08:00–21:45, 15 dk arayla (22:00–08:00 sessiz saatler: o arada bildirim gelmez).
+const SAATLER=[];for(let m=8*60;m<22*60;m+=15)SAATLER.push(('0'+Math.floor(m/60)).slice(-2)+':'+('0'+m%60).slice(-2));
+async function renderBil(){const d=await OXACC.bildirimDurum(),a=d.ayar;
   document.getElementById('bilcard').classList.toggle('hidden',!d.native);   // tarayıcıda yok
   if(!d.native)return;
-  document.getElementById('bilrows').innerHTML=BIL.map(b=>'<div class="row"><div><div class="t">'+b.t+'</div><div class="s">'+b.s+'</div></div>'+
-    '<button class="sw'+(d.var&&d.acik[b.k]?' on':'')+'" data-bil="'+b.k+'" aria-label="'+b.t+'"'+(d.var?'':' disabled')+'></button></div>').join('');
-  const izinYok=d.var&&d.izin&&d.izin!=='granted'&&BIL.some(b=>d.acik[b.k]);
+  document.getElementById('bilrows').innerHTML=BIL.map(b=>{const on=d.var&&a[b.k],v=b.saat?a[b.saat]:'';
+    const sel=b.saat?'<select class="saat" data-saat="'+b.saat+'" aria-label="'+b.t+' saati"'+(on?'':' disabled')+'>'+
+      (SAATLER.includes(v)?SAATLER:SAATLER.concat(v).sort()).map(x=>'<option'+(x===v?' selected':'')+'>'+x+'</option>').join('')+'</select>':'';
+    return '<div class="row"><div><div class="t">'+b.t+'</div><div class="s">'+b.s+'</div>'+sel+'</div>'+
+      '<button class="sw'+(on?' on':'')+'" data-bil="'+b.k+'" aria-label="'+b.t+'"'+(d.var?'':' disabled')+'></button></div>';}).join('');
+  const izinYok=d.var&&d.izin&&d.izin!=='granted'&&BIL.some(b=>a[b.k]);
   document.getElementById('bilizin').classList.toggle('hidden',!izinYok);
   document.getElementById('bilizinbtn').textContent=d.izin==='prompt'?'İzin ver':'Ayarları aç';
   document.getElementById('bilnote').textContent=!d.var?'Bildirimler için uygulamanın yeni sürümünü (APK) kur.':
-    (!d.hesap&&d.acik.arkadas)?'Arkadaşlık istekleri için önce hesap oluştur.':'';}
+    ((!d.hesap&&(a.arkadas||a.durt))?'Arkadaşlık istekleri ve dürtmeler için önce hesap oluştur. ':'')+
+    'Gece 22:00–08:00 arası bildirim gelmez (arkadaş bildirimleri sabah gelir). Uygulamayı 3 gün açmazsan hatırlatmalar durur.';}
 document.getElementById('bilrows').onclick=async e=>{const b=e.target.closest('[data-bil]');if(!b||b.disabled)return;
   const on=!b.classList.contains('on'),t=(BIL.find(x=>x.k===b.dataset.bil)||{}).t||'';b.classList.toggle('on',on);b.disabled=true;
-  try{await OXACC.bildirimAyarla(b.dataset.bil,on);}finally{b.disabled=false;}toast(t+': '+(on?'açık':'kapalı'));renderBil();};
+  try{await OXACC.bildirimAyarla({[b.dataset.bil]:on});}finally{b.disabled=false;}toast(t+': '+(on?'açık':'kapalı'));renderBil();};
+document.getElementById('bilrows').onchange=async e=>{const s=e.target.closest('select[data-saat]');if(!s)return;
+  const b=BIL.find(x=>x.saat===s.dataset.saat);await OXACC.bildirimAyarla({[s.dataset.saat]:s.value});toast((b?b.t:'')+': '+s.value);};
 document.getElementById('bilizinbtn').onclick=async()=>{await OXACC.bildirimIzinIste();renderBil();};
 // Telefonun ayarlarından dönünce izin durumu yenilensin.
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderBil();});

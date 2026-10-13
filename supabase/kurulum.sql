@@ -1,4 +1,4 @@
--- Oxford 3000 · Arkadaşlar, yedek, kullanım kayıtları, bildirimler — Supabase SQL Editor'de çalıştırın.
+-- Oxford 3000 · Arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirimler — Supabase SQL Editor'de çalıştırın.
 -- Tekrar çalıştırmak güvenli: tablolar ve veriler korunur, fonksiyonlar güncellenir. Dosya değişince
 -- (yeni sürüm) tamamını yeniden çalıştırın.
 -- Tablolara doğrudan erişim kapalı (RLS açık, politika yok); uygulama yalnız aşağıdaki fonksiyonları çağırır.
@@ -37,11 +37,26 @@ create table if not exists public.backups (
   updated_at timestamptz not null default now()
 );
 
+-- Dürtme ("Hadi çalış!"): bir arkadaşını günde (Türkiye saatiyle) en çok bir kez dürtebilirsin.
+create table if not exists public.durtmeler (
+  id         bigserial primary key,
+  from_id    uuid not null references public.profiles(id) on delete cascade on update cascade,
+  to_id      uuid not null references public.profiles(id) on delete cascade on update cascade,
+  gun        date not null,                         -- Türkiye saatiyle gün (günde bir sınırı)
+  created_at timestamptz not null default now(),
+  unique (from_id, to_id, gun),
+  check (from_id <> to_id)
+);
+create index if not exists durtmeler_to_created_idx on public.durtmeler (to_id, created_at);
+create index if not exists durtmeler_created_idx on public.durtmeler (created_at);
+
 alter table public.profiles        enable row level security;
 alter table public.friendships     enable row level security;
 alter table public.friend_requests enable row level security;
 alter table public.backups         enable row level security;
-revoke all on public.profiles, public.friendships, public.friend_requests, public.backups from anon, authenticated;
+alter table public.durtmeler       enable row level security;
+revoke all on public.profiles, public.friendships, public.friend_requests, public.backups, public.durtmeler from anon, authenticated;
+revoke all on sequence public.durtmeler_id_seq from anon, authenticated;
 
 -- ---------- yardımcılar (dışarıya kapalı) ----------
 create or replace function public._rand_code(n int) returns text
@@ -199,12 +214,30 @@ begin
   delete from friendships where (user_id = uid and friend_id = p_friend) or (user_id = p_friend and friend_id = uid);
 end $$;
 
--- Arkadaşlar sayfası tek çağrıda: ben, arkadaşlar (ilerlemeleriyle), gelen ve giden istekler.
+-- Dürt: arkadaşına "Hadi çalış!" (günde bir kez, Türkiye saatiyle). Arkadaşın bildirimi arka plan kontrolünde
+-- (bildirim_kontrol) alır. Dönen: {ok, msg: gonderildi | bugun_durttun | arkadas_degil, nick?}
+create or replace function public.durt(p_friend uuid) returns json
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := _me(); g date := (now() at time zone 'Europe/Istanbul')::date; nk text;
+begin
+  select p.nick into nk from friendships f join profiles p on p.id = f.friend_id where f.user_id = uid and f.friend_id = p_friend;
+  if not found then return json_build_object('ok', false, 'msg', 'arkadas_degil'); end if;
+  insert into durtmeler (from_id, to_id, gun) values (uid, p_friend, g) on conflict (from_id, to_id, gun) do nothing;
+  if not found then return json_build_object('ok', false, 'msg', 'bugun_durttun', 'nick', nk); end if;
+  -- saklama: 60 günden eski dürtmeler azar azar silinir
+  delete from durtmeler where id in (select id from durtmeler where created_at < now() - interval '60 days' order by created_at limit 200);
+  return json_build_object('ok', true, 'msg', 'gonderildi', 'nick', nk);
+end $$;
+
+-- Arkadaşlar sayfası tek çağrıda: ben, arkadaşlar (ilerlemeleriyle; bugün dürttüklerim işaretli), gelen ve giden
+-- istekler, son 24 saatte beni dürten arkadaşlar.
 create or replace function public.dashboard() returns json
 language sql stable security definer set search_path = public as $$
   select json_build_object(
     'me', (select json_build_object('id', p.id, 'nick', p.nick, 'code', p.code) from profiles p where p.id = auth.uid()),
-    'friends', coalesce((select json_agg(json_build_object('id', p.id, 'nick', p.nick, 'stats', p.stats, 'last_seen', p.last_seen)
+    'friends', coalesce((select json_agg(json_build_object('id', p.id, 'nick', p.nick, 'stats', p.stats, 'last_seen', p.last_seen,
+                                           'durtuldu', exists (select 1 from durtmeler d where d.from_id = auth.uid() and d.to_id = p.id
+                                                               and d.gun = (now() at time zone 'Europe/Istanbul')::date))
                                          order by p.last_seen desc)
                          from friendships f join profiles p on p.id = f.friend_id where f.user_id = auth.uid()), '[]'::json),
     'incoming', coalesce((select json_agg(json_build_object('id', p.id, 'nick', p.nick, 'code', p.code, 'at', r.created_at)
@@ -212,7 +245,12 @@ language sql stable security definer set search_path = public as $$
                           from friend_requests r join profiles p on p.id = r.from_id where r.to_id = auth.uid()), '[]'::json),
     'outgoing', coalesce((select json_agg(json_build_object('id', p.id, 'nick', p.nick, 'code', p.code, 'at', r.created_at)
                                           order by r.created_at desc)
-                          from friend_requests r join profiles p on p.id = r.to_id where r.from_id = auth.uid()), '[]'::json)
+                          from friend_requests r join profiles p on p.id = r.to_id where r.from_id = auth.uid()), '[]'::json),
+    'durtmeler', coalesce((select json_agg(json_build_object('id', d.id, 'from', d.from_id, 'nick', p.nick, 'at', d.created_at)
+                                           order by d.created_at desc)
+                           from durtmeler d join profiles p on p.id = d.from_id
+                           where d.to_id = auth.uid() and d.created_at > now() - interval '24 hours'
+                             and exists (select 1 from friendships f where f.user_id = auth.uid() and f.friend_id = d.from_id)), '[]'::json)
   )
 $$;
 
@@ -220,10 +258,12 @@ $$;
 revoke execute on function public._rand_code(int), public._hash(text), public._me(), public._fmt(text) from public, anon, authenticated;
 revoke execute on function public.create_profile(text), public.set_nick(text), public.new_recovery(), public.claim_account(text),
   public.delete_account(), public.push_stats(jsonb), public.push_backup(jsonb), public.get_backup(), public.send_request(text),
-  public.respond_request(uuid, boolean), public.cancel_request(uuid), public.remove_friend(uuid), public.dashboard() from public, anon;
+  public.respond_request(uuid, boolean), public.cancel_request(uuid), public.remove_friend(uuid), public.dashboard(),
+  public.durt(uuid) from public, anon;
 grant execute on function public.create_profile(text), public.set_nick(text), public.new_recovery(), public.claim_account(text),
   public.delete_account(), public.push_stats(jsonb), public.push_backup(jsonb), public.get_backup(), public.send_request(text),
-  public.respond_request(uuid, boolean), public.cancel_request(uuid), public.remove_friend(uuid), public.dashboard() to authenticated;
+  public.respond_request(uuid, boolean), public.cancel_request(uuid), public.remove_friend(uuid), public.dashboard(),
+  public.durt(uuid) to authenticated;
 
 -- ================= kullanım kayıtları (geliştirici için) =================
 -- Uygulamanın olay günlüğü (log.js) hesabı olan telefonlardan buraya gelir. Bakmak için:
@@ -322,7 +362,7 @@ revoke all on public.kayitlar_gorunum from anon, authenticated;
 revoke execute on function public.push_logs(jsonb) from public, anon;
 grant execute on function public.push_logs(jsonb) to authenticated;
 
--- ================= bildirimler (uygulama kapalıyken arkadaşlık isteği) =================
+-- ================= bildirimler (uygulama kapalıyken arkadaşlık isteği ve dürtme) =================
 -- Telefon arka planda (~15 dk'da bir) bildirim_kontrol'ü çağırır. Oturum (JWT) uygulamanın içinde kalır;
 -- arka plan için hesaba özel ayrı bir bildirim anahtarı kullanılır, sunucuda yalnız özeti (sha256) durur.
 alter table public.profiles add column if not exists bildirim_hash text;
@@ -337,8 +377,9 @@ begin
   return json_build_object('anahtar', s);
 end $$;
 
--- Arka plan kontrolü (giriş gerekmez, anahtar yeter): p_sonra'dan sonra gelen istekler (en yeni önce,
--- en çok 5) ve bekleyen istek sayısı. Anahtar bilinmiyorsa {ok:false} (telefon kontrolü bırakır).
+-- Arka plan kontrolü (giriş gerekmez, anahtar yeter): p_sonra'dan sonra gelen istekler ve dürtmeler (her biri
+-- en yeni önce, en çok 5; dürtmeler yalnız son 24 saat ve hâlâ arkadaş olanlardan), bekleyen istek sayısı.
+-- Telefon tek bir imleç (p_sonra) tutar: gördüğü/bildirdiği en yeni zaman. Anahtar bilinmiyorsa {ok:false}.
 create or replace function public.bildirim_kontrol(p_anahtar text, p_sonra timestamptz default null) returns json
 language plpgsql stable security definer set search_path = public as $$
 declare uid uuid;
@@ -351,7 +392,15 @@ begin
                       from (select p.nick, r.created_at from friend_requests r join profiles p on p.id = r.from_id
                             where r.to_id = uid and (p_sonra is null or r.created_at > p_sonra)
                             order by r.created_at desc limit 5) x), '[]'::json),
-    'bekleyen', (select count(*) from friend_requests where to_id = uid));
+    'bekleyen', (select count(*) from friend_requests where to_id = uid),
+    'durt', coalesce((select json_agg(json_build_object('nick', x.nick, 'at', x.created_at) order by x.created_at desc)
+                      from (select * from (select distinct on (d.from_id) p.nick, d.created_at   -- dürten başına en yenisi
+                                           from durtmeler d join profiles p on p.id = d.from_id
+                                           where d.to_id = uid and d.created_at > now() - interval '24 hours'
+                                             and (p_sonra is null or d.created_at > p_sonra)
+                                             and exists (select 1 from friendships f where f.user_id = uid and f.friend_id = d.from_id)
+                                           order by d.from_id, d.created_at desc) y
+                            order by y.created_at desc limit 5) x), '[]'::json));
 end $$;
 
 revoke execute on function public.bildirim_anahtari(), public.bildirim_kontrol(text, timestamptz) from public, anon;

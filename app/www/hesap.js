@@ -6,7 +6,8 @@
  * hesap, arkadaşlar ve ilerleme yedeği yeni telefona taşınır.
  * İlerleme özeti (bugün + toplam) dakikada en çok bir kez, yedek arada bir gönderilir.
  * Kullanım kayıtları (log.js) da hesap varsa sunucuya gider (geliştirici için, sessizce).
- * Telefonda (yeni APK) arkadaşlık isteği gelince uygulama kapalıyken de bildirim gösterilir (Bildirim eklentisi).
+ * Telefonda (yeni APK) bildirimler (Bildirim eklentisi): arkadaşlık isteği ve dürtme (uygulama kapalıyken de),
+ * seri / tekrar hatırlatmaları.
  * Sunucu tarafı: supabase/kurulum.sql — yalnız oradaki fonksiyonlar çağrılır.
  */
 window.OXACC = (function () {
@@ -246,6 +247,7 @@ window.OXACC = (function () {
 
   var syncTimer = 0;
   function syncSoon(force, withBackup) {
+    hatirlatSoon();   // sınav cevabından sonra: bugünün seri hatırlatması kalksın, tekrar sayıları güncellensin
     if (!account()) return;
     clearTimeout(syncTimer);
     syncTimer = setTimeout(function () {
@@ -253,10 +255,13 @@ window.OXACC = (function () {
       if (withBackup) pushBackup(false).catch(function (e) { if (!e.net) log("hesap_hata", { f: "yedek", m: String(e.message).slice(0, 120) }); });
     }, force ? 300 : 1500);
   }
-  // Uygulama arka plana geçince (ya da sayfa değişince): özeti, (değiştiyse) yedeği ve yeni kayıtları gönder.
+  // Uygulama arka plana geçince (ya da sayfa değişince): hatırlatmaları yeniden kur; özeti, (değiştiyse) yedeği
+  // ve yeni kayıtları gönder.
   try {
     document.addEventListener("visibilitychange", function () {
-      if (document.hidden && account()) {
+      if (!document.hidden) return;
+      hatirlatmaPlanla(false);
+      if (account()) {
         pushStats(false).catch(function () {});
         pushBackup(false).catch(function () {});
         if (!leaving) pushLogs(false);   // sayfa değişirken değil: yeni sayfa açılınca gerekirse gönderir
@@ -264,24 +269,55 @@ window.OXACC = (function () {
     });
   } catch (e) {}
 
-  // ---------------- bildirimler (uygulama kapalıyken arkadaşlık isteği) ----------------
-  // Native Bildirim eklentisi (yeni APK) arka planda ~15 dk'da bir sunucuya sorar (WorkManager). Uygulamanın
-  // oturumu (JWT) yerine hesaba özel bir bildirim anahtarı kullanılır: bildirim_anahtari ile alınır, burada
-  // saklanır, configure ile native'e verilir. Tarayıcıda, eski APK'da, internet yokken ya da sunucuda fonksiyon
-  // henüz yokken her şey sessizce atlanır (hata olursa 30 dk sonra, sonraki açılışta yeniden denenir).
-  var NKEY = "ox3000_bildirim_v1";   // {anahtar, kapali: {arkadas: true}, izin: 1 (bir kez soruldu), hata: ms}
+  // ---------------- bildirimler ----------------
+  // Native Bildirim eklentisi (yeni APK) iki iş yapar:
+  //  1) Arkadaşlık isteği ve dürtme: arka planda ~15 dk'da bir sunucuya sorar (WorkManager; uygulama kapalıyken de).
+  //     Uygulamanın oturumu (JWT) yerine hesaba özel bir bildirim anahtarı kullanılır: bildirim_anahtari ile
+  //     alınır, burada saklanır, configure ile native'e verilir.
+  //  2) Seri / tekrar hatırlatmaları (yerel, hesap gerekmez): içerikleri burada önümüzdeki en çok 3 gün için
+  //     hesaplanır, planla ile native'e verilir; uygulama açılınca, her sınav cevabında (syncSoon) ve arka plana
+  //     geçerken yeniden kurulur. Uygulama 3 gün açılmazsa hatırlatmalar biter.
+  // 22:00–08:00 arası native hiç bildirim göstermez (arkadaş bildirimleri sabaha kalır). Tarayıcıda, eski APK'da,
+  // internet yokken ya da sunucuda fonksiyon henüz yokken her şey sessizce atlanır (hata olursa 30 dk sonra,
+  // sonraki açılışta yeniden denenir). Açık/kapalı ve saatler ox3000_settings_v1.bildirim'de: ilerleme
+  // yedeğiyle birlikte yedeklenir (bildirim anahtarı yedeklenmez; telefona özeldir).
+  var NKEY = "ox3000_bildirim_v1";   // bu telefona özel: {anahtar, izin: 1 (bir kez soruldu), hata: ms}
+  var SETK = "ox3000_settings_v1", HKEY = "ox3000_hatirlatma_v1";   // HKEY: native'e son verilen plan {h, at}
+  var BVAR = { seri: true, seriSaat: "20:00", tekrar: true, tekrarSaat: "09:00", arkadas: true, durt: true };
   function nativeMi() { try { var C = window.Capacitor; return !!(C && C.isNativePlatform && C.isNativePlatform()); } catch (e) { return false; } }
   function nplug() { try { return (nativeMi() && window.Capacitor.Plugins && window.Capacitor.Plugins.Bildirim) || null; } catch (e) { return null; } }
   function nget() { var n = getJ(NKEY, {}); return (n && typeof n === "object") ? n : {}; }
   function nset(f) { var n = nget(); f(n); setJ(NKEY, n); return n; }
   function nflag(v) { try { if (v) sessionStorage.setItem("oxbil_kur", "1"); else sessionStorage.removeItem("oxbil_kur"); } catch (e) {} }
-  // Gelen isteklerin en yenisinin zamanı (sunucunun metni aynen: native ondan yenilerini sorar).
+  function sessiz(p) { try { if (p && p.catch) p.catch(function () {}); } catch (e) {} return p; }   // native sözü: hata yutulur
+  // Saat "SS:DD", 08:00–21:59 (22:00–08:00 sessiz saatler).
+  function saatOk(v) { return typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(v) && v >= "08:00" && v < "22:00"; }
+  // Bildirim ayarları (varsayılanlarla). Önceki sürümdeki "arkadaş istekleri kapalı" buraya taşınır.
+  function bilAyar() {
+    var n = nget();
+    if (n.kapali) { if (n.kapali.arkadas) bilAyarYaz({ arkadas: false }); nset(function (x) { delete x.kapali; }); }
+    var s = getJ(SETK, {}) || {}, b = (s.bildirim && typeof s.bildirim === "object") ? s.bildirim : {}, o = {};
+    for (var k in BVAR) o[k] = Object.prototype.hasOwnProperty.call(b, k) ? b[k] : BVAR[k];
+    ["seri", "tekrar", "arkadas", "durt"].forEach(function (k) { o[k] = o[k] !== false; });
+    if (!saatOk(o.seriSaat)) o.seriSaat = BVAR.seriSaat;
+    if (!saatOk(o.tekrarSaat)) o.tekrarSaat = BVAR.tekrarSaat;
+    return o;
+  }
+  function bilAyarYaz(p) {
+    var s = getJ(SETK, {}) || {}, b = (s.bildirim && typeof s.bildirim === "object") ? s.bildirim : {};
+    for (var k in p) b[k] = p[k];
+    s.bildirim = b; setJ(SETK, s);
+  }
+
+  // ---- arkadaşlık isteği + dürtme (sunucu) ----
+  // Uygulamada görülen en yeni istek/dürtme zamanı (sunucunun metni aynen): native tek imleçle ondan yenilerini sorar.
   function sonIstek(d) {
     var m = null;
-    ((d && d.incoming) || []).forEach(function (r) { if (r && r.at && (!m || Date.parse(r.at) > Date.parse(m))) m = r.at; });
+    ((d && d.incoming) || []).concat((d && d.durtmeler) || []).forEach(function (r) {
+      if (r && r.at && (!m || Date.parse(r.at) > Date.parse(m))) m = r.at;
+    });
     return m;
   }
-  function sessiz(p) { try { if (p && p.catch) p.catch(function () {}); } catch (e) {} return p; }   // native sözü: hata yutulur
   var nIs = null;
   // Kur: anahtar yoksa (ya da yeni=true) sunucudan al, native'e ver. Aynı anda tek: sonraki çağrı sıraya girer.
   function bildirimKur(yeni) {
@@ -293,8 +329,9 @@ window.OXACC = (function () {
   async function kur(yeni) {
     var B = nplug();
     if (!B || typeof B.configure !== "function" || !account()) return false;
+    var a = bilAyar();
+    if (!a.arkadas && !a.durt) { sessiz(B.disable()); nflag(true); return false; }   // ikisi de kapalı
     var n = nget();
-    if (n.kapali && n.kapali.arkadas) { sessiz(B.disable()); nflag(true); return false; }   // kullanıcı kapattı
     if (yeni || !n.anahtar) {
       if (!yeni && n.hata && ago(n.hata) < 1800000) return false;
       var r;
@@ -303,7 +340,7 @@ window.OXACC = (function () {
       if (!r || !r.anahtar) return false;
       n = nset(function (x) { x.anahtar = r.anahtar; delete x.hata; });
     }
-    var res = await B.configure({ url: URL, key: KEY, secret: n.anahtar, son: sonIstek(cachedDashboard()) });
+    var res = await B.configure({ url: URL, key: KEY, secret: n.anahtar, son: sonIstek(cachedDashboard()), arkadas: a.arkadas, durt: a.durt });
     if (res && res.gecersiz) {   // sunucu bu anahtarı artık tanımıyor (hesap taşındı): yenisini al (bir kez)
       nset(function (x) { delete x.anahtar; });
       return yeni ? false : kur(true);
@@ -317,11 +354,61 @@ window.OXACC = (function () {
     nflag(false);
     bildirimKur(!!yeniAnahtar);
   }
-  // Uygulamada görülen en yeni istek: native aynı isteği bildirmesin.
+  // Uygulamada görülen en yeni istek/dürtme: native aynısını bildirmesin.
   function bildirimGordu(d) {
     var B = nplug(), s = sonIstek(d);
     if (B && s && typeof B.seen === "function") { try { sessiz(B.seen({ son: s })); } catch (e) {} }
   }
+
+  // ---- seri / tekrar hatırlatmaları (yerel) ----
+  var GUN = 86400000, UFUK = 3 * GUN, hatTimer = 0;   // en çok 3 gün sonrası planlanır
+  function ymd(d) { var p = function (x) { return ("0" + x).slice(-2); }; return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+  function saatte(d, hhmm) { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), +hhmm.slice(0, 2), +hhmm.slice(3, 5)).getTime(); }
+  // Çalışılan gün: o gün en az bir sınav cevabı (günlük özette n > 0; hesap.js stats()'taki seriyle aynı).
+  function seriBitis(DL, d) { var n = 0; while (DL[d] && DL[d].n > 0) { n++; d--; } return n; }
+  // Önümüzdeki hatırlatmalar — "bundan sonra hiç çalışılmazsa" varsayımıyla (çalışınca plan yeniden kurulur):
+  //   seri: o gün çalışılmadıysa, ayarlı saatte; metin o güne kadarki seriye göre.
+  //   tekrar: o gün vadesi gelmiş (ya da geçmiş) kelime varsa, ayarlı saatte.
+  // Yalnız şu andan sonraki ve en çok 3 gün içindekiler; günde en çok 2 (seri + tekrar).
+  function hatirlatmaPlani(now) {
+    if (!window.SRS) return null;
+    var a = bilAyar(), T = SRS.today(), R = SRS.records(), DL = SRS.daily(), b = new Date(now), out = [];
+    function ekle(tip, gun, at, metin, baslik) {
+      if (at > now && at - now <= UFUK) out.push({ id: tip + "-" + gun, tip: tip, gun: gun, at: at, baslik: baslik, metin: metin, hedef: "kartlar.html?exam=1" });
+    }
+    for (var i = 0; i <= 3; i++) {
+      var d = new Date(b.getFullYear(), b.getMonth(), b.getDate() + i), g = T + i, gs = ymd(d);   // g: SRS günü
+      if (a.seri && !(DL[g] && DL[g].n > 0)) {
+        var s = seriBitis(DL, g - 1);
+        ekle("seri", gs, saatte(d, a.seriSaat), s >= 1 ? "🔥 " + s + " günlük serin bozulmasın! Bugün henüz çalışmadın."
+          : "📖 Bugün henüz çalışmadın. Birkaç kelimeyle başla!", "Seri hatırlatma");
+      }
+      if (a.tekrar) {
+        var n = 0;
+        for (var k in R) if (R[k] && R[k].due <= g) n++;
+        if (n > 0) ekle("tekrar", gs, saatte(d, a.tekrarSaat), "📚 Bugün " + n + " kelimenin tekrar zamanı geldi.", "Tekrar zamanı");
+      }
+    }
+    return out.sort(function (x, y) { return x.at - y.at; });
+  }
+  // Planı native'e ver (öncekinin yerine). Değişmediyse 6 saatte bir tazelenir. force: ayar değişti.
+  function hatirlatmaPlanla(force) {
+    clearTimeout(hatTimer);
+    var B = nplug();
+    if (!B || typeof B.planla !== "function") return false;
+    var items = hatirlatmaPlani(Date.now());
+    if (!items) return false;
+    var h = JSON.stringify(items), o = getJ(HKEY, {}) || {};
+    if (!force && o.h === h && ago(o.at) < 21600000) return false;
+    try {
+      var p = B.planla({ items: items });
+      if (p && p.then) p.then(function () { setJ(HKEY, { h: h, at: Date.now() }); }, function () {});
+    } catch (e) { return false; }
+    return true;
+  }
+  function hatirlatSoon() { clearTimeout(hatTimer); hatTimer = setTimeout(function () { hatirlatmaPlanla(false); }, 1500); }
+
+  // ---- izin + Ayarlar ----
   // Bildirim izni: hesap açılınca bir kez, karar verilmemişse sorulur (Android 13+).
   async function izinIlk() {
     var B = nplug();
@@ -344,23 +431,25 @@ window.OXACC = (function () {
       return d;
     } catch (e) { return null; }
   }
-  // Ayarlar kartı için durum. native: telefonda mı; var: eklenti var mı (yeni APK); acik: tür → açık mı.
+  // Ayarlar kartı için durum. native: telefonda mı; var: eklenti yeni APK'daki gibi mi; ayar: açık/kapalı + saatler.
   async function bildirimDurum() {
-    var B = nplug(), k = nget().kapali || {}, izin = null;
+    var B = nplug(), izin = null;
     if (B && typeof B.permission === "function") { try { var p = await B.permission(); izin = p && p.display; } catch (e) {} }
-    return { native: nativeMi(), var: !!B, hesap: !!account(), izin: izin, acik: { arkadas: !k.arkadas } };
+    return { native: nativeMi(), var: !!(B && typeof B.planla === "function"), hesap: !!account(), izin: izin, ayar: bilAyar() };
   }
-  // Ayarlar: bir bildirim türünü aç/kapat (şimdilik "arkadas"; ileride hatırlatıcılar da buraya).
-  async function bildirimAyarla(tur, acik) {
-    nset(function (x) { x.kapali = x.kapali || {}; if (acik) delete x.kapali[tur]; else x.kapali[tur] = true; });
-    log("ayar", { bildirim: tur, acik: acik ? 1 : 0 });
+  // Ayarlar: bildirim ayarlarından birini değiştir, ör. {seri: false}, {tekrarSaat: "10:30"}, {durt: true}.
+  async function bildirimAyarla(p) {
+    if (p.seriSaat != null && !saatOk(p.seriSaat)) delete p.seriSaat;
+    if (p.tekrarSaat != null && !saatOk(p.tekrarSaat)) delete p.tekrarSaat;
+    bilAyarYaz(p);
+    log("ayar", { bildirim: p });
     var B = nplug();
     if (!B) return false;
-    if (tur === "arkadas") {
-      if (!acik) { try { await B.disable(); } catch (e) {} return true; }
-      await bildirimKur(false);
-      try { var p = await B.permission(); if (p && p.display === "prompt") await bildirimIzinIste(); } catch (e) {}
-    }
+    if ("seri" in p || "tekrar" in p || "seriSaat" in p || "tekrarSaat" in p) hatirlatmaPlanla(true);
+    if ("arkadas" in p || "durt" in p) await bildirimKur(false);   // ikisi de kapalıysa kontrol durur
+    var acildi = false;
+    for (var k in p) if (p[k] === true) acildi = true;
+    if (acildi) { try { var q = await B.permission(); if (q && q.display === "prompt") await bildirimIzinIste(); } catch (e) {} }
     return true;
   }
 
@@ -375,6 +464,8 @@ window.OXACC = (function () {
   async function respond(id, ok) { return rpc("respond_request", { p_from: id, p_accept: !!ok }); }
   async function cancel(id) { return rpc("cancel_request", { p_to: id }); }
   async function removeFriend(id) { return rpc("remove_friend", { p_friend: id }); }
+  // Dürt: {ok, msg: gonderildi | bugun_durttun | arkadas_degil, nick?} (günde bir kez, sunucu sınırlar).
+  async function durt(id) { return rpc("durt", { p_friend: id }); }
 
   var MSG = {
     baglanti: "İnternet bağlantısı yok.", giris_yok: "Giriş yapılamadı, tekrar dene.", profil_yok: "Hesap bulunamadı (başka telefona taşınmış olabilir).",
@@ -475,10 +566,11 @@ window.OXACC = (function () {
   }
   function askRecover(done) { stepRecover(done); }
 
-  // Sayfa açılınca: hesap varsa özeti (gerekirse), son gönderimden 10 dk geçtiyse kayıtları gönder;
-  // bildirim ayarlarını uygulama açılışında (oturum başına) bir kez native'e ver (yeniden kurulumda iş yeniden kurulur).
+  // Sayfa açılınca: hatırlatmaları kur; hesap varsa özeti (gerekirse), son gönderimden 10 dk geçtiyse kayıtları
+  // gönder; arkadaş bildirim ayarlarını uygulama açılışında (oturum başına) bir kez native'e ver.
   try {
     setTimeout(function () {
+      hatirlatmaPlanla(false);
       if (!account()) return;
       syncSoon(false, false);
       if (ago((getJ(GKEY, {}) || {}).at) > 600000) pushLogs(false);
@@ -495,6 +587,7 @@ window.OXACC = (function () {
     stats: stats, todayStr: todayStr, pushStats: pushStats, pushBackup: pushBackup, syncSoon: syncSoon,
     pushLogs: pushLogs, logDurum: logDurum,
     bildirimKur: bildirimKur, bildirimDurum: bildirimDurum, bildirimAyarla: bildirimAyarla, bildirimIzinIste: bildirimIzinIste,
+    bildirimAyar: bilAyar, hatirlatmaPlani: hatirlatmaPlani, hatirlatmaPlanla: hatirlatmaPlanla, durt: durt,
     dashboard: dashboard, cachedDashboard: cachedDashboard, sendRequest: sendRequest, respond: respond,
     cancel: cancel, removeFriend: removeFriend, errText: errText, esc: esc, fmtRec: fmtRec
   };

@@ -11,6 +11,7 @@ import android.provider.Settings;
 
 import androidx.core.app.ActivityCompat;
 
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
@@ -23,14 +24,18 @@ import com.getcapacitor.annotation.PermissionCallback;
 /**
  * Bildirimler eklentisi — JS'te Capacitor.Plugins.Bildirim (hesap.js kullanır).
  *
- * Arkadaşlık isteği: configure ile sunucu adresi, herkese açık anahtar ve hesaba özel bildirim
+ * Arkadaşlık isteği ve dürtme: configure ile sunucu adresi, herkese açık anahtar ve hesaba özel bildirim
  * anahtarı saklanır, {@link ArkadasWorker} dönemli olarak kurulur (uygulama kapalıyken de çalışır).
+ * Seri / tekrar hatırlatmaları: planla ile JS'in hesapladığı yerel bildirimler zamanlanır ({@link HatirlatmaWorker}).
+ * 22:00–08:00 arası hiç bildirim gösterilmez.
  *
  * Yöntemler:
- *   configure({url, key, secret, son})  ayarları sakla + dönemli kontrolü kur (her açılışta çağrılabilir).
+ *   configure({url, key, secret, son, arkadas?, durt?})  ayarları sakla + dönemli kontrolü kur (her açılışta
+ *                                       çağrılabilir). arkadas/durt: o tür bildirilsin mi (varsayılan evet).
  *                                       Dönen {ok, izin} ya da anahtar sunucuda geçersizse {ok:false, gecersiz:true}.
- *   disable()                           kontrolü durdur, ayarları sil.
- *   seen({son})                         uygulamada görülen en yeni istek zamanı (aynısı bildirilmesin).
+ *   disable()                           arkadaş kontrolünü durdur, ayarları sil (hatırlatmalara dokunmaz).
+ *   seen({son})                         uygulamada görülen en yeni istek/dürtme zamanı (aynısı bildirilmesin).
+ *   planla({items:[{id, tip, gun, at, baslik, metin, hedef}]})  hatırlatma planı (öncekilerin hepsinin yerine).
  *   checkNow()                          hemen bir kontrol (test için) → {durum, n?, bekleyen?}.
  *   permission() / requestPermission()  bildirim izni → {display: granted | denied | prompt}.
  *   openSettings()                      uygulamanın bildirim ayarları sayfası.
@@ -58,7 +63,9 @@ public class Bildirim extends Plugin {
                 call.resolve(r);
                 return;
             }
-            SharedPreferences.Editor ed = sp.edit().putString("url", url).putString("key", key);
+            SharedPreferences.Editor ed = sp.edit().putString("url", url).putString("key", key)
+                    .putBoolean("t_arkadas", !Boolean.FALSE.equals(call.getBoolean("arkadas", true)))
+                    .putBoolean("t_durt", !Boolean.FALSE.equals(call.getBoolean("durt", true)));
             if (!secret.equals(sp.getString("secret", null))) {   // yeni anahtar (yeni hesap/telefon): baştan
                 ed.putString("secret", secret).remove("son").remove("bad");
                 if (Bildirimler.isoMicros(son) != Long.MIN_VALUE) ed.putString("son", son);
@@ -87,6 +94,19 @@ public class Bildirim extends Plugin {
             Bildirimler.prefs(c).edit().remove("url").remove("key").remove("secret").remove("son").remove("bad").apply();
         }
         call.resolve();
+    }
+
+    @PluginMethod
+    public void planla(PluginCall call) {
+        JSArray items = call.getArray("items");
+        try {
+            JSObject r = new JSObject();
+            r.put("ok", true);
+            r.put("n", HatirlatmaWorker.plan(getContext(), items));
+            call.resolve(r);
+        } catch (Exception e) {
+            call.reject("planlanamadı: " + e.getMessage());
+        }
     }
 
     @PluginMethod

@@ -24,16 +24,17 @@
     var p = location.pathname.split("/").pop() || "index.html";
     if (p !== "index.html") location.href = "index.html";
   });
-  // Arkadaşlık isteği bildirimine dokununca o sayfaya (arkadaslar.html) geç. Uygulama kapalıydıysa sayfa
-  // açılırken launchTarget() verir, açıktıysa MainActivity "oxHedef" olayı gönderir; hedef native'de bir kez
-  // verilip silindiğinden sayfaya bir kez gidilir. Güncelleyici başka pakete yönlendiriyorsa orada bakılır.
+  // Bildirime dokununca ilgili sayfaya geç: arkadaşlık isteği → arkadaslar.html, dürtme / hatırlatma →
+  // kartlar.html?exam=1. Uygulama kapalıydıysa sayfa açılırken launchTarget() verir, açıktıysa MainActivity
+  // "oxHedef" olayı gönderir; hedef native'de bir kez verilip silindiğinden sayfaya bir kez gidilir.
+  // Güncelleyici başka pakete yönlendiriyorsa orada bakılır.
   var BL = Cap.Plugins && Cap.Plugins.Bildirim;
   if (BL && typeof BL.launchTarget === "function") {
     var hedef = function () {
       if (window.OX_YONLENDIR) return;
       Promise.resolve(BL.launchTarget()).then(function (r) {
-        var p = r && r.sayfa, cur = location.pathname.split("/").pop() || "index.html";
-        if (!p || !/^[a-z0-9_-]+\.html$/i.test(p)) return;
+        var p = r && r.sayfa, cur = (location.pathname.split("/").pop() || "index.html") + location.search;
+        if (!p || !/^[a-z0-9_-]+\.html(\?[a-z0-9_=&-]*)?$/i.test(p)) return;
         try { if (window.OXLOG) OXLOG.add("bildirim", { a: "ac", p: p.replace(".html", "") }); } catch (e) {}
         if (cur !== p) location.href = p;
       }).catch(function () {});

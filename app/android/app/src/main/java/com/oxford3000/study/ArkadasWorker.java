@@ -25,12 +25,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Arkadaşlık isteği kontrolü — WorkManager ile ~15 dk'da bir, internet varken; uygulama kapalıyken de.
+ * Arkadaşlık isteği ve dürtme kontrolü — WorkManager ile ~15 dk'da bir, internet varken; uygulama kapalıyken de.
  *
  * Supabase'teki bildirim_kontrol'ü hesaba özel bildirim anahtarıyla çağırır (uygulamanın oturumu/JWT
- * kullanılmaz; yalnız herkese açık anahtar "apikey" başlığında). Son görülen istekten (son) yeni istek
- * varsa bildirim gösterir. Anahtar geçersizse (hesap başka telefona taşındı / silindi) kendini kapatır.
- * Bildirim izni yoksa sunucuya hiç gitmez. Hiçbir hata uygulamayı düşürmez.
+ * kullanılmaz; yalnız herkese açık anahtar "apikey" başlığında). Tek imleç (son): görülen/bildirilen en yeni
+ * istek ya da dürtme zamanı; sunucu bundan yenilerini verir, yeni varsa bildirim gösterilir (türü açıksa).
+ * Sessiz saatlerde (22:00–08:00) sunucuya hiç sorulmaz: imleç ilerlemediğinden gece gelenler sabah 08:00'den
+ * sonraki ilk kontrolde bildirilir (düşmez). Anahtar geçersizse (hesap başka telefona taşındı / silindi)
+ * kendini kapatır. Bildirim izni yoksa sunucuya gitmez. Hiçbir hata uygulamayı düşürmez.
  */
 public class ArkadasWorker extends Worker {
     public static final String WORK = "ox_arkadas";
@@ -59,21 +61,27 @@ public class ArkadasWorker extends Worker {
         WorkManager.getInstance(c).cancelUniqueWork(WORK);
     }
 
-    /** Bir kontrol. Dönen: {durum, n?, bekleyen?} (eklentinin checkNow'u için; teşhis). */
+    /** Bir kontrol. Dönen: {durum, n?, d?, bekleyen?} (eklentinin checkNow'u için; teşhis). */
     public static synchronized JSONObject check(Context c) {
         JSONObject out = new JSONObject();
         try {
             SharedPreferences sp = Bildirimler.prefs(c);
             String url, key, secret, son;
+            boolean istek, durt;
             synchronized (Bildirimler.LOCK) {
                 url = sp.getString("url", null);
                 key = sp.getString("key", null);
                 secret = sp.getString("secret", null);
                 son = sp.getString("son", null);
+                istek = sp.getBoolean("t_arkadas", true);
+                durt = sp.getBoolean("t_durt", true);
             }
             if (empty(url) || empty(key) || empty(secret)) return out.put("durum", "ayar_yok");
+            if (!istek && !durt) return out.put("durum", "kapali");
+            if (Bildirimler.quiet()) return out.put("durum", "gece");   // sabaha ertelenir (imleç yerinde)
             Bildirimler.ensureFriendsChannel(c);
-            if (!Bildirimler.canPost(c, Bildirimler.CH_FRIENDS)) return out.put("durum", "izin_yok");
+            Bildirimler.ensureNudgeChannel(c);
+            if (!Bildirimler.enabled(c)) return out.put("durum", "izin_yok");
 
             JSONObject body = new JSONObject();
             body.put("p_anahtar", secret);
@@ -94,26 +102,30 @@ public class ArkadasWorker extends Worker {
             }
             int bekleyen = r.optInt("bekleyen", 0);
             out.put("bekleyen", bekleyen);
-            JSONArray yeni = r.optJSONArray("yeni");
-            int n = yeni == null ? 0 : yeni.length();
-            if (n == 0) return out.put("durum", "yeni_yok");
+            JSONArray yeni = r.optJSONArray("yeni"), durtler = r.optJSONArray("durt");
+            int n = yeni == null ? 0 : yeni.length(), nd = durtler == null ? 0 : durtler.length();
+            if (n == 0 && nd == 0) return out.put("durum", "yeni_yok");
 
-            JSONObject ilk = yeni.optJSONObject(0);
-            String nick = ilk != null ? ilk.optString("nick", "") : "";
-            if (nick.trim().isEmpty()) nick = "Biri";
-            String metin = n == 1 ? nick + " sana arkadaşlık isteği gönderdi"
-                    : nick + " ve " + (n - 1) + " kişi daha sana arkadaşlık isteği gönderdi";
-            Bildirimler.post(c, Bildirimler.CH_FRIENDS, Bildirimler.ID_FRIENDS, R.drawable.ic_stat_friends,
-                    NotificationCompat.CATEGORY_SOCIAL, "👥 Arkadaşlık isteği", metin, "arkadaslar.html", bekleyen);
-            // En yeni istek zamanı: bir sonraki kontrol yalnız bundan yenilerini sorar (aynı istek iki kez bildirilmez).
-            String enYeni = null;
-            for (int i = 0; i < n; i++) {
-                JSONObject o = yeni.optJSONObject(i);
-                String at = o != null ? o.optString("at", null) : null;
-                if (at != null && (enYeni == null || Bildirimler.later(at, enYeni))) enYeni = at;
+            int gosterilen = 0;
+            if (n > 0 && istek && Bildirimler.canPost(c, Bildirimler.CH_FRIENDS)) {
+                String nick = ilkNick(yeni);
+                String metin = n == 1 ? nick + " sana arkadaşlık isteği gönderdi"
+                        : nick + " ve " + (n - 1) + " kişi daha sana arkadaşlık isteği gönderdi";
+                Bildirimler.post(c, Bildirimler.CH_FRIENDS, Bildirimler.ID_FRIENDS, R.drawable.ic_stat_friends,
+                        NotificationCompat.CATEGORY_SOCIAL, "👥 Arkadaşlık isteği", metin, "arkadaslar.html", bekleyen);
+                gosterilen++;
             }
-            if (enYeni != null) Bildirimler.saveSon(c, enYeni);
-            return out.put("durum", "gosterildi").put("n", n);
+            if (nd > 0 && durt && Bildirimler.canPost(c, Bildirimler.CH_NUDGE)) {
+                String nick = ilkNick(durtler);
+                String metin = (nd == 1 ? "👉 " + nick : "👉 " + nick + " ve " + (nd - 1) + " kişi daha") + " seni dürttü: Hadi çalış!";
+                Bildirimler.post(c, Bildirimler.CH_NUDGE, Bildirimler.ID_NUDGE, R.drawable.ic_stat_friends,
+                        NotificationCompat.CATEGORY_SOCIAL, "Dürtme", metin, "kartlar.html?exam=1", 0);
+                gosterilen++;
+            }
+            // İmleç: gelenlerin (istek + dürtme, türü kapalı olsa da) en yenisi; aynısı iki kez bildirilmez.
+            String imlec = enYeni(yeni, enYeni(durtler, null));
+            if (imlec != null) Bildirimler.saveSon(c, imlec);
+            return out.put("durum", gosterilen > 0 ? "gosterildi" : "kapali_tur").put("n", n).put("d", nd);
         } catch (Exception e) {
             try { out.put("durum", "hata").put("m", String.valueOf(e.getMessage())); } catch (Exception ignored) {}
             return out;
@@ -147,6 +159,22 @@ public class ArkadasWorker extends Worker {
         } finally {
             con.disconnect();
         }
+    }
+
+    private static String ilkNick(JSONArray a) {
+        JSONObject o = a.optJSONObject(0);
+        String nick = o != null ? o.optString("nick", "") : "";
+        return nick.trim().isEmpty() ? "Biri" : nick;
+    }
+
+    /** Dizideki en yeni "at" (ya da {@code cur}, daha yeniyse). */
+    private static String enYeni(JSONArray a, String cur) {
+        for (int i = 0; a != null && i < a.length(); i++) {
+            JSONObject o = a.optJSONObject(i);
+            String at = o != null ? o.optString("at", null) : null;
+            if (at != null && (cur == null || Bildirimler.later(at, cur))) cur = at;
+        }
+        return cur;
     }
 
     private static boolean empty(String s) { return s == null || s.trim().isEmpty(); }

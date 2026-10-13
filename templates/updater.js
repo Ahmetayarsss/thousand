@@ -107,6 +107,22 @@
     return "";
   }
 
+  // Eski paketleri sil: her güncelleme webupd/v<sürüm> klasörüne yazılır; önceden silinmediği için
+  // birikip telefonda yer kaplıyordu (≈3 MB × güncelleme sayısı). Yalnız uygulanan sürüm ve şu an
+  // açık olan sayfanın klasörü kalır (açık sayfanın dosyaları silinirse sayfalar arası geçiş bozulur).
+  async function temizle(Fs, keep) {
+    try {
+      var r = await Fs.readdir({ path: "webupd", directory: "DATA" });
+      var list = (r && r.files) || [];
+      for (var i = 0; i < list.length; i++) {
+        var f = list[i], name = typeof f === "string" ? f : (f && f.name);
+        if (!name || keep.indexOf(name) >= 0) continue;
+        try { await Fs.rmdir({ path: "webupd/" + name, directory: "DATA", recursive: true }); } catch (e) {}
+      }
+    } catch (e) {}
+  }
+  function acikKlasor() { var m = /\/webupd\/(v\d+)\//.exec(location.href); return m ? m[1] : ""; }
+
   // İndirip cihaza yazar ve HEMEN uygular (bir sonraki açılışı beklemeden): gömülü
   // sayfadaysak indirilen pakete yönleniriz, yeşil "güncellendi ✓" balonu çıkar.
   // Tek açılışta güncelleme olur — "iki kez kapat-aç" gerekmez.
@@ -114,10 +130,11 @@
     try {
       var Fs = plugin("Filesystem");
       if (!Fs) return;
-      var rv = await getRemoteVer();
-      if (!rv.ver) return;
       var applied = 0;
       try { var a = JSON.parse(localStorage.getItem("ox_webupd") || "{}"); applied = a.ver || 0; } catch (e) {}
+      await temizle(Fs, [applied ? "v" + applied : "", acikKlasor()]);   // internet olmasa da
+      var rv = await getRemoteVer();
+      if (!rv.ver) return;
       if (rv.ver <= Math.max(VER, applied)) return; // zaten güncel
 
       var jtxt = await getBundle();
@@ -135,6 +152,7 @@
       if (base.slice(-1) !== "/") base += "/";
       localStorage.setItem("ox_webupd", JSON.stringify({ ver: rv.ver, base: base }));
       localStorage.setItem("ox_webupd_new", "1");
+      await temizle(Fs, ["v" + rv.ver, acikKlasor()]);
       // Hemen uygula: gömülü sayfadaysak indirilen pakete yönlen (tek açılışta güncelle).
       if (!inUpdate) {
         var page = location.pathname.split("/").pop() || "index.html";

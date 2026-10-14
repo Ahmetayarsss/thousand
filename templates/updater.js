@@ -2,15 +2,19 @@
  * Uygulama içi güncelleme.
  *
  * APK BİR KEZ kurulur (ses dosyaları içinde gömülü kalır). Arayüz (HTML/JS/CSS)
- * daha sonra küçük bir web paketiyle (web.json, ~2 MB) güncellenir;
+ * daha sonra küçük bir web paketiyle (web.json, ~3 MB) güncellenir;
  * yeni APK kurmaya gerek kalmaz. Ses hiç yeniden inmez.
  *
  * Çalışma:
  *  1) Daha önce indirilmiş (uygulanmış) daha yeni bir paket varsa ve hâlâ gömülü
  *     sayfadaysak, o pakete yönleniriz (dosyalar cihaz hafızasından yüklenir).
  *     Ses hep mutlak '/audio/...' yolundan APK içindeki dosyalara gider.
- *  2) Arka planda GitHub release'teki sürümü kontrol ederiz; daha yeniyse paketi
- *     indirip cihaza yazarız — bir SONRAKİ açılışta uygulanır.
+ *  2) Arka planda GitHub release'teki (apk-latest) sürümü kontrol ederiz; daha yeniyse
+ *     paketi indirip cihaza yazar ve hemen uygularız.
+ *
+ * Kaynak YALNIZ release: oraya paketi yalnız CI (build-apk.yml) koyar, o da main dalına
+ * birleşen ve testler + bekçi geçen commit'ten. Herhangi bir dalın ham dosyasından
+ * paket indirilmez.
  *
  * Her şey try/catch içinde: güncelleme başarısız olursa uygulama gömülü (APK'daki)
  * sürümle sorunsuz çalışmaya devam eder. Tarayıcıda (native değil) hiçbir şey yapmaz.
@@ -65,10 +69,7 @@
   } catch (e) {}
 
   // 2) Arka planda güncelleme kontrolü + indirme.
-  var OWNER = "Ahmetayarsss", REPO = "thousand", BRANCH = "claude/oxford-3000-pronunciation-defs-inzs33";
-  var API = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/contents/";   // taze, önbeleksiz
-  var RAW = "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/refs/heads/" + BRANCH + "/";
-  var REL = "https://github.com/" + OWNER + "/" + REPO + "/releases/download/apk-latest/";
+  var REL = "https://github.com/Ahmetayarsss/thousand/releases/download/apk-latest/";
 
   async function oneGet(url, headers) {
     try {
@@ -80,7 +81,8 @@
       if (H) {
         var hd = headers || {}; hd["Cache-Control"] = "no-cache";
         var res = await H.request({ url: url, method: "GET", responseType: "text", headers: hd });
-        var d = (res && res.data != null) ? ("" + res.data) : "";
+        if (!res || res.status !== 200) return "";   // 404 sayfası vb. içerik sayılmaz
+        var d = (res.data != null) ? ("" + res.data) : "";
         if (d) return d;
       }
     } catch (e) {}
@@ -88,23 +90,12 @@
   }
   function toVer(s) { var t = ("" + (s || "")).trim(); return /^\d{1,20}$/.test(t) ? parseInt(t, 10) : 0; } // sadece saf sayı (404 sayfası vb. elenir)
 
-  // Sürüm: API (taze) + raw + release → geçerli sayıların EN BÜYÜĞÜ (bayat kaynak eler).
   async function getRemoteVer() {
-    var best = 0, src = "yok";
-    try {
-      var a = await oneGet(API + "web-version.txt?ref=" + BRANCH, { "Accept": "application/vnd.github.raw+json" });
-      var n = toVer(a);
-      if (!n) { try { var j = JSON.parse(a); if (j && j.content) n = toVer(atob(j.content.replace(/\s/g, ""))); } catch (e) {} }
-      if (n > best) { best = n; src = "api"; }
-    } catch (e) {}
-    try { var n2 = toVer(await oneGet(RAW + "web-version.txt")); if (n2 > best) { best = n2; src = "raw"; } } catch (e) {}
-    try { var n3 = toVer(await oneGet(REL + "web-version.txt")); if (n3 > best) { best = n3; src = "rel"; } } catch (e) {}
-    return { ver: best, src: src };
+    return { ver: toVer(await oneGet(REL + "web-version.txt")) };
   }
   async function getBundle() {
-    var t = await oneGet(RAW + "web.json"); if (t && t.charAt(0) === "{") return t;
-    t = await oneGet(REL + "web.json"); if (t && t.charAt(0) === "{") return t;
-    return "";
+    var t = await oneGet(REL + "web.json");
+    return (t && t.charAt(0) === "{") ? t : "";
   }
 
   // Eski paketleri sil: her güncelleme webupd/v<sürüm> klasörüne yazılır; önceden silinmediği için
@@ -141,6 +132,10 @@
       if (!jtxt) return;
       var files = JSON.parse(jtxt);
       if (!files || !files["index.html"]) return;
+      // Paket gerçekten bu sürümün paketi mi? (release'e yükleme sürerken sürüm dosyası yeni,
+      // paket eski olabilir; eski paket yeni numarayla kurulmasın.)
+      var pv = /var VER = (\d+);/.exec(String(files["updater.js"] || ""));
+      if (!pv || parseInt(pv[1], 10) !== rv.ver) return;
 
       var dir = "webupd/v" + rv.ver;
       for (var name in files) {

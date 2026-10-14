@@ -15,3 +15,9 @@ app/android/.idea/
 
 # CI teşhis çıktısı (geçici)
 ci-error.log
+
+# Uygulama içi güncelleme paketi: yalnız CI (build-apk.yml) üretir ve release'e koyar.
+# Repoda tutulmaz (güncelleyici herhangi bir dalın ham dosyasından paket indirmesin).
+web.json
+web-version.txt
+app/www/updater.js

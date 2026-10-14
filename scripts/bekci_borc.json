@@ -1,0 +1,12 @@
+[
+  {
+    "kural": "gizli-dosya",
+    "dosya": "app/android/app/oxford.keystore",
+    "neden": "Telefonlardaki uygulama bu anahtarla imzalı; anahtar değişirse güncelleme kurulmaz (kaldır-kur = yerel ilerleme silinir). Anahtar git geçmişinde açık. Çözüm: yeni anahtar CI secret'ında + kullanıcıların hesap yedeğiyle tek seferlik yeniden kurulumu. Kullanıcı kararı gerekiyor."
+  },
+  {
+    "kural": "gizli-icerik",
+    "dosya": "app/android/app/build.gradle",
+    "neden": "Yukarıdaki keystore'un parolası. Keystore ile birlikte CI secret'ına taşınacak."
+  }
+]

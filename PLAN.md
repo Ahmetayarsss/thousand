@@ -16,8 +16,12 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 3. Yayın kanalı `main` (kullanıcı kararı: main + PR). APK ve güncelleme paketi yalnız
       `main`'den, testler + bekçi geçerse çıkar; güncelleyici yalnız release'ten indirir,
       paketin içindeki sürümü doğrular; `web.json` repodan çıktı. Eski dal donduruldu.
-- [ ] 4. Güncelleyici: paketin imzası doğrulanır (imzasızsa uygulanmaz; release'e erişen
-      biri de sahte paket koyamaz); bozuk paket açılmazsa gömülü sürüme kendiliğinden döner.
+- [x] 4. Bozuk pakette geri dönüş: paket üst üste 3 açılışta açılamazsa gömülü sürüme
+      dönülür, o sürüm bir daha indirilmez, kullanıcıya söylenir (yeni APK kurulunca etkin).
+- [ ] 4b. 🔸 Paket imzası: imza anahtarı GitHub'da (CI'da) durursa, GitHub hesabını ele geçiren
+      onu da kullanır — koruma çok az. Bunun yerine GitHub hesabında iki adımlı doğrulama ve
+      `main` için "PR zorunlu" kuralı (kullanıcı ayarları). İmza ancak anahtar GitHub dışında
+      tutulursa anlamlı; kullanıcı karar verecek.
 - [ ] 5. 🔸 İmza anahtarı: parola ve keystore CI secret'ına taşınır. Anahtar yenilensin mi
       (herkes bir kez kaldır-kur; ilerleme yalnız hesap yedeğiyle döner)?
 - [ ] 6. Yedekleme: `allowBackup` gözden geçirilir (kurtarma kodu Google yedeğine düz metin

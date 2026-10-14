@@ -17,11 +17,15 @@ kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 |---|---|
 | `data/all_groups.json`, `scripts/enrich/*.py` | kökteki `*.html` |
 | `templates/*.html`, `templates/updater.js` | `app/www/*.html`, `app/www/updater.js` |
-| `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js` | kökteki `srs.js`, `hesap.js`, `log.js`, `progress.js` (kopya) |
+| `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js` | kökteki `srs.js`, `hesap.js`, `log.js` (kopya) |
 | `supabase/kurulum.sql`, `app/android/**` | `web.json`, `web-version.txt` |
 
 Üretim: `python3 scripts/build_all.py`. Şablonu ya da kaynak JS'i değiştirdikten sonra
 çalıştır ve üretilenleri de commit'le; CI farkı yakalar.
+
+## Sıradaki iş
+
+Düzeltme planı `PLAN.md`'de; ilk işaretlenmemiş adımdan devam edilir.
 
 ## Push etmeden önce (hepsi geçmeli)
 

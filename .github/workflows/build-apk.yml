@@ -128,9 +128,10 @@ jobs:
       - name: Web güncelleme paketini üret (web.json)
         run: |
           python3 - <<'PY'
-          import json, os
+          import json, os, sys
+          sys.path.insert(0, "scripts")
+          from build_all import WEB_BUNDLE_FILES as names   # tek liste: build_all.py
           base = "app/www"
-          names = ["index.html","kartlar.html","sozluk.html","istatistik.html","ayarlar.html","analiz.html","arkadaslar.html","tts-bridge.js","progress.js","srs.js","log.js","hesap.js","updater.js","three.min.js"]
           d = {}
           for n in names:
               p = os.path.join(base, n)

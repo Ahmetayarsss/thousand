@@ -33,15 +33,5 @@
     "kural": "buyuk-dosya",
     "dosya": "web.json",
     "neden": "Güncelleme paketi (~3 MB) her derlemede repoya giriyor ve geçmişi şişiriyor. Güncelleyici yalnız release'ten okuyunca repodan çıkacak."
-  },
-  {
-    "kural": "olu-dosya",
-    "dosya": "app/www/progress.js",
-    "neden": "Eski sıralı/kilitli bölüm sistemi; hiçbir sayfa yüklemiyor ama güncelleme paketine giriyor. Silinecek (build_all.py, build-apk.yml ve README'den de)."
-  },
-  {
-    "kural": "belge-kaymasi",
-    "dosya": "app/README.md",
-    "neden": "README eski yapıyı (bolumler.html, kilitli bölümler, %100 sınavı) anlatıyor. Güncel yapıya göre yeniden yazılacak."
   }
 ]

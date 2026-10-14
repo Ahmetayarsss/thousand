@@ -1,7 +1,7 @@
 # Oxford 3000 — Türkçe Çalışma Araçları
 
 Oxford 3000 kelime listesi (A1–B2) üzerinden, Türkçe konuşanlar için İngilizce
-kelime çalışma uygulaması: Android uygulaması (`app/`) ve tarayıcıda açılan HTML'ler.
+kelime çalışma uygulaması (Android, `app/`).
 
 Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 
@@ -20,7 +20,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `scripts/enrich/gN.py` | Grup N'nin okunuş/açıklama/örnek içeriği (Grup 1 ve 10 doğrudan `all_groups.json`'da) |
 | `scripts/enrich/multi_examples.py` | Kelimelere eklenen ek örnek cümleler |
 | `templates/` | Sayfa şablonları (`__GROUPS_JSON__` vb. yer tutucular build'de doldurulur) ve `updater.js` |
-| `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, tarayıcı ve uygulama sayfalarını, güncelleme paketini (`web.json`, `web-version.txt`) üretir |
+| `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`) ve güncelleme paketini (`web.json`, `web-version.txt`) üretir |
 | `scripts/validate.py` | Veri tutarlılık kontrolleri |
 | `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, ölü dosya, belge kayması, paket tutarlılığı; bilinen borçlar `scripts/bekci_borc.json` |
 | `tests/srs.test.js` | Tekrar sistemi (`app/www/srs.js`) testleri |
@@ -29,13 +29,6 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `.github/workflows/build-apk.yml` | APK ve güncelleme paketini derleyip `apk-latest` release'ine koyar |
 | `.github/workflows/fetch-audio.yml` | Sözlük US seslerini `app/www/audio/`'ya indirir (elle çalıştırılır) |
 | `app/` | Android uygulaması (Capacitor) — yapı ve APK için `app/README.md` |
-
-Kökteki tarayıcı sürümleri (build üretir, elle düzenlenmez): `Oxford3000_30grup_sesli.html`
-(liste), `Oxford3000_kartlar.html` (kartlar), `Oxford3000_sozluk.html`, `istatistik.html`,
-`analiz.html`, `ayarlar.html`, `arkadaslar.html` ve kopya JS'ler (`srs.js`, `log.js`, `hesap.js`).
-
-> Tarayıcı sürümlerinde ses ve ilerleme kaydı için dosyaları **tarayıcıda** açın
-> (uygulama içi önizlemede değil). İlerleme `localStorage`'da durur.
 
 ## Alanlar
 

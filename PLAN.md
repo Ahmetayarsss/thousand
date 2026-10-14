@@ -8,8 +8,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 - [x] 1. Ölü kod: `progress.js` (eski kilitli bölüm sistemi) silinir; paket listesi, CI ve
       belgeler temizlenir. README'ler gerçek yapıya göre yeniden yazılır.
-- [ ] 2. Artık dosyalar: `proto_*.html` silinir. 🔸 Kökteki tarayıcı sürümleri
-      (`Oxford3000_*.html` + kopya JS'ler) hâlâ kullanılıyor mu? Kullanılmıyorsa kalkar.
+- [x] 2. Artık dosyalar: `proto_*.html`, `media/` ve kökteki tarayıcı sürümleri
+      (`Oxford3000_*.html` + kopya JS'ler) silindi — kullanıcı: tarayıcı sürümü kullanılmıyor.
 
 ## Aşama 2 — Güvenlik ve yayın
 

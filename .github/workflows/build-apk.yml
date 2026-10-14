@@ -149,7 +149,7 @@ jobs:
           tag_name: apk-latest
           name: "Oxford 3000 — son APK"
           prerelease: true
-          # web.json.gz + web-version.txt: uygulama içi güncelleme paketi (APK'yı
+          # web.json + web-version.txt: uygulama içi güncelleme paketi (APK'yı
           # tekrar kurmadan arayüzü günceller). build_all.py üretir, repoda tutulur.
           files: |
             Oxford3000.apk

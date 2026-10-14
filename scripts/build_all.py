@@ -5,14 +5,12 @@
 1. data/all_groups.json'u yükler (30 grup x 100 kelime).
 2. scripts/enrich/ altındaki grup modüllerini uygular (ok/en/ex alanları).
 3. data/all_groups.json'u günceller.
-4. templates/ içindeki şablonlardan iki HTML'i üretir:
-   - Oxford3000_30grup_sesli.html  (tam alanlar: w,pos,sec,tr,ok,en,ex,cam)
-   - Oxford3000_kartlar.html       (kart alanları: w,tr,ok,ex — ex'te <b> etiketi yok)
+4. templates/ içindeki şablonlardan uygulama sayfalarını (app/www/*.html) üretir.
+5. Güncelleme paketini (web.json, web-version.txt, app/www/updater.js) yazar.
 
 Yeni bir grup zenginleştirildiğinde: scripts/enrich/gN.py oluştur ve
 aşağıdaki ENRICH_MODS listesine "gN" ekle, sonra bu scripti çalıştır.
 """
-import gzip
 import importlib
 import json
 import re
@@ -164,71 +162,23 @@ def render(groups):
         }
         for g in groups
     ]
-    # app_out: uygulama sayfası. swipe: (next, prev) yatay kaydırma hedefleri.
-    #   sözlük         → sola: liste
-    #   liste (index)  → sola: kartlar | sağa: sözlük
-    #   kartlar        → sola: istatistik | sağa: liste
-    for tpl, data, out, app_out, swipe in [
-        ("sesli_template.html", sesli_groups, "Oxford3000_30grup_sesli.html",
-         "app/www/index.html", ("kartlar.html", "sozluk.html")),
-        ("kartlar_template.html", kart_groups, "Oxford3000_kartlar.html",
-         "app/www/kartlar.html", ("istatistik.html", "index.html")),
-    ]:
+    # Uygulama sayfaları (app/www). Her sayfaya güncelleyici + TTS köprüsü + kaydırma eklenir.
+    # Ses yolu MUTLAK ('/audio/...') olur: hem gömülü hem güncellenmiş (cihaz hafızasından
+    # yüklenen) sayfalarda APK içindeki sese erişir.
+    # swipe_script(sola, sağa, aşağı çekince, yukarı itince) — gezinme haritası app/README.md'de.
+    def page(tpl, out, swipe, repl=(), head=""):
         html = (ROOT / "templates" / tpl).read_text(encoding="utf-8")
-        blob = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-        html = html.replace("__GROUPS_JSON__", blob)
+        for k, v in repl:
+            html = html.replace(k, v)
+        html = html.replace("</head>", head + APP_HEAD + swipe_script(*swipe) + "</head>", 1)
+        html = html.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
+        path = ROOT / "app/www" / out
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(html, encoding="utf-8")
+        print(f"app/www/{out}: {len(html)} bayt")
 
-        # 1) Bağımsız kök HTML (tarayıcıda çift tıkla aç)
-        root_html = html.replace("__SOZLUK__", "Oxford3000_sozluk.html")
-        (ROOT / out).write_text(root_html, encoding="utf-8")
-        print(f"{out}: {len(root_html)} bayt")
-
-        # 2) Android uygulaması sürümü: güncelleyici + TTS köprüsü + yatay kaydırma
-        #    Ses yolu MUTLAK ('/audio/...') olur: hem gömülü hem güncellenmiş
-        #    (cihaz hafızasından yüklenen) sayfalarda APK içindeki sese erişir.
-        three = '<script src="three.min.js"></script>' if tpl == "kartlar_template.html" else ""
-        inject = three + APP_HEAD + swipe_script(*swipe) + "</head>"
-        app_html = html.replace("__SOZLUK__", "sozluk.html").replace("</head>", inject, 1)
-        app_html = app_html.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
-        app_path = ROOT / app_out
-        app_path.parent.mkdir(parents=True, exist_ok=True)
-        app_path.write_text(app_html, encoding="utf-8")
-        print(f"{app_out}: {len(app_html)} bayt")
-
-    # Sözlük sayfası: tüm 3000 kelime; boş, aranınca yalnız o kelimenin kartı.
-    sesli_blob = json.dumps(sesli_groups, ensure_ascii=False, separators=(",", ":"))
-    soz_tpl = (ROOT / "templates" / "sozluk_template.html").read_text(encoding="utf-8")
-    soz_tpl = soz_tpl.replace("__GROUPS_JSON__", sesli_blob)
-    root_soz = soz_tpl.replace("__BACK__", "Oxford3000_30grup_sesli.html")
-    (ROOT / "Oxford3000_sozluk.html").write_text(root_soz, encoding="utf-8")
-    print(f"Oxford3000_sozluk.html: {len(root_soz)} bayt")
-    app_soz = soz_tpl.replace("__BACK__", "index.html").replace(
-        "</head>", APP_HEAD + swipe_script("index.html", "", "ayarlar.html", "arkadaslar.html") + "</head>", 1
-    )
-    app_soz = app_soz.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
-    (ROOT / "app/www/sozluk.html").write_text(app_soz, encoding="utf-8")
-    print(f"app/www/sozluk.html: {len(app_soz)} bayt")
-
-    # Arkadaşlar sayfası (Sözlük'ün altı): Sözlük'ün en altında yukarı itince açılır,
-    # en üstte aşağı çekince Sözlük'e döner.
-    ar_tpl = (ROOT / "templates" / "arkadaslar_template.html").read_text(encoding="utf-8")
-    (ROOT / "arkadaslar.html").write_text(ar_tpl.replace("__SOZLUK__", "Oxford3000_sozluk.html"), encoding="utf-8")
-    app_ar = ar_tpl.replace("__SOZLUK__", "sozluk.html").replace(
-        "</head>", APP_HEAD + swipe_script("", "", "sozluk.html", "") + "</head>", 1
-    )
-    (ROOT / "app/www/arkadaslar.html").write_text(app_ar, encoding="utf-8")
-    print(f"app/www/arkadaslar.html: {len(app_ar)} bayt")
-
-    # Ayarlar sayfası (Sözlük'ün üstü): Sözlük'te en üstte aşağı çekince açılır,
-    # burada yukarı itince Sözlük'e döner. İçerik sonra eklenecek.
-    ay_tpl = (ROOT / "templates" / "ayarlar_template.html").read_text(encoding="utf-8")
-    (ROOT / "ayarlar.html").write_text(ay_tpl.replace("__SOZLUK__", "Oxford3000_sozluk.html")
-                                       .replace("__INDEX__", "Oxford3000_30grup_sesli.html"), encoding="utf-8")
-    app_ay = ay_tpl.replace("__SOZLUK__", "sozluk.html").replace("__INDEX__", "index.html").replace(
-        "</head>", APP_HEAD + swipe_script("analiz.html", "", "", "sozluk.html") + "</head>", 1
-    )
-    (ROOT / "app/www/ayarlar.html").write_text(app_ay, encoding="utf-8")
-    print(f"app/www/ayarlar.html: {len(app_ay)} bayt")
+    def blob(data):
+        return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
 
     # İstatistik / ilerleme sayfaları (kelime listesi + Türkçe: no, level, ws, tr)
     stats_data = [
@@ -236,34 +186,28 @@ def render(groups):
          "tr": [it["tr"] for it in g["items"]]}
         for g in groups
     ]
-    # Ayrıntılı istatistik (Ayarlar'ın sağı; yalnız Ayarlar'dan sola kaydırınca açılır)
-    an_tpl = (ROOT / "templates" / "analiz_template.html").read_text(encoding="utf-8")
-    an_tpl = an_tpl.replace("__GROUPS_JSON__", json.dumps(stats_data, ensure_ascii=False, separators=(",", ":")))
-    (ROOT / "analiz.html").write_text(an_tpl.replace("__AYARLAR__", "ayarlar.html"), encoding="utf-8")
-    app_an = an_tpl.replace("__AYARLAR__", "ayarlar.html").replace(
-        "</head>", APP_HEAD + swipe_script("", "ayarlar.html") + "</head>", 1
-    )
-    (ROOT / "app/www/analiz.html").write_text(app_an, encoding="utf-8")
-    print(f"app/www/analiz.html: {len(app_an)} bayt")
-    stats_tpl = (ROOT / "templates" / "stats_template.html").read_text(encoding="utf-8")
-    stats_blob = json.dumps(stats_data, ensure_ascii=False, separators=(",", ":"))
-    stats_tpl = stats_tpl.replace("__GROUPS_JSON__", stats_blob)
-    # Kök (tarayıcı) sürümü: kartlar'a geri döner, swipe yok
-    root_stats = stats_tpl.replace("__BACK__", "Oxford3000_kartlar.html")
-    (ROOT / "istatistik.html").write_text(root_stats, encoding="utf-8")
-    print(f"istatistik.html: {len(root_stats)} bayt")
-    # Uygulama sürümü: geri = kartlar.html, sağa kaydır → kartlar
-    app_stats = stats_tpl.replace("__BACK__", "kartlar.html").replace(
-        "</head>", APP_HEAD + swipe_script("", "kartlar.html") + "</head>", 1
-    )
-    (ROOT / "app/www/istatistik.html").write_text(app_stats, encoding="utf-8")
-    print(f"app/www/istatistik.html: {len(app_stats)} bayt")
-
-    # Paylaşılan JS'lerin kanonik kopyası app/www'da; kök (tarayıcı) sürümü için kopyala
-    for js in ("srs.js", "log.js", "hesap.js"):
-        (ROOT / js).write_text((ROOT / "app/www" / js).read_text(encoding="utf-8"), encoding="utf-8")
-        print(f"{js}: köke kopyalandı")
-
+    nav = (("__SOZLUK__", "sozluk.html"),)
+    # Liste (açılış): sola kartlar, sağa sözlük.
+    page("sesli_template.html", "index.html", ("kartlar.html", "sozluk.html"),
+         (("__GROUPS_JSON__", blob(sesli_groups)),) + nav)
+    # Kartlar: sola istatistik, sağa liste.
+    page("kartlar_template.html", "kartlar.html", ("istatistik.html", "index.html"),
+         (("__GROUPS_JSON__", blob(kart_groups)),) + nav, head='<script src="three.min.js"></script>')
+    # Sözlük (tüm 3000 kelime; aranınca o kelimenin kartı): sola liste, aşağı çek → ayarlar,
+    # yukarı it → arkadaşlar.
+    page("sozluk_template.html", "sozluk.html", ("index.html", "", "ayarlar.html", "arkadaslar.html"),
+         (("__GROUPS_JSON__", blob(sesli_groups)), ("__BACK__", "index.html")))
+    # Arkadaşlar (sözlüğün altı): aşağı çek → sözlük.
+    page("arkadaslar_template.html", "arkadaslar.html", ("", "", "sozluk.html", ""), nav)
+    # Ayarlar (sözlüğün üstü): sola analiz, yukarı it → sözlük.
+    page("ayarlar_template.html", "ayarlar.html", ("analiz.html", "", "", "sozluk.html"),
+         nav + (("__INDEX__", "index.html"),))
+    # Ayrıntılı istatistik (ayarların sağı): sağa ayarlar.
+    page("analiz_template.html", "analiz.html", ("", "ayarlar.html"),
+         (("__GROUPS_JSON__", blob(stats_data)), ("__AYARLAR__", "ayarlar.html")))
+    # İlerleme: sağa kartlar.
+    page("stats_template.html", "istatistik.html", ("", "kartlar.html"),
+         (("__GROUPS_JSON__", blob(stats_data)), ("__BACK__", "kartlar.html")))
 
 def main():
     groups = apply_enrichment(load_groups())
@@ -272,7 +216,7 @@ def main():
     with open(ROOT / "data" / "all_groups.json", "w", encoding="utf-8") as f:
         json.dump(groups, f, ensure_ascii=False, indent=1)
     render(groups)
-    write_web_bundle()   # updater.js + web.json.gz + web-version.txt
+    write_web_bundle()   # updater.js + web.json + web-version.txt
     done = [g["no"] for g in groups if all(it.get("ok") for it in g["items"])]
     print("okunuşu tam gruplar:", done)
 

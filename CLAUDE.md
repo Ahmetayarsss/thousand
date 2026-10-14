@@ -7,18 +7,16 @@ uymayan değişiklik CI'da (`.github/workflows/kontrol.yml`) kırmızı yanar.
 ## Proje
 
 Oxford 3000 kelime listesi (A1–B2) için Türkçe konuşanlara İngilizce kelime çalışma
-uygulaması: Android (Capacitor + WebView) ve tarayıcıda açılan HTML'ler. Hesap, arkadaşlar,
+uygulaması: Android (Capacitor + WebView). Hesap, arkadaşlar,
 yedek ve kullanım kayıtları Supabase'de (`supabase/kurulum.sql`). Kullanıcı Türkçe konuşur;
 kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 
 ## Kaynak ve üretilen dosyalar
 
-| Elle düzenlenir (kaynak) | Üretilir — elle DÜZENLENMEZ |
-|---|---|
-| `data/all_groups.json`, `scripts/enrich/*.py` | kökteki `*.html` |
-| `templates/*.html`, `templates/updater.js` | `app/www/*.html`, `app/www/updater.js` |
-| `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js` | kökteki `srs.js`, `hesap.js`, `log.js` (kopya) |
-| `supabase/kurulum.sql`, `app/android/**` | `web.json`, `web-version.txt` |
+- **Kaynak (elle düzenlenir):** `data/all_groups.json`, `scripts/enrich/*.py`, `templates/*.html`,
+  `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js`,
+  `supabase/kurulum.sql`, `app/android/**`.
+- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html`, `app/www/updater.js`, `web.json`, `web-version.txt`.
 
 Üretim: `python3 scripts/build_all.py`. Şablonu ya da kaynak JS'i değiştirdikten sonra
 çalıştır ve üretilenleri de commit'le; CI farkı yakalar.

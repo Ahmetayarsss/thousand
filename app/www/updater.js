@@ -16,7 +16,7 @@
  * sürümle sorunsuz çalışmaya devam eder. Tarayıcıda (native değil) hiçbir şey yapmaz.
  */
 (function () {
-  var VER = 1792000264;
+  var VER = 1792000404;
   window.OX_WEBVER = VER;   // kayıt dışa aktarımı için (log.js)
   var Cap = window.Capacitor;
   var native = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());

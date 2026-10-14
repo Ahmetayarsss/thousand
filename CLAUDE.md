@@ -31,6 +31,7 @@ Düzeltme planı `PLAN.md`'de; ilk işaretlenmemiş adımdan devam edilir.
 ```bash
 TZ=Europe/Istanbul node tests/srs.test.js
 node tests/updater.test.js
+node tests/hesap.test.js
 python3 scripts/validate.py
 python3 scripts/build_all.py
 python3 scripts/bekci.py
@@ -62,7 +63,8 @@ Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekir
 4. **Kullanıcıdan veri toplayan yeni kod** (kayıt, istatistik, cihaz bilgisi) kullanıcıya
    sorulmadan ve uygulamada görünür bir açıklama/onay olmadan eklenmez.
 5. **İmza anahtarı kullanıcı onayı olmadan değiştirilmez.** Değişirse telefondaki uygulama
-   güncellenemez; kaldır-kur yerel ilerlemeyi siler.
+   güncellenemez; kaldır-kur yerel ilerlemeyi siler. Anahtar repoda değil, GitHub gizli
+   ayarlarında (`IMZA_ANAHTARI`, `IMZA_PAROLA`); yoksa `build-apk.yml` yayın yapmaz.
 6. **localStorage anahtarlarını** (`ox3000_*`) yeniden adlandıran ya da biçimini değiştiren
    değişiklik eski veriyi taşıyan bir geçiş kodu içerir. İlerleme yalnız telefonda durur.
 7. **Sabit dal adı** kodda ve CI'da kullanılmaz (yeni kodda; mevcutlar borç listesinde).

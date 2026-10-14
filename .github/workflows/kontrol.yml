@@ -30,6 +30,7 @@ jobs:
         run: |
           TZ=Europe/Istanbul node tests/srs.test.js
           node tests/updater.test.js
+          node tests/hesap.test.js
 
       - name: Veri doğrulama
         run: python3 scripts/validate.py

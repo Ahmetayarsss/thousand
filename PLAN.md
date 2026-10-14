@@ -22,8 +22,10 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
       onu da kullanır — koruma çok az. Bunun yerine GitHub hesabında iki adımlı doğrulama ve
       `main` için "PR zorunlu" kuralı (kullanıcı ayarları). İmza ancak anahtar GitHub dışında
       tutulursa anlamlı; kullanıcı karar verecek.
-- [ ] 5. 🔸 İmza anahtarı: parola ve keystore CI secret'ına taşınır. Anahtar yenilensin mi
-      (herkes bir kez kaldır-kur; ilerleme yalnız hesap yedeğiyle döner)?
+- [x] 5. İmza anahtarı yenilendi (kullanıcı kararı: yeni mühür). Anahtar repodan çıktı, GitHub
+      gizli ayarlarında; CI yayından önce imzayı doğrular. Eski APK'lı telefonlarda yeniden kurulum
+      rehberi (yedek doğrulama → kurtarma kodu → sil-kur). Eski anahtar git geçmişinde kalıyor ama
+      artık hiçbir şeyi imzalamıyor.
 - [ ] 6. Yedekleme: `allowBackup` gözden geçirilir (kurtarma kodu Google yedeğine düz metin
       gidiyor; öte yandan yerel ilerlemeyi de kurtarıyor).
 

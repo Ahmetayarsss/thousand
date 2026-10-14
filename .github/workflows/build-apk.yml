@@ -61,6 +61,10 @@ jobs:
       - name: Tekrar sistemi testleri
         run: TZ=Europe/Istanbul node tests/srs.test.js
 
+      # Bekçi kırmızıysa APK ve güncelleme paketi yayınlanmaz (kurallar: CLAUDE.md).
+      - name: Bekçi
+        run: python3 scripts/bekci.py
+
       - name: Bağımlılıkları kur (npm ci)
         working-directory: app
         run: |

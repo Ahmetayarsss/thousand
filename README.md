@@ -20,6 +20,9 @@ kelime çalışma araçları.
 | `templates/` | HTML şablonları (`__GROUPS_JSON__` yer tutucusu build'de doldurulur) |
 | `scripts/build_all.py` | Enrichment'ı uygular + iki HTML'i üretir |
 | `scripts/validate.py` | Veri tutarlılık kontrolleri |
+| `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, ölü dosya, belge kayması, paket tutarlılığı; bilinen borçlar `scripts/bekci_borc.json` |
+| `CLAUDE.md` | Bu repoda çalışırken uyulacak kurallar ve push öncesi kontroller |
+| `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + üretilen dosyaların güncelliği |
 | `scripts/enrich/gN.py` | Grup N'nin okunuş/açıklama/örnek içeriği |
 | `app/` | Android uygulaması (Capacitor + yerel TTS) — kurulum & APK için `app/README.md` |
 

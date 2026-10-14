@@ -53,8 +53,10 @@ app/
 **Uygulama içi güncelleme:** arayüz (HTML/JS) APK yeniden kurulmadan güncellenir
 (`templates/updater.js`). Güncelleyici yalnız `apk-latest` release'indeki `web-version.txt`'ye
 bakar; daha yeniyse `web.json`'u indirir, içindeki sürüm aynıysa cihaza yazıp hemen uygular.
-Paketi yalnız CI (`main`'e birleşince) üretir. Kalan güvenlik işleri (paket imzası, bozuk
-pakette gömülü sürüme dönüş) `PLAN.md` adım 4'te.
+Paketi yalnız CI (`main`'e birleşince) üretir. İndirilen paket üst üste 3 açılışta açılamazsa
+uygulama kendiliğinden APK'daki sürüme döner, o sürümü bir daha indirmez ve kullanıcıya
+"Güncelleme açılamadı — önceki sürüm kullanılıyor" der (bu koruma APK'daki güncelleyicide
+çalışır: bu sürümü içeren APK kurulduktan sonra etkindir).
 
 Kelime içeriği ya da şablon değişince: `python3 scripts/build_all.py` çalıştır. Yerel
 derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script üretir.

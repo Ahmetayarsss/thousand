@@ -16,6 +16,7 @@
  *   durt {s}              arkadaşını dürttü (s: gonderildi | bugun_durttun)
  *   ayar {...}            ayar değişti        dev {a}        geliştirici işlemi
  *   hata {m, f, l}        yakalanmamış JS hatası
+ *   guncelleme {a, v}     güncelleme olayı (a: geri = v sürümü açılamadı, gömülü sürüme dönüldü)
  * En fazla MAX olay tutulur (eskiler silinir). Her olayın bir sıra numarası var: sira() şimdiye
  * dek eklenen olay sayısı (silinenler dahil), son olayın numarası budur; sunucuya hangi olayların
  * gittiği bununla izlenir. Kimlik: rastgele, anonim (cihaz kimliği).

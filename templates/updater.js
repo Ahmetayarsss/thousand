@@ -18,6 +18,13 @@
  *
  * Her şey try/catch içinde: güncelleme başarısız olursa uygulama gömülü (APK'daki)
  * sürümle sorunsuz çalışmaya devam eder. Tarayıcıda (native değil) hiçbir şey yapmaz.
+ *
+ * Bozuk pakete karşı geri dönüş: gömülü sayfa pakete her yönlendirişte bir sayaç artırır,
+ * paketin sayfası açılınca (load) sayacı sıfırlar. Paket üst üste DENEME_SINIRI açılışta
+ * açılamazsa (beyaz ekran, silinmiş dosya, betik hatası yüzünden güncelleyici hiç
+ * çalışmıyor…) gömülü sürüme dönülür, o sürüm "kötü" işaretlenir ve bir daha indirilmez;
+ * daha yeni bir sürüm çıkınca o denenir. Bu koruma gömülü (APK'daki) güncelleyicide
+ * çalışır, yani bu dosyayı içeren bir APK kurulduktan sonra etkindir.
  */
 (function () {
   var VER = __WEBVER__;
@@ -31,6 +38,9 @@
            (typeof Cap.registerPlugin === "function" && Cap.registerPlugin(name));
   }
   var inUpdate = location.href.indexOf("_capacitor_file_") > -1;
+  var DENEME_SINIRI = 3;
+  var K_DENEME = "ox_webupd_deneme", K_KOTU = "ox_webupd_kotu", K_GERI = "ox_webupd_geri";
+  function sayi(k) { try { return parseInt(localStorage.getItem(k), 10) || 0; } catch (e) { return 0; } }
 
   // 1) Uygulanmış güncellemeye yönlen (yalnız gömülü sayfadayken).
   try {
@@ -39,10 +49,20 @@
       var u = JSON.parse(raw);
       if (u && u.ver && u.base) {
         if (u.ver > VER && !inUpdate) {
-          var page = location.pathname.split("/").pop() || "index.html";
-          window.OX_YONLENDIR = 1;   // bu sayfa terk ediliyor (tts-bridge bildirim hedefine yenisinde baksın)
-          location.replace(u.base + page + location.search + location.hash);
-          return;
+          var deneme = sayi(K_DENEME);
+          if (deneme >= DENEME_SINIRI) {
+            // Paket üst üste açılamadı: gömülü sürüme dön, bu sürümü bir daha indirme.
+            localStorage.setItem(K_KOTU, String(u.ver));
+            localStorage.setItem(K_GERI, String(u.ver));
+            localStorage.removeItem("ox_webupd");
+            localStorage.removeItem(K_DENEME);
+          } else {
+            localStorage.setItem(K_DENEME, String(deneme + 1));
+            var page = location.pathname.split("/").pop() || "index.html";
+            window.OX_YONLENDIR = 1;   // bu sayfa terk ediliyor (tts-bridge bildirim hedefine yenisinde baksın)
+            location.replace(u.base + page + location.search + location.hash);
+            return;
+          }
         }
         // Yalnız GÖMÜLÜ sayfada ve gömülü sürüm işareti geçince temizle. Uygulanmış
         // pakette (inUpdate) VER==u.ver olduğundan burada temizlersek işaret silinir
@@ -52,21 +72,41 @@
     }
   } catch (e) {}
 
+  // Paketin sayfası açıldı: sağlıklı, sayaç sıfırlanır.
+  if (inUpdate) {
+    window.addEventListener("load", function () { try { localStorage.removeItem(K_DENEME); } catch (e) {} });
+  }
+
+  // Bozuk paketten geri dönüldüyse: kullanıcıya söyle ve kayda yaz (sessiz geçme).
+  try {
+    var geri = localStorage.getItem(K_GERI);
+    if (geri && !inUpdate) {
+      localStorage.removeItem(K_GERI);
+      window.addEventListener("DOMContentLoaded", function () {
+        try { if (window.OXLOG) OXLOG.add("guncelleme", { a: "geri", v: +geri }); } catch (e) {}
+        balon("Güncelleme açılamadı — önceki sürüm kullanılıyor", "#C9741A", 4000);
+      });
+    }
+  } catch (e) {}
+
   // Güncellenmiş sayfadaysak ve yeni uygulandıysa küçük bilgi balonu.
   try {
     if (inUpdate && localStorage.getItem("ox_webupd_new")) {
       localStorage.removeItem("ox_webupd_new");
-      window.addEventListener("DOMContentLoaded", function () {
-        try {
-          var t = document.createElement("div");
-          t.textContent = "Uygulama güncellendi ✓";
-          t.style.cssText = "position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#2E9E5B;color:#fff;font:600 12px system-ui;padding:8px 14px;border-radius:18px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none";
-          document.body.appendChild(t);
-          setTimeout(function () { t.style.transition = "opacity .5s"; t.style.opacity = "0"; }, 2500);
-        } catch (e) {}
-      });
+      window.addEventListener("DOMContentLoaded", function () { balon("Uygulama güncellendi ✓", "#2E9E5B", 2500); });
     }
   } catch (e) {}
+
+  // Altta kısa bilgi balonu.
+  function balon(metin, renk, ms) {
+    try {
+      var t = document.createElement("div");
+      t.textContent = metin;
+      t.style.cssText = "position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:" + renk + ";color:#fff;font:600 12px system-ui;padding:8px 14px;border-radius:18px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none";
+      document.body.appendChild(t);
+      setTimeout(function () { t.style.transition = "opacity .5s"; t.style.opacity = "0"; }, ms);
+    } catch (e) {}
+  }
 
   // 2) Arka planda güncelleme kontrolü + indirme.
   var REL = "https://github.com/Ahmetayarsss/thousand/releases/download/apk-latest/";
@@ -127,6 +167,7 @@
       var rv = await getRemoteVer();
       if (!rv.ver) return;
       if (rv.ver <= Math.max(VER, applied)) return; // zaten güncel
+      if (rv.ver === sayi(K_KOTU)) return;          // bu sürüm bu telefonda açılamamıştı
 
       var jtxt = await getBundle();
       if (!jtxt) return;
@@ -146,6 +187,7 @@
       var base = Cap.convertFileSrc(uri);
       if (base.slice(-1) !== "/") base += "/";
       localStorage.setItem("ox_webupd", JSON.stringify({ ver: rv.ver, base: base }));
+      localStorage.removeItem(K_DENEME);
       localStorage.setItem("ox_webupd_new", "1");
       await temizle(Fs, ["v" + rv.ver, acikKlasor()]);
       // Hemen uygula: gömülü sayfadaysak indirilen pakete yönlen (tek açılışta güncelle).

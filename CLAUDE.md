@@ -16,7 +16,8 @@ kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 - **Kaynak (elle düzenlenir):** `data/all_groups.json`, `scripts/enrich/*.py`, `templates/*.html`,
   `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js`,
   `supabase/kurulum.sql`, `app/android/**`.
-- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html`, `app/www/updater.js`, `web.json`, `web-version.txt`.
+- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html` (repoda). Güncelleme paketi
+  (`app/www/updater.js`, `web.json`, `web-version.txt`) de üretilir ama repoya girmez.
 
 Üretim: `python3 scripts/build_all.py`. Şablonu ya da kaynak JS'i değiştirdikten sonra
 çalıştır ve üretilenleri de commit'le; CI farkı yakalar.
@@ -29,6 +30,7 @@ Düzeltme planı `PLAN.md`'de; ilk işaretlenmemiş adımdan devam edilir.
 
 ```bash
 TZ=Europe/Istanbul node tests/srs.test.js
+node tests/updater.test.js
 python3 scripts/validate.py
 python3 scripts/build_all.py
 python3 scripts/bekci.py
@@ -37,12 +39,17 @@ python3 scripts/bekci.py
 Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekirse ekran görüntüsü
 (Playwright, 390px genişlik). Çalıştırmadığın şeyi çalışıyor diye bildirme.
 
-## Yayın gerçeği — dikkat
+## Yayın — nasıl telefona ulaşır
 
-`claude/oxford-3000-pronunciation-defs-inzs33` dalı şu an **canlı yayın kanalı**: o dala
-giren `web.json`, uygulama içi güncelleyiciyle (`templates/updater.js`) doğrudan bütün
-telefonlara iner ve native yetkilerle çalışır. O dala kullanıcı açıkça istemeden push etme;
-iş kendi dalında yapılır. Bu düzen bir borçtur (aşağıda), düzeltilene kadar böyle.
+- **`main` = yayın.** `main`'e giren her değişiklikte `build-apk.yml` testleri, doğrulamayı ve
+  bekçiyi çalıştırır, geçerse APK'yı ve güncelleme paketini `apk-latest` release'ine koyar.
+  Telefonlardaki güncelleyici paketi YALNIZ oradan indirir; arayüz değişikliği dakikalar
+  içinde bütün telefonlarda olur.
+- **`main`'e doğrudan push yok.** İş bir çalışma dalında yapılır, PR açılır, kullanıcı
+  birleştirir. PR açıklaması telefonda neyin değişeceğini sade dille söyler.
+- **Eski yayın dalı** (`claude/oxford-3000-pronunciation-defs-inzs33`) donduruldu: ona push edilmez.
+- Güncelleme paketi (`web.json`, `web-version.txt`, `app/www/updater.js`) repoda tutulmaz;
+  yalnız CI üretir (bekçi `paket-repoda` kuralı).
 
 ## Değişmez kurallar
 

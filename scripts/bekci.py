@@ -13,7 +13,8 @@ Kurallar (her ihlal "kural: dosya — açıklama" olarak yazılır):
   olu-dosya       app/www'da hiçbir sayfanın yüklemediği .js dosyası
   belge-kaymasi   README'lerde adı geçen ama repoda olmayan dosya
   buyuk-dosya     1,5 MB'tan büyük dosya (repo şişmesi)
-  paket-tutarli   web.json / updater.js, app/www'daki kaynaklarla ve web-version.txt ile uyuşmuyor
+  paket-repoda    güncelleme paketi (web.json, web-version.txt, app/www/updater.js) repoya girmiş;
+                  paketi yalnız CI üretip release'e koyar, güncelleyici yalnız oradan indirir
 
 Bilinen, henüz düzeltilmemiş ihlaller scripts/bekci_borc.json'da gerekçesiyle durur.
 Listede olmayan her ihlal CI'ı kırar. Bir borç düzeltilince kaydı da silinmelidir:
@@ -32,9 +33,7 @@ BORC_DOSYASI = ROOT / "scripts" / "bekci_borc.json"
 # gidebileceği yeni bir yer demek: önce kullanıcıya sorulur, gerekçesi buraya yazılır.
 IZINLI_ALANLAR = {
     "ezztsktfyangyzrdkszb.supabase.co": "hesap, arkadaşlar, yedek, kayıtlar (supabase/kurulum.sql)",
-    "api.github.com": "uygulama içi güncelleme: sürüm kontrolü",
-    "raw.githubusercontent.com": "uygulama içi güncelleme: paket",
-    "github.com": "uygulama içi güncelleme: release",
+    "github.com": "uygulama içi güncelleme: yalnız apk-latest release'i (templates/updater.js)",
     "": "yalnız kullanıcının açtığı sözlük bağlantıları (veri gönderilmez)",
     "schemas.android.com": "XML ad alanı (ağ isteği değil)",
     "www.w3.org": "SVG/XML ad alanı (ağ isteği değil)",
@@ -54,9 +53,9 @@ GIZLI_DESENLER = [
     (re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b"), "Google API anahtarı"),
 ]
 IKILI_UZANTILAR = (".mp3", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".jar", ".ico", ".ttf", ".woff", ".woff2") + GIZLI_UZANTILAR
-# Üretilen paket (app/www'nun kopyası) ve bekçinin kendi dosyaları içerik taramalarına girmez;
-# paketin doğruluğu paket-tutarli kuralıyla ayrıca denetlenir.
-TARAMA_DISI = {"web.json", "scripts/bekci.py", "scripts/bekci_borc.json", "CLAUDE.md"}
+# Bekçinin kendi dosyaları ve kuralları anlatan belge içerik taramalarına girmez.
+TARAMA_DISI = {"scripts/bekci.py", "scripts/bekci_borc.json", "CLAUDE.md"}
+PAKET_DOSYALARI = ("web.json", "web-version.txt", "app/www/updater.js")
 BUYUK_SINIR = 1_500_000
 
 # Uygulama kodu (ağ adresi taraması): şablonlar, app/www'daki elle yazılan JS, native Java.
@@ -124,7 +123,9 @@ def denetle():
                 ihlaller.append(("olu-dosya", d, "hiçbir sayfa yüklemiyor"))
 
     # belge-kaymasi: README'lerde adı geçen dosyalar var mı (yol ya da dosya adı olarak)
-    adlar = {d.rsplit("/", 1)[-1] for d in dosyalar} | set(dosyalar)
+    # CI'ın ürettiği paket dosyaları repoda olmasa da belgelerde anılabilir.
+    uretilen = set(PAKET_DOSYALARI) | {d.rsplit("/", 1)[-1] for d in PAKET_DOSYALARI}
+    adlar = {d.rsplit("/", 1)[-1] for d in dosyalar} | set(dosyalar) | uretilen
     for belge in ("README.md", "app/README.md"):
         t = metin.get(belge) or ""
         for ad in sorted(set(re.findall(r"[A-Za-z0-9_./-]+\.(?:html|js|py|json|md|yml|sql|java|txt)\b", t))):
@@ -139,23 +140,10 @@ def denetle():
         if (ROOT / d).stat().st_size > BUYUK_SINIR:
             ihlaller.append(("buyuk-dosya", d, f"{(ROOT / d).stat().st_size // 1024} KB"))
 
-    # paket-tutarli: updater.js sürümü = web-version.txt; web.json = app/www'daki dosyalar
-    surum = (metin.get("web-version.txt") or "").strip()
-    sablon = metin.get("templates/updater.js") or ""
-    uretilen = metin.get("app/www/updater.js") or ""
-    if sablon.replace("__WEBVER__", surum) != uretilen:
-        ihlaller.append(("paket-tutarli", "app/www/updater.js",
-                         "templates/updater.js + web-version.txt ile uyuşmuyor (build_all.py çalıştır)"))
-    try:
-        paket = json.loads(metin.get("web.json") or "{}")
-    except ValueError:
-        paket = None
-    if not isinstance(paket, dict) or "index.html" not in paket:
-        ihlaller.append(("paket-tutarli", "web.json", "okunamıyor ya da index.html yok"))
-    else:
-        for ad, icerik in sorted(paket.items()):
-            if metin.get("app/www/" + ad) != icerik:
-                ihlaller.append(("paket-tutarli", "web.json", f"{ad} app/www'dakiyle aynı değil (build_all.py çalıştır)"))
+    # paket-repoda
+    for d in PAKET_DOSYALARI:
+        if d in dosyalar:
+            ihlaller.append(("paket-repoda", d, "güncelleme paketi repoda; yalnız CI üretir (.gitignore)"))
 
     return ihlaller
 

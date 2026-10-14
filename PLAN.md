@@ -13,11 +13,11 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Aşama 2 — Güvenlik ve yayın
 
-- [ ] 3. 🔸 Yayın kanalı: eski `claude/...` dalı yerine `main` + sürüm etiketi. APK ve
-      güncelleme paketi yalnız CI'dan geçmiş commit'ten çıkar.
-- [ ] 4. Güncelleyici: paket yalnız release'ten iner, imzası doğrulanır (imzasızsa
-      uygulanmaz); bozuk paket açılmazsa gömülü sürüme kendiliğinden döner. `web.json`
-      repodan çıkar.
+- [x] 3. Yayın kanalı `main` (kullanıcı kararı: main + PR). APK ve güncelleme paketi yalnız
+      `main`'den, testler + bekçi geçerse çıkar; güncelleyici yalnız release'ten indirir,
+      paketin içindeki sürümü doğrular; `web.json` repodan çıktı. Eski dal donduruldu.
+- [ ] 4. Güncelleyici: paketin imzası doğrulanır (imzasızsa uygulanmaz; release'e erişen
+      biri de sahte paket koyamaz); bozuk paket açılmazsa gömülü sürüme kendiliğinden döner.
 - [ ] 5. 🔸 İmza anahtarı: parola ve keystore CI secret'ına taşınır. Anahtar yenilensin mi
       (herkes bir kez kaldır-kur; ilerleme yalnız hesap yedeğiyle döner)?
 - [ ] 6. Yedekleme: `allowBackup` gözden geçirilir (kurtarma kodu Google yedeğine düz metin
@@ -64,7 +64,7 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [ ] 23. Kart çevirme: 600 KB three.js + WebGL yerine CSS 3D (önce/sonra ekran kaydıyla).
 - [ ] 24. Kelime verisi her sayfaya ayrı gömülmez; tek veri dosyası (paket ~3 MB → ~1 MB).
 - [ ] 25. `scripts/enrich/g*.py` (veri kod içinde) → veri dosyası.
-- [ ] 26. Testler: `hesap.js`, güncelleyici, Supabase fonksiyonları için.
+- [ ] 26. Testler: `hesap.js` ve Supabase fonksiyonları için (güncelleyici testi adım 3'te geldi).
 - [ ] 27. `versionCode` her derlemede artar.
 
 ## Aşama 8 — Android ve dağıtım

@@ -1,17 +1,26 @@
 name: Android APK derle
 
-# Oxford 3000 uygulamasını (app/) GitHub sunucularında derler ve
-# imzalı debug APK'sını indirilebilir bir artifact olarak yükler.
-# Elle çalıştırmak için: Actions sekmesi > "Android APK derle" > Run workflow.
+# YAYIN: main dalına giren her değişiklikte APK'yı ve uygulama içi güncelleme paketini
+# (web.json + web-version.txt) derleyip apk-latest release'ine koyar. Telefonlardaki
+# güncelleyici paketi YALNIZ oradan indirir. Testler, doğrulama ya da bekçi kırmızıysa
+# hiçbir şey yayınlanmaz. Elle: Actions > "Android APK derle" > Run workflow (main seçili).
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - claude/oxford-3000-pronunciation-defs-inzs33
+      - main
     paths:
       - "app/**"
+      - "templates/**"
+      - "data/**"
+      - "scripts/**"
       - ".github/workflows/build-apk.yml"
+
+# Aynı anda iki yayın olmasın (sonraki, öncekinin bitmesini bekler).
+concurrency:
+  group: yayin
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -20,10 +29,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Yalnız main'den yayın
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Yayın yalnız main dalından yapılır (şu an: ${{ github.ref_name }})."
+          exit 1
+
       - name: Depoyu al
         uses: actions/checkout@v4
-        with:
-          ref: claude/oxford-3000-pronunciation-defs-inzs33
 
       - name: Node kur
         uses: actions/setup-node@v4
@@ -58,12 +71,22 @@ jobs:
           tail -n 40 /tmp/sdk.log || true
           [ "$ok" = "1" ] || { echo "SDK paketleri 5 denemede kurulamadı"; exit 1; }
 
-      - name: Tekrar sistemi testleri
-        run: TZ=Europe/Istanbul node tests/srs.test.js
+      - name: Testler
+        run: |
+          TZ=Europe/Istanbul node tests/srs.test.js
+          node tests/updater.test.js
+
+      - name: Veri doğrulama
+        run: python3 scripts/validate.py
 
       # Bekçi kırmızıysa APK ve güncelleme paketi yayınlanmaz (kurallar: CLAUDE.md).
       - name: Bekçi
         run: python3 scripts/bekci.py
+
+      # Sayfalar + updater.js (yeni sürüm numarasıyla) + web.json + web-version.txt.
+      # APK'ya giren app/www ile release'e giden paket böylece aynı derlemeden çıkar.
+      - name: Sayfaları ve güncelleme paketini üret
+        run: python3 scripts/build_all.py
 
       - name: Bağımlılıkları kur (npm ci)
         working-directory: app
@@ -83,7 +106,7 @@ jobs:
           set -o pipefail
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
 
-      - name: Hata logunu depoya yaz (teşhis)
+      - name: Hata logunu topla (teşhis)
         if: failure()
         run: |
           {
@@ -97,17 +120,8 @@ jobs:
             tail -n 250 /tmp/gradle.log 2>/dev/null || echo "gradle.log yok → gradle'a gelinmedi"
           } > ci-error.log
           echo "log boyutu: $(wc -c < ci-error.log) bayt"
-          BR=claude/oxford-3000-pronunciation-defs-inzs33
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add -f ci-error.log
-          git commit -m "CI teşhis logu" || echo "commit yok"
-          for i in 1 2 3 4 5; do
-            git push origin "HEAD:$BR" && break
-            echo "push $i başarısız, güncelle"; git fetch origin "$BR"; git rebase "origin/$BR" || git rebase --abort; sleep 4
-          done
 
-      - name: Log'u artifact olarak da yükle (yedek)
+      - name: Hata logunu artifact olarak yükle
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -125,36 +139,18 @@ jobs:
       - name: APK'yı sabit adlandır
         run: cp app/android/app/build/outputs/apk/debug/app-debug.apk Oxford3000.apk
 
-      - name: Web güncelleme paketini üret (web.json)
-        run: |
-          python3 - <<'PY'
-          import json, os, sys
-          sys.path.insert(0, "scripts")
-          from build_all import WEB_BUNDLE_FILES as names   # tek liste: build_all.py
-          base = "app/www"
-          d = {}
-          for n in names:
-              p = os.path.join(base, n)
-              if os.path.exists(p):
-                  with open(p, encoding="utf-8") as f:
-                      d[n] = f.read()
-          with open("web.json", "w", encoding="utf-8") as f:
-              json.dump(d, f, ensure_ascii=False)
-          print("web.json:", os.path.getsize("web.json"), "bayt,", len(d), "dosya")
-          PY
-
       - name: Release olarak yayınla (apk-latest)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-latest
           name: "Oxford 3000 — son APK"
           prerelease: true
-          # web.json + web-version.txt: uygulama içi güncelleme paketi (APK'yı
-          # tekrar kurmadan arayüzü günceller). build_all.py üretir, repoda tutulur.
+          # web.json + web-version.txt: uygulama içi güncelleme paketi (APK'yı tekrar
+          # kurmadan arayüzü günceller). Yukarıda build_all.py üretti; repoda tutulmaz.
           files: |
             Oxford3000.apk
             web.json
             web-version.txt
           body: |
-            Otomatik derlenen debug APK (her push'ta güncellenir).
+            main dalından otomatik derlenen APK (main'e her birleşmede güncellenir).
             Telefona kurmak için: indir → aç → "bilinmeyen kaynaklara izin ver".

@@ -20,14 +20,15 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `scripts/enrich/gN.py` | Grup N'nin okunuş/açıklama/örnek içeriği (Grup 1 ve 10 doğrudan `all_groups.json`'da) |
 | `scripts/enrich/multi_examples.py` | Kelimelere eklenen ek örnek cümleler |
 | `templates/` | Sayfa şablonları (`__GROUPS_JSON__` vb. yer tutucular build'de doldurulur) ve `updater.js` |
-| `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`) ve güncelleme paketini (`web.json`, `web-version.txt`) üretir |
+| `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`) ve güncelleme paketini (`web.json`, `web-version.txt`, `app/www/updater.js` — repoda tutulmaz) üretir |
 | `scripts/validate.py` | Veri tutarlılık kontrolleri |
 | `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, ölü dosya, belge kayması, paket tutarlılığı; bilinen borçlar `scripts/bekci_borc.json` |
 | `tests/srs.test.js` | Tekrar sistemi (`app/www/srs.js`) testleri |
+| `tests/updater.test.js` | Uygulama içi güncelleyici (`templates/updater.js`) testleri |
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + üretilen dosyaların güncelliği |
-| `.github/workflows/build-apk.yml` | APK ve güncelleme paketini derleyip `apk-latest` release'ine koyar |
-| `.github/workflows/fetch-audio.yml` | Sözlük US seslerini `app/www/audio/`'ya indirir (elle çalıştırılır) |
+| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK ve güncelleme paketini derleyip `apk-latest` release'ine koyar |
+| `.github/workflows/fetch-audio.yml` | Sözlük US seslerini `app/www/audio/`'ya indirir (elle, bir çalışma dalında) |
 | `app/` | Android uygulaması (Capacitor) — yapı ve APK için `app/README.md` |
 
 ## Alanlar
@@ -51,7 +52,7 @@ Heceler tireli, vurgulu hece BÜYÜK harf, yalnız Türkçe harfler
    `DATA = {"kelime": ("okunuş", "açıklama", "örnek <b>kelime</b> cümlesi"), ...}` kaydını düzelt
    (Grup 1 ve 10 için `data/all_groups.json`).
 2. `python3 scripts/build_all.py && python3 scripts/validate.py && python3 scripts/bekci.py`
-3. Üretilen dosyaları da commit'le.
+3. Üretilen dosyaları da commit'le, PR aç; `main`'e birleşince telefonlara gider.
 
 ## Notlar
 

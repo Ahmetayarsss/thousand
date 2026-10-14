@@ -8,30 +8,5 @@
     "kural": "gizli-icerik",
     "dosya": "app/android/app/build.gradle",
     "neden": "Yukarıdaki keystore'un parolası. Keystore ile birlikte CI secret'ına taşınacak."
-  },
-  {
-    "kural": "sabit-dal",
-    "dosya": "templates/updater.js",
-    "neden": "Uygulama içi güncelleme paketi doğrudan bir dalın ham dosyasından iniyor (imzasız, CI'sız). Çözüm: yalnız CI'dan geçmiş, imzalı release paketi + gömülü sürüme dönüş yolu."
-  },
-  {
-    "kural": "sabit-dal",
-    "dosya": "app/www/updater.js",
-    "neden": "templates/updater.js'ten üretilir; o düzelince bu da düzelir."
-  },
-  {
-    "kural": "sabit-dal",
-    "dosya": ".github/workflows/build-apk.yml",
-    "neden": "APK ve güncelleme paketi yalnız eski bir claude/... dalından derleniyor. Çözüm: main dalı + sürüm etiketi."
-  },
-  {
-    "kural": "sabit-dal",
-    "dosya": ".github/workflows/fetch-audio.yml",
-    "neden": "Aynı eski dala yazıyor; build-apk.yml ile birlikte düzelecek."
-  },
-  {
-    "kural": "buyuk-dosya",
-    "dosya": "web.json",
-    "neden": "Güncelleme paketi (~3 MB) her derlemede repoya giriyor ve geçmişi şişiriyor. Güncelleyici yalnız release'ten okuyunca repodan çıkacak."
   }
 ]

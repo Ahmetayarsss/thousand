@@ -50,22 +50,25 @@ app/
   package.json
 ```
 
-**Uygulama içi güncelleme:** arayüz (HTML/JS) APK yeniden kurulmadan `web.json` paketiyle
-güncellenir (`templates/updater.js`). Bu yolun bilinen güvenlik sorunları ve düzeltme planı
-`PLAN.md` Aşama 2'de.
+**Uygulama içi güncelleme:** arayüz (HTML/JS) APK yeniden kurulmadan güncellenir
+(`templates/updater.js`). Güncelleyici yalnız `apk-latest` release'indeki `web-version.txt`'ye
+bakar; daha yeniyse `web.json`'u indirir, içindeki sürüm aynıysa cihaza yazıp hemen uygular.
+Paketi yalnız CI (`main`'e birleşince) üretir. Kalan güvenlik işleri (paket imzası, bozuk
+pakette gömülü sürüme dönüş) `PLAN.md` adım 4'te.
 
-Kelime içeriği ya da şablon değişince: `python3 scripts/build_all.py` çalıştır, sonra
-(yerel derleme için) `cd app && npx cap sync android`.
+Kelime içeriği ya da şablon değişince: `python3 scripts/build_all.py` çalıştır. Yerel
+derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script üretir.
 
 ## APK nasıl üretilir
 
 ### Yol 1 — GitHub Actions (önerilen, kurulum gerektirmez)
-`.github/workflows/build-apk.yml` yayın dalına (bkz. `CLAUDE.md` → Yayın gerçeği) push'ta veya Actions sekmesinden elle
+`.github/workflows/build-apk.yml` `main`'e her birleşmede veya Actions sekmesinden elle
 ("Run workflow") çalışır. Biten derlemede **oxford3000-debug-apk** adlı artifact'i
 indir; içindeki `app-debug.apk`'yı telefona kur (Ayarlar > bilinmeyen kaynaklara izin).
 
 ### Yol 2 — Yerel makine (Android SDK gerekir)
 ```bash
+python3 scripts/build_all.py   # sayfalar + updater.js
 cd app
 npm ci
 npx cap sync android

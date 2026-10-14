@@ -26,8 +26,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Tekrar sistemi testleri
-        run: TZ=Europe/Istanbul node tests/srs.test.js
+      - name: Testler
+        run: |
+          TZ=Europe/Istanbul node tests/srs.test.js
+          node tests/updater.test.js
 
       - name: Veri doğrulama
         run: python3 scripts/validate.py
@@ -38,8 +40,8 @@ jobs:
       - name: Üretilen dosyalar şablonlarla güncel mi
         run: |
           python3 scripts/build_all.py > /dev/null
-          # Sürüm numarası (zaman damgası) her derlemede değişir; o üç dosya hariç fark olmamalı.
-          if ! git diff --exit-code --stat -- . ':!web.json' ':!web-version.txt' ':!app/www/updater.js'; then
+          # Güncelleme paketi (web.json, web-version.txt, app/www/updater.js) repoda değil; geri kalanında fark olmamalı.
+          if ! git diff --exit-code --stat; then
             echo "::error::Üretilen dosyalar commit'lenenden farklı. 'python3 scripts/build_all.py' çalıştırıp sonucu commit'le; app/www'daki üretilen sayfaları elle düzenleme."
             exit 1
           fi

@@ -71,7 +71,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Aşama 7 — Performans ve mimari
 
-- [ ] 22. `log.js`: her olayda 5000 olayı yeniden yazmak yerine toplu/ertelenmiş yazma.
+- [x] 22. `log.js`: olaylar bellekte birikir, en geç 1 sn sonra tek seferde yazılır; sayfadan çıkarken /
+      arka plana geçerken hemen yazılır (`tests/log.test.js`). Dolu kayıtta 100 olay: 272 ms → <1 ms.
 - [ ] 23. Kart çevirme: 600 KB three.js + WebGL yerine CSS 3D (önce/sonra ekran kaydıyla).
 - [ ] 24. Kelime verisi her sayfaya ayrı gömülmez; tek veri dosyası (paket ~3 MB → ~1 MB).
 - [ ] 25. `scripts/enrich/g*.py` (veri kod içinde) → veri dosyası.

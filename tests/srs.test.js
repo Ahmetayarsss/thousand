@@ -113,8 +113,8 @@ t("sınav kuyruğu: tekrarlar kutu yüksekten düşüğe, sonra turun yenileri",
   assert.strictEqual(q.reviews.length, 4);
   assert.deepStrictEqual(q.reviews.map(S.level), [3, 2, 1, 1]);
   assert.deepStrictEqual(new Set(q.reviews.slice(2)), new Set([ks[0], ks[1]]));
-  assert.strictEqual(q.news.length, 100);
-  assert.deepStrictEqual(new Set(q.news), new Set(S.newList(100)));
+  assert.strictEqual(q.news.length, 20);                                      // varsayılan liste
+  assert.deepStrictEqual(new Set(q.news), new Set(S.newList(20)));
 });
 
 t("sınav kuyruğu: olgun 5–7 de gelir, seviye yüksekten düşüğe", () => {
@@ -152,8 +152,10 @@ t("tur: yarıda bırakılınca kalanlarla sürer, bitince yeni tur kurulur", () 
   S.setListSize(100);
 });
 
-t("liste sayısı ayarı: sınırlar, varsayılan 100, değişince tur sıfırlanır", () => {
-  assert.strictEqual(S.listSize(), 100);
+t("liste sayısı ayarı: sınırlar, varsayılan 20, değişince tur sıfırlanır", () => {
+  localStorage.removeItem("ox3000_settings_v1");
+  assert.strictEqual(S.listSize(), 20);
+  assert.strictEqual(S.examQueue(at(0)).news.length, 20);
   assert.strictEqual(S.setListSize(30), 30);
   assert.strictEqual(S.topLevel(), "A1");
   assert.strictEqual(S.examQueue(at(0)).news.length, 30);
@@ -162,6 +164,12 @@ t("liste sayısı ayarı: sınırlar, varsayılan 100, değişince tur sıfırla
   assert.strictEqual(S.setListSize(1), S.LMIN);
   assert.strictEqual(S.setListSize(9999), S.LMAX);
   S.setListSize(100);
+});
+
+t("liste sayısı: elle 100 seçmiş kullanıcı 100'de kalır (varsayılan değişse de)", () => {
+  localStorage.setItem("ox3000_settings_v1", JSON.stringify({ listN: 100, loop: true }));
+  assert.strictEqual(S.listSize(), 100);
+  assert.strictEqual(S.examQueue(at(0)).news.length, 100);
 });
 
 t("geliştirici: gün kaydırma vadeyi öne çeker", () => {

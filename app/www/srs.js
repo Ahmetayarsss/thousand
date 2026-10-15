@@ -32,7 +32,7 @@
   var LV = ["A1", "A2", "B1", "B2", "C1"];
   var SETK = "ox3000_settings_v1", DEVK = "ox3000_dev_v1";
   var BKEY = "ox3000_exam_batch_v1", DAYK = "ox3000_daily_v1";
-  var LMIN = 5, LMAX = 300, LDEF = 100;
+  var LMIN = 5, LMAX = 300, LDEF = 20;
   var CAT = [], IDX = {}, st = null;
 
   var G = typeof window !== "undefined" ? window : globalThis;
@@ -84,7 +84,9 @@
   function opt(k, d) { var s = getJ(SETK, {}) || {}; return Object.prototype.hasOwnProperty.call(s, k) ? s[k] : d; }
   function setOpt(k, v) { var s = getJ(SETK, {}) || {}; s[k] = v; setJ(SETK, s); return v; }
 
-  // Ana sayfadaki yeni kelime sayısı (= bir sınav turundaki yeni kelime sayısı).
+  // Ana sayfadaki yeni kelime sayısı (= bir sınav turundaki yeni kelime sayısı). Varsayılan 20
+  // (eskiden 100: bir oturumda öğrenmek için çok). listN yalnız kullanıcı ayarlayınca yazılır;
+  // elle 100 seçmiş olan 100'de kalır, hiç seçmemiş olan yeni varsayılanı alır.
   function listSize() { var n = (getJ(SETK, {}) || {}).listN | 0; return n >= LMIN && n <= LMAX ? n : LDEF; }
   function setListSize(n) {
     n = Math.max(LMIN, Math.min(LMAX, n | 0));
@@ -180,7 +182,7 @@
 
   function inCycle() { var s = load(), c = 0; for (var k in s) if (IDX[k] != null) c++; return c; }
 
-  // Ana sayfadaki 100'lük listede bulunan en yüksek seviye etiketi.
+  // Ana sayfadaki yeni kelime listesinde bulunan en yüksek seviye etiketi.
   function topLevel(n) {
     var l = newList(n == null ? listSize() : n), best = -1;
     for (var i = 0; i < l.length; i++) {

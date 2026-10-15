@@ -28,7 +28,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `tests/hesap.test.js` | Hesap (`app/www/hesap.js`): yeniden kurulum öncesi yedek doğrulama testleri |
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + üretilen dosyaların güncelliği |
-| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK ve güncelleme paketini derleyip `apk-latest` release'ine koyar |
+| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK'yı (release, mühürlü) ve güncelleme paketini derleyip `apk-latest` release'ine koyar. PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
 | `.github/workflows/fetch-audio.yml` | Sözlük US seslerini `app/www/audio/`'ya indirir (elle, bir çalışma dalında) |
 | `app/` | Android uygulaması (Capacitor) — yapı ve APK için `app/README.md` |
 

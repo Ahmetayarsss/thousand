@@ -65,8 +65,14 @@ derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script 
 
 ### Yol 1 — GitHub Actions (önerilen, kurulum gerektirmez)
 `.github/workflows/build-apk.yml` `main`'e her birleşmede veya Actions sekmesinden elle
-("Run workflow") çalışır. Biten derlemede **oxford3000-debug-apk** adlı artifact'i
-indir; içindeki `app-debug.apk`'yı telefona kur (Ayarlar > bilinmeyen kaynaklara izin).
+("Run workflow") çalışır ve **yayın (release)** APK'sını derler: hata ayıklanamaz (USB ile
+bağlanan biri uygulamanın verisini okuyamaz), `versionCode` her derlemede artar (GitHub çalışma
+numarası). APK `apk-latest` release'inde **`Oxford3000.apk`** adıyla durur; telefona oradan
+kurulur (Ayarlar > bilinmeyen kaynaklara izin).
+
+**Yedekleme:** `allowBackup` açık bırakıldı: Android'in Google yedeği uygulama verisini
+(ilerleme dahil) telefonun ekran kilidiyle şifreli olarak saklar; yeni telefonda işe yarar.
+İçinde kurtarma kodu da var, ama yedeğe yalnız kullanıcının kendi Google hesabı erişir.
 
 ### Yol 2 — Yerel makine (Android SDK gerekir)
 ```bash

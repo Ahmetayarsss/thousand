@@ -4,6 +4,7 @@ name: Android APK derle
 # (web.json + web-version.txt) derleyip apk-latest release'ine koyar. Telefonlardaki
 # güncelleyici paketi YALNIZ oradan indirir. Testler, doğrulama ya da bekçi kırmızıysa
 # hiçbir şey yayınlanmaz. Elle: Actions > "Android APK derle" > Run workflow (main seçili).
+# PR'larda yalnız DENEME: APK mühürsüz derlenir (derleniyor mu?), hiçbir şey yayınlanmaz.
 
 on:
   workflow_dispatch:
@@ -16,10 +17,17 @@ on:
       - "data/**"
       - "scripts/**"
       - ".github/workflows/build-apk.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "templates/**"
+      - "data/**"
+      - "scripts/**"
+      - ".github/workflows/build-apk.yml"
 
-# Aynı anda iki yayın olmasın (sonraki, öncekinin bitmesini bekler).
+# Aynı anda iki yayın olmasın (sonraki, öncekinin bitmesini bekler). PR denemeleri ayrı sırada.
 concurrency:
-  group: yayin
+  group: ${{ github.event_name == 'pull_request' && format('deneme-{0}', github.ref) || 'yayin' }}
   cancel-in-progress: false
 
 permissions:
@@ -30,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Yalnız main'den yayın
-        if: github.ref != 'refs/heads/main'
+        if: github.event_name != 'pull_request' && github.ref != 'refs/heads/main'
         run: |
           echo "::error::Yayın yalnız main dalından yapılır (şu an: ${{ github.ref_name }})."
           exit 1
@@ -53,6 +61,7 @@ jobs:
       # IMZA_ANAHTARI (base64 PKCS12) ve IMZA_PAROLA'dan açılır. Yoksa yayın yapılmaz (yanlış
       # anahtarla imzalı APK telefondakinin üstüne kurulamaz).
       - name: İmza anahtarını hazırla
+        if: github.event_name != 'pull_request'
         env:
           IMZA_ANAHTARI: ${{ secrets.IMZA_ANAHTARI }}
           IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
@@ -118,13 +127,25 @@ jobs:
         working-directory: app
         run: npx cap sync android 2>&1 | tee /tmp/capsync.log
 
-      - name: Debug APK derle
+      # Yayın (release) derlemesi: hata ayıklanamaz — USB ile bağlanan biri uygulamanın verisini
+      # (ilerleme, kurtarma kodu) okuyamaz, WebView uzaktan incelenemez.
+      - name: APK derle (release)
         working-directory: app/android
         env:
           IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
         run: |
           set -o pipefail
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
+          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
+
+      - name: "Deneme: APK hata ayıklanamaz mı"
+        if: github.event_name == 'pull_request'
+        run: |
+          aapt=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n 1)
+          apk=$(ls app/android/app/build/outputs/apk/release/*.apk | head -n 1)
+          "$aapt" dump badging "$apk" | grep -E "^package:"
+          if "$aapt" dump badging "$apk" | grep -q "application-debuggable"; then
+            echo "::error::APK hata ayıklanabilir (debuggable) derlenmiş"; exit 1
+          fi
 
       - name: Hata logunu topla (teşhis)
         if: failure()
@@ -150,17 +171,20 @@ jobs:
           if-no-files-found: warn
 
       - name: APK'yı artifact olarak yükle
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: oxford3000-debug-apk
-          path: app/android/app/build/outputs/apk/debug/app-debug.apk
+          name: oxford3000-apk
+          path: app/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
       - name: APK'yı sabit adlandır
-        run: cp app/android/app/build/outputs/apk/debug/app-debug.apk Oxford3000.apk
+        if: github.event_name != 'pull_request'
+        run: cp app/android/app/build/outputs/apk/release/app-release.apk Oxford3000.apk
 
       # APK gerçekten yeni anahtarla mı imzalandı? (Yanlış imzalı APK yayınlanmasın.)
       - name: İmzayı doğrula
+        if: github.event_name != 'pull_request'
         env:
           IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
         run: |
@@ -169,8 +193,15 @@ jobs:
           gercek=$("$apksigner" verify --print-certs Oxford3000.apk | grep -m1 'SHA-256 digest' | awk '{print $NF}')
           echo "beklenen: $beklenen"; echo "APK:      $gercek"
           [ "$(echo "$beklenen" | tr -d ':' | tr 'A-F' 'a-f')" = "$gercek" ] || { echo "::error::APK yanlış anahtarla imzalı"; exit 1; }
+          # Hata ayıklanabilir APK yayınlanmasın; sürüm numarası da yazılsın.
+          aapt=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n 1)
+          "$aapt" dump badging Oxford3000.apk | grep -E "^package:" 
+          if "$aapt" dump badging Oxford3000.apk | grep -q "application-debuggable"; then
+            echo "::error::APK hata ayıklanabilir (debuggable) derlenmiş"; exit 1
+          fi
 
       - name: Release olarak yayınla (apk-latest)
+        if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-latest

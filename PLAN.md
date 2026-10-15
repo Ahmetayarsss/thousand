@@ -18,16 +18,15 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
       paketin içindeki sürümü doğrular; `web.json` repodan çıktı. Eski dal donduruldu.
 - [x] 4. Bozuk pakette geri dönüş: paket üst üste 3 açılışta açılamazsa gömülü sürüme
       dönülür, o sürüm bir daha indirilmez, kullanıcıya söylenir (yeni APK kurulunca etkin).
-- [ ] 4b. 🔸 Paket imzası: imza anahtarı GitHub'da (CI'da) durursa, GitHub hesabını ele geçiren
-      onu da kullanır — koruma çok az. Bunun yerine GitHub hesabında iki adımlı doğrulama ve
-      `main` için "PR zorunlu" kuralı (kullanıcı ayarları). İmza ancak anahtar GitHub dışında
-      tutulursa anlamlı; kullanıcı karar verecek.
+- [x] 4b. Paket imzası: yapılmadı (kullanıcı kararı; aşağıda "Bilerek bırakılanlar"). Yerine
+      GitHub hesabında iki adımlı doğrulama önerildi.
 - [x] 5. İmza anahtarı yenilendi (kullanıcı kararı: yeni mühür). Anahtar repodan çıktı, GitHub
       gizli ayarlarında; CI yayından önce imzayı doğrular. Eski APK'lı telefonlarda yeniden kurulum
       rehberi (yedek doğrulama → kurtarma kodu → sil-kur). Eski anahtar git geçmişinde kalıyor ama
       artık hiçbir şeyi imzalamıyor.
-- [ ] 6. Yedekleme: `allowBackup` gözden geçirilir (kurtarma kodu Google yedeğine düz metin
-      gidiyor; öte yandan yerel ilerlemeyi de kurtarıyor).
+- [x] 6. Yedekleme ve dışarıdan erişim: `allowBackup` açık kaldı (Google yedeği ekran kilidiyle
+      şifreli, yeni telefonda ilerlemeyi kurtarıyor). Asıl açık hata ayıklama derlemesiydi: APK
+      artık release derleniyor (USB ile veri okunamaz); CI debuggable APK'yı yayınlamaz.
 
 ## Aşama 3 — Veri kaybına karşı sağlamlık
 
@@ -71,7 +70,7 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [ ] 24. Kelime verisi her sayfaya ayrı gömülmez; tek veri dosyası (paket ~3 MB → ~1 MB).
 - [ ] 25. `scripts/enrich/g*.py` (veri kod içinde) → veri dosyası.
 - [ ] 26. Testler: `hesap.js` ve Supabase fonksiyonları için (güncelleyici testi adım 3'te geldi).
-- [ ] 27. `versionCode` her derlemede artar.
+- [x] 27. `versionCode` her derlemede artar (GitHub çalışma numarası; adım 6 ile birlikte).
 
 ## Aşama 8 — Android ve dağıtım
 
@@ -80,6 +79,10 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [ ] 29. 🔸 `targetSdk` 35+ (Capacitor 7'ye geçiş) — yalnız Play Store için şart.
 
 ## Bilerek bırakılanlar (şimdilik)
+
+- Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele
+  geçiren onu da kullanırdı — ek koruma çok az. Asıl koruma GitHub hesabında iki adımlı
+  doğrulama. (Kullanıcı kararı, Ekim 2026.)
 
 - Arkadaş istatistikleri telefondan geldiği için sahtelenebilir — yalnız arkadaşlar arası
   görünüyor, ödül/sıralama yok.

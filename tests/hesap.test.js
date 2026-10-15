@@ -32,6 +32,7 @@ function ortam({ bozuk = false, agYok = false } = {}) {
     fetch: async (url, opt) => {
       if (agYok) throw new TypeError("Failed to fetch");
       const fn = url.split("/rpc/")[1], body = JSON.parse(opt.body || "{}");
+      (sunucu.cagri = sunucu.cagri || []).push([fn, body]);
       let cevap = null;
       if (fn === "push_backup") { sunucu.yedek = jsonb(JSON.parse(JSON.stringify(body.p))); }
       else if (fn === "get_backup") {
@@ -44,7 +45,7 @@ function ortam({ bozuk = false, agYok = false } = {}) {
   };
   ctx.window = ctx;
   vm.createContext(ctx);
-  for (const f of ["srs.js", "hesap.js"]) vm.runInContext(fs.readFileSync(path.join(WWW, f), "utf8"), ctx);
+  for (const f of ["log.js", "srs.js", "hesap.js"]) vm.runInContext(fs.readFileSync(path.join(WWW, f), "utf8"), ctx);
   return { ctx, ls, sunucu };
 }
 
@@ -95,6 +96,24 @@ function bak(ad, kosul, bilgi) {
   const soru = o.ctx.OXACC.karsilastirma({ t: Date.UTC(2026, 9, 1), keys: { ox3000_srs_v1: { a: { a: T - 3 }, b: { a: T - 5 }, c: { a: T - 4 } } } });
   bak("kurtarma sorusu: yedekte 3 kelime / 3 gün önce, telefonda 2 kelime / bugün",
     /Yedek \(.*\): 3 kelime, en son 3 gün önce/.test(soru) && /Bu telefon: 2 kelime, en son bugün/.test(soru) && /İptal = bu telefondakini koru/.test(soru), soru);
+
+  // Kullanım kayıtları yalnız izinle (adım 9).
+  const gonderilen = (sv) => (sv.cagri || []).filter(([fn]) => fn === "push_logs").flatMap(([, b]) => b.p.olaylar.map((e) => e[1]));
+  o = ortam();
+  o.ctx.OXLOG.add("cevap", { k: "a" });
+  await o.ctx.OXACC.pushLogs(true);
+  bak("izin sorulmadıysa kayıt gönderilmez", gonderilen(o.sunucu).length === 0 && o.ctx.OXACC.logDurum() === null, o.sunucu.cagri);
+  o.ctx.OXACC.kayitIzniAyarla(false);
+  o.ctx.OXLOG.add("cevap", { k: "b" });
+  await o.ctx.OXACC.pushLogs(true);
+  bak("'hayır' denince kayıt gönderilmez", gonderilen(o.sunucu).length === 0, o.sunucu.cagri);
+  o.ctx.OXLOG.add("eski_olay", {});
+  o.ctx.OXACC.kayitIzniAyarla(true);
+  o.ctx.OXLOG.add("yeni_olay", {});
+  await o.ctx.OXACC.pushLogs(true);
+  const giden = gonderilen(o.sunucu);
+  bak("'evet' denince gönderilir, ama yalnız izinden SONRAKİ olaylar", giden.includes("yeni_olay") && !giden.includes("eski_olay") && !giden.includes("cevap"), giden);
+  bak("izin telefonda saklanır", o.ctx.OXACC.kayitIzni() === "evet" && JSON.parse(o.ls.ox3000_kayit_izni_v1) === "evet", o.ls.ox3000_kayit_izni_v1);
 
   if (hata) { console.log(hata + " test BAŞARISIZ"); process.exitCode = 1; }
 })();

@@ -266,7 +266,8 @@ grant execute on function public.create_profile(text), public.set_nick(text), pu
   public.durt(uuid) to authenticated;
 
 -- ================= kullanım kayıtları (geliştirici için) =================
--- Uygulamanın olay günlüğü (log.js) hesabı olan telefonlardan buraya gelir. Bakmak için:
+-- Uygulamanın olay günlüğü (log.js) hesabı olan VE izin veren telefonlardan buraya gelir (izin uygulamada
+-- bir kez sorulur, Ayarlar → Gizlilik'ten değişir; sorulmadıysa ya da 'hayır' ise gelmez). Bakmak için:
 -- Table Editor → kayitlar_gorunum (en yeni üstte, Türkiye saati) ya da SQL Editor'de
 --   select * from kayitlar_gorunum limit 200;
 -- Kişi başı 24 saatte en çok ~5000 olay alınır; 60 günden eski kayıtlar her gönderimde azar azar silinir.

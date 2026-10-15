@@ -5,7 +5,7 @@
  * takma ad seçer; arkadaş kodu ve kurtarma kodu verilir. Telefon değişince kurtarma koduyla
  * hesap, arkadaşlar ve ilerleme yedeği yeni telefona taşınır.
  * İlerleme özeti (bugün + toplam) dakikada en çok bir kez, yedek arada bir gönderilir.
- * Kullanım kayıtları (log.js) da hesap varsa sunucuya gider (geliştirici için, sessizce).
+ * Kullanım kayıtları (log.js) yalnız kullanıcı izin verirse sunucuya gider (bir kez sorulur; Ayarlar → Gizlilik).
  * Telefonda (yeni APK) bildirimler (Bildirim eklentisi): arkadaşlık isteği ve dürtme (uygulama kapalıyken de),
  * seri / tekrar hatırlatmaları.
  * Sunucu tarafı: supabase/kurulum.sql — yalnız oradaki fonksiyonlar çağrılır.
@@ -227,7 +227,7 @@ window.OXACC = (function () {
   }
 
   // ---------------- kullanım kayıtları → sunucu ----------------
-  // log.js olayları hesap varsa sunucuya da gider (geliştirici Supabase'de kayitlar_gorunum'den bakar).
+  // log.js olayları hesap VE izin varsa sunucuya da gider (geliştirici Supabase'de kayitlar_gorunum'den bakar).
   // Her olayın sıra numarası var (OXLOG.sira); gönderilen son sıra burada (GKEY) ve sunucuda cihaz başına
   // tutulur: cevabı kaybolan parça (ör. sayfa değişirken) tekrar gelirse sunucu ikinci kez yazmaz.
   // En çok 500 olayluk parçalar. Hatalar sessizdir ve OXLOG'a YAZILMAZ (yoksa kayıt kendini besler);
@@ -241,13 +241,25 @@ window.OXACC = (function () {
   } catch (e) {}
   function bytes(s) { try { return new TextEncoder().encode(s).length; } catch (e) { return s.length * 2; } }
   function ago(t) { return Math.abs(Date.now() - (t || 0)); }   // saat geri alınsa da takılmasın
+  // İzin (adım 9, kullanıcı kararı: bir kez sorulsun): kayıtlar YALNIZ "evet" denirse sunucuya gider.
+  // Sorulmamış (null) ya da "hayir" ise hiçbir şey gönderilmez; telefonda kalır (Ayarlar'dan dışa aktarılabilir).
+  // "evet" anından önceki olaylar gönderilmez (gönderim imleci o ana çekilir).
+  var IZINK = "ox3000_kayit_izni_v1";
+  function kayitIzni() { var v = getJ(IZINK, null); return v === "evet" || v === "hayir" ? v : null; }
+  function kayitIzniAyarla(evet) {
+    if (evet && kayitIzni() !== "evet" && window.OXLOG && typeof OXLOG.sira === "function") {
+      var g = getJ(GKEY, {}) || {}; g.s = Math.max(+g.s || 0, OXLOG.sira()); setJ(GKEY, g);
+    }
+    setJ(IZINK, evet ? "evet" : "hayir");
+    log("ayar", { kayit_izni: evet ? 1 : 0 });
+  }
   function pushLogs(force) {
     if (!logIs) logIs = sendLogs(!!force).catch(function () { return false; }).finally(function () { logIs = null; });
     return logIs;
   }
   async function sendLogs(force) {
     var L = window.OXLOG;
-    if (!account() || !L || typeof L.sira !== "function") return false;
+    if (!account() || !L || typeof L.sira !== "function" || kayitIzni() !== "evet") return false;
     var g = getJ(GKEY, {}) || {};
     if (!force && ((g.hata && ago(g.hata) < 1800000) || ago(g.at) < 120000)) return false;   // hatadan sonra 30 dk, gönderimler arası 2 dk
     var top = L.sira(), ev = L.events(), sent = Math.min(+g.s || 0, top);
@@ -275,10 +287,10 @@ window.OXACC = (function () {
     }
     return n;
   }
-  // Ayarlar için: gönderilmeyi bekleyen olay sayısı, son gönderim (hesap yoksa null).
+  // Ayarlar için: gönderilmeyi bekleyen olay sayısı, son gönderim (hesap ya da izin yoksa null).
   function logDurum() {
     var L = window.OXLOG;
-    if (!account() || !L || typeof L.sira !== "function") return null;
+    if (!account() || !L || typeof L.sira !== "function" || kayitIzni() !== "evet") return null;
     var g = getJ(GKEY, {}) || {}, top = L.sira();
     return { bekleyen: Math.max(0, Math.min(top - Math.min(+g.s || 0, top), L.count())), at: g.at || 0, hata: g.hata || 0 };
   }
@@ -647,8 +659,10 @@ window.OXACC = (function () {
       '<b>Ekran görüntüsü al</b> ya da bir yere yaz. Ayarlar\'da da görebilirsin.</p>' +
       '<button id="oxok">Kaydettim</button>');
     b.querySelector("#oxok").onclick = function () {
-      close(); if (done) done(a);
-      kurulum(false).then(function (g) { if (!g) izinIlk(); }, function () { izinIlk(); });
+      kayitSor(function () {
+        close(); if (done) done(a);
+        kurulum(false).then(function (g) { if (!g) izinIlk(); }, function () { izinIlk(); });
+      });
     };
   }
   function stepRecover(done) {
@@ -671,10 +685,14 @@ window.OXACC = (function () {
              "(hafıza dolu olabilir). Biraz yer açıp Ayarlar'dan kurtarma koduyla tekrar dene; yedeğin sunucuda duruyor." :
            yuklendi ? "Hesabın, arkadaşların ve ilerlemen geri geldi." : "Hesabın ve arkadaşların geri geldi.") +
           '</p><button id="oxok">Devam</button>').querySelector("#oxok").onclick = function () {
+          if (kayitIzni() === null) { kayitSor(devam); return; }
+          devam();
+        };
+        function devam() {
           close();
           if (r.backup) { try { sessionStorage.setItem("oxbil_izin", "1"); } catch (e) {} location.reload(); }   // izin yenilenen sayfada sorulur
           else { izinIlk(); if (done) done(r.account); }
-        };
+        }
       }).catch(function (e) { go.disabled = false; go.textContent = "Tekrar dene"; er.textContent = errText(e); });
     }
     go.onclick = submit;
@@ -699,12 +717,25 @@ window.OXACC = (function () {
   }
   function askRecover(done) { stepRecover(done); }
 
-  // Sayfa açılınca: hatırlatmaları kur; hesap varsa özeti (gerekirse), son gönderimden 10 dk geçtiyse kayıtları
+  // Kullanım kayıtları izni penceresi. next: cevap verilince çağrılır (pencereyi kapatmak ona kalır).
+  function kayitSor(next) {
+    var b = el('<h2>Uygulamayı geliştirmeye yardım eder misin?</h2>' +
+      '<p>Kullanım kayıtlarını geliştiriciye gönderelim mi: hangi ekranı açtığın, verdiğin cevaplar, ' +
+      'karşılaştığın hatalar ve telefon modeli. Takma adınla birlikte saklanır, <b>60 gün sonra silinir</b>. ' +
+      'Kurtarma kodun gönderilmez. İstediğin zaman <b>Ayarlar → Gizlilik</b>\'ten değiştirebilirsin.</p>' +
+      '<button id="oxevet">Evet, gönder</button><button class="ghost" id="oxhayir">Hayır, gönderme</button>');
+    b.querySelector("#oxevet").onclick = function () { kayitIzniAyarla(true); next(); };
+    b.querySelector("#oxhayir").onclick = function () { kayitIzniAyarla(false); next(); };
+  }
+
+  // Sayfa açılınca: hatırlatmaları kur; hesap varsa (izin hiç sorulmadıysa ana sayfada sor) özeti (gerekirse), izinle ve son gönderimden 10 dk geçtiyse kayıtları
   // gönder; arkadaş bildirim ayarlarını uygulama açılışında (oturum başına) bir kez native'e ver.
   try {
     setTimeout(function () {
       hatirlatmaPlanla(false);
       if (!account()) return;
+      var anaSayfa = /(^|\/)(index\.html)?$/.test(location.pathname);
+      if (kayitIzni() === null && anaSayfa && !box) kayitSor(close);
       syncSoon(false, false);
       if (ago((getJ(GKEY, {}) || {}).at) > 600000) pushLogs(false);
       var kurulu = false; try { kurulu = !!sessionStorage.getItem("oxbil_kur"); } catch (e) {}
@@ -718,7 +749,7 @@ window.OXACC = (function () {
     account: account, onboard: onboard, askRecover: askRecover, close: close,
     create: create, claim: claim, restore: restore, setNick: setNick, newRecovery: newRecovery, deleteAccount: deleteAccount,
     stats: stats, todayStr: todayStr, pushStats: pushStats, pushBackup: pushBackup, syncSoon: syncSoon,
-    yedekDogrula: yedekDogrula, yenidenKurulmali: yenidenKurulmali, karsilastirma: karsilastirma,
+    yedekDogrula: yedekDogrula, yenidenKurulmali: yenidenKurulmali, kayitIzni: kayitIzni, kayitIzniAyarla: kayitIzniAyarla, karsilastirma: karsilastirma,
     pushLogs: pushLogs, logDurum: logDurum,
     bildirimKur: bildirimKur, bildirimDurum: bildirimDurum, bildirimAyarla: bildirimAyarla, bildirimIzinIste: bildirimIzinIste,
     bildirimAyar: bilAyar, hatirlatmaPlani: hatirlatmaPlani, hatirlatmaPlanla: hatirlatmaPlanla, durt: durt,

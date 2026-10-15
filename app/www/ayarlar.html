@@ -91,9 +91,22 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
         <div class="btns"><button class="btn ghost" id="acc-showrec">Göster</button><button class="btn ghost" id="acc-newrec">Yenile</button></div></div>
       <div class="row"><div><div class="t">Başka hesaba geç</div><div class="s">Kurtarma koduyla eski hesabını bu telefona getir.</div></div>
         <div class="btns"><button class="btn ghost" id="acc-recover">Kodu gir</button></div></div>
-      <div class="row"><div><div class="t danger">Hesabı sil</div><div class="s">Takma ad, arkadaşlıklar ve yedek sunucudan silinir. Telefondaki ilerleme kalır.</div></div>
+      <div class="row"><div><div class="t danger">Hesabı sil</div><div class="s">Takma ad, arkadaşlıklar, yedek ve kullanım kayıtları sunucudan silinir. Telefondaki ilerleme kalır.</div></div>
         <div class="btns"><button class="btn red" id="acc-del">Sil</button></div></div>
     </div>
+  </div>
+
+  <div class="card">
+    <h2>Gizlilik</h2>
+    <div class="row">
+      <div><div class="t">Kullanım kayıtlarını gönder</div><div class="s">Uygulamayı geliştirmek için: açtığın ekranlar,
+        verdiğin cevaplar, hatalar, telefon modeli. Takma adınla saklanır, 60 gün sonra silinir.</div>
+        <div class="s" id="kizin-durum"></div></div>
+      <button class="sw" id="kizin" aria-label="Kullanım kayıtlarını gönder"></button>
+    </div>
+    <div class="note">Sunucuda tutulanlar (yalnız hesabın varsa): takma adın ve arkadaş kodun; arkadaşlarının gördüğü
+      günlük özet (bugün kaç cevap, seri); ilerleme yedeğin; izin verdiysen kullanım kayıtları. Hesabı silersen
+      sunucudakilerin hepsi silinir. Hesabın yoksa hiçbir şey gönderilmez.</div>
   </div>
 
   <div class="card">
@@ -151,7 +164,7 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
       <a class="btn" href="index.html?kutla=1" style="text-decoration:none">Göster</a>
     </div>
     <div class="row">
-      <div><div class="t">Kayıtlar</div><div class="s">Telefondaki kayıtlar (sunucuya da gidiyor).</div><div class="s" id="logs"></div></div>
+      <div><div class="t">Kayıtlar</div><div class="s">Telefondaki kayıtlar (izin verildiyse sunucuya da gider).</div><div class="s" id="logs"></div></div>
       <div class="btns"><button class="btn" id="lexp">Dışa aktar</button><button class="btn ghost" id="lcopy">Kopyala</button></div>
     </div>
     <div class="row">
@@ -182,7 +195,11 @@ function render(){
   const kb=Math.max(1,Math.round(OXLOG.size()/1024)),ld=OXACC.logDurum();
   // Hesap varsa kayıtlar sunucuya da gider (geliştirici görür); yoksa yalnız telefonda.
   document.getElementById('logs').textContent=OXLOG.count().toLocaleString('tr-TR')+' olay · '+kb+' KB · '+
-    (!ld?'telefonda':ld.at?'sunucuya gönderildi '+when(ld.at):'sunucuya gönderilecek');
+    (!ld?'yalnız telefonda':ld.at?'sunucuya gönderildi '+when(ld.at):'sunucuya gönderilecek');
+  const iz=OXACC.kayitIzni();
+  document.getElementById('kizin').classList.toggle('on',iz==='evet');
+  document.getElementById('kizin-durum').textContent=!OXACC.account()?'Hesabın yok: gönderilmiyor.':
+    iz==='evet'?'Açık: gönderiliyor.':iz==='hayir'?'Kapalı: gönderilmiyor.':'Henüz seçilmedi: gönderilmiyor.';
 }
 function setN(v){const n=SRS.setListSize(v);OXLOG.add('ayar',{liste:n});render();toast('Ana sayfada '+n+' kelime');}
 document.getElementById('minus').onclick=()=>setN(SRS.listSize()-5);
@@ -206,6 +223,8 @@ const GT=(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.GroupTts)||null
 function readOpts(){const o={loop:!!SRS.opt('loop',true),readTr:!!SRS.opt('readTr',false)};
   if(GT&&typeof GT.setOptions==='function'){try{const r=GT.setOptions(o);if(r&&r.catch)r.catch(()=>{});}catch(e){}}
   OXLOG.add('ayar',{dongu:o.loop?1:0,tr:o.readTr?1:0});}
+document.getElementById('kizin').onclick=()=>{const ac=OXACC.kayitIzni()!=='evet';OXACC.kayitIzniAyarla(ac);render();
+  toast(ac?'Kullanım kayıtları gönderilecek. Teşekkürler!':'Kullanım kayıtları artık gönderilmiyor');};
 document.getElementById('loop').onclick=()=>{const v=SRS.setOpt('loop',!SRS.opt('loop',true));readOpts();render();toast('Döngü '+(v?'açık':'kapalı'));};
 document.getElementById('readtr').onclick=()=>{const v=SRS.setOpt('readTr',!SRS.opt('readTr',false));readOpts();render();toast('Türkçe okuma '+(v?'açık':'kapalı'));};
 document.getElementById('lexp').onclick=async()=>{const where=await OXLOG.exportFile();

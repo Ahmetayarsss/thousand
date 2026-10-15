@@ -1,7 +1,7 @@
 /*
- * log.js — Kullanım kaydı (olay günlüğü). Olaylar telefonda birikir; hesap varsa hesap.js
- * bunları arada bir sunucuya da gönderir (Supabase: kayitlar tablosu — geliştirici
- * kayitlar_gorunum'den bakar), hesap yoksa yalnız telefonda kalır. Ayarlar → Destek'ten
+ * log.js — Kullanım kaydı (olay günlüğü). Olaylar telefonda birikir; hesap VE kullanıcı izni varsa
+ * hesap.js bunları arada bir sunucuya da gönderir (Supabase: kayitlar tablosu — geliştirici
+ * kayitlar_gorunum'den bakar; izin bir kez sorulur, Ayarlar → Gizlilik), yoksa yalnız telefonda kalır. Ayarlar → Destek'ten
  * dosya olarak da dışa aktarılır (geliştirme için).
  *
  * Her olay: [zaman(ms), tür, veri?]. Türler:

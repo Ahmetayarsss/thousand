@@ -68,7 +68,8 @@ derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script 
 ("Run workflow") çalışır ve **yayın (release)** APK'sını derler: hata ayıklanamaz (USB ile
 bağlanan biri uygulamanın verisini okuyamaz), `versionCode` her derlemede artar (GitHub çalışma
 numarası). APK `apk-latest` release'inde **`Thousand.apk`** adıyla durur; telefona oradan
-kurulur (Ayarlar > bilinmeyen kaynaklara izin).
+kurulur (Ayarlar > bilinmeyen kaynaklara izin). Release'te yalnız `Thousand.apk`, `web.json`,
+`web-version.txt` kalır; başka (eski adlı) dosyalar her yayından sonra silinir.
 
 **Yedekleme:** `allowBackup` açık bırakıldı: Android'in Google yedeği uygulama verisini
 (ilerleme dahil) telefonun ekran kilidiyle şifreli olarak saklar; yeni telefonda işe yarar.

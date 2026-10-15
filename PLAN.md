@@ -52,16 +52,18 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 13. Yazılı cevap esnekliği: yapılmadı (kullanıcı kararı; aşağıda "Bilerek bırakılanlar").
 - [x] 14. Okunuş tutarlılığı (kullanıcı kararı: Amerikan'a çevir): 243 okunuş düzeltildi
       (`proper → PRA-pır`, `ask → ESK`); validate.py İngiliz söyleyişinde kalanı yakalar.
-- [ ] 15. İsteğe bağlı IPA gösterimi (`data/sources/ipa_ref.json` hazır).
-- [ ] 16. Hile tespiti: eşik ve mesaj tonu gözden geçirilir (bilen kullanıcı yanlışlıkla yakalanmasın).
+- [x] 15. IPA gösterimi: yapılmadı (kullanıcı kararı; hazırlanan PR #11 kapatıldı).
+- [x] 16. Hile tespiti kaldırıldı (kullanıcı kararı): hiç tetiklenemiyordu (Bildim düğmesi kart açılma
+      animasyonundan sonra çıkıyor, tespit 0,35 sn'den hızlı basış bekliyordu). Telefondaki eski sayaç silinir.
 
 ## Aşama 6 — Arayüz
 
-- [ ] 17. İlk açılış: takma ad hemen sorulmaz; ilk çalışmadan sonra önerilir.
-- [ ] 18. Ana ekran: "0 · A1" başlığı anlamlı hale gelir, kaydırıcıya etiket, görünür
-      gezinme (alt çubuk ya da sayfa noktaları).
-- [ ] 19. Terminoloji tek: Grup / Bölüm / Kısım / Tur / Liste karmaşası giderilir.
-- [ ] 20. Kart ekranı: boş alan, Test ile Sınav farkı ekranda anlatılır.
+- [x] 17. İlk açılışta takma ad sorusu: yapılmadı (kullanıcı kararı, şimdiki hali kalıyor).
+- [ ] 18. Ana ekran: kaydırıcıya etiket, görünür gezinme (alt çubuk ya da sayfa noktaları).
+      "0 · A1" başlığına dokunulmaz (kullanıcı kararı). Kullanıcı beğenmezse geri çekilir.
+- [ ] 19. 🔸 Terminoloji tek: Grup / Bölüm / Kısım / Tur / Liste karmaşası giderilir (değişecek
+      adlar önce kullanıcıya sorulur).
+- [x] 20. Kart ekranı düzeni: yapılmadı (kullanıcı kararı).
 - [ ] 21. Erişilebilirlik (etiketler, yalnız renge dayanmayan durumlar) ve karanlık mod.
 
 ## Aşama 7 — Performans ve mimari
@@ -94,6 +96,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 - Yazılı cevapta tek harf hatası yine yanlış sayılıyor, "doğru saydır" düğmesi yok (13): hazırlanan
   değişiklik (kapatılan PR #9) kullanıcı tarafından istenmedi — mevcut katı kontrolden memnun (Ekim 2026).
+- IPA gösterimi (15, kapatılan PR #11), ilk açılışta takma ad sorusunun ertelenmesi (17) ve kart
+  ekranı düzeni (20) yapılmadı: kullanıcı istemedi (Ekim 2026).
 - Arkadaş istatistikleri telefondan geldiği için sahtelenebilir — yalnız arkadaşlar arası
   görünüyor, ödül/sıralama yok.
 - Kurtarma koduyla hesap taşınınca eski anonim giriş kaydı sunucuda kalıyor — zararsız,

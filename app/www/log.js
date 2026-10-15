@@ -9,7 +9,6 @@
  *   test_bas {n}          Test başladı        test {k, ok}   Test kartı
  *   sinav_bas {rev,nw,yz} Sınav başladı       cevap {k, y, ok, b, ms, yz, g?}
  *   sinav_bit {n,ok,tum}  Sınav bitti/bırakıldı
- *   hile {n}              hızlı cevap tespiti
  *   okuma {…}             Listeyi oku         okuma_hata {m}
  *   hesap {a}             hesap işlemi        hesap_hata {f, m}
  *   bildirim {a, …}       bildirim izni (a: izin, d) / bildirime dokunup açma (a: ac, p)
@@ -77,7 +76,7 @@
       zaman: Date.now(), cihaz: navigator.userAgent,
       ayar: j("ox3000_settings_v1", {}), gelistirici: j("ox3000_dev_v1", {}),
       kelimeler: j("ox3000_srs_v1", {}), gunluk: j("ox3000_daily_v1", {}),
-      sinavlar: j("ox3000_sessions_v1", []), hile: j("ox3000_cheat_v1", 0),
+      sinavlar: j("ox3000_sessions_v1", []),
       olaylar: load()
     };
   }

@@ -50,7 +50,7 @@ h1{font-size:20px;font-weight:800;margin:4px 0 12px}
 .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:4px}
 .foot:empty{display:none}
 .hidden{display:none}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;max-width:92%;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;max-width:92%;text-align:center}
 .toast.show{opacity:1}
 </style>
 </head>

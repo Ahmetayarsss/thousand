@@ -5,7 +5,7 @@
 :root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--green:#2E9E5B;--green-d:#238049;--red:#D9544D;--red-d:#B83E38;--tr:#B03A2E;--ok:#0E8074;--accent:#3B6EA5;--speak:#E5892B}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overscroll-behavior:none}
-#app{max-width:600px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
+#app{max-width:600px;margin:0 auto;height:calc(100dvh - var(--navh,0px) - env(safe-area-inset-bottom));display:flex;flex-direction:column;padding:8px 12px 10px}   /* alt çubuğun üstünde biter */
 .top{flex:0 0 auto}
 .moderow{display:flex;gap:6px;background:#E9EDF3;border-radius:11px;padding:4px;margin:2px 0 8px}
 .moderow button{flex:1;border:0;background:transparent;color:var(--muted);font-weight:800;font-size:13.5px;padding:9px 0;border-radius:8px;cursor:pointer}
@@ -190,12 +190,13 @@ const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNative
 // paketlenmediği için registerPlugin YOK — eskiden yalnız ona bakıldığından native okuma hiç çalışmıyordu).
 const GT=NATIVE?((window.Capacitor.Plugins&&Capacitor.Plugins.GroupTts)||(typeof Capacitor.registerPlugin==='function'&&Capacitor.registerPlugin('GroupTts'))||null):null;
 let toastEl=null,toastTimer=null;
-function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';
+function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';
   placeToast();
   if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 // Klavye paneli açıksa bilgi balonu onun üstünde durur.
 function placeToast(){if(!toastEl)return;const kp=document.getElementById('kpanel');
-  toastEl.style.bottom=(kp&&!kp.classList.contains('hidden')&&kp.offsetHeight)?(kp.offsetHeight+12)+'px':'22px';}
+  const alt='var(--navh,0px) + env(safe-area-inset-bottom)';   // alt gezinme çubuğunun üstü
+  toastEl.style.bottom='calc('+((kp&&!kp.classList.contains('hidden')&&kp.offsetHeight)?(kp.offsetHeight+12):22)+'px + '+alt+')';}
 let wordAudio=null;
 function slugOf(w){var b=w.replace(/\(.*?\)/g,'').split(',')[0];return b.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 function playAudioUrl(url){return new Promise(res=>{

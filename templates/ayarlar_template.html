@@ -47,7 +47,7 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
 .kur .adim .btn{margin-top:6px}
 .kur .ok{color:#2E9E5B;font-weight:700}.kur .no{color:#B03A2E;font-weight:700}
 .kur a{color:#1565C0;font-weight:700}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;text-align:center;background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
+.toast{position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:92%;text-align:center;background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
 .toast.show{opacity:1}
 </style>
 </head>

@@ -59,8 +59,9 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 ## Aşama 6 — Arayüz
 
 - [x] 17. İlk açılışta takma ad sorusu: yapılmadı (kullanıcı kararı, şimdiki hali kalıyor).
-- [ ] 18. Ana ekran: kaydırıcıya etiket, görünür gezinme (alt çubuk ya da sayfa noktaları).
-      "0 · A1" başlığına dokunulmaz (kullanıcı kararı). Kullanıcı beğenmezse geri çekilir.
+- [x] 18. Ana ekran: kaydırıcıda "Kelime arası 0,5 sn" etiketi; her sayfada alt sekme çubuğu (Liste ·
+      Kartlar · İlerleme · Sözlük · Arkadaş · Ayarlar), kaydırma da duruyor. "0 · A1" başlığına dokunulmadı
+      (kullanıcı kararı). Kullanıcı beğenmezse geri çekilir (ayrı PR).
 - [x] 19. Adlar (kullanıcı seçti): tekrar sistemindeki kelimeler "döngü" → "çalışılan"; Listeyi oku'daki
       "Döngü" → "Başa dön"; sınav turu → "liste"; "Kısım" ve İlerleme'deki Olgun/Öğreniliyor/Yeni aynı.
 - [x] 20. Kart ekranı düzeni: yapılmadı (kullanıcı kararı).

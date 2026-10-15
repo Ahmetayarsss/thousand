@@ -21,6 +21,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .speed{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
 .speed input{width:84px}
+.speed b{color:var(--ink);font-weight:700;min-width:38px}
 .playbtns{margin-left:auto;display:flex;gap:6px}
 .playall{border:0;background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer}
 .playall.stop{background:var(--speak-d)}
@@ -73,7 +74,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
-    <label class="speed"><input id="gap" type="range" min="0" max="3" step="0.25" value="0.5" aria-label="Bekleme"></label>
+    <label class="speed">Kelime arası<input id="gap" type="range" min="0" max="3" step="0.25" value="0.5" aria-label="Kelimeler arası bekleme"><b id="gapv"></b></label>
     <div class="playbtns">
       <button class="playall" id="playall">▶ Listeyi oku</button>
     </div>
@@ -107,7 +108,7 @@ function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
 function clrWord(){if(wordCard){wordCard.classList.remove('playing');wordCard=null;}}
 // Geçici teşhis balonu: Sözlük sesi neden gelmedi görünsün.
 let toastEl=null,toastTimer=null;
-function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
+function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 // Kalıcı teşhis çubuğu (üstte, dokununca kapanır). Toast'tan daha görünür.
 let diagEl=null;
 function diag(msg,act){if(!diagEl){diagEl=document.createElement('div');diagEl.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#8A2A1E;color:#fff;font-size:13px;font-weight:600;padding:12px 14px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.35);line-height:1.4';diagEl.onclick=()=>{diagEl.style.display='none';};document.body.appendChild(diagEl);}diagEl.innerHTML='';const t=document.createElement('span');t.textContent='🔎 '+msg+'  (kapatmak için dokun)';diagEl.appendChild(t);
@@ -251,7 +252,8 @@ list.appendChild(c);});
 document.getElementById('search').value='';}
 
 // Bekleme sürgüsü: değer saklanır; okuma sürerken değişince HEMEN uygulanır.
-function setGap(v){GAP=Math.round(parseFloat(v)*1000);}
+function setGap(v){GAP=Math.round(parseFloat(v)*1000);   // kaydırıcının yanında değeri: "0,5 sn"
+  document.getElementById('gapv').textContent=String(parseFloat(v)).replace('.',',')+' sn';}
 const gapEl=document.getElementById('gap');
 {const g=parseFloat(SRS.opt('gap',0.5));if(g>=0&&g<=3)gapEl.value=String(g);}
 setGap(gapEl.value);
@@ -312,4 +314,4 @@ setTimeout(()=>{if(FORCE_CELE)return;
     if(kim.length)msgs.push('👉 '+kim[0].nick+(kim.length>1?' ve '+(kim.length-1)+' kişi daha':'')+' seni dürttü: Hadi çalış!');
     try{localStorage.setItem('ox3000_durt_gor',JSON.stringify(dz.map(x=>x.id)));}catch(e){}
     msgs.forEach((m,i)=>setTimeout(()=>toast(m),i*4300));}).catch(()=>{});},800);
-</script></body></html>
+</script><style>:root{--navh:58px}body{padding-bottom:calc(var(--navh) + env(safe-area-inset-bottom))}.oxbar{position:fixed;left:0;right:0;bottom:0;z-index:9990;display:flex;justify-content:center;background:rgba(255,255,255,.97);border-top:1px solid #E6EAF1;padding-bottom:env(safe-area-inset-bottom)}.oxbar nav{display:flex;width:100%;max-width:600px}.oxbar a{flex:1;height:var(--navh);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#7A8699;font:600 10.5px system-ui,-apple-system,Roboto,Arial,sans-serif;text-decoration:none}.oxbar a.on{color:#1B2430;font-weight:800}.oxbar a.on svg{stroke:#3B6EA5}.oxbar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}</style><div class="oxbar"><nav aria-label="Sayfalar"><a href="index.html" class=on aria-current=page><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Liste</a><a href="kartlar.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h11a2 2 0 0 1 2 2v13M4 8h11a2 2 0 0 1 2 2v10H6a2 2 0 0 1-2-2z"/></svg>Kartlar</a><a href="istatistik.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>İlerleme</a><a href="sozluk.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h8"/></svg>Sözlük</a><a href="arkadaslar.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M22 21v-1a6 6 0 0 0-4-5.6"/></svg>Arkadaş</a><a href="ayarlar.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Ayarlar</a></nav></div><script>document.querySelectorAll('.oxbar a').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var u=a.getAttribute('href');if(a.classList.contains('on'))return;if(window.oxCikisSor)window.oxCikisSor(function(){location.href=u;},u);else location.href=u;});});</script></body></html>

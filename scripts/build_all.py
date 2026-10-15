@@ -2,24 +2,18 @@
 # -*- coding: utf-8 -*-
 """Thousand üretim hattı (içerik: Oxford 3000 kelime listesi).
 
-1. data/all_groups.json'u yükler (30 grup x 100 kelime).
-2. scripts/enrich/ altındaki grup modüllerini uygular (ok/en/ex alanları).
-3. data/all_groups.json'u günceller.
-4. templates/ içindeki şablonlardan uygulama sayfalarını (app/www/*.html) üretir.
-5. Güncelleme paketini (web.json, web-version.txt, app/www/updater.js) yazar.
-
-Yeni bir grup zenginleştirildiğinde: scripts/enrich/gN.py oluştur ve
-aşağıdaki ENRICH_MODS listesine "gN" ekle, sonra bu scripti çalıştır.
+1. data/all_groups.json'u yükler (30 grup x 100 kelime; okunuş, açıklama, örnekler dahil —
+   içeriğin tek kaynağı bu dosya).
+2. Örnek alanını (ex) liste biçimine getirip dosyayı geri yazar (biçim tek düze kalsın).
+3. Kelime verisini (app/www/kelimeler.js) ve şablonlardan sayfaları (app/www/*.html) üretir.
+4. Güncelleme paketini (web.json, web-version.txt, app/www/updater.js) yazar.
 """
-import importlib
 import json
 import re
-import sys
 import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts" / "enrich"))
 
 # Uygulama sayfalarının <head>'ine eklenenler (sıra önemli: güncelleyici en önce,
 # yönlendirme kararını diğer scriptlerden önce versin).
@@ -56,7 +50,6 @@ def write_web_bundle():
     print(f"web paketi: sürüm {ver}, web.json {(ROOT / 'web.json').stat().st_size} bayt, "
           f"{len(bundle)} dosya")
 
-ENRICH_MODS = ["g2", "g3", "g4", "g5", "g6", "g7", "g8", "g9", "g11", "g12", "g13", "g14", "g15", "g16", "g17", "g18", "g19", "g20", "g21", "g22", "g23", "g24", "g25", "g26", "g27", "g28", "g29", "g30"]
 
 # Android uygulaması: menü yok. Sayfa sırası liste ⇄ kartlar ⇄ istatistik.
 # Yatay kaydırma: sola → NEXT sayfa, sağa → PREV sayfa (boş ise o yön no-op).
@@ -151,22 +144,6 @@ def load_groups():
         return json.load(f)
 
 
-def apply_enrichment(groups):
-    by_no = {g["no"]: g for g in groups}
-    for name in ENRICH_MODS:
-        mod = importlib.import_module(name)
-        grp = by_no[mod.GRUP_NO]
-        data = mod.DATA
-        missing = [it["w"] for it in grp["items"] if it["w"] not in data]
-        extra = [w for w in data if w not in {it["w"] for it in grp["items"]}]
-        if missing or extra:
-            raise SystemExit(f"{name}: eksik kelime {missing[:5]} / fazla kelime {extra[:5]}")
-        for it in grp["items"]:
-            ok, en, ex = data[it["w"]]
-            it["ok"], it["en"], it["ex"] = ok, en, ex
-    return groups
-
-
 def normalize_examples(groups):
     """ex alanını her zaman liste (cümle listesi) yap."""
     for g in groups:
@@ -176,23 +153,6 @@ def normalize_examples(groups):
                 it["ex"] = [ex] if ex else []
             else:
                 it["ex"] = [s for s in ex if s]
-
-
-def apply_multi_examples(groups):
-    """multi_examples.EX overlay'i: (grup_no, kelime) -> [cümle, ...].
-
-    Çok anlamlı kelimeler için her anlama bir örnek cümle. 100-kelime
-    kısıtı yok; hem enrich'li gruplara hem de JSON'daki Grup 1/10'a uygulanır.
-    """
-    try:
-        import multi_examples as ME
-    except ImportError:
-        return
-    for g in groups:
-        for it in g["items"]:
-            sents = ME.EX.get((g["no"], it["w"]))
-            if sents:
-                it["ex"] = list(sents)
 
 
 # Grup içi sıra (ana sayfa, sınav, ilerleme hepsi aynı sırayı kullanır):
@@ -257,9 +217,8 @@ def render(groups):
          (("__BACK__", "kartlar.html"),))
 
 def main():
-    groups = apply_enrichment(load_groups())
+    groups = load_groups()
     normalize_examples(groups)
-    apply_multi_examples(groups)
     with open(ROOT / "data" / "all_groups.json", "w", encoding="utf-8") as f:
         json.dump(groups, f, ensure_ascii=False, indent=1)
     render(groups)

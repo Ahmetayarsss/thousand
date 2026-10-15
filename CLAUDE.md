@@ -14,7 +14,7 @@ kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 
 ## Kaynak ve üretilen dosyalar
 
-- **Kaynak (elle düzenlenir):** `data/all_groups.json`, `scripts/enrich/*.py`, `templates/*.html`,
+- **Kaynak (elle düzenlenir):** `data/all_groups.json` (bütün kelime içeriği), `templates/*.html`,
   `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js`,
   `supabase/kurulum.sql`, `app/android/**`.
 - **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html` ve `app/www/kelimeler.js` (repoda). Güncelleme paketi

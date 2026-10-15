@@ -76,7 +76,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 23. Kart çevirme: yapılmadı (kullanıcı kararı; aşağıda "Bilerek bırakılanlar"). three.js kalıyor.
 - [x] 24. Kelime verisi tek dosyada (`app/www/kelimeler.js`, build üretir); sayfalar ihtiyaç duyduğu biçimi
       yüklenince türetir. Paket 3,08 → 1,74 MB (three.js kaldığı için ~1 MB'a inmedi). Sayfalar piksel aynı.
-- [ ] 25. `scripts/enrich/g*.py` (veri kod içinde) → veri dosyası.
+- [x] 25. `scripts/enrich/` silindi: okunuş/açıklama/örnekler zaten `data/all_groups.json`'daydı (build her
+      seferinde kopyalıyordu). Artık tek kaynak o dosya; build çıktısı birebir aynı.
 - [ ] 26. Testler: `hesap.js` ve Supabase fonksiyonları için (güncelleyici testi adım 3'te geldi).
 - [x] 27. `versionCode` her derlemede artar (GitHub çalışma numarası; adım 6 ile birlikte).
 

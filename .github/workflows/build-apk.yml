@@ -216,3 +216,18 @@ jobs:
           body: |
             main dalından otomatik derlenen APK (main'e her birleşmede güncellenir).
             Telefona kurmak için: indir → aç → "bilinmeyen kaynaklara izin ver".
+
+      # Yayın aracı eski dosyaları silmez: adı değişen ya da artık üretilmeyen dosyalar (ör. eski
+      # Oxford3000.apk) release sayfasında kalıp yanlışlıkla indirilmesin. Yeni dosyalar yüklendikten
+      # SONRA silinir, böylece sayfada hiçbir an APK'sız kalınmaz.
+      - name: Release'teki eski dosyaları temizle
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for a in $(gh release view apk-latest --json assets -q '.assets[].name'); do
+            case "$a" in
+              Thousand.apk|web.json|web-version.txt) ;;
+              *) echo "siliniyor: $a"; gh release delete-asset apk-latest "$a" -y ;;
+            esac
+          done

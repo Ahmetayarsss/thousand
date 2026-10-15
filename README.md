@@ -18,9 +18,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 |---|---|
 | `data/all_groups.json` | Tek doğruluk kaynağı — 30 grup, kelime başına `w, pos, sec, tr, ok, en, ex, cam` |
 | `data/sources/ipa_ref.json` | Okunuş yazarken referans IPA (Oxford Learner's, [tyypgzl/Oxford-5000-words](https://github.com/tyypgzl/Oxford-5000-words)) |
-| `scripts/enrich/gN.py` | Grup N'nin okunuş/açıklama/örnek içeriği (Grup 1 ve 10 doğrudan `all_groups.json`'da) |
-| `scripts/enrich/multi_examples.py` | Kelimelere eklenen ek örnek cümleler |
-| `templates/` | Sayfa şablonları (`__GROUPS_JSON__` vb. yer tutucular build'de doldurulur) ve `updater.js` |
+| `templates/` | Sayfa şablonları (`__SOZLUK__` vb. yer tutucular build'de doldurulur; kelime verisi `app/www/kelimeler.js`'ten gelir) ve `updater.js` |
 | `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`), sayfaların ortak kelime verisini (`app/www/kelimeler.js`) ve güncelleme paketini (`web.json`, `web-version.txt`, `app/www/updater.js` — repoda tutulmaz) üretir |
 | `scripts/validate.py` | Veri tutarlılık kontrolleri |
 | `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, ölü dosya, belge kayması, paket tutarlılığı; bilinen borçlar `scripts/bekci_borc.json` |
@@ -55,9 +53,8 @@ Söyleyiş **Amerikan** (uygulama US sesi çalar): `hot → HAT`, `body → BA-d
 
 ## İçerik düzeltme
 
-1. Grubun `scripts/enrich/gN.py` dosyasında
-   `DATA = {"kelime": ("okunuş", "açıklama", "örnek <b>kelime</b> cümlesi"), ...}` kaydını düzelt
-   (Grup 1 ve 10 için `data/all_groups.json`).
+1. `data/all_groups.json`'da kelimenin kaydını düzelt (`ok` okunuş, `en` açıklama, `ex` örnek
+   cümle listesi — kelime `<b>` içinde). İçeriğin tek kaynağı bu dosya.
 2. `python3 scripts/build_all.py && python3 scripts/validate.py && python3 scripts/bekci.py`
 3. Üretilen dosyaları da commit'le, PR aç; `main`'e birleşince telefonlara gider.
 

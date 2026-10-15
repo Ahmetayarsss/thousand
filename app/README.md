@@ -79,6 +79,11 @@ cd android
 # çıktı: app/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-> APK, repodaki sabit anahtarla (`app/android/app/oxford.keystore`) imzalanır ki her yeni
-> APK öncekinin üstüne güncelleme olarak kurulsun. Anahtar ve parolası açıkta; CI secret'ına
-> taşınması `PLAN.md` adım 5'te.
+> **İmza:** CI, APK'yı GitHub gizli ayarlarındaki anahtarla (`IMZA_ANAHTARI` = base64 PKCS12,
+> `IMZA_PAROLA`) imzalar ve yayından önce APK'nın gerçekten o anahtarla imzalandığını doğrular;
+> ayarlar yoksa yayın yapılmaz. Anahtar repoda değil. Yerel derleme Android'in debug anahtarını
+> kullanır; o APK telefondakinin üstüne kurulamaz (yalnız deneme için).
+>
+> Eski anahtar (repoda açıktı) Ekim 2026'da değiştirildi. Eski APK'lı telefonlarda ana sayfada
+> uyarı ve Ayarlar'da "Uygulamayı bir kez yeniden kur" kartı çıkar: yedek doğrulanır
+> (`OXACC.yedekDogrula`), kurtarma kodu gösterilir, sonra sil-kur yapılır.

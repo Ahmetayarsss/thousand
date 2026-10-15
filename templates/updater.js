@@ -38,6 +38,9 @@
            (typeof Cap.registerPlugin === "function" && Cap.registerPlugin(name));
   }
   var inUpdate = location.href.indexOf("_capacitor_file_") > -1;
+  // Bu APK hangi imza anahtarıyla derlendi: gömülü sayfa (APK'nın kendisi) yazar, paket yazmaz.
+  // "2" = repoda olmayan yeni anahtar (adım 5). Yoksa eski APK → uygulama "yeniden kur" der (hesap.js).
+  if (!inUpdate) { try { localStorage.setItem("ox_apk_imza", "2"); } catch (e) {} }
   var DENEME_SINIRI = 3;
   var K_DENEME = "ox_webupd_deneme", K_KOTU = "ox_webupd_kotu", K_GERI = "ox_webupd_geri";
   function sayi(k) { try { return parseInt(localStorage.getItem(k), 10) || 0; } catch (e) { return 0; } }

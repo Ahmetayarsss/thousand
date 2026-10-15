@@ -25,6 +25,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, ölü dosya, belge kayması, paket tutarlılığı; bilinen borçlar `scripts/bekci_borc.json` |
 | `tests/srs.test.js` | Tekrar sistemi (`app/www/srs.js`) testleri |
 | `tests/updater.test.js` | Uygulama içi güncelleyici (`templates/updater.js`) testleri |
+| `tests/hesap.test.js` | Hesap (`app/www/hesap.js`): yeniden kurulum öncesi yedek doğrulama testleri |
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + üretilen dosyaların güncelliği |
 | `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK ve güncelleme paketini derleyip `apk-latest` release'ine koyar |

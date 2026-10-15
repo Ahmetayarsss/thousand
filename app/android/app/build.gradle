@@ -1,5 +1,10 @@
 apply plugin: 'com.android.application'
 
+// Yayın imzası: anahtar repoda DEĞİL. CI (build-apk.yml) GitHub gizli ayarlarından (IMZA_ANAHTARI,
+// IMZA_PAROLA) dosyayı açar ve IMZA_DOSYASI / IMZA_PAROLA ortam değişkenlerini verir. Yerel derlemede
+// bunlar yoksa Android'in kendi debug anahtarı kullanılır (o APK telefondakinin üstüne kurulamaz).
+def imzaDosyasi = System.getenv("IMZA_DOSYASI")
+
 android {
     namespace "com.oxford3000.study"
     compileSdk rootProject.ext.compileSdkVersion
@@ -19,21 +24,22 @@ android {
         }
     }
     signingConfigs {
-        // Sabit imza: her derlemede aynı anahtar → yeni APK öncekinin üstüne
-        // güncelleme olarak kurulur (kişisel kullanım için; gizli değil).
-        stable {
-            storeFile file('oxford.keystore')
-            storePassword 'oxford123'
-            keyAlias 'oxford'
-            keyPassword 'oxford123'
+        if (imzaDosyasi) {
+            yayin {
+                storeFile file(imzaDosyasi)
+                storeType "pkcs12"
+                storePassword System.getenv("IMZA_PAROLA")
+                keyAlias "oxford"
+                keyPassword System.getenv("IMZA_PAROLA")
+            }
         }
     }
     buildTypes {
         debug {
-            signingConfig signingConfigs.stable
+            if (imzaDosyasi) signingConfig signingConfigs.yayin
         }
         release {
-            signingConfig signingConfigs.stable
+            if (imzaDosyasi) signingConfig signingConfigs.yayin
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

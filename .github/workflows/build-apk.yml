@@ -49,6 +49,23 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+      # İmza anahtarı repoda değil: GitHub → Settings → Secrets and variables → Actions'taki
+      # IMZA_ANAHTARI (base64 PKCS12) ve IMZA_PAROLA'dan açılır. Yoksa yayın yapılmaz (yanlış
+      # anahtarla imzalı APK telefondakinin üstüne kurulamaz).
+      - name: İmza anahtarını hazırla
+        env:
+          IMZA_ANAHTARI: ${{ secrets.IMZA_ANAHTARI }}
+          IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
+        run: |
+          if [ -z "$IMZA_ANAHTARI" ] || [ -z "$IMZA_PAROLA" ]; then
+            echo "::error::IMZA_ANAHTARI / IMZA_PAROLA gizli ayarları yok; yayın yapılmadı."
+            exit 1
+          fi
+          printf '%s' "$IMZA_ANAHTARI" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/imza.p12"
+          keytool -list -storetype PKCS12 -keystore "$RUNNER_TEMP/imza.p12" -storepass "$IMZA_PAROLA" -alias oxford > /dev/null \
+            || { echo "::error::İmza anahtarı açılamadı (gizli ayar eksik/yanlış kopyalanmış olabilir)."; exit 1; }
+          echo "IMZA_DOSYASI=$RUNNER_TEMP/imza.p12" >> "$GITHUB_ENV"
+
       - name: Android SDK kur
         uses: android-actions/setup-android@v3
         with:
@@ -75,6 +92,7 @@ jobs:
         run: |
           TZ=Europe/Istanbul node tests/srs.test.js
           node tests/updater.test.js
+          node tests/hesap.test.js
 
       - name: Veri doğrulama
         run: python3 scripts/validate.py
@@ -102,6 +120,8 @@ jobs:
 
       - name: Debug APK derle
         working-directory: app/android
+        env:
+          IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
         run: |
           set -o pipefail
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
@@ -138,6 +158,17 @@ jobs:
 
       - name: APK'yı sabit adlandır
         run: cp app/android/app/build/outputs/apk/debug/app-debug.apk Oxford3000.apk
+
+      # APK gerçekten yeni anahtarla mı imzalandı? (Yanlış imzalı APK yayınlanmasın.)
+      - name: İmzayı doğrula
+        env:
+          IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
+        run: |
+          beklenen=$(keytool -list -storetype PKCS12 -keystore "$IMZA_DOSYASI" -storepass "$IMZA_PAROLA" -alias oxford | grep -o 'SHA-256): .*' | cut -d' ' -f2)
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -n 1)
+          gercek=$("$apksigner" verify --print-certs Oxford3000.apk | grep -m1 'SHA-256 digest' | awk '{print $NF}')
+          echo "beklenen: $beklenen"; echo "APK:      $gercek"
+          [ "$(echo "$beklenen" | tr -d ':' | tr 'A-F' 'a-f')" = "$gercek" ] || { echo "::error::APK yanlış anahtarla imzalı"; exit 1; }
 
       - name: Release olarak yayınla (apk-latest)
         uses: softprops/action-gh-release@v2

@@ -188,6 +188,36 @@ window.OXACC = (function () {
     y = getJ(YKEY, {}) || {}; y.b = h; y.bAt = Date.now(); setJ(YKEY, y);
     return true;
   }
+  // Yeniden kurulumdan önce: yedeği (değişmemiş olsa da) gönderir, sunucudan geri okur ve telefondakiyle
+  // karşılaştırır. Dönen: {ok, kelime}. ok=false ise yedek eksik: kullanıcı uygulamayı SİLMEMELİ.
+  // (Sunucu jsonb anahtar sırasını değiştirdiği için karşılaştırma sıradan bağımsız yapılır.)
+  function kanon(v) {
+    if (Array.isArray(v)) return "[" + v.map(kanon).join(",") + "]";
+    if (v && typeof v === "object") return "{" + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ":" + kanon(v[k]); }).join(",") + "}";
+    return JSON.stringify(v);
+  }
+  async function yedekDogrula() {
+    if (!account() || !window.SRS) throw new Error("hesap_yok");
+    var data = snapshot();
+    await rpc("push_backup", { p: data });
+    var y = getJ(YKEY, {}) || {}; y.b = String(hash(JSON.stringify(data.keys))); y.bAt = Date.now(); setJ(YKEY, y);
+    var b = await rpc("get_backup", {});
+    var ok = !!(b && b.keys) && kanon(b.keys) === kanon(data.keys);
+    var kelime = Object.keys(data.keys["ox3000_srs_v1"] || {}).length;
+    log("hesap", { a: "yedek_dogrula", ok: ok ? 1 : 0, n: kelime });
+    return { ok: ok, kelime: kelime };
+  }
+
+  // Bu telefondaki APK eski imza anahtarıyla mı (anahtar repoda açıktı)? Yeni anahtarla derlenen APK'nın
+  // gömülü güncelleyicisi açılışta ox_apk_imza'yı yazar (templates/updater.js); eski APK'larda yoktur.
+  // Eskiyse uygulama bir kez silinip yeni APK kurulmalı (önce yedek doğrulanır). Tarayıcıda hep false.
+  var APK_IMZA = "2";
+  function yenidenKurulmali() {
+    var Cap = window.Capacitor;
+    if (!(Cap && Cap.isNativePlatform && Cap.isNativePlatform())) return false;
+    try { return localStorage.getItem("ox_apk_imza") !== APK_IMZA; } catch (e) { return false; }
+  }
+
   // ---------------- kullanım kayıtları → sunucu ----------------
   // log.js olayları hesap varsa sunucuya da gider (geliştirici Supabase'de kayitlar_gorunum'den bakar).
   // Her olayın sıra numarası var (OXLOG.sira); gönderilen son sıra burada (GKEY) ve sunucuda cihaz başına
@@ -661,6 +691,7 @@ window.OXACC = (function () {
     account: account, onboard: onboard, askRecover: askRecover, close: close,
     create: create, claim: claim, restore: restore, setNick: setNick, newRecovery: newRecovery, deleteAccount: deleteAccount,
     stats: stats, todayStr: todayStr, pushStats: pushStats, pushBackup: pushBackup, syncSoon: syncSoon,
+    yedekDogrula: yedekDogrula, yenidenKurulmali: yenidenKurulmali,
     pushLogs: pushLogs, logDurum: logDurum,
     bildirimKur: bildirimKur, bildirimDurum: bildirimDurum, bildirimAyarla: bildirimAyarla, bildirimIzinIste: bildirimIzinIste,
     bildirimAyar: bilAyar, hatirlatmaPlani: hatirlatmaPlani, hatirlatmaPlanla: hatirlatmaPlanla, durt: durt,

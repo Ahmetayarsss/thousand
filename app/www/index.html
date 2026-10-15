@@ -26,6 +26,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .playall.stop{background:var(--speak-d)}
 .search{width:100%;margin-top:9px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-size:14px}
 .hint{font-size:12px;color:var(--muted);background:#EEF2F7;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;line-height:1.5}
+.kurban{display:none;background:#FDECEA;border-color:#F5C4BD;color:#8A2A1E;text-decoration:none}
 .warn{display:none;background:#FDECEA;border-color:#F5C4BD;color:#8A2A1E}
 .lvlbadge{display:inline-block;font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:2px 7px;vertical-align:middle}
 .secbar{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-weight:800;font-size:15px}
@@ -79,6 +80,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
   </div>
   <input class="search" id="search" placeholder="Listede ara… (İngilizce/Türkçe)">
 </header>
+<a class="hint kurban" id="kurban" href="ayarlar.html#kurulum">⚠️ <b>Uygulamayı bir kez yeniden kurman gerekiyor.</b> İlerlemen kaybolmasın diye nasıl yapılacağını gör →</a>
 <div class="hint warn" id="warn">Bu tarayıcı sesli okumayı desteklemiyor gibi. Her karttaki <b>Sözlük</b> bağlantısını kullan.</div>
 <div id="list"></div>
 </div>
@@ -92,6 +94,7 @@ let LANG="en-US",RATE=0.8,GAP=500,voices=[];const synth=window.speechSynthesis;
 SRS.setCatalog(SRS.catalogFromGroups(GROUPS));
 const BYK={};GROUPS.forEach(g=>g.items.forEach(d=>{BYK[d._k]={d:d,g:g};}));
 function loadV(){voices=synth?synth.getVoices():[];}
+try{if(window.OXACC&&OXACC.yenidenKurulmali())document.getElementById('kurban').style.display='block';}catch(e){}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
 let playing=false,looping=false,queue=[],cur=null,curCards=[],gapTimer=null,wordCard=null,wordAudio=null;

@@ -41,6 +41,12 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
 .acc .code{letter-spacing:2px}
 .acc .rec{letter-spacing:1.5px;font-family:ui-monospace,Menlo,monospace}
 .acc .danger{color:var(--red)}
+.kur h2{color:#B03A2E}
+.kur .adim{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.55}
+.kur .adim li{margin-bottom:10px}
+.kur .adim .btn{margin-top:6px}
+.kur .ok{color:#2E9E5B;font-weight:700}.kur .no{color:#B03A2E;font-weight:700}
+.kur a{color:#1565C0;font-weight:700}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;text-align:center;background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
 .toast.show{opacity:1}
 </style>
@@ -48,6 +54,22 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
 <body>
 <div class="wrap">
   <h1 id="title">Ayarlar</h1>
+
+  <!-- Yalnız eski imza anahtarlı APK'da (OXACC.yenidenKurulmali). Sıra önemli: yedek doğrulanmadan silme. -->
+  <div class="card kur hidden" id="kurulum">
+    <h2>⚠️ Uygulamayı bir kez yeniden kur</h2>
+    <div class="note">Uygulamanın güvenlik mührü yenilendi. Bu telefondaki sürüm eski mühürlü, yenisi üstüne
+      kurulamıyor: bir kez silip yeniden kurman gerekiyor. İlerlemen kaybolmasın diye <b>sırayla</b> yap:</div>
+    <ol class="adim">
+      <li><b>Yedeğini al.</b> <span id="k-durum"></span><br>
+        <button class="btn" id="k-hesap">Önce hesap aç</button><button class="btn" id="k-yedek">Yedeği al ve doğrula</button></li>
+      <li><b>Kurtarma kodunu bir yere yaz</b> (ya da ekran görüntüsü al):
+        <div class="v rec" id="k-rec">— önce 1. adım</div></li>
+      <li><b>Yeni uygulamayı indir:</b> <a href="https://github.com/Ahmetayarsss/thousand/releases/tag/apk-latest">Oxford3000.apk</a></li>
+      <li><b>Bu uygulamayı sil</b> (simgesine basılı tut → Kaldır), sonra indirdiğin dosyayı aç → Yükle.</li>
+      <li><b>Yeni uygulamayı açınca</b> "Hesabım var → kurtarma kodu gir" de ve kodunu yaz. İlerlemen geri gelir.</li>
+    </ol>
+  </div>
 
   <div class="card acc">
     <h2>Hesap</h2>
@@ -216,6 +238,26 @@ document.getElementById('acc-newrec').onclick=e=>{if(!confirm('Yeni kurtarma kod
   recShown=true;accDo(e.target,()=>OXACC.newRecovery(),r=>'Yeni kurtarma kodun: '+r+' — kaydetmeyi unutma');};
 document.getElementById('acc-del').onclick=e=>{if(!confirm('Hesabın silinsin mi? Arkadaşlıkların ve yedeğin silinir; bu geri alınamaz.'))return;
   if(!confirm('Emin misin?'))return;accDo(e.target,()=>OXACC.deleteAccount(),'Hesap silindi');};
+
+// ---- Yeniden kurulum (eski imzalı APK) ----
+let kYedekOk=false;
+function renderKur(){const kart=document.getElementById('kurulum'),goster=OXACC.yenidenKurulmali();
+  kart.classList.toggle('hidden',!goster);if(!goster)return;
+  const a=OXACC.account();
+  document.getElementById('k-hesap').classList.toggle('hidden',!!a);
+  document.getElementById('k-yedek').classList.toggle('hidden',!a);
+  if(!a)document.getElementById('k-durum').textContent='Yedek için önce bir hesap gerekiyor.';
+  document.getElementById('k-rec').textContent=!kYedekOk?'— önce 1. adım':(a&&a.recovery)||'Bu telefonda kayıtlı kod yok: aşağıda Hesap → Kurtarma kodu → "Yenile" ile yenisini al.';}
+document.getElementById('k-hesap').onclick=()=>OXACC.onboard(true,()=>{renderKur();renderAcc();renderBil();});
+document.getElementById('k-yedek').onclick=async e=>{const d=document.getElementById('k-durum');
+  e.target.disabled=true;d.textContent='Yedekleniyor…';d.className='';
+  try{const r=await OXACC.yedekDogrula();kYedekOk=r.ok;
+    d.textContent=r.ok?'✓ Yedek doğrulandı ('+r.kelime+' kelime). 2. adıma geç.':'✗ Yedek doğrulanamadı. Uygulamayı SİLME; tekrar dene, olmazsa haber ver.';
+    d.className=r.ok?'ok':'no';}
+  catch(err){kYedekOk=false;d.textContent='✗ '+OXACC.errText(err)+' — tekrar dene.';d.className='no';}
+  finally{e.target.disabled=false;renderKur();}};
+renderKur();
+if(location.hash==='#kurulum')setTimeout(()=>{try{document.getElementById('kurulum').scrollIntoView({block:'start'});}catch(e){}},50);
 
 // ---- Bildirimler (telefonda). Yeni tür: BIL'e satır + hesap.js'te ayarı (BVAR) ve native tarafı. ----
 const BIL=[

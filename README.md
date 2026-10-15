@@ -26,6 +26,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `tests/updater.test.js` | Uygulama içi güncelleyici (`templates/updater.js`) testleri |
 | `tests/hesap.test.js` | Hesap (`app/www/hesap.js`): yedek doğrulama, geri yükleme, kullanım kaydı izni testleri |
 | `tests/log.test.js` | Kullanım kaydı (`app/www/log.js`): toplu/ertelenmiş yazma, sayfadan çıkarken kaybolmama |
+| `tests/sunucu.test.sh` | Sunucu (`supabase/kurulum.sql`): geçici PostgreSQL'de kurulumu iki kez çalıştırır, `tests/sunucu/testler.sql`'i (yetkiler, hesap, yedek, arkadaşlık, dürtme, bildirim, kayıtlar, taşıma, silme) koşar; Supabase'in parçaları `tests/sunucu/supabase_taklit.sql`'de taklit edilir |
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + üretilen dosyaların güncelliği |
 | `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK'yı (release, mühürlü) ve güncelleme paketini derleyip `apk-latest` release'ine koyar. PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |

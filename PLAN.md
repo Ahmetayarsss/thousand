@@ -78,7 +78,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
       yüklenince türetir. Paket 3,08 → 1,74 MB (three.js kaldığı için ~1 MB'a inmedi). Sayfalar piksel aynı.
 - [x] 25. `scripts/enrich/` silindi: okunuş/açıklama/örnekler zaten `data/all_groups.json`'daydı (build her
       seferinde kopyalıyordu). Artık tek kaynak o dosya; build çıktısı birebir aynı.
-- [ ] 26. Testler: `hesap.js` ve Supabase fonksiyonları için (güncelleyici testi adım 3'te geldi).
+- [x] 26. Sunucu testleri (`tests/sunucu.test.sh`, 40 denetim): geçici PostgreSQL'de kurulum.sql iki kez +
+      yetkiler, hesap, yedek, arkadaşlık, dürtme, bildirim, kayıtlar, taşıma, silme. hesap.js testleri adım 7–9'da geldi.
 - [x] 27. `versionCode` her derlemede artar (GitHub çalışma numarası; adım 6 ile birlikte).
 
 ## Aşama 8 — Android ve dağıtım

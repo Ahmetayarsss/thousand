@@ -34,6 +34,7 @@ TZ=Europe/Istanbul node tests/srs.test.js
 node tests/updater.test.js
 node tests/hesap.test.js
 node tests/log.test.js
+bash tests/sunucu.test.sh      # sunucu (kurulum.sql) — geçici PostgreSQL açar
 python3 scripts/validate.py
 python3 scripts/build_all.py
 python3 scripts/bekci.py

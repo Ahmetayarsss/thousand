@@ -103,6 +103,7 @@ jobs:
           node tests/updater.test.js
           node tests/hesap.test.js
           node tests/log.test.js
+          bash tests/sunucu.test.sh
 
       - name: Veri doğrulama
         run: python3 scripts/validate.py

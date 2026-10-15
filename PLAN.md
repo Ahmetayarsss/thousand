@@ -74,7 +74,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 22. `log.js`: olaylar bellekte birikir, en geç 1 sn sonra tek seferde yazılır; sayfadan çıkarken /
       arka plana geçerken hemen yazılır (`tests/log.test.js`). Dolu kayıtta 100 olay: 272 ms → <1 ms.
 - [x] 23. Kart çevirme: yapılmadı (kullanıcı kararı; aşağıda "Bilerek bırakılanlar"). three.js kalıyor.
-- [ ] 24. Kelime verisi her sayfaya ayrı gömülmez; tek veri dosyası (paket ~3 MB → ~1 MB).
+- [x] 24. Kelime verisi tek dosyada (`app/www/kelimeler.js`, build üretir); sayfalar ihtiyaç duyduğu biçimi
+      yüklenince türetir. Paket 3,08 → 1,74 MB (three.js kaldığı için ~1 MB'a inmedi). Sayfalar piksel aynı.
 - [ ] 25. `scripts/enrich/g*.py` (veri kod içinde) → veri dosyası.
 - [ ] 26. Testler: `hesap.js` ve Supabase fonksiyonları için (güncelleyici testi adım 3'te geldi).
 - [x] 27. `versionCode` her derlemede artar (GitHub çalışma numarası; adım 6 ile birlikte).

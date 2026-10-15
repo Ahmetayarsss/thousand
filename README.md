@@ -21,7 +21,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `scripts/enrich/gN.py` | Grup N'nin okunuş/açıklama/örnek içeriği (Grup 1 ve 10 doğrudan `all_groups.json`'da) |
 | `scripts/enrich/multi_examples.py` | Kelimelere eklenen ek örnek cümleler |
 | `templates/` | Sayfa şablonları (`__GROUPS_JSON__` vb. yer tutucular build'de doldurulur) ve `updater.js` |
-| `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`) ve güncelleme paketini (`web.json`, `web-version.txt`, `app/www/updater.js` — repoda tutulmaz) üretir |
+| `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`), sayfaların ortak kelime verisini (`app/www/kelimeler.js`) ve güncelleme paketini (`web.json`, `web-version.txt`, `app/www/updater.js` — repoda tutulmaz) üretir |
 | `scripts/validate.py` | Veri tutarlılık kontrolleri |
 | `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, ölü dosya, belge kayması, paket tutarlılığı; bilinen borçlar `scripts/bekci_borc.json` |
 | `tests/srs.test.js` | Tekrar sistemi (`app/www/srs.js`) testleri |

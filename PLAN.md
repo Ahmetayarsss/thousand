@@ -87,7 +87,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 28. Arka plan kontrolü (kullanıcı kararı: seyrek kontrol): arkadaş isteği/dürtme kontrolü saatte bir;
       pil optimizasyonu muafiyeti (izin + kurulum adımı) kaldırıldı. Bedeli: telefon uykudayken bildirim
       ve hatırlatmalar gecikebilir. Yeni APK ile etkin.
-- [ ] 29. `targetSdk` 35+ (Capacitor 7'ye geçiş) — Play Store şartı (kullanıcı: uygulama herkese dağıtılacak).
+- [x] 29. Capacitor 7, `targetSdk`/`compileSdk` 35 (Play Store şartı), Gradle 8.11.1 / AGP 8.7.2. En düşük Android 6
+      (minSdk 23; eskiden 5.1). Android 15'te ekran kenarı payı: `adjustMarginsForEdgeToEdge: auto`. Yeni APK ile etkin.
 
 ## Bilerek bırakılanlar (şimdilik)
 

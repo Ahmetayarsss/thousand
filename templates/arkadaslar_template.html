@@ -130,7 +130,7 @@ function render(d,offline){
       <button class="more" data-rm="${esc(f.id)}" data-nick="${esc(f.nick)}" aria-label="Seçenekler">⋯</button></div>
       ${dz?`<div class="line dm">👉 Seni dürttü · ${ago(dz.at)}</div>`:''}
       <div class="line"><span class="k">Bugün</span>${td&&s.cevap?`<b>${n(s.cevap)}</b> cevap · <b>${n(s.dogru)}</b> doğru · <b>${n(s.yeni)}</b> yeni`:'<span class="idle">henüz çalışmadı</span>'}</div>
-      <div class="line"><span class="k">Toplam</span><b>${n(s.dongu)}</b> döngüde · <b>${n(s.olgun)}</b> olgun${s.seri?` · 🔥 <b>${n(s.seri)}</b> gün`:''}</div></div>`;}).join('')
+      <div class="line"><span class="k">Toplam</span><b>${n(s.dongu)}</b> çalışılan · <b>${n(s.olgun)}</b> olgun${s.seri?` · 🔥 <b>${n(s.seri)}</b> gün`:''}</div></div>`;}).join('')
     :'<div class="empty">Henüz arkadaşın yok.<br>Kodunu paylaş ya da arkadaşının kodunu yukarıya yaz.</div>';
   // Giden istekler
   const out=d.outgoing||[];

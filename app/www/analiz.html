@@ -71,7 +71,7 @@ td.tr{color:#B03A2E}
 
   <div class="card">
     <h2>Kutu dağılımı</h2>
-    <p class="desc">Döngüdeki kelimelerin bulunduğu kutular</p>
+    <p class="desc">Çalışılan kelimelerin bulunduğu kutular</p>
     <div class="chart" id="c-box"></div>
   </div>
 
@@ -159,9 +159,9 @@ function tiles(){
     ['Doğruluk',n?'%'+Math.round(ok/n*100):'—',n30?'Son 30 gün: %'+Math.round(ok30/n30*100):'Son 30 gün: —'],
     ['Çalışma serisi',st.cur+' gün',st.cur&&!st.today?'Bugün çalışırsan seri sürer':'Art arda sınav yapılan gün'],
     ['En uzun seri',st.best+' gün',''],
-    ['Döngüde',fmtN(tot.mature+tot.learning),'Olgun: '+fmtN(tot.mature)],
+    ['Çalışılan',fmtN(tot.mature+tot.learning),'Olgun: '+fmtN(tot.mature)],
     ['Tahmini bitiş',fe.done?'Bitti':fe.none?'—':dmy(fe.day),
-      fe.done?'Tüm kelimeler döngüde':fe.none?'Son 14 günde yeni kelime yok':'≈'+fmtN(fe.days)+' gün · günde ort. '+fe.per.toFixed(1).replace('.',',')+' yeni']
+      fe.done?'Tüm kelimeler çalışılıyor':fe.none?'Son 14 günde yeni kelime yok':'≈'+fmtN(fe.days)+' gün · günde ort. '+fe.per.toFixed(1).replace('.',',')+' yeni']
   ];
   document.getElementById('tiles').innerHTML='';
   items.forEach(([l,v,d])=>{const t=document.createElement('div');t.className='tile';
@@ -243,7 +243,7 @@ function chartBox(){
     const show=()=>showTip(box,ml+Math.max(w,30)/2,yy,fmtN(v)+' kelime',[{c:css(C[i]),v:tot?'%'+Math.round(v/tot*100):'%0',l:L[i]}]);
     const sh=show;hit.addEventListener('pointerdown',()=>{sh();lift(hit);});hit.addEventListener('pointerenter',()=>{sh();lift(hit);});hit.addEventListener('focus',()=>{sh();lift(hit);});});
   svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hideTips();});
-  if(!tot){box.insertAdjacentHTML('beforeend','<div class="empty">Henüz döngüde kelime yok</div>');}
+  if(!tot){box.insertAdjacentHTML('beforeend','<div class="empty">Henüz çalışılan kelime yok</div>');}
 }
 
 /* ---------- Önümüzdeki 7 gün: tek seri sütun, değer tepede ---------- */

@@ -567,7 +567,7 @@ function startTestFrom(order){
   mode='test';showStage();document.getElementById('finish').classList.add('hidden');
   document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';
   order.forEach(it=>{it._lockDir=false;it._dir=null;});   // yeni test: yön + kilit sıfırla
-  if(!order.length){showResult('🎉','yeni kelime kalmadı','Tüm kelimeler döngüde. Sınav sekmesinden tekrarlara devam et.','',true);return;}
+  if(!order.length){showResult('🎉','yeni kelime kalmadı','Tüm kelimeler çalışılıyor. Sınav sekmesinden tekrarlara devam et.','',true);return;}
   cur=order[0];queue=order.slice(1);testTotal=order.length;
   OXLOG.add('test_bas',{n:order.length});
   busy=false;buildDeck();
@@ -634,13 +634,13 @@ function examDone(){
   const nxt=left?'Bugün daha '+left+' tekrar var.':(nd==null?'':'Sonraki tekrar '+(nd===1?'yarın':nd+' gün sonra')+'.');
   let msg;
   if(all){const nl=SRS.newList(1).length;
-    msg='Bu turun bütün kelimeleri bitti. '+(nl?'Ana sayfada yeni kelimeler seni bekliyor; çalışınca sınava dönebilirsin. ':'')+(nxt?nxt:'');
+    msg='Bu listenin bütün kelimeleri bitti. '+(nl?'Ana sayfada yeni kelimeler seni bekliyor; çalışınca sınava dönebilirsin. ':'')+(nxt?nxt:'');
     if(n)msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:'',sess.ty?'Yazılı: '+sess.tyOk+'/'+sess.ty:''].filter(Boolean).join(' · ')+'. '+msg;}
   else if(!n)msg=((left||SRS.newList(1).length)?'Henüz cevap yok.':'Bugün sorulacak kelime yok. 🎉')+(nxt?' '+nxt:'');
-  else msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:'',sess.ty?'Yazılı: '+sess.tyOk+'/'+sess.ty:''].filter(Boolean).join(' · ')+'. '+(sess.nw?sess.nw+' kelime döngüye girdi. ':'')+nxt;
+  else msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:'',sess.ty?'Yazılı: '+sess.tyOk+'/'+sess.ty:''].filter(Boolean).join(' · ')+'. '+(sess.nw?sess.nw+' kelime çalışılanlara eklendi. ':'')+nxt;
   const wl=sess.wrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
   showResult(n?ok+'/'+n:'0',n?'doğru':'kelime cevaplandı',msg,wl,false);
-  document.getElementById('r-again').textContent=all?'Yeni tur':'Sınava devam';
+  document.getElementById('r-again').textContent=all?'Yeni liste':'Sınava devam';
 }
 
 function showResult(big,small,msg,wlHtml,isTest){

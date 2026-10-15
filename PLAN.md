@@ -61,8 +61,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 17. İlk açılışta takma ad sorusu: yapılmadı (kullanıcı kararı, şimdiki hali kalıyor).
 - [ ] 18. Ana ekran: kaydırıcıya etiket, görünür gezinme (alt çubuk ya da sayfa noktaları).
       "0 · A1" başlığına dokunulmaz (kullanıcı kararı). Kullanıcı beğenmezse geri çekilir.
-- [ ] 19. 🔸 Terminoloji tek: Grup / Bölüm / Kısım / Tur / Liste karmaşası giderilir (değişecek
-      adlar önce kullanıcıya sorulur).
+- [x] 19. Adlar (kullanıcı seçti): tekrar sistemindeki kelimeler "döngü" → "çalışılan"; Listeyi oku'daki
+      "Döngü" → "Başa dön"; sınav turu → "liste"; "Kısım" ve İlerleme'deki Olgun/Öğreniliyor/Yeni aynı.
 - [x] 20. Kart ekranı düzeni: yapılmadı (kullanıcı kararı).
 - [ ] 21. Erişilebilirlik (etiketler, yalnız renge dayanmayan durumlar) ve karanlık mod.
 

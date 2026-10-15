@@ -19,7 +19,7 @@ istatistik ⇄ kartlar ⇄ liste ⇄ sözlük
 - **liste** (`index.html`): sıradaki yeni kelimeler (ayarlardaki sayı kadar), arama,
   "Listeyi oku" (ekran kapalıyken de okuyan native servis, kulaklık tuşlarıyla).
 - **kartlar** (`kartlar.html`): *Test* = listeyi kartlarla çalışma (tekrar sistemine
-  yazmaz). *Sınav* = vadesi gelen tekrarlar + turun yeni kelimeleri; cevaplar tekrar
+  yazmaz). *Sınav* = vadesi gelen tekrarlar + listenin yeni kelimeleri; cevaplar tekrar
   sistemine yazılır, altın kartlarda cevap yazılır.
 - **sözlük**, **istatistik** (genel ilerleme), **analiz** (ayrıntılı istatistik),
   **ayarlar** (hesap, kelime sayısı, okuma ayarları, bildirimler), **arkadaşlar**

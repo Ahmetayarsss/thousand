@@ -124,8 +124,8 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
   <div class="card">
     <h2>Listeyi oku</h2>
     <div class="row">
-      <div><div class="t">Döngü</div><div class="s">Liste bitince baştan başlasın.</div></div>
-      <button class="sw" id="loop" aria-label="Döngü"></button>
+      <div><div class="t">Başa dön</div><div class="s">Liste bitince baştan başlasın.</div></div>
+      <button class="sw" id="loop" aria-label="Başa dön"></button>
     </div>
     <div class="row">
       <div><div class="t">Türkçesini de oku</div><div class="s">Her kelimeden sonra Türkçe anlamı okunur (telefonda Türkçe ses paketi gerekir).</div></div>
@@ -219,7 +219,7 @@ function readOpts(){const o={loop:!!SRS.opt('loop',true),readTr:!!SRS.opt('readT
   OXLOG.add('ayar',{dongu:o.loop?1:0,tr:o.readTr?1:0});}
 document.getElementById('kizin').onclick=()=>{const ac=OXACC.kayitIzni()!=='evet';OXACC.kayitIzniAyarla(ac);render();
   toast(ac?'Kullanım kayıtları gönderilecek. Teşekkürler!':'Kullanım kayıtları artık gönderilmiyor');};
-document.getElementById('loop').onclick=()=>{const v=SRS.setOpt('loop',!SRS.opt('loop',true));readOpts();render();toast('Döngü '+(v?'açık':'kapalı'));};
+document.getElementById('loop').onclick=()=>{const v=SRS.setOpt('loop',!SRS.opt('loop',true));readOpts();render();toast('Başa dön '+(v?'açık':'kapalı'));};
 document.getElementById('readtr').onclick=()=>{const v=SRS.setOpt('readTr',!SRS.opt('readTr',false));readOpts();render();toast('Türkçe okuma '+(v?'açık':'kapalı'));};
 document.getElementById('lexp').onclick=async()=>{const where=await OXLOG.exportFile();
   toast(where?'Kaydedildi: '+where:'Dosya kaydedilemedi — "Kopyala"yı dene',4000);};

@@ -50,7 +50,7 @@ h1{font-size:20px;font-weight:800;margin:4px 0 12px}
 .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:4px}
 .foot:empty{display:none}
 .hidden{display:none}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;max-width:92%;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;max-width:92%;text-align:center}
 .toast.show{opacity:1}
 </style>
 </head>
@@ -130,7 +130,7 @@ function render(d,offline){
       <button class="more" data-rm="${esc(f.id)}" data-nick="${esc(f.nick)}" aria-label="Seçenekler">⋯</button></div>
       ${dz?`<div class="line dm">👉 Seni dürttü · ${ago(dz.at)}</div>`:''}
       <div class="line"><span class="k">Bugün</span>${td&&s.cevap?`<b>${n(s.cevap)}</b> cevap · <b>${n(s.dogru)}</b> doğru · <b>${n(s.yeni)}</b> yeni`:'<span class="idle">henüz çalışmadı</span>'}</div>
-      <div class="line"><span class="k">Toplam</span><b>${n(s.dongu)}</b> döngüde · <b>${n(s.olgun)}</b> olgun${s.seri?` · 🔥 <b>${n(s.seri)}</b> gün`:''}</div></div>`;}).join('')
+      <div class="line"><span class="k">Toplam</span><b>${n(s.dongu)}</b> çalışılan · <b>${n(s.olgun)}</b> olgun${s.seri?` · 🔥 <b>${n(s.seri)}</b> gün`:''}</div></div>`;}).join('')
     :'<div class="empty">Henüz arkadaşın yok.<br>Kodunu paylaş ya da arkadaşının kodunu yukarıya yaz.</div>';
   // Giden istekler
   const out=d.outgoing||[];

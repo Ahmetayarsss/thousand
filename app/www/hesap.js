@@ -16,7 +16,7 @@ window.OXACC = (function () {
   var SKEY = "ox3000_oturum_v1", AKEY = "ox3000_hesap_v1", YKEY = "ox3000_esitleme_v1", PKEY = "ox3000_pano_v1";
   // Yedeklenen veriler (kayıtlar/log hariç).
   var BKEYS = ["ox3000_srs_v1", "ox3000_daily_v1", "ox3000_sessions_v1", "ox3000_settings_v1",
-               "ox3000_exam_batch_v1", "ox3000_cheat_v1"];
+               "ox3000_exam_batch_v1"];
   try {   // test için sunucu değiştirme
     var o = JSON.parse(localStorage.getItem("ox3000_api") || "null");
     if (o && o.url) { URL = o.url; KEY = o.key || KEY; }

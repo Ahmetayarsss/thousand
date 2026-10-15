@@ -21,6 +21,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .speed{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
 .speed input{width:84px}
+.speed b{color:var(--ink);font-weight:700;min-width:38px}
 .playbtns{margin-left:auto;display:flex;gap:6px}
 .playall{border:0;background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer}
 .playall.stop{background:var(--speak-d)}
@@ -73,7 +74,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
 <header>
   <div class="seclabel" id="seclabel"></div>
   <div class="controls">
-    <label class="speed"><input id="gap" type="range" min="0" max="3" step="0.25" value="0.5" aria-label="Bekleme"></label>
+    <label class="speed">Kelime arası<input id="gap" type="range" min="0" max="3" step="0.25" value="0.5" aria-label="Kelimeler arası bekleme"><b id="gapv"></b></label>
     <div class="playbtns">
       <button class="playall" id="playall">▶ Listeyi oku</button>
     </div>
@@ -107,7 +108,7 @@ function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
 function clrWord(){if(wordCard){wordCard.classList.remove('playing');wordCard=null;}}
 // Geçici teşhis balonu: Sözlük sesi neden gelmedi görünsün.
 let toastEl=null,toastTimer=null;
-function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
+function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 // Kalıcı teşhis çubuğu (üstte, dokununca kapanır). Toast'tan daha görünür.
 let diagEl=null;
 function diag(msg,act){if(!diagEl){diagEl=document.createElement('div');diagEl.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#8A2A1E;color:#fff;font-size:13px;font-weight:600;padding:12px 14px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.35);line-height:1.4';diagEl.onclick=()=>{diagEl.style.display='none';};document.body.appendChild(diagEl);}diagEl.innerHTML='';const t=document.createElement('span');t.textContent='🔎 '+msg+'  (kapatmak için dokun)';diagEl.appendChild(t);
@@ -251,7 +252,8 @@ list.appendChild(c);});
 document.getElementById('search').value='';}
 
 // Bekleme sürgüsü: değer saklanır; okuma sürerken değişince HEMEN uygulanır.
-function setGap(v){GAP=Math.round(parseFloat(v)*1000);}
+function setGap(v){GAP=Math.round(parseFloat(v)*1000);   // kaydırıcının yanında değeri: "0,5 sn"
+  document.getElementById('gapv').textContent=String(parseFloat(v)).replace('.',',')+' sn';}
 const gapEl=document.getElementById('gap');
 {const g=parseFloat(SRS.opt('gap',0.5));if(g>=0&&g<=3)gapEl.value=String(g);}
 setGap(gapEl.value);

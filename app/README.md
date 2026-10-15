@@ -6,7 +6,9 @@ saklanır; hesap açılırsa Supabase'e yedeklenir.
 
 ## Sayfalar ve gezinme
 
-Menü yok; sayfalar arasında kaydırarak geçilir (`scripts/build_all.py` → `swipe_script`):
+Her sayfanın altında sekme çubuğu var: Liste · Kartlar · İlerleme · Sözlük · Arkadaş · Ayarlar
+(`scripts/build_all.py` → `nav_bar`; sınav sürerken çıkış onayı sorulur). Ayrıca sayfalar arasında
+kaydırarak da geçilir (`swipe_script`); analiz yalnız ayarlardan kaydırarak açılır:
 
 ```
                  ayarlar ⇄ analiz          (ayarlar: sözlükte en üstte aşağı çek)
@@ -19,7 +21,7 @@ istatistik ⇄ kartlar ⇄ liste ⇄ sözlük
 - **liste** (`index.html`): sıradaki yeni kelimeler (ayarlardaki sayı kadar), arama,
   "Listeyi oku" (ekran kapalıyken de okuyan native servis, kulaklık tuşlarıyla).
 - **kartlar** (`kartlar.html`): *Test* = listeyi kartlarla çalışma (tekrar sistemine
-  yazmaz). *Sınav* = vadesi gelen tekrarlar + turun yeni kelimeleri; cevaplar tekrar
+  yazmaz). *Sınav* = vadesi gelen tekrarlar + listenin yeni kelimeleri; cevaplar tekrar
   sistemine yazılır, altın kartlarda cevap yazılır.
 - **sözlük**, **istatistik** (genel ilerleme), **analiz** (ayrıntılı istatistik),
   **ayarlar** (hesap, kelime sayısı, okuma ayarları, bildirimler), **arkadaşlar**

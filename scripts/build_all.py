@@ -87,6 +87,39 @@ def swipe_script(next_t, prev_t, up_t="", down_t=""):
     ) % (next_t, prev_t, up_t, down_t)
 
 
+# Alt gezinme çubuğu (adım 18): kaydırmayı bilmeyen de sayfalar arasında geçebilsin. Kaydırma
+# da çalışmaya devam eder. Sınav sürerken çıkış onayı (window.oxCikisSor) burada da sorulur.
+NAV_TABS = [   # (sayfa, ad, SVG yolu — 24x24, çizgi)
+    ("index.html", "Liste", "M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"),
+    ("kartlar.html", "Kartlar", "M7 4h11a2 2 0 0 1 2 2v13M4 8h11a2 2 0 0 1 2 2v10H6a2 2 0 0 1-2-2z"),
+    ("istatistik.html", "İlerleme", "M4 20V10M10 20V4M16 20v-7M22 20H2"),
+    ("sozluk.html", "Sözlük", "M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h8"),
+    ("arkadaslar.html", "Arkadaş", "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M22 21v-1a6 6 0 0 0-4-5.6"),
+    ("ayarlar.html", "Ayarlar", "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"),
+]
+
+
+def nav_bar(active):
+    """Sayfanın altına sabit sekme çubuğu. active: vurgulanacak sayfa (NAV_TABS'taki ad)."""
+    css = ("<style>:root{--navh:58px}body{padding-bottom:calc(var(--navh) + env(safe-area-inset-bottom))}"
+           ".oxbar{position:fixed;left:0;right:0;bottom:0;z-index:9990;display:flex;justify-content:center;"
+           "background:rgba(255,255,255,.97);border-top:1px solid #E6EAF1;padding-bottom:env(safe-area-inset-bottom)}"
+           ".oxbar nav{display:flex;width:100%;max-width:600px}"
+           ".oxbar a{flex:1;height:var(--navh);display:flex;flex-direction:column;align-items:center;justify-content:center;"
+           "gap:3px;color:#7A8699;font:600 10.5px system-ui,-apple-system,Roboto,Arial,sans-serif;text-decoration:none}"
+           ".oxbar a.on{color:#1B2430;font-weight:800}.oxbar a.on svg{stroke:#3B6EA5}"
+           ".oxbar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}"
+           "</style>")
+    links = "".join(
+        f'<a href="{u}"{" class=on aria-current=page" if u == active else ""}>'
+        f'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="{d}"/></svg>{ad}</a>'
+        for u, ad, d in NAV_TABS)
+    js = ("<script>document.querySelectorAll('.oxbar a').forEach(function(a){a.addEventListener('click',function(e){"
+          "e.preventDefault();var u=a.getAttribute('href');if(a.classList.contains('on'))return;"
+          "if(window.oxCikisSor)window.oxCikisSor(function(){location.href=u;},u);else location.href=u;});});</script>")
+    return css + f'<div class="oxbar"><nav aria-label="Sayfalar">{links}</nav></div>' + js
+
+
 def load_groups():
     with open(ROOT / "data" / "all_groups.json", encoding="utf-8") as f:
         return json.load(f)
@@ -166,11 +199,12 @@ def render(groups):
     # Ses yolu MUTLAK ('/audio/...') olur: hem gömülü hem güncellenmiş (cihaz hafızasından
     # yüklenen) sayfalarda APK içindeki sese erişir.
     # swipe_script(sola, sağa, aşağı çekince, yukarı itince) — gezinme haritası app/README.md'de.
-    def page(tpl, out, swipe, repl=(), head=""):
+    def page(tpl, out, swipe, repl=(), head="", sekme=None):
         html = (ROOT / "templates" / tpl).read_text(encoding="utf-8")
         for k, v in repl:
             html = html.replace(k, v)
         html = html.replace("</head>", head + APP_HEAD + swipe_script(*swipe) + "</head>", 1)
+        html = html.replace("</body>", nav_bar(sekme or out) + "</body>", 1)
         html = html.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
         path = ROOT / "app/www" / out
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -204,7 +238,7 @@ def render(groups):
          nav + (("__INDEX__", "index.html"),))
     # Ayrıntılı istatistik (ayarların sağı): sağa ayarlar.
     page("analiz_template.html", "analiz.html", ("", "ayarlar.html"),
-         (("__GROUPS_JSON__", blob(stats_data)), ("__AYARLAR__", "ayarlar.html")))
+         (("__GROUPS_JSON__", blob(stats_data)), ("__AYARLAR__", "ayarlar.html")), sekme="istatistik.html")
     # İlerleme: sağa kartlar.
     page("stats_template.html", "istatistik.html", ("", "kartlar.html"),
          (("__GROUPS_JSON__", blob(stats_data)), ("__BACK__", "kartlar.html")))

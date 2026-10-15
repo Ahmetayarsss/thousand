@@ -181,25 +181,25 @@ t("geliştirici: gün kaydırma vadeyi öne çeker", () => {
   S.setDev({ on: false, off: 0 });
 });
 
-t("geliştirici: mod kapalıyken gün kaydırma ve hile ayarı yok sayılır, açılınca geri gelir", () => {
+t("geliştirici: mod kapalıyken gün kaydırma yok sayılır, açılınca geri gelir", () => {
   const near = (a, b) => Math.abs(a - b) < 1000;
   S.answer(k1, false, null);                                                  // bugün, kutu 1 (vade yarın)
   localStorage.setItem("ox3000_dev_v1", JSON.stringify({ off: 3, noCheat: true }));   // eski sürümden kalan ("on" yok)
-  assert.deepStrictEqual(S.dev(), { on: false, off: 0, noCheat: false });
+  assert.deepStrictEqual(S.dev(), { on: false, off: 0 });
   assert.ok(near(S.now(), Date.now()));
   assert.strictEqual(S.today(), S.today(Date.now()));
   assert.strictEqual(S.isDue(k1), false);
-  S.setDev({ on: true });                                                     // açılınca kayıtlı değerler geçerli
-  assert.deepStrictEqual(S.dev(), { on: true, off: 3, noCheat: true });
+  S.setDev({ on: true });                                                     // açılınca kayıtlı değer geçerli
+  assert.deepStrictEqual(S.dev(), { on: true, off: 3 });
   assert.ok(near(S.now(), Date.now() + 3 * D));
   assert.strictEqual(S.isDue(k1), true);
-  S.setDev({ on: false });                                                    // kapatınca yine yok sayılır, değerler silinmez
-  assert.deepStrictEqual(S.dev(), { on: false, off: 0, noCheat: false });
+  S.setDev({ on: false });                                                    // kapatınca yine yok sayılır, değer silinmez
+  assert.deepStrictEqual(S.dev(), { on: false, off: 0 });
   assert.ok(near(S.now(), Date.now()));
-  assert.deepStrictEqual(JSON.parse(localStorage.getItem("ox3000_dev_v1")), { on: false, off: 3, noCheat: true });
+  assert.deepStrictEqual(JSON.parse(localStorage.getItem("ox3000_dev_v1")), { on: false, off: 3 });   // kaldırılan hile ayarı düştü
   S.setDev({ on: true });
-  assert.deepStrictEqual(S.dev(), { on: true, off: 3, noCheat: true });
-  S.setDev({ on: false, off: 0, noCheat: false });
+  assert.deepStrictEqual(S.dev(), { on: true, off: 3 });
+  S.setDev({ on: false, off: 0 });
 });
 
 t("günlük özet: cevap, doğru ve yeni sayıları", () => {

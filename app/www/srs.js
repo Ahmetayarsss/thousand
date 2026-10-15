@@ -72,11 +72,11 @@
   }
 
   // Geliştirici modu: on = açık (kullanıcılardan gizli; Ayarlar başlığına 7 kez hızlıca
-  // dokununca açılır/kapanır), off = gün kaydırma (test için "1 gün ileri sar"),
-  // noCheat = hile tespiti kapalı. Mod kapalıyken off ve noCheat yok sayılır (gerçek
-  // tarih, hile tespiti açık); kayıtlı değerler durur, mod yeniden açılınca geçerli olur.
-  function devStored() { var d = getJ(DEVK, {}) || {}; return { on: !!d.on, off: d.off | 0, noCheat: !!d.noCheat }; }
-  function dev() { var d = devStored(); return d.on ? d : { on: false, off: 0, noCheat: false }; }
+  // dokununca açılır/kapanır), off = gün kaydırma (test için "1 gün ileri sar").
+  // Mod kapalıyken off yok sayılır (gerçek tarih); kayıtlı değer durur, mod yeniden açılınca
+  // geçerli olur.
+  function devStored() { var d = getJ(DEVK, {}) || {}; return { on: !!d.on, off: d.off | 0 }; }
+  function dev() { var d = devStored(); return d.on ? d : { on: false, off: 0 }; }
   function setDev(p) { var d = devStored(); for (var k in p) d[k] = p[k]; setJ(DEVK, d); }
   function nowMs() { return Date.now() + dev().off * DAYMS; }
 

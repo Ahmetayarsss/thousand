@@ -5,7 +5,7 @@
 :root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--green:#2E9E5B;--green-d:#238049;--red:#D9544D;--red-d:#B83E38;--tr:#B03A2E;--ok:#0E8074;--accent:#3B6EA5;--speak:#E5892B}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overscroll-behavior:none}
-#app{max-width:600px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
+#app{max-width:600px;margin:0 auto;height:calc(100dvh - var(--navh,0px) - env(safe-area-inset-bottom));display:flex;flex-direction:column;padding:8px 12px 10px}   /* alt çubuğun üstünde biter */
 .top{flex:0 0 auto}
 .moderow{display:flex;gap:6px;background:#E9EDF3;border-radius:11px;padding:4px;margin:2px 0 8px}
 .moderow button{flex:1;border:0;background:transparent;color:var(--muted);font-weight:800;font-size:13.5px;padding:9px 0;border-radius:8px;cursor:pointer}
@@ -77,9 +77,6 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
 .leave button{flex:1;border:0;border-radius:13px;padding:14px 0;font-size:15px;font-weight:800;cursor:pointer}
 .leave .stay{background:var(--ink);color:#fff}
 .leave .go{background:#FDECEA;color:var(--red-d)}
-.cheat{position:fixed;inset:0;z-index:9999;background:#fff;display:none;align-items:center;justify-content:center;padding:34px;text-align:center}
-.cheat.show{display:flex}
-.cheat-msg{color:#111;font-size:30px;font-weight:900;line-height:1.3;max-width:620px}
 
 .result{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
 .score{font-size:60px;font-weight:900;letter-spacing:-.03em}
@@ -171,7 +168,6 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-ra
   </div>
 </div>
 </div>
-<div class="cheat" id="cheat"><div class="cheat-msg"></div></div>
 <script>
 const GROUPS=__GROUPS_JSON__;
 const SKEY="ox3000_sessions_v1";   // sınav oturumu kaydı (ilerleme sayfası için)
@@ -194,12 +190,13 @@ const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNative
 // paketlenmediği için registerPlugin YOK — eskiden yalnız ona bakıldığından native okuma hiç çalışmıyordu).
 const GT=NATIVE?((window.Capacitor.Plugins&&Capacitor.Plugins.GroupTts)||(typeof Capacitor.registerPlugin==='function'&&Capacitor.registerPlugin('GroupTts'))||null):null;
 let toastEl=null,toastTimer=null;
-function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';
+function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';
   placeToast();
   if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 // Klavye paneli açıksa bilgi balonu onun üstünde durur.
 function placeToast(){if(!toastEl)return;const kp=document.getElementById('kpanel');
-  toastEl.style.bottom=(kp&&!kp.classList.contains('hidden')&&kp.offsetHeight)?(kp.offsetHeight+12)+'px':'22px';}
+  const alt='var(--navh,0px) + env(safe-area-inset-bottom)';   // alt gezinme çubuğunun üstü
+  toastEl.style.bottom='calc('+((kp&&!kp.classList.contains('hidden')&&kp.offsetHeight)?(kp.offsetHeight+12):22)+'px + '+alt+')';}
 let wordAudio=null;
 function slugOf(w){var b=w.replace(/\(.*?\)/g,'').split(',')[0];return b.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 function playAudioUrl(url){return new Promise(res=>{
@@ -215,7 +212,7 @@ async function sayWord(t){
 
 let mode='test',cur=null,side=0;
 let queue=[],testTotal=0,examList=[],examIdx=0,revCount=0,sess=null;   // examList: anahtarlar (önce tekrarlar, sonra turun yenileri)
-let tPrompt=0,tReveal=0,suspStreak=0;   // hile tespiti: soru gösterim / çevirme anı, art arda şüpheli sayısı
+let tPrompt=0;   // sorunun gösterildiği an (kayda cevap süresi yazılır)
 const DEPTH=4;            // destede görünen kart sayısı (1 üst + 3 arka)
 let slots=[],topFlip=null,busy=false;   // slots[0]=en üstteki aktif kart; busy=animasyon sürüyor
 
@@ -436,7 +433,7 @@ function glFlip(item,rx){
 // (menteşe merkez), arka yüzü (cevap) öne gelir. Çok yavaş (net görülsün).
 // rx,ry: dokunma yerine göre takla ekseni/yönü (dikey dokunuş→X takla, yatay→Y).
 function reveal(rx,ry){
-  if(side===1||busy)return;side=1;tReveal=performance.now();
+  if(side===1||busy)return;side=1;
   const fl=topFlip, back=fl.querySelector('.face.back');
   if(typeof rx!=='number')rx=0.5; if(typeof ry!=='number')ry=0.5;
   rx=Math.max(0,Math.min(1,rx));ry=Math.max(0,Math.min(1,ry));
@@ -571,7 +568,7 @@ function startTestFrom(order){
   mode='test';showStage();document.getElementById('finish').classList.add('hidden');
   document.getElementById('again').textContent='Tekrar';document.getElementById('know').textContent='Biliyorum';
   order.forEach(it=>{it._lockDir=false;it._dir=null;});   // yeni test: yön + kilit sıfırla
-  if(!order.length){showResult('🎉','yeni kelime kalmadı','Tüm kelimeler döngüde. Sınav sekmesinden tekrarlara devam et.','',true);return;}
+  if(!order.length){showResult('🎉','yeni kelime kalmadı','Tüm kelimeler çalışılıyor. Sınav sekmesinden tekrarlara devam et.','',true);return;}
   cur=order[0];queue=order.slice(1);testTotal=order.length;
   OXLOG.add('test_bas',{n:order.length});
   busy=false;buildDeck();
@@ -609,7 +606,6 @@ function startExam(){mode='exam';showStage();document.getElementById('finish').c
 function gradeExam(correct){
   if(busy||!cur)return;
   const it=cur,ty=isTyped(it);
-  if(!ty&&checkSpeed())return;                            // hız kontrolü yalnız Bildim/Bilemedim kartlarında
   const wasNew=SRS.isNew(it._k);
   const res=SRS.answer(it._k,correct,it._dir);            // kutu + vade + (yanlışta) yön kilidi
   if(wasNew){sess.nw++;if(correct)sess.nwOk++;}else{sess.rev++;if(correct)sess.revOk++;}
@@ -626,35 +622,8 @@ function gradeExam(correct){
   advanceDeck(correct?'right':'left');
 }
 
-/* ---- Hile yakalama: yalnız sınavda; kademeli mesaj (ceza henüz yok). Geliştirici ayarından kapatılabilir. ---- */
-const CKEY="ox3000_cheat_v1";
-// Sayacı bu sürümde bir kez sıfırla (flag sayesinde tekrar sıfırlamaz).
-try{if(!localStorage.getItem('ox3000_cheat_migr_v4')){localStorage.removeItem(CKEY);localStorage.setItem('ox3000_cheat_migr_v4','1');}}catch(e){}
-function cheatN(){try{return (parseInt(localStorage.getItem(CKEY),10))||0;}catch(e){return 0;}}
-// true dönerse: mevcut sınav/test turu yeniden başlatıldı → çağıran devam etmemeli.
-function checkSpeed(){
-  if(mode!=='exam'||SRS.dev().noCheat)return false;
-  const flip=tReveal-tPrompt, decide=performance.now()-tReveal;
-  if(flip>0&&flip<300&&decide<350){ if(++suspStreak>=2){ suspStreak=0; return cheatCaught(); } }
-  else suspStreak=0;
-  return false;
-}
-function restartRound(){ start(); }   // yalnız mevcut sınav/test turunu baştan başlatır; ilerleme (bölümler/seviye) DOKUNULMAZ
-// Sırayla gösterilen uyarılar; sonuncusundan sonra artık hiçbir şey gösterilmez (yalnız kayda yazılır).
-const CHEAT_MSG=["hayiydiy gaydeş","Yaşayan en hızlı insan Barry Allen'ın bilinmeyen bı akrabası falan mısın bu ne hız",
-  "son uyarım","sen kaşındın","ceza bulamadım ama kendini kandırdığını bil"];
-function cheatCaught(){   // ceza yok: sınav kaldığı yerden sürer
-  let n=cheatN()+1;try{localStorage.setItem(CKEY,n);}catch(e){}
-  OXLOG.add('hile',{n:n});
-  if(n<=CHEAT_MSG.length)showCheat(CHEAT_MSG[n-1],false);
-  return false;
-}
-function showCheat(msg,restart){
-  if(synth)synth.cancel();
-  const o=document.getElementById('cheat');o.querySelector('.cheat-msg').textContent=msg;o.classList.add('show');
-  const dur=Math.min(6000,Math.max(3000,msg.length*60));   // mesaj uzunluğuna göre okunabilir süre
-  setTimeout(()=>{o.classList.remove('show');tPrompt=performance.now();if(restart)restartRound();},dur);
-}
+// Kaldırılan hile tespitinin (adım 16) telefonda kalan kayıtları.
+try{localStorage.removeItem('ox3000_cheat_v1');localStorage.removeItem('ox3000_cheat_migr_v4');}catch(e){}
 function examDone(){
   const n=sess.rev+sess.nw,ok=sess.revOk+sess.nwOk,all=examList.length>0&&examIdx>=examList.length;
   if(n){try{const L=JSON.parse(localStorage.getItem(SKEY)||'[]');
@@ -666,13 +635,13 @@ function examDone(){
   const nxt=left?'Bugün daha '+left+' tekrar var.':(nd==null?'':'Sonraki tekrar '+(nd===1?'yarın':nd+' gün sonra')+'.');
   let msg;
   if(all){const nl=SRS.newList(1).length;
-    msg='Bu turun bütün kelimeleri bitti. '+(nl?'Ana sayfada yeni kelimeler seni bekliyor; çalışınca sınava dönebilirsin. ':'')+(nxt?nxt:'');
+    msg='Bu listenin bütün kelimeleri bitti. '+(nl?'Ana sayfada yeni kelimeler seni bekliyor; çalışınca sınava dönebilirsin. ':'')+(nxt?nxt:'');
     if(n)msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:'',sess.ty?'Yazılı: '+sess.tyOk+'/'+sess.ty:''].filter(Boolean).join(' · ')+'. '+msg;}
   else if(!n)msg=((left||SRS.newList(1).length)?'Henüz cevap yok.':'Bugün sorulacak kelime yok. 🎉')+(nxt?' '+nxt:'');
-  else msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:'',sess.ty?'Yazılı: '+sess.tyOk+'/'+sess.ty:''].filter(Boolean).join(' · ')+'. '+(sess.nw?sess.nw+' kelime döngüye girdi. ':'')+nxt;
+  else msg=[sess.rev?'Tekrar: '+sess.revOk+'/'+sess.rev:'',sess.nw?'Yeni: '+sess.nwOk+'/'+sess.nw:'',sess.ty?'Yazılı: '+sess.tyOk+'/'+sess.ty:''].filter(Boolean).join(' · ')+'. '+(sess.nw?sess.nw+' kelime çalışılanlara eklendi. ':'')+nxt;
   const wl=sess.wrong.map(w=>`<div class="wr"><b>${w.w}</b> — <span>${w.tr||''}</span></div>`).join('');
   showResult(n?ok+'/'+n:'0',n?'doğru':'kelime cevaplandı',msg,wl,false);
-  document.getElementById('r-again').textContent=all?'Yeni tur':'Sınava devam';
+  document.getElementById('r-again').textContent=all?'Yeni liste':'Sınava devam';
 }
 
 function showResult(big,small,msg,wlHtml,isTest){

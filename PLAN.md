@@ -84,8 +84,9 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Aşama 8 — Android ve dağıtım
 
-- [ ] 28. 🔸 Arka plan kontrolü: 15 dk'da bir sunucuya sorma + pil optimizasyonu muafiyeti
-      yerine ne? (Firebase bildirimleri ya da daha seyrek kontrol.)
+- [x] 28. Arka plan kontrolü (kullanıcı kararı: seyrek kontrol): arkadaş isteği/dürtme kontrolü saatte bir;
+      pil optimizasyonu muafiyeti (izin + kurulum adımı) kaldırıldı. Bedeli: telefon uykudayken bildirim
+      ve hatırlatmalar gecikebilir. Yeni APK ile etkin.
 - [ ] 29. `targetSdk` 35+ (Capacitor 7'ye geçiş) — Play Store şartı (kullanıcı: uygulama herkese dağıtılacak).
 
 ## Bilerek bırakılanlar (şimdilik)

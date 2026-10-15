@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
-import android.os.PowerManager;
 import android.provider.Settings;
 
 import java.util.Locale;
@@ -44,9 +43,8 @@ import com.getcapacitor.annotation.PermissionCallback;
  *   permission() / requestPermission()  bildirim izni → {display: granted | denied | prompt}.
  *   openSettings()                      uygulamanın bildirim ayarları sayfası.
  *   launchTarget()                      bildirime dokunarak açıldıysa açılacak sayfa → {sayfa?} (bir kez verir).
- *   cihaz()                             kurulum ekranı için → {marka, sdk, pil (arka plan izni var mı), otobas (otomatik
- *                                       başlatma ayarı gereken marka mı)}.
- *   pilIzni()                           "arka planda çalışmaya izin ver" sistem penceresi (pil optimizasyonu dışı).
+ *   cihaz()                             kurulum ekranı için → {marka, sdk, otobas (otomatik başlatma ayarı gereken
+ *                                       marka mı)}.
  *   otomatikBaslatma()                  markanın otomatik başlatma ekranı (Xiaomi, Huawei, Oppo, Vivo…) → {acildi:
  *                                       otobas | uygulama (bulunamadı, uygulama bilgisi açıldı) | ''}.
  */
@@ -244,24 +242,11 @@ public class Bildirim extends Plugin {
         return false;
     }
 
-    /** Uygulama pil optimizasyonu dışında mı (Android 6+; daha eskisinde kısıtlama yok). */
-    private boolean pilSerbest() {
-        if (Build.VERSION.SDK_INT < 23) return true;
-        try {
-            Context c = getContext();
-            PowerManager pm = (PowerManager) c.getSystemService(Context.POWER_SERVICE);
-            return pm != null && pm.isIgnoringBatteryOptimizations(c.getPackageName());
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     @PluginMethod
     public void cihaz(PluginCall call) {
         JSObject r = new JSObject();
         r.put("marka", marka());
         r.put("sdk", Build.VERSION.SDK_INT);
-        r.put("pil", pilSerbest());
         r.put("otobas", otobasGerekli());
         call.resolve(r);
     }
@@ -279,19 +264,6 @@ public class Bildirim extends Plugin {
 
     private boolean uygulamaBilgisi() {
         return ac(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getContext().getPackageName())));
-    }
-
-    /** "Arka planda çalışmaya izin ver" penceresi; olmazsa pil optimizasyonu listesi, o da olmazsa uygulama bilgisi. */
-    @PluginMethod
-    public void pilIzni(PluginCall call) {
-        JSObject r = new JSObject();
-        if (Build.VERSION.SDK_INT < 23 || pilSerbest()) { r.put("pil", true); call.resolve(r); return; }
-        boolean ok = ac(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                Uri.parse("package:" + getContext().getPackageName())));
-        if (!ok) ok = ac(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
-        if (!ok) uygulamaBilgisi();
-        r.put("pil", pilSerbest());
-        call.resolve(r);
     }
 
     @PluginMethod

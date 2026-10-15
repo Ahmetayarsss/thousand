@@ -38,8 +38,9 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Aşama 4 — Gizlilik ve hukuk
 
-- [ ] 9. Kullanım kayıtları (kullanıcı kararı: bir kez sorulsun): hesap açılınca kısa açıklamayla
-      onay sorulur, evet derse gönderilir; Ayarlar'dan değiştirilebilir. Kısa gizlilik metni.
+- [x] 9. Kullanım kayıtları yalnız izinle (kullanıcı kararı: bir kez sorulsun): hesap açılınca, kurtarma
+      kodundan sonra ve izni hiç sorulmamış hesaplarda ana sayfada bir kez sorulur; "evet" anından önceki
+      olaylar gönderilmez. Ayarlar → Gizlilik: aç/kapa + sunucuda neyin tutulduğunu anlatan kısa metin.
 - [x] 10. Sözlük ses dosyaları: kullanıcı kararıyla kalıyor (aşağıda "Bilerek bırakılanlar").
 - [x] 11. Ad "Thousand", paket `io.github.ahmetayarsss.thousand` (kullanıcı kararı; uygulama herkese
       dağıtılacak). Eski uygulamada taşıma rehberi; bekçi `marka-adi` kuralı adın geri girmesini engeller.

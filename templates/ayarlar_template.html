@@ -10,12 +10,12 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-
 body{min-height:100vh}
 .wrap{max-width:600px;margin:0 auto;padding:8px 14px calc(24px + env(safe-area-inset-bottom));min-height:100vh;display:flex;flex-direction:column}
 h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;user-select:none;touch-action:manipulation}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 20px rgba(20,30,50,.06);padding:16px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 20px var(--shade);padding:16px;margin-bottom:14px}
 .card h2{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;margin:0 0 12px}
 .lbl{font-size:15px;font-weight:800}
 .note{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45}
 .stepper{display:flex;align-items:center;gap:10px;margin-top:12px}
-.stepper button{width:44px;height:44px;border-radius:12px;border:0;background:var(--ink);color:#fff;font-size:22px;font-weight:800;cursor:pointer}
+.stepper button{width:44px;height:44px;border-radius:12px;border:0;background:var(--solid);color:var(--on-solid);font-size:22px;font-weight:800;cursor:pointer}
 .stepper .val{flex:1;text-align:center;font-size:30px;font-weight:900}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .chips button{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-weight:800;font-size:13px;border-radius:10px;padding:8px 0;cursor:pointer}
@@ -26,11 +26,11 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
 .row:first-of-type{border-top:0;padding-top:0}
 .row .t{font-size:14px;font-weight:700}
 .row .s{font-size:12px;color:var(--muted);margin-top:2px}
-.btn{border:0;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:800;cursor:pointer;background:var(--ink);color:#fff;white-space:nowrap}
+.btn{border:0;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:800;cursor:pointer;background:var(--solid);color:var(--on-solid);white-space:nowrap}
 .btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
 .btn.red{background:var(--red)}
 .btns{display:flex;gap:6px}
-.sw{position:relative;width:50px;height:30px;border-radius:15px;background:#C7D0DB;border:0;cursor:pointer;flex:0 0 auto;transition:background .2s}
+.sw{position:relative;width:50px;height:30px;border-radius:15px;background:var(--neu,#C7D0DB);border:0;cursor:pointer;flex:0 0 auto;transition:background .2s}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s}
 .sw.on{background:var(--green)} .sw.on::after{left:23px}
 .sw:disabled{opacity:.45;cursor:default}
@@ -41,13 +41,13 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
 .acc .code{letter-spacing:2px}
 .acc .rec{letter-spacing:1.5px;font-family:ui-monospace,Menlo,monospace}
 .acc .danger{color:var(--red)}
-.kur h2{color:#B03A2E}
+.kur h2{color:var(--tr,#B03A2E)}
 .kur .adim{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.55}
 .kur .adim li{margin-bottom:10px}
 .kur .adim .btn{margin-top:6px}
-.kur .ok{color:#2E9E5B;font-weight:700}.kur .no{color:#B03A2E;font-weight:700}
+.kur .ok{color:#2E9E5B;font-weight:700}.kur .no{color:var(--tr,#B03A2E);font-weight:700}
 .kur a{color:#1565C0;font-weight:700}
-.toast{position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:92%;text-align:center;background:var(--ink);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
+.toast{position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:92%;text-align:center;background:var(--solid);color:var(--on-solid);font-size:12px;padding:8px 14px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
 .toast.show{opacity:1}
 </style>
 </head>

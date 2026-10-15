@@ -87,6 +87,32 @@ def swipe_script(next_t, prev_t, up_t="", down_t=""):
     ) % (next_t, prev_t, up_t, down_t)
 
 
+# Karanlık mod (adım 21): telefon karanlık moddaysa <html data-theme="dark"> olur ve renk
+# değişkenleri koyu karşılıklarına döner. Sayfalar renkleri bu değişkenlerden alır; sabit renk
+# yazmak yerine buradaki değişkeni kullan. Kart çevirme görüntüsü (kartlar → captureFace) de
+# data-theme'i taşır. Uygulamanın Android teması DayNight olduğu için WebView telefonun
+# ayarını sayfaya bildirir.
+THEME_HEAD = (
+    "<script>(function(){var m=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)');"
+    "function s(){document.documentElement.setAttribute('data-theme',m&&m.matches?'dark':'light');}"
+    "s();if(m&&m.addEventListener)m.addEventListener('change',s);})();</script>"
+    "<style>"
+    # Açık tema: şablonlarda olmayan ortak değişkenler (şablonların kendi :root'u önce gelir).
+    ":root{--solid:#1B2430;--on-solid:#fff;--field:#fff;--soft:#E9EDF3;--soft2:#EEF2F7;--en:#33414F;--ex:#5B6B7B;"
+    "--sep:#D5DCE7;--face-line:#c7d2e3;--hdr:rgba(245,246,248,.95);--bad-bg:#FDECEA;--bad-line:#F5C4BD;--bad-ink:#8A2A1E;"
+    "--good-bg:#E9F7EF;--warn-bg:#FCF3E3;--warn-line:#F2E0BE;--warn-ink:#8A6D3B;--cam:#0B5FA5;--cam-bg:#E8F1FB;--cam-line:#C4DBF3;"
+    "--kb:#D9E0EA;--key:#fff;--key2:#B9C4D4;--key3:#AEB9C9;--key4:#8E9BB0;--shade:rgba(20,30,50,.06);--scrim:rgba(20,27,38,.5);--bar:#fff}"
+    ":root[data-theme=dark]{color-scheme:dark;--bg:#0F141B;--card:#19202A;--ink:#E4E9F0;--ink2:#C5CDD8;--muted:#8D99AA;"
+    "--line:#2B3542;--accent:#5B8FD0;--green:#35A867;--green-d:#2E9A5E;--red:#DE5F57;--red-d:#E87A72;--tr:#EE8579;"
+    "--ok:#3CC2B0;--amber:#E5892B;--neu:#3A4554;--green-bg:#17352A;--amber-bg:#3A2C1A;--secgray:#222B36;"
+    "--secgray-ink:#7C8899;--gold:#D4AE3A;--gold-bg:#3A3218;--dev:#B27AD0;"
+    "--solid:#2F3B4C;--on-solid:#F2F5F9;--field:#222B36;--soft:#222B36;--soft2:#1E2631;--en:#C5CDD8;--ex:#9AA6B6;"
+    "--sep:#3A4554;--face-line:#2B3542;--hdr:rgba(15,20,27,.95);--bad-bg:#3A1E1C;--bad-line:#5A2C28;--bad-ink:#F2A59D;"
+    "--good-bg:#17352A;--warn-bg:#3A2C1A;--warn-line:#5A4428;--warn-ink:#E8C48A;--cam:#8DB8E8;--cam-bg:#1D2A3A;--cam-line:#2D4560;"
+    "--kb:#151B23;--key:#2A3442;--key2:#3A4656;--key3:#3A4656;--key4:#4A5768;--shade:rgba(0,0,0,.35);--scrim:rgba(0,0,0,.6);--bar:#151B23}"
+    "</style>"
+)
+
 # Alt gezinme çubuğu (adım 18): kaydırmayı bilmeyen de sayfalar arasında geçebilsin. Kaydırma
 # da çalışmaya devam eder. Sınav sürerken çıkış onayı (window.oxCikisSor) burada da sorulur.
 NAV_TABS = [   # (sayfa, ad, SVG yolu — 24x24, çizgi)
@@ -103,11 +129,11 @@ def nav_bar(active):
     """Sayfanın altına sabit sekme çubuğu. active: vurgulanacak sayfa (NAV_TABS'taki ad)."""
     css = ("<style>:root{--navh:58px}body{padding-bottom:calc(var(--navh) + env(safe-area-inset-bottom))}"
            ".oxbar{position:fixed;left:0;right:0;bottom:0;z-index:9990;display:flex;justify-content:center;"
-           "background:rgba(255,255,255,.97);border-top:1px solid #E6EAF1;padding-bottom:env(safe-area-inset-bottom)}"
+           "background:var(--bar);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}"
            ".oxbar nav{display:flex;width:100%;max-width:600px}"
            ".oxbar a{flex:1;height:var(--navh);display:flex;flex-direction:column;align-items:center;justify-content:center;"
-           "gap:3px;color:#7A8699;font:600 10.5px system-ui,-apple-system,Roboto,Arial,sans-serif;text-decoration:none}"
-           ".oxbar a.on{color:#1B2430;font-weight:800}.oxbar a.on svg{stroke:#3B6EA5}"
+           "gap:3px;color:var(--muted);font:600 10.5px system-ui,-apple-system,Roboto,Arial,sans-serif;text-decoration:none}"
+           ".oxbar a.on{color:var(--ink);font-weight:800}.oxbar a.on svg{stroke:var(--accent,#3B6EA5)}"
            ".oxbar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}"
            "</style>")
     links = "".join(
@@ -203,7 +229,7 @@ def render(groups):
         html = (ROOT / "templates" / tpl).read_text(encoding="utf-8")
         for k, v in repl:
             html = html.replace(k, v)
-        html = html.replace("</head>", head + APP_HEAD + swipe_script(*swipe) + "</head>", 1)
+        html = html.replace("</head>", THEME_HEAD + head + APP_HEAD + swipe_script(*swipe) + "</head>", 1)
         html = html.replace("</body>", nav_bar(sekme or out) + "</body>", 1)
         html = html.replace("playAudioUrl('audio/", "playAudioUrl('/audio/")
         path = ROOT / "app/www" / out

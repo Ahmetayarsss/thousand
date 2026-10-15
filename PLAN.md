@@ -65,7 +65,9 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 19. Adlar (kullanıcı seçti): tekrar sistemindeki kelimeler "döngü" → "çalışılan"; Listeyi oku'daki
       "Döngü" → "Başa dön"; sınav turu → "liste"; "Kısım" ve İlerleme'deki Olgun/Öğreniliyor/Yeni aynı.
 - [x] 20. Kart ekranı düzeni: yapılmadı (kullanıcı kararı).
-- [ ] 21. Erişilebilirlik (etiketler, yalnız renge dayanmayan durumlar) ve karanlık mod.
+- [x] 21. Karanlık mod: telefon karanlıktaysa bütün sayfalar (kart çevirme görüntüsü dahil) koyu; açık
+      tema eskisiyle piksel piksel aynı. Erişilebilirlik taraması: adı olmayan tek kontrol (sözlük arama
+      kutusu) etiketlendi; doğru/yanlış sonucu renkle birlikte yazıyla da veriliyor.
 
 ## Aşama 7 — Performans ve mimari
 

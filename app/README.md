@@ -60,6 +60,10 @@ uygulama kendiliğinden APK'daki sürüme döner, o sürümü bir daha indirmez 
 "Güncelleme açılamadı — önceki sürüm kullanılıyor" der (bu koruma APK'daki güncelleyicide
 çalışır: bu sürümü içeren APK kurulduktan sonra etkindir).
 
+**Karanlık mod:** telefon karanlık moddaysa sayfalar da koyu olur (`scripts/build_all.py` →
+`THEME_HEAD`: `<html data-theme="dark">` + renk değişkenleri). Şablonda sabit renk yazma; değişken
+kullan (`--card`, `--ink`, `--solid`…), yoksa karanlık modda o parça açık kalır.
+
 Kelime içeriği ya da şablon değişince: `python3 scripts/build_all.py` çalıştır. Yerel
 derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script üretir.
 

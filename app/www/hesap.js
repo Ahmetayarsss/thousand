@@ -321,7 +321,7 @@ window.OXACC = (function () {
 
   // ---------------- bildirimler ----------------
   // Native Bildirim eklentisi (yeni APK) iki iş yapar:
-  //  1) Arkadaşlık isteği ve dürtme: arka planda ~15 dk'da bir sunucuya sorar (WorkManager; uygulama kapalıyken de).
+  //  1) Arkadaşlık isteği ve dürtme: arka planda ~saatte bir sunucuya sorar (WorkManager; uygulama kapalıyken de).
   //     Uygulamanın oturumu (JWT) yerine hesaba özel bir bildirim anahtarı kullanılır: bildirim_anahtari ile
   //     alınır, burada saklanır, configure ile native'e verilir.
   //  2) Seri / tekrar hatırlatmaları (yerel, hesap gerekmez): içerikleri burada önümüzdeki en çok 3 gün için
@@ -482,8 +482,8 @@ window.OXACC = (function () {
     } catch (e) { return null; }
   }
   // ---- bildirim kurulumu (telefon ayarları) ----
-  // Bildirimlerin zamanında gelmesi için gereken izinler, her biri tek dokunuşla: bildirim izni, arka planda
-  // çalışma (pil), otomatik başlatma (yalnız uygulamaları kendiliğinden kapatan markalarda: Xiaomi, Huawei, Oppo…).
+  // Bildirimlerin gelmesi için gereken izinler, her biri tek dokunuşla: bildirim izni, otomatik başlatma (yalnız
+  // uygulamaları kendiliğinden kapatan markalarda: Xiaomi, Huawei, Oppo…). Pil izni istenmez (adım 28).
   // Hesap açılınca ve ana sayfada bir kez kendiliğinden çıkar; Ayarlar → Bildirimler'den her zaman açılır.
   var KKEY = "ox3000_kurulum_v1";   // {goster: 1 (kendiliğinden bir kez gösterildi), otobas: 1 (ekranı açıldı → yapıldı sayılır)}
   async function kurulumDurum() {
@@ -493,7 +493,6 @@ window.OXACC = (function () {
     try { c = (await B.cihaz()) || {}; } catch (e) {}
     try { var p = await B.permission(); izin = p && p.display; } catch (e) {}
     var adim = [{ id: "izin", t: "Bildirim izni", s: "Bildirim gösterebilmesi için.", ok: izin === "granted", btn: "İzin ver" }];
-    if ((c.sdk || 0) >= 23) adim.push({ id: "pil", t: "Arka planda çalışma", s: "Uygulama kapalıyken de hatırlatabilmesi için.", ok: !!c.pil, btn: "İzin ver" });
     if (c.otobas) adim.push({ id: "otobas", t: "Otomatik başlatma", s: "Açılan listede Thousand'ı aç.", ok: !!k.otobas, btn: "Aç" });
     return { adim: adim, tamam: adim.every(function (a) { return a.ok; }), marka: c.marka || "" };
   }
@@ -503,7 +502,6 @@ window.OXACC = (function () {
     try {
       log("kurulum", { a: id });
       if (id === "izin") { await bildirimIzinIste(); return ""; }
-      if (id === "pil") { await B.pilIzni(); return ""; }
       if (id === "otobas") {
         var r = await B.otomatikBaslatma(), k = getJ(KKEY, {}) || {};
         k.otobas = 1; setJ(KKEY, k);

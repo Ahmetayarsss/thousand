@@ -25,7 +25,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Arkadaşlık isteği ve dürtme kontrolü — WorkManager ile ~15 dk'da bir, internet varken; uygulama kapalıyken de.
+ * Arkadaşlık isteği ve dürtme kontrolü — WorkManager ile ~saatte bir, internet varken; uygulama kapalıyken de.
+ * Pil izni (pil optimizasyonu dışı) istenmez: telefon uykudayken Android kontrolü bir sonraki uyanışa erteleyebilir,
+ * bildirim o kadar gecikir (adım 28, kullanıcı kararı: pil dostu, Play Store'a uygun).
  *
  * Supabase'teki bildirim_kontrol'ü hesaba özel bildirim anahtarıyla çağırır (uygulamanın oturumu/JWT
  * kullanılmaz; yalnız herkese açık anahtar "apikey" başlığında). Tek imleç (son): görülen/bildirilen en yeni
@@ -51,7 +53,7 @@ public class ArkadasWorker extends Worker {
     /** Dönemli işi kur. Varsa takvimi sıfırlamadan yeni tanımı uygular (UPDATE); ayarlar her çalışmada okunur. */
     public static void schedule(Context c) {
         Constraints cons = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
-        PeriodicWorkRequest req = new PeriodicWorkRequest.Builder(ArkadasWorker.class, 15, TimeUnit.MINUTES)
+        PeriodicWorkRequest req = new PeriodicWorkRequest.Builder(ArkadasWorker.class, 60, TimeUnit.MINUTES)
                 .setConstraints(cons)
                 .build();
         WorkManager.getInstance(c).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE, req);

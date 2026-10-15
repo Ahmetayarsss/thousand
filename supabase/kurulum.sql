@@ -364,7 +364,7 @@ revoke execute on function public.push_logs(jsonb) from public, anon;
 grant execute on function public.push_logs(jsonb) to authenticated;
 
 -- ================= bildirimler (uygulama kapalıyken arkadaşlık isteği ve dürtme) =================
--- Telefon arka planda (~15 dk'da bir) bildirim_kontrol'ü çağırır. Oturum (JWT) uygulamanın içinde kalır;
+-- Telefon arka planda (~saatte bir) bildirim_kontrol'ü çağırır. Oturum (JWT) uygulamanın içinde kalır;
 -- arka plan için hesaba özel ayrı bir bildirim anahtarı kullanılır, sunucuda yalnız özeti (sha256) durur.
 alter table public.profiles add column if not exists bildirim_hash text;
 create unique index if not exists profiles_bildirim_hash_key on public.profiles (bildirim_hash);

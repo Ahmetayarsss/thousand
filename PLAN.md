@@ -30,10 +30,11 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Aşama 3 — Veri kaybına karşı sağlamlık
 
-- [ ] 7. Sessiz hata yutma: ilerleme/yedek yazmaları başarısız olursa kullanıcı uyarılır
-      ve kayda düşer (`srs.js` `save()`, `hesap.js` `restore()`).
-- [ ] 8. Kurtarma kodu ile geri yüklemede yerel ilerleme körlemesine ezilmez (hangisi
-      yeni / daha dolu ise o; ya da kullanıcıya sorulur).
+- [x] 7. İlerleme yazılamazsa (hafıza dolu): önce kullanım kaydı kısaltılıp tekrar denenir; yine
+      olmazsa ekranda kırmızı uyarı + kayda düşer (`SRS.yaz`). Geri yükleme yazılamazsa "geri geldi"
+      denmez, eksik söylenir.
+- [x] 8. Kurtarmada telefonda da ilerleme varsa soru artık iki tarafı sayıyla gösterir (kelime
+      sayısı, en son ne zaman çalışıldı, yedek tarihi); kullanıcı bilerek seçer.
 
 ## Aşama 4 — Gizlilik ve hukuk
 

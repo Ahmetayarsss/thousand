@@ -15,7 +15,7 @@
  *   bildirim {a, …}       bildirim izni (a: izin, d) / bildirime dokunup açma (a: ac, p)
  *   durt {s}              arkadaşını dürttü (s: gonderildi | bugun_durttun)
  *   ayar {...}            ayar değişti        dev {a}        geliştirici işlemi
- *   hata {m, f, l}        yakalanmamış JS hatası
+ *   hata {m, f, l}        yakalanmamış JS hatası (f: kayit = ilerleme telefona yazılamadı, k: anahtar)
  *   guncelleme {a, v}     güncelleme olayı (a: geri = v sürümü açılamadı, gömülü sürüme dönüldü)
  * En fazla MAX olay tutulur (eskiler silinir). Her olayın bir sıra numarası var: sira() şimdiye
  * dek eklenen olay sayısı (silinenler dahil), son olayın numarası budur; sunucuya hangi olayların
@@ -59,6 +59,15 @@
   function events() { return load(); }   // salt okunur (hesap.js sunucuya gönderirken)
   function size() { try { return (localStorage.getItem(KEY) || "").length; } catch (e) { return 0; } }
   function clear() { buf = []; try { localStorage.removeItem(KEY); } catch (e) {} }
+  // Telefon hafızası dolunca (srs.js ilerlemeyi yazamayınca) yer açar: en eski yarıyı siler.
+  // Kayıt en önemsiz veri; ilerleme ondan önce gelir. Silinen bir şey olduysa true.
+  function yerAc() {
+    var b = load();
+    if (b.length < 2) { if (!b.length) return false; clear(); return true; }
+    b.splice(0, Math.ceil(b.length / 2));
+    try { localStorage.setItem(KEY, JSON.stringify(b)); } catch (e) { clear(); }
+    return true;
+  }
 
   // Dışa aktarılacak tüm veri: olaylar + ilerleme durumu (anlamak için gerekenler).
   function snapshot() {
@@ -126,6 +135,6 @@
     }
   } catch (e) {}
 
-  return { add: add, count: count, size: size, clear: clear, snapshot: snapshot, exportFile: exportFile, copy: copy, uid: uid,
+  return { add: add, count: count, size: size, clear: clear, yerAc: yerAc, snapshot: snapshot, exportFile: exportFile, copy: copy, uid: uid,
            sira: sira, events: events };
 })();

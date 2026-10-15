@@ -78,5 +78,23 @@ function bak(ad, kosul, bilgi) {
 
   bak("tarayıcıda (native değil) yeniden kurulum istenmez", o.ctx.OXACC.yenidenKurulmali() === false, null);
 
+  // Geri yükleme: telefona yazılamayan anahtar varsa "tamam" denmez.
+  o = ortam();
+  const yedek = { v: 1, t: 1, keys: { ox3000_srs_v1: { "1|apple": { b: 4 } }, ox3000_daily_v1: { 1: { n: 1 } } } };
+  let g = o.ctx.OXACC.restore(yedek);
+  bak("geri yükleme: hepsi yazıldı → ok", g.ok === true && JSON.parse(o.ls.ox3000_srs_v1)["1|apple"].b === 4, g);
+  o = ortam();
+  o.ctx.localStorage.setItem = (k, v) => { if (k === "ox3000_srs_v1") { const e = new Error("dolu"); e.name = "QuotaExceededError"; throw e; } o.ls[k] = String(v); };
+  g = o.ctx.OXACC.restore(yedek);
+  bak("geri yükleme: ilerleme yazılamadı → ok değil, eksik listesinde", g.ok === false && g.eksik.indexOf("ox3000_srs_v1") >= 0, g);
+
+  // Kurtarmada telefonda da ilerleme varsa sorulan soru sayıları ve tarihleri göstermeli.
+  o = ortam();
+  const T = o.ctx.SRS.today();
+  o.ls.ox3000_srs_v1 = JSON.stringify({ x: { a: T }, y: { a: T - 2 } }); o.ctx.SRS._reload();
+  const soru = o.ctx.OXACC.karsilastirma({ t: Date.UTC(2026, 9, 1), keys: { ox3000_srs_v1: { a: { a: T - 3 }, b: { a: T - 5 }, c: { a: T - 4 } } } });
+  bak("kurtarma sorusu: yedekte 3 kelime / 3 gün önce, telefonda 2 kelime / bugün",
+    /Yedek \(.*\): 3 kelime, en son 3 gün önce/.test(soru) && /Bu telefon: 2 kelime, en son bugün/.test(soru) && /İptal = bu telefondakini koru/.test(soru), soru);
+
   if (hata) { console.log(hata + " test BAŞARISIZ"); process.exitCode = 1; }
 })();

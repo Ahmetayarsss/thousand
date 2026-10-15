@@ -16,12 +16,16 @@
  *   ayar {...}            ayar değişti        dev {a}        geliştirici işlemi
  *   hata {m, f, l}        yakalanmamış JS hatası (f: kayit = ilerleme telefona yazılamadı, k: anahtar)
  *   guncelleme {a, v}     güncelleme olayı (a: geri = v sürümü açılamadı, gömülü sürüme dönüldü)
+ * Yazma toplu ve ertelenmiş: olay önce bellekte birikir, telefona en geç BEKLE ms sonra tek seferde
+ * yazılır; sayfa kapanırken/arka plana geçerken hemen yazılır (eskiden her olayda 5000 olay baştan
+ * yazılıyordu). Uygulama aniden çökerse en çok son BEKLE ms'nin olayları kaybolur.
  * En fazla MAX olay tutulur (eskiler silinir). Her olayın bir sıra numarası var: sira() şimdiye
  * dek eklenen olay sayısı (silinenler dahil), son olayın numarası budur; sunucuya hangi olayların
  * gittiği bununla izlenir. Kimlik: rastgele, anonim (cihaz kimliği).
  */
 (typeof window !== "undefined" ? window : globalThis).OXLOG = (function () {
-  var KEY = "ox3000_log_v1", UIDK = "ox3000_uid", SEQK = "ox3000_log_sira", MAX = 5000, buf = null, seq = -1;
+  var KEY = "ox3000_log_v1", UIDK = "ox3000_uid", SEQK = "ox3000_log_sira", MAX = 5000, BEKLE = 1000;
+  var buf = null, seq = -1, kirli = false, zaman = null;
 
   function load() {
     if (buf) return buf;
@@ -50,20 +54,32 @@
       if (data != null) e.push(data);
       b.push(e); seq = s;
       if (b.length > MAX) b.splice(0, b.length - MAX);
-      localStorage.setItem(KEY, JSON.stringify(b));
-      localStorage.setItem(SEQK, String(s));
+      kirli = true;
+      if (!zaman) zaman = setTimeout(yaz, BEKLE);
+    } catch (e) {}
+  }
+  // Biriken olayları telefona yaz. Kayıt en önemsiz veri: yazılamazsa (hafıza dolu) sessizce geçilir,
+  // ilerleme yazımı ayrıca korunur (srs.js yaz → yerAc).
+  function yaz() {
+    if (zaman) { clearTimeout(zaman); zaman = null; }
+    if (!kirli) return;
+    kirli = false;
+    try {
+      localStorage.setItem(KEY, JSON.stringify(load()));
+      localStorage.setItem(SEQK, String(seq));
     } catch (e) {}
   }
   function count() { return load().length; }
   function events() { return load(); }   // salt okunur (hesap.js sunucuya gönderirken)
-  function size() { try { return (localStorage.getItem(KEY) || "").length; } catch (e) { return 0; } }
-  function clear() { buf = []; try { localStorage.removeItem(KEY); } catch (e) {} }
+  function size() { yaz(); try { return (localStorage.getItem(KEY) || "").length; } catch (e) { return 0; } }
+  function clear() { buf = []; kirli = false; try { localStorage.removeItem(KEY); } catch (e) {} }
   // Telefon hafızası dolunca (srs.js ilerlemeyi yazamayınca) yer açar: en eski yarıyı siler.
   // Kayıt en önemsiz veri; ilerleme ondan önce gelir. Silinen bir şey olduysa true.
   function yerAc() {
     var b = load();
     if (b.length < 2) { if (!b.length) return false; clear(); return true; }
     b.splice(0, Math.ceil(b.length / 2));
+    kirli = false;
     try { localStorage.setItem(KEY, JSON.stringify(b)); } catch (e) { clear(); }
     return true;
   }
@@ -123,7 +139,11 @@
   try {
     if (typeof window !== "undefined" && window.addEventListener) {
       // Geri tuşuyla önbellekten dönen sayfa eski kopyayı yazmasın (arada başka sayfalar olay ekledi).
-      window.addEventListener("pageshow", function (e) { if (e.persisted) { buf = null; seq = -1; } });
+      window.addEventListener("pageshow", function (e) { if (e.persisted) { buf = null; seq = -1; kirli = false; } });
+      // Sayfadan çıkarken / uygulama arka plana geçerken bekleyenleri hemen yaz (sonraki sayfa okusun).
+      window.addEventListener("pagehide", yaz);
+      if (typeof document !== "undefined" && document.addEventListener)
+        document.addEventListener("visibilitychange", function () { if (document.hidden) yaz(); });
       add("sayfa", { p: (location.pathname.split("/").pop() || "index.html").replace(".html", "") });
       window.addEventListener("error", function (e) {
         add("hata", { m: String(e.message || "").slice(0, 200), f: String(e.filename || "").split("/").pop(), l: e.lineno || 0 });
@@ -135,5 +155,5 @@
   } catch (e) {}
 
   return { add: add, count: count, size: size, clear: clear, yerAc: yerAc, snapshot: snapshot, exportFile: exportFile, copy: copy, uid: uid,
-           sira: sira, events: events };
+           sira: sira, events: events, yaz: yaz };
 })();

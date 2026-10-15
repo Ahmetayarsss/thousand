@@ -33,6 +33,7 @@ Düzeltme planı `PLAN.md`'de; ilk işaretlenmemiş adımdan devam edilir.
 TZ=Europe/Istanbul node tests/srs.test.js
 node tests/updater.test.js
 node tests/hesap.test.js
+node tests/log.test.js
 python3 scripts/validate.py
 python3 scripts/build_all.py
 python3 scripts/bekci.py

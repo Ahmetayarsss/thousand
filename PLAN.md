@@ -47,7 +47,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Aşama 5 — Öğrenme (pedagoji)
 
-- [ ] 12. Varsayılan yeni kelime sayısı 100 → 20 (ayarı elle değiştirmiş kullanıcıya dokunulmaz).
+- [x] 12. Varsayılan yeni kelime sayısı 100 → 20 (ayarı elle değiştirmiş kullanıcıya dokunulmaz;
+      yarım kalan tur kendi sayısıyla biter, sonraki tur 20'lik kurulur).
 - [ ] 13. Yazılı cevap: tek harf hatası "neredeyse doğru" (doğru sayılır, doğrusu gösterilir)
       + yanlış sayılan cevapta "doğru saydır" düğmesi.
 - [ ] 14. Okunuş tutarlılığı: uygulama US sesi çalıyor, bazı okunuşlar UK (`proper → PRO-pır`).

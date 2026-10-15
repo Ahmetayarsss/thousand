@@ -7,12 +7,12 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 .wrap{max-width:640px;margin:0 auto;padding:0 14px 60px}
-header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 14px;margin:0 -14px 12px}
+header{position:sticky;top:0;z-index:20;background:var(--hdr);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 14px;margin:0 -14px 12px}
 .toprow{display:flex;align-items:center;gap:10px}
-.back{flex:0 0 auto;border:0;background:var(--ink);color:#fff;font-size:15px;font-weight:800;width:38px;height:38px;border-radius:10px;cursor:pointer;text-decoration:none;display:grid;place-items:center}
+.back{flex:0 0 auto;border:0;background:var(--solid);color:var(--on-solid);font-size:15px;font-weight:800;width:38px;height:38px;border-radius:10px;cursor:pointer;text-decoration:none;display:grid;place-items:center}
 .title{font-size:17px;font-weight:800;letter-spacing:-.02em}
 .title small{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:1px}
-.search{width:100%;margin-top:10px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;font-size:15px}
+.search{width:100%;margin-top:10px;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px}
 .hint{color:var(--muted);text-align:center;font-size:13.5px;margin-top:40px;line-height:1.6}
 .hint .big{font-size:34px;display:block;margin-bottom:8px}
 .count{color:var(--muted);font-size:12px;margin:2px 2px 8px}
@@ -27,12 +27,12 @@ header{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.95);backdro
 .spk.playing{box-shadow:0 0 0 3px rgba(229,137,43,.35)}
 .ok{color:var(--ok);font-weight:700;font-size:14px;margin-top:7px}
 .tr{color:var(--tr);font-size:15px;margin-top:4px}
-.en{color:#33414F;font-size:13.5px;margin-top:4px}
-.ex{color:#5B6B7B;font-size:13.5px;font-style:italic;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.en{color:var(--en);font-size:13.5px;margin-top:4px}
+.ex{color:var(--ex);font-size:13.5px;font-style:italic;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
 </style><script src="log.js"></script><script src="hesap.js"></script></head><body><div class="wrap">
 <header>
   <div class="title">Sözlük</div>
-  <input class="search" id="q" placeholder="" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <input class="search" id="q" placeholder="" aria-label="Sözlükte ara (İngilizce ya da Türkçe)" autocomplete="off" autocapitalize="off" spellcheck="false">
 </header>
 <div id="hint" class="hint"><span class="big">📖</span></div>
 <div id="list"></div>

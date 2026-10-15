@@ -296,4 +296,44 @@ t("yazılı: başka kelimenin karşılığı ve yazım hatası kabul edilmez", (
   assert.ok(!C("winter", "en2tr", ["kışş"]).ok);
 });
 
+// ---- Hafıza dolu (kota): ilerleme sessizce kaybolmamalı ----
+// Sahte kota: toplam boyut sınırı aşılırsa setItem QuotaExceededError fırlatır.
+function kotaliDepo(sinir) {
+  const asil = global.localStorage.setItem;
+  global.localStorage.setItem = (k, v) => {
+    const top = Object.keys(mem).reduce((t, x) => t + (x === k ? 0 : mem[x].length), 0) + String(v).length;
+    if (top > sinir) { const e = new Error("dolu"); e.name = "QuotaExceededError"; throw e; }
+    mem[k] = String(v);
+  };
+  return () => { global.localStorage.setItem = asil; delete globalThis.OXLOG; };
+}
+
+t("hafıza dolu, kullanım kaydı var → kayıt kısaltılır, cevap yine kaydedilir", () => {
+  const buyukKayit = "x".repeat(4000);
+  mem["ox3000_log_v1"] = buyukKayit;
+  let acildi = 0;
+  globalThis.OXLOG = { add() {}, yerAc() { acildi++; mem["ox3000_log_v1"] = "[]"; return true; } };
+  const dolu = Object.keys(mem).reduce((t, x) => t + mem[x].length, 0);
+  const geri = kotaliDepo(dolu + 30);   // cevap kaydı ancak kullanım kaydı kısalınca sığar
+  try {
+    S.answer(k1, true, "en2tr", at(0));
+    S._reload();
+    assert.strictEqual(acildi, 1, "yer açılmalıydı");
+    assert.strictEqual(S.level(k1), 2, "cevap kaydedilmiş olmalı");
+    assert.strictEqual(S.sonKayitHatasi(), null);
+  } finally { geri(); delete mem["ox3000_log_v1"]; }
+});
+
+t("hafıza dolu, açılacak yer yok → hata kaydedilir ve görünür (sessiz değil)", () => {
+  const olaylar = [];
+  globalThis.OXLOG = { add(t, d) { olaylar.push([t, d]); }, yerAc() { return false; } };
+  const geri = kotaliDepo(10);
+  try {
+    const yazildi = S.yaz("ox3000_srs_v1", "{\"a\":1}");
+    assert.strictEqual(yazildi, false);
+    assert.ok(S.sonKayitHatasi(), "son hata tutulmalı");
+    assert.ok(olaylar.some(([t, d]) => t === "hata" && d.f === "kayit"), "kayda düşmeli");
+  } finally { geri(); }
+});
+
 console.log(`\n${n} test geçti`);

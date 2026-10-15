@@ -118,15 +118,22 @@ window.OXACC = (function () {
     log("hesap", { a: "kurtar", yedek: b ? 1 : 0 });
     return { ok: true, account: a, backup: b };
   }
+  // Yedeği telefona yazar. Dönen: {ok, eksik: [yazılamayan anahtarlar]}. Yazma SRS.yaz ile (hafıza
+  // dolunca kullanım kaydını kısaltıp tekrar dener); yine olmazsa eksik listesine girer ve kayda düşer.
   function restore(b) {
-    if (!b || !b.keys) return false;
+    if (!b || !b.keys) return { ok: false, eksik: [] };
+    var eksik = [];
     BKEYS.forEach(function (k) {
       try {
-        if (b.keys[k] == null) localStorage.removeItem(k);
-        else localStorage.setItem(k, JSON.stringify(b.keys[k]));
-      } catch (e) {}
+        if (b.keys[k] == null) { localStorage.removeItem(k); return; }
+        var metin = JSON.stringify(b.keys[k]);
+        var ok = window.SRS && SRS.yaz ? SRS.yaz(k, metin) : (localStorage.setItem(k, metin), true);
+        if (!ok) eksik.push(k);
+      } catch (e) { eksik.push(k); }
     });
-    return true;
+    if (window.SRS && SRS._reload) SRS._reload();
+    if (eksik.length) log("hesap_hata", { f: "geri_yukle", eksik: eksik.length });
+    return { ok: !eksik.length, eksik: eksik };
   }
   async function setNick(n) {
     var r = await rpc("set_nick", { p_nick: String(n || "").trim() });
@@ -656,9 +663,12 @@ window.OXACC = (function () {
       claim(c).then(function (r) {
         if (!r.ok) { go.disabled = false; go.textContent = "Hesabımı getir"; er.textContent = "Bu kurtarma koduyla bir hesap bulunamadı."; return; }
         var hasLocal = window.SRS && Object.keys(SRS.records()).length > 0;
-        if (r.backup && (!hasLocal || confirm("Yedekteki ilerleme bu telefondakinin yerine yüklensin mi?"))) restore(r.backup);
+        var yuklendi = null;
+        if (r.backup && (!hasLocal || confirm(karsilastirma(r.backup)))) yuklendi = restore(r.backup);
         el('<h2>Tekrar hoş geldin, ' + esc(r.account.nick) + '!</h2><p>' +
-          (r.backup ? "Hesabın, arkadaşların ve ilerlemen geri geldi." : "Hesabın ve arkadaşların geri geldi.") +
+          (yuklendi && !yuklendi.ok ? "Hesabın geri geldi ama <b>ilerlemenin bir kısmı bu telefona yazılamadı</b> " +
+             "(hafıza dolu olabilir). Biraz yer açıp Ayarlar'dan kurtarma koduyla tekrar dene; yedeğin sunucuda duruyor." :
+           yuklendi ? "Hesabın, arkadaşların ve ilerlemen geri geldi." : "Hesabın ve arkadaşların geri geldi.") +
           '</p><button id="oxok">Devam</button>').querySelector("#oxok").onclick = function () {
           close();
           if (r.backup) { try { sessionStorage.setItem("oxbil_izin", "1"); } catch (e) {} location.reload(); }   // izin yenilenen sayfada sorulur
@@ -669,6 +679,22 @@ window.OXACC = (function () {
     go.onclick = submit;
     inp.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
     b.querySelector("#oxback").onclick = function () { stepNick(done); };
+  }
+  // Telefonda da ilerleme varken yedeği yüklemeden önce sorulan soru: ikisini sayılarla gösterir ki
+  // kullanıcı körlemesine seçmesin (yükleme telefondakini tamamen değiştirir).
+  function ilerlemeOzeti(kayitlar) {
+    var n = 0, son = 0;
+    for (var k in (kayitlar || {})) { n++; var a = kayitlar[k] && kayitlar[k].a; if (a > son) son = a; }
+    var gun = son && window.SRS ? SRS.today() - son : null;
+    return n + " kelime" + (gun == null ? "" : gun <= 0 ? ", en son bugün çalışıldı" : ", en son " + gun + " gün önce çalışıldı");
+  }
+  function karsilastirma(b) {
+    var y = ilerlemeOzeti(b.keys && b.keys["ox3000_srs_v1"]), t = ilerlemeOzeti(SRS.records());
+    var tarih = b.t ? new Date(b.t).toLocaleDateString("tr-TR") : "?";
+    return "Bu telefonda da ilerleme var. Hangisi kalsın?\n\n" +
+      "• Yedek (" + tarih + "): " + y + "\n" +
+      "• Bu telefon: " + t + "\n\n" +
+      "Tamam = yedeği yükle (bu telefondaki silinir)\nİptal = bu telefondakini koru";
   }
   function askRecover(done) { stepRecover(done); }
 
@@ -691,7 +717,7 @@ window.OXACC = (function () {
     account: account, onboard: onboard, askRecover: askRecover, close: close,
     create: create, claim: claim, restore: restore, setNick: setNick, newRecovery: newRecovery, deleteAccount: deleteAccount,
     stats: stats, todayStr: todayStr, pushStats: pushStats, pushBackup: pushBackup, syncSoon: syncSoon,
-    yedekDogrula: yedekDogrula, yenidenKurulmali: yenidenKurulmali,
+    yedekDogrula: yedekDogrula, yenidenKurulmali: yenidenKurulmali, karsilastirma: karsilastirma,
     pushLogs: pushLogs, logDurum: logDurum,
     bildirimKur: bildirimKur, bildirimDurum: bildirimDurum, bildirimAyarla: bildirimAyarla, bildirimIzinIste: bildirimIzinIste,
     bildirimAyar: bilAyar, hatirlatmaPlani: hatirlatmaPlani, hatirlatmaPlanla: hatirlatmaPlanla, durt: durt,

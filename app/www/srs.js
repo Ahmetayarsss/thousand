@@ -35,8 +35,37 @@
   var LMIN = 5, LMAX = 300, LDEF = 100;
   var CAT = [], IDX = {}, st = null;
 
+  var G = typeof window !== "undefined" ? window : globalThis;
   function getJ(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
-  function setJ(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function setJ(k, v) { return yaz(k, JSON.stringify(v)); }
+
+  // Kalıcı yazma. Olmazsa (çoğunlukla telefon hafızası/kotası dolu) önce kullanım kaydını kısaltıp
+  // (OXLOG.yerAc) yer açar ve tekrar dener; yine olmazsa kullanıcıya görünür uyarı verir ve kayda
+  // yazar. İlerleme yazmaları sessizce kaybolmaz. Dönen: yazıldı mı.
+  var sonHata = null, uyarildi = false;
+  function yaz(k, metin) {
+    try { localStorage.setItem(k, metin); return true; } catch (e) { sonHata = e; }
+    try {
+      if (G.OXLOG && typeof G.OXLOG.yerAc === "function" && G.OXLOG.yerAc()) {
+        localStorage.setItem(k, metin); sonHata = null; return true;
+      }
+    } catch (e) { sonHata = e; }
+    kayitHatasi(k, sonHata);
+    return false;
+  }
+  function kayitHatasi(k, e) {
+    try { if (G.OXLOG) G.OXLOG.add("hata", { f: "kayit", k: k, m: String((e && (e.name || e.message)) || e).slice(0, 80) }); } catch (x) {}
+    if (uyarildi || typeof document === "undefined" || !document.body) return;
+    uyarildi = true;
+    try {
+      var d = document.createElement("div");
+      d.setAttribute("role", "alert");
+      d.textContent = "⚠️ İlerlemen kaydedilemedi — telefonun hafızası dolu olabilir. Biraz yer açıp uygulamayı yeniden aç. (Kapatmak için dokun)";
+      d.style.cssText = "position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#B03A2E;color:#fff;font:600 13px/1.4 system-ui;padding:12px 14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.3)";
+      d.onclick = function () { d.remove(); };
+      document.body.appendChild(d);
+    } catch (x) {}
+  }
   function shuffle(a) {
     for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = a[i]; a[i] = a[j]; a[j] = x; }
     return a;
@@ -70,7 +99,7 @@
     if (!st || typeof st !== "object") st = {};
     return st;
   }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function save() { return yaz(KEY, JSON.stringify(st)); }
 
   function today(now) {
     var d = new Date(now == null ? nowMs() : now);
@@ -248,6 +277,7 @@
     level: level, isNew: isNew, isDue: isDue, dirOf: dirOf, answer: answer,
     dueList: dueList, newList: newList, examQueue: examQueue,
     inCycle: inCycle, topLevel: topLevel, groupCounts: groupCounts, totals: totals,
-    nextDue: nextDue, reset: reset, _reload: _reload
+    nextDue: nextDue, reset: reset, _reload: _reload,
+    sonKayitHatasi: function () { return sonHata; }, yaz: yaz
   };
 })();

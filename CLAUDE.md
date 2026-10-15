@@ -6,8 +6,9 @@ uymayan değişiklik CI'da (`.github/workflows/kontrol.yml`) kırmızı yanar.
 
 ## Proje
 
-Oxford 3000 kelime listesi (A1–B2) için Türkçe konuşanlara İngilizce kelime çalışma
-uygulaması: Android (Capacitor + WebView). Hesap, arkadaşlar,
+**Thousand**: Türkçe konuşanlara İngilizce kelime çalışma uygulaması, Android (Capacitor + WebView),
+paket `io.github.ahmetayarsss.thousand`. İçerik Oxford 3000 kelime listesine dayanır ama uygulamanın
+adında, başlıklarında ve kimliğinde "Oxford" kullanılmaz (marka; kullanıcı kararı, Ekim 2026). Hesap, arkadaşlar,
 yedek ve kullanım kayıtları Supabase'de (`supabase/kurulum.sql`). Kullanıcı Türkçe konuşur;
 kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 

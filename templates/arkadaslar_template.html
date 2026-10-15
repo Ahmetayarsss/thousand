@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="tr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Oxford 3000 · Arkadaşlar</title>
+<title>Thousand · Arkadaşlar</title>
 <script src="log.js"></script><script src="srs.js"></script><script src="hesap.js"></script>
 <style>
 :root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--red:#D9544D;--amber:#E5892B}
@@ -181,7 +181,7 @@ async function copyCode(){const c=$('mycode').textContent;
   try{await navigator.clipboard.writeText(c);toast('Kod kopyalandı: '+c);}
   catch(e){const t=document.createElement('textarea');t.value=c;document.body.appendChild(t);t.select();try{document.execCommand('copy');toast('Kod kopyalandı: '+c);}catch(_){toast(c);}t.remove();}}
 $('copy').onclick=copyCode;
-$('share').onclick=async()=>{const c=$('mycode').textContent,txt='Oxford 3000\'de arkadaşım ol! Kodum: '+c;
+$('share').onclick=async()=>{const c=$('mycode').textContent,txt='Thousand\'da arkadaşım ol! Kodum: '+c;
   if(navigator.share){try{await navigator.share({text:txt});return;}catch(e){}}
   try{await navigator.clipboard.writeText(txt);toast('Davet metni kopyalandı, istediğin yere yapıştır.');}catch(e){copyCode();}};
 $('mk').onclick=()=>OXACC.onboard(true,()=>refresh());

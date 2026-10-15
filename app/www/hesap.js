@@ -215,10 +215,11 @@ window.OXACC = (function () {
     return { ok: ok, kelime: kelime };
   }
 
-  // Bu telefondaki APK eski imza anahtarıyla mı (anahtar repoda açıktı)? Yeni anahtarla derlenen APK'nın
-  // gömülü güncelleyicisi açılışta ox_apk_imza'yı yazar (templates/updater.js); eski APK'larda yoktur.
-  // Eskiyse uygulama bir kez silinip yeni APK kurulmalı (önce yedek doğrulanır). Tarayıcıda hep false.
-  var APK_IMZA = "2";
+  // Bu telefondaki uygulama eski mi? Güncel APK'nın (yeni ad "Thousand", paket io.github.ahmetayarsss.thousand,
+  // yeni imza) gömülü güncelleyicisi açılışta ox_apk_imza = "3" yazar (templates/updater.js). Eski uygulamalarda
+  // yok ya da "2" (eski paket): kullanıcı yeni uygulamayı yanına kurup ilerlemesini kurtarma koduyla taşımalı.
+  // localStorage uygulamaya özel olduğu için yeni uygulama eskisinin işaretini görmez. Tarayıcıda hep false.
+  var APK_IMZA = "3";
   function yenidenKurulmali() {
     var Cap = window.Capacitor;
     if (!(Cap && Cap.isNativePlatform && Cap.isNativePlatform())) return false;
@@ -481,7 +482,7 @@ window.OXACC = (function () {
     try { var p = await B.permission(); izin = p && p.display; } catch (e) {}
     var adim = [{ id: "izin", t: "Bildirim izni", s: "Bildirim gösterebilmesi için.", ok: izin === "granted", btn: "İzin ver" }];
     if ((c.sdk || 0) >= 23) adim.push({ id: "pil", t: "Arka planda çalışma", s: "Uygulama kapalıyken de hatırlatabilmesi için.", ok: !!c.pil, btn: "İzin ver" });
-    if (c.otobas) adim.push({ id: "otobas", t: "Otomatik başlatma", s: "Açılan listede Oxford 3000'i aç.", ok: !!k.otobas, btn: "Aç" });
+    if (c.otobas) adim.push({ id: "otobas", t: "Otomatik başlatma", s: "Açılan listede Thousand'ı aç.", ok: !!k.otobas, btn: "Aç" });
     return { adim: adim, tamam: adim.every(function (a) { return a.ok; }), marka: c.marka || "" };
   }
   async function kurulumAdim(id) {

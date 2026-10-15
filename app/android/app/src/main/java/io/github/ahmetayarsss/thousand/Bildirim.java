@@ -1,4 +1,4 @@
-package com.oxford3000.study;
+package io.github.ahmetayarsss.thousand;
 
 import android.Manifest;
 import android.app.Activity;

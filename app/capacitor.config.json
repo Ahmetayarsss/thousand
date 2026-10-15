@@ -1,6 +1,6 @@
 {
-  "appId": "com.oxford3000.study",
-  "appName": "3000",
+  "appId": "io.github.ahmetayarsss.thousand",
+  "appName": "Thousand",
   "webDir": "www",
   "android": {
     "allowMixedContent": false

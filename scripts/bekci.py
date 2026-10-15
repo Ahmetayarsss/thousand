@@ -13,6 +13,8 @@ Kurallar (her ihlal "kural: dosya — açıklama" olarak yazılır):
   olu-dosya       app/www'da hiçbir sayfanın yüklemediği .js dosyası
   belge-kaymasi   README'lerde adı geçen ama repoda olmayan dosya
   buyuk-dosya     1,5 MB'tan büyük dosya (repo şişmesi)
+  marka-adi       uygulamaya giren dosyalarda "Oxford 3000" / "oxford3000" geçiyor (ad "Thousand";
+                  "Oxford" başkasının markası — kullanıcı kararı, Ekim 2026)
   paket-repoda    güncelleme paketi (web.json, web-version.txt, app/www/updater.js) repoya girmiş;
                   paketi yalnız CI üretip release'e koyar, güncelleyici yalnız oradan indirir
 
@@ -139,6 +141,16 @@ def denetle():
     for d in dosyalar:
         if (ROOT / d).stat().st_size > BUYUK_SINIR:
             ihlaller.append(("buyuk-dosya", d, f"{(ROOT / d).stat().st_size // 1024} KB"))
+
+    # marka-adi: uygulamaya giren dosyalarda (sayfalar, JS, native kod/kaynak, yapılandırma) "Oxford" olmaz
+    for d in dosyalar:
+        uygulamada = (d.startswith("templates/") or d.startswith("app/www/") or d.startswith("app/android/app/src/main/")
+                      or d in ("app/capacitor.config.json", "app/package.json", "app/android/app/build.gradle"))
+        t = metin.get(d)
+        # Marka kullanımı: "Oxford 3000", "OXFORD 3000", "oxford3000", "com.oxford3000"… Örnek cümledeki
+        # şehir/üniversite adı ("a graduate of Oxford") marka kullanımı değil, sayılmaz.
+        if uygulamada and t and not d.endswith("three.min.js") and re.search(r"oxford\s*-?\s*3000", t, re.I):
+            ihlaller.append(("marka-adi", d, "'Oxford 3000' geçiyor (uygulamanın adı Thousand)"))
 
     # paket-repoda
     for d in PAKET_DOSYALARI:

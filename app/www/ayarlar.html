@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="tr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Oxford 3000 · Ayarlar</title>
+<title>Thousand · Ayarlar</title>
 <script src="log.js"></script><script src="srs.js"></script><script src="hesap.js"></script>
 <style>
 :root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--muted:#7A8699;--line:#E6EAF1;--accent:#3B6EA5;--green:#2E9E5B;--red:#D9544D;--dev:#8E44AD}
@@ -55,19 +55,21 @@ h1{font-size:20px;font-weight:800;margin:6px 0 14px;-webkit-user-select:none;use
 <div class="wrap">
   <h1 id="title">Ayarlar</h1>
 
-  <!-- Yalnız eski imza anahtarlı APK'da (OXACC.yenidenKurulmali). Sıra önemli: yedek doğrulanmadan silme. -->
+  <!-- Yalnız eski uygulamada (eski paket kimliği; OXACC.yenidenKurulmali). Yeni uygulama bunun YANINA kurulur;
+       eskisi ancak ilerleme yeniye geçtikten sonra silinir. Sıra önemli: yedek doğrulanmadan taşıma. -->
   <div class="card kur hidden" id="kurulum">
-    <h2>⚠️ Uygulamayı bir kez yeniden kur</h2>
-    <div class="note">Uygulamanın güvenlik mührü yenilendi. Bu telefondaki sürüm eski mühürlü, yenisi üstüne
-      kurulamıyor: bir kez silip yeniden kurman gerekiyor. İlerlemen kaybolmasın diye <b>sırayla</b> yap:</div>
+    <h2>⚠️ Uygulama yeni adıyla taşınıyor: Thousand</h2>
+    <div class="note">Uygulamanın adı ve kimliği değişti. Yeni uygulama bunun <b>yanına ayrı</b> kurulur;
+      ilerlemeni kurtarma koduyla oraya taşırsın. Bu uygulamayı en sona kadar silme. <b>Sırayla</b> yap:</div>
     <ol class="adim">
       <li><b>Yedeğini al.</b> <span id="k-durum"></span><br>
         <button class="btn" id="k-hesap">Önce hesap aç</button><button class="btn" id="k-yedek">Yedeği al ve doğrula</button></li>
       <li><b>Kurtarma kodunu bir yere yaz</b> (ya da ekran görüntüsü al):
         <div class="v rec" id="k-rec">— önce 1. adım</div></li>
-      <li><b>Yeni uygulamayı indir:</b> <a href="https://github.com/Ahmetayarsss/thousand/releases/tag/apk-latest">Oxford3000.apk</a></li>
-      <li><b>Bu uygulamayı sil</b> (simgesine basılı tut → Kaldır), sonra indirdiğin dosyayı aç → Yükle.</li>
-      <li><b>Yeni uygulamayı açınca</b> "Hesabım var → kurtarma kodu gir" de ve kodunu yaz. İlerlemen geri gelir.</li>
+      <li><b>Yeni uygulamayı indir ve kur:</b> <a href="https://github.com/Ahmetayarsss/thousand/releases/tag/apk-latest">Thousand.apk</a>
+        → indirdiğin dosyayı aç → Yükle. (Bu uygulama silinmez, yanına kurulur.)</li>
+      <li><b>Thousand'ı aç</b> → "Hesabım var → kurtarma kodu gir" → kodunu yaz. İlerlemenin geldiğini gör.</li>
+      <li><b>Ancak ondan sonra</b> bu eski uygulamayı sil (simgesine basılı tut → Kaldır).</li>
     </ol>
   </div>
 

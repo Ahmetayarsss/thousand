@@ -1,7 +1,8 @@
-# Oxford 3000 — Türkçe Çalışma Araçları
+# Thousand — İngilizce kelime çalışma uygulaması
 
-Oxford 3000 kelime listesi (A1–B2) üzerinden, Türkçe konuşanlar için İngilizce
-kelime çalışma uygulaması (Android, `app/`).
+Türkçe konuşanlar için İngilizce kelime çalışma uygulaması (Android, `app/`). İçerik, Oxford 3000
+kelime listesinin (A1–B2) kelimeleri üzerine kurulu; uygulamanın adı ve kimliği Oxford'la ilişkili
+değildir (Ekim 2026'da "Oxford 3000"den "Thousand"a değiştirildi).
 
 Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 

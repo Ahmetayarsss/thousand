@@ -1,4 +1,4 @@
--- Oxford 3000 · Arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirimler — Supabase SQL Editor'de çalıştırın.
+-- Thousand · Arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirimler — Supabase SQL Editor'de çalıştırın.
 -- Tekrar çalıştırmak güvenli: tablolar ve veriler korunur, fonksiyonlar güncellenir. Dosya değişince
 -- (yeni sürüm) tamamını yeniden çalıştırın.
 -- Tablolara doğrudan erişim kapalı (RLS açık, politika yok); uygulama yalnız aşağıdaki fonksiyonları çağırır.

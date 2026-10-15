@@ -174,13 +174,13 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: oxford3000-apk
+          name: thousand-apk
           path: app/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
       - name: APK'yı sabit adlandır
         if: github.event_name != 'pull_request'
-        run: cp app/android/app/build/outputs/apk/release/app-release.apk Oxford3000.apk
+        run: cp app/android/app/build/outputs/apk/release/app-release.apk Thousand.apk
 
       # APK gerçekten yeni anahtarla mı imzalandı? (Yanlış imzalı APK yayınlanmasın.)
       - name: İmzayı doğrula
@@ -190,13 +190,13 @@ jobs:
         run: |
           beklenen=$(keytool -list -storetype PKCS12 -keystore "$IMZA_DOSYASI" -storepass "$IMZA_PAROLA" -alias oxford | grep -o 'SHA-256): .*' | cut -d' ' -f2)
           apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -n 1)
-          gercek=$("$apksigner" verify --print-certs Oxford3000.apk | grep -m1 'SHA-256 digest' | awk '{print $NF}')
+          gercek=$("$apksigner" verify --print-certs Thousand.apk | grep -m1 'SHA-256 digest' | awk '{print $NF}')
           echo "beklenen: $beklenen"; echo "APK:      $gercek"
           [ "$(echo "$beklenen" | tr -d ':' | tr 'A-F' 'a-f')" = "$gercek" ] || { echo "::error::APK yanlış anahtarla imzalı"; exit 1; }
           # Hata ayıklanabilir APK yayınlanmasın; sürüm numarası da yazılsın.
           aapt=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n 1)
-          "$aapt" dump badging Oxford3000.apk | grep -E "^package:" 
-          if "$aapt" dump badging Oxford3000.apk | grep -q "application-debuggable"; then
+          "$aapt" dump badging Thousand.apk | grep -E "^package:" 
+          if "$aapt" dump badging Thousand.apk | grep -q "application-debuggable"; then
             echo "::error::APK hata ayıklanabilir (debuggable) derlenmiş"; exit 1
           fi
 
@@ -205,12 +205,12 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-latest
-          name: "Oxford 3000 — son APK"
+          name: "Thousand — son APK"
           prerelease: true
           # web.json + web-version.txt: uygulama içi güncelleme paketi (APK'yı tekrar
           # kurmadan arayüzü günceller). Yukarıda build_all.py üretti; repoda tutulmaz.
           files: |
-            Oxford3000.apk
+            Thousand.apk
             web.json
             web-version.txt
           body: |

@@ -73,7 +73,7 @@
   function snapshot() {
     function j(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
     return {
-      uygulama: "oxford3000", kimlik: uid(), surum: window.OX_WEBVER || null,
+      uygulama: "thousand", kimlik: uid(), surum: window.OX_WEBVER || null,
       zaman: Date.now(), cihaz: navigator.userAgent,
       ayar: j("ox3000_settings_v1", {}), gelistirici: j("ox3000_dev_v1", {}),
       kelimeler: j("ox3000_srs_v1", {}), gunluk: j("ox3000_daily_v1", {}),
@@ -83,9 +83,9 @@
   }
   function fileName() {
     var d = new Date(), p = function (n) { return ("0" + n).slice(-2); };
-    return "oxford3000_kayit_" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + ".json";
+    return "thousand_kayit_" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + ".json";
   }
-  // Dosyaya kaydet. Telefonda: Belgeler/Oxford3000/ (olmazsa uygulamanın kendi klasörü).
+  // Dosyaya kaydet. Telefonda: Belgeler/Thousand/ (olmazsa uygulamanın kendi klasörü).
   // Tarayıcıda: indirme. Dönen: kaydedilen yer (metin) ya da null.
   async function exportFile() {
     var text = JSON.stringify(snapshot()), name = fileName();
@@ -94,8 +94,8 @@
       var Fs = (Cap.Plugins && Cap.Plugins.Filesystem) || (typeof Cap.registerPlugin === "function" && Cap.registerPlugin("Filesystem"));
       if (!Fs) return null;
       try {
-        await Fs.writeFile({ path: "Oxford3000/" + name, data: text, directory: "DOCUMENTS", encoding: "utf8", recursive: true });
-        return "Belgeler › Oxford3000 › " + name;
+        await Fs.writeFile({ path: "Thousand/" + name, data: text, directory: "DOCUMENTS", encoding: "utf8", recursive: true });
+        return "Belgeler › Thousand › " + name;
       } catch (e) {}
       try {
         var r = await Fs.writeFile({ path: name, data: text, directory: "EXTERNAL", encoding: "utf8", recursive: true });

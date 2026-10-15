@@ -1,4 +1,4 @@
-package com.oxford3000.study;
+package io.github.ahmetayarsss.thousand;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -65,14 +65,14 @@ import java.util.Map;
  */
 public class GroupTtsService extends Service {
 
-    public static final String ACTION_START = "com.oxford3000.study.TTS_START";
-    public static final String ACTION_STOP = "com.oxford3000.study.TTS_STOP";
-    public static final String ACTION_TOGGLE = "com.oxford3000.study.TTS_TOGGLE";
-    public static final String ACTION_NEXT = "com.oxford3000.study.TTS_NEXT";
-    public static final String ACTION_PREV = "com.oxford3000.study.TTS_PREV";
+    public static final String ACTION_START = "io.github.ahmetayarsss.thousand.TTS_START";
+    public static final String ACTION_STOP = "io.github.ahmetayarsss.thousand.TTS_STOP";
+    public static final String ACTION_TOGGLE = "io.github.ahmetayarsss.thousand.TTS_TOGGLE";
+    public static final String ACTION_NEXT = "io.github.ahmetayarsss.thousand.TTS_NEXT";
+    public static final String ACTION_PREV = "io.github.ahmetayarsss.thousand.TTS_PREV";
     public static final String EXTRA_FROM_TTS = "fromTts";
     private static final String CUSTOM_CLOSE = "kapat";
-    private static final String CHANNEL = "oxford_tts";
+    private static final String CHANNEL = "thousand_tts";
     private static final int NOTIF_ID = 4201;
     private static final int CLICK_WINDOW_MS = 450;   // kulaklık çoklu basış penceresi
     private static final int TR_PAUSE_MS = 450;       // İngilizce → Türkçe arası
@@ -402,7 +402,7 @@ public class GroupTtsService extends Service {
     private void ensureSession() {
         if (session != null) return;
         try {
-            session = new MediaSessionCompat(this, "OxfordTts");
+            session = new MediaSessionCompat(this, "ThousandTts");
             session.setCallback(sessionCallback);
             PendingIntent open = openPendingIntent();
             if (open != null) session.setSessionActivity(open);
@@ -522,7 +522,7 @@ public class GroupTtsService extends Service {
             s.setTextAlign(Paint.Align.CENTER);
             s.setTextSize(S * 0.075f);
             s.setLetterSpacing(0.18f);
-            c.drawText("OXFORD 3000", S / 2f, S * 0.86f, s);
+            c.drawText("THOUSAND", S / 2f, S * 0.86f, s);
             artCache.put(lv, b);
             return b;
         } catch (Exception e) {
@@ -639,7 +639,7 @@ public class GroupTtsService extends Service {
     private Notification buildNotification() {
         ensureChannel();
         int i = index, n = words.size();
-        String w = n > 0 ? get(words, i) : "Oxford 3000";
+        String w = n > 0 ? get(words, i) : "Thousand";
         androidx.media.app.NotificationCompat.MediaStyle style =
                 new androidx.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0, 1, 2);
         if (session != null) style.setMediaSession(session.getSessionToken());
@@ -673,7 +673,7 @@ public class GroupTtsService extends Service {
         ensureChannel();
         return new NotificationCompat.Builder(this, CHANNEL)
                 .setSmallIcon(R.drawable.ic_stat_listen)
-                .setContentTitle("Oxford 3000")
+                .setContentTitle("Thousand")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .build();
     }
@@ -813,7 +813,7 @@ public class GroupTtsService extends Service {
         try {
             if (wakeLock == null) {
                 PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-                wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "oxford3000:tts");
+                wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "thousand:tts");
             }
             if (!wakeLock.isHeld()) wakeLock.acquire(3 * 60 * 60 * 1000L);
         } catch (Exception e) {}

@@ -1,4 +1,4 @@
-# Oxford 3000 — Android uygulaması (Capacitor)
+# Thousand — Android uygulaması (Capacitor)
 
 Kelime listesi, kartlar (test + sınav), sözlük, istatistik, ayarlar ve arkadaşlar
 sayfalarını tek bir Android uygulamasında toplar. İlerleme telefonda (`localStorage`)
@@ -43,7 +43,7 @@ app/
     tts-bridge.js      # native TTS köprüsü + bildirimden sayfa açma — elle yazılır
     three.min.js       # kart çevirme animasyonu
     audio/             # gömülü sesler
-  android/             # native proje; com/oxford3000/study/ altında:
+  android/             # native proje; io/github/ahmetayarsss/thousand/ altında:
                        #   GroupTts*  "Listeyi oku" servisi, Bildirim* / *Worker bildirimler,
                        #   Uygulama   geri tuşu, MainActivity eklenti kaydı
   capacitor.config.json
@@ -67,7 +67,7 @@ derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script 
 `.github/workflows/build-apk.yml` `main`'e her birleşmede veya Actions sekmesinden elle
 ("Run workflow") çalışır ve **yayın (release)** APK'sını derler: hata ayıklanamaz (USB ile
 bağlanan biri uygulamanın verisini okuyamaz), `versionCode` her derlemede artar (GitHub çalışma
-numarası). APK `apk-latest` release'inde **`Oxford3000.apk`** adıyla durur; telefona oradan
+numarası). APK `apk-latest` release'inde **`Thousand.apk`** adıyla durur; telefona oradan
 kurulur (Ayarlar > bilinmeyen kaynaklara izin).
 
 **Yedekleme:** `allowBackup` açık bırakıldı: Android'in Google yedeği uygulama verisini
@@ -89,6 +89,12 @@ cd android
 > `IMZA_PAROLA`) imzalar ve yayından önce APK'nın gerçekten o anahtarla imzalandığını doğrular;
 > ayarlar yoksa yayın yapılmaz. Anahtar repoda değil. Yerel derleme Android'in debug anahtarını
 > kullanır; o APK telefondakinin üstüne kurulamaz (yalnız deneme için).
+>
+> **Ad ve paket kimliği:** uygulama "Thousand", paket `io.github.ahmetayarsss.thousand` (Ekim 2026'ya
+> kadar "3000" / `com.oxford3000.study`). Paket değişince Android onu ayrı uygulama sayar: eski
+> uygulamada ana sayfada uyarı ve Ayarlar'da taşıma rehberi çıkar (yedek doğrula → kurtarma kodu →
+> yeni uygulamayı yanına kur → kodu gir → eskisini sil). İşaret: gömülü güncelleyicinin yazdığı
+> `ox_apk_imza = "3"`; eski uygulamalarda yok ya da `"2"`.
 >
 > Eski anahtar (repoda açıktı) Ekim 2026'da değiştirildi. Eski APK'lı telefonlarda ana sayfada
 > uyarı ve Ayarlar'da "Uygulamayı bir kez yeniden kur" kartı çıkar: yedek doğrulanır

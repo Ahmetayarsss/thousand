@@ -38,12 +38,11 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Aşama 4 — Gizlilik ve hukuk
 
-- [ ] 9. 🔸 Kullanım kayıtları: sunucuya gönderim için görünür açıklama + açma/kapama;
-      varsayılan açık mı kapalı mı? Kısa gizlilik metni.
-- [ ] 10. 🔸 Sözlük ses dosyaları (telif): uygulama dağıtılacak mı? Dağıtılacaksa
-      lisanslı ses ya da cihaz sesi.
-- [ ] 11. 🔸 "Oxford" adı ve `com.oxford3000` paket adı (marka): yalnız Play Store'a
-      çıkılacaksa gerekli; paket adı değişirse uygulama yeni uygulama sayılır.
+- [ ] 9. Kullanım kayıtları (kullanıcı kararı: bir kez sorulsun): hesap açılınca kısa açıklamayla
+      onay sorulur, evet derse gönderilir; Ayarlar'dan değiştirilebilir. Kısa gizlilik metni.
+- [x] 10. Sözlük ses dosyaları: kullanıcı kararıyla kalıyor (aşağıda "Bilerek bırakılanlar").
+- [x] 11. Ad "Thousand", paket `io.github.ahmetayarsss.thousand` (kullanıcı kararı; uygulama herkese
+      dağıtılacak). Eski uygulamada taşıma rehberi; bekçi `marka-adi` kuralı adın geri girmesini engeller.
 
 ## Aşama 5 — Öğrenme (pedagoji)
 
@@ -77,9 +76,16 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 - [ ] 28. 🔸 Arka plan kontrolü: 15 dk'da bir sunucuya sorma + pil optimizasyonu muafiyeti
       yerine ne? (Firebase bildirimleri ya da daha seyrek kontrol.)
-- [ ] 29. 🔸 `targetSdk` 35+ (Capacitor 7'ye geçiş) — yalnız Play Store için şart.
+- [ ] 29. `targetSdk` 35+ (Capacitor 7'ye geçiş) — Play Store şartı (kullanıcı: uygulama herkese dağıtılacak).
 
 ## Bilerek bırakılanlar (şimdilik)
+
+- Sözlük ses dosyaları (10): telif Sözlük'in; uygulama herkese dağıtılınca ihlal sayılır,
+  şikâyet gelirse Play Store uygulamayı kaldırabilir / hesaba uyarı gelebilir. Kullanıcı bu riski
+  bilerek sesleri tuttu (Ekim 2026). Çıkış yolu: cihaz sesi (TTS) ya da lisanslı ses.
+- İmza anahtarının iç adı (`keyAlias "oxford"`) ve sertifikadaki "CN=Oxford 3000": kullanıcıya
+  görünmez; değiştirmek yeni anahtar + yeni gizli ayar ister. Bekçinin marka kuralı yalnız
+  "Oxford 3000" biçimini yakalar, bu yüzden takılmaz.
 
 - Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele
   geçiren onu da kullanırdı — ek koruma çok az. Asıl koruma GitHub hesabında iki adımlı

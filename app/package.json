@@ -1,8 +1,8 @@
 {
-  "name": "oxford3000-app",
+  "name": "thousand-app",
   "version": "1.0.0",
   "private": true,
-  "description": "Oxford 3000 Türkçe çalışma uygulaması (Android)",
+  "description": "Thousand — Türkçe konuşanlar için İngilizce kelime çalışma uygulaması (Android)",
   "scripts": {
     "sync": "cap sync android"
   },

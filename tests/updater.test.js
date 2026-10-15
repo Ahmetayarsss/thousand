@@ -91,5 +91,14 @@ const uyg = (ls) => (ls.ox_webupd ? JSON.parse(ls.ox_webupd).ver : 0);
   r = await ac({ ls, remote: { "web-version.txt": "201", "web.json": pkt.replace("200", "201") } });
   bak("daha yeni sürüm çıkınca o denenir", uyg(ls) === 201 && r.replaced && !("ox_webupd_deneme" in ls), { r, ls });
 
+  // Uygulama kuşağı işareti: yalnız gömülü sayfa (APK'nın kendisi) yazar; indirilen paket yazmaz
+  // (yoksa eski uygulama, yeni paketi indirince kendini yeni sanıp taşıma rehberini gizlerdi).
+  ls = {};
+  await ac({ ls });
+  bak("gömülü sayfa uygulama işaretini yazar (ox_apk_imza=3)", ls.ox_apk_imza === "3", ls);
+  ls = {};
+  await ac({ ver: 200, href: PAKET + "index.html", ls });
+  bak("indirilen paketin sayfası işaret yazmaz", !("ox_apk_imza" in ls), ls);
+
   if (hata) { console.log(hata + " test BAŞARISIZ"); process.exitCode = 1; }
 })();

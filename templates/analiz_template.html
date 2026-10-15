@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thousand · İstatistikler</title>
-<script src="log.js"></script><script src="srs.js"></script>
+<script src="kelimeler.js"></script><script src="log.js"></script><script src="srs.js"></script>
 <style>
 :root{--bg:#F4F6F9;--card:#fff;--ink:#1B2430;--ink2:#52514e;--muted:#7A8699;--line:#E6EAF1;
 --grid:#e9ecf1;--axis:#c3c9d3;--s1:#2a78d6;--s2:#eb6834;--o1:#86b6ef;--o2:#3987e5;--o3:#1c5cab;--o4:#0d366b}
@@ -89,7 +89,7 @@ td.tr{color:var(--tr,#B03A2E)}
   </div>
 </div>
 <script>
-const SG=__GROUPS_JSON__;
+const SG=KELIMELER.map(g=>({no:g.no,level:g.level,ws:g.items.map(it=>it.w),tr:g.items.map(it=>it.tr)}));   // kelimeler.js'ten
 const CAT=SRS.catalogFromGroups(SG);SRS.setCatalog(CAT);
 // anahtar → {w, tr}: katalog, grupların kelimeleriyle aynı sırada.
 const WK={};{let i=0;SG.forEach(g=>g.ws.forEach((w,j)=>{WK[CAT[i++].k]={w:w,tr:(g.tr||[])[j]||''};}));}

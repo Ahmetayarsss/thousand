@@ -38,6 +38,7 @@ düşürür (en az 1. kutu; olgun kelime 2. kutuya iner). Günler yerel saatle g
 app/
   www/                 # uygulamanın web varlıkları (webDir)
     *.html             # sayfalar — build_all.py üretir, elle düzenlenmez
+    kelimeler.js       # 3000 kelimenin verisi (bütün sayfalar ortak) — build_all.py üretir
     updater.js         # uygulama içi güncelleme — build_all.py templates/'ten üretir
     srs.js             # tekrar sistemi — elle yazılır
     hesap.js           # hesap, arkadaşlar, yedek, bildirim ayarı (Supabase) — elle yazılır

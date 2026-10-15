@@ -131,7 +131,7 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:var(--field);c
 .btn.check{background:#B8902C} .btn.check.know{background:var(--green)} .btn.check.again{background:var(--red)}
 .btn:disabled{cursor:default}
 .finish{flex:0 0 auto;border:0;background:var(--solid);color:var(--on-solid);font-weight:800;font-size:12px;border-radius:8px;padding:6px 12px;cursor:pointer}
-</style><script src="log.js"></script><script src="srs.js"></script><script src="hesap.js"></script></head><body><div id="app">
+</style><script src="kelimeler.js"></script><script src="log.js"></script><script src="srs.js"></script><script src="hesap.js"></script></head><body><div id="app">
 <div class="top">
   <div class="moderow" id="moderow">
     <button data-m="test" class="on">Test</button>
@@ -174,7 +174,9 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:var(--field);c
 </div>
 </div>
 <script>
-const GROUPS=__GROUPS_JSON__;
+// Kart için gereken alanlar (kelimeler.js'ten); örnek cümlelerdeki <b> işareti kartta gösterilmez.
+const GROUPS=KELIMELER.map(g=>({no:g.no,level:g.level,lo:g.lo,hi:g.hi,
+  items:g.items.map(it=>({w:it.w,tr:it.tr,ok:it.ok||'',ex:(it.ex||[]).map(s=>s.replace(/<\/?b>/g,''))}))}));
 const SKEY="ox3000_sessions_v1";   // sınav oturumu kaydı (ilerleme sayfası için)
 // Kelime bazlı tekrar: tüm kelimeler sırasıyla katalog; her kelimeye anahtarı (_k) ve seviyesi (_lv).
 SRS.setCatalog(SRS.catalogFromGroups(GROUPS));

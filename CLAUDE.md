@@ -17,7 +17,7 @@ kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 - **Kaynak (elle düzenlenir):** `data/all_groups.json`, `scripts/enrich/*.py`, `templates/*.html`,
   `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js`,
   `supabase/kurulum.sql`, `app/android/**`.
-- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html` (repoda). Güncelleme paketi
+- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html` ve `app/www/kelimeler.js` (repoda). Güncelleme paketi
   (`app/www/updater.js`, `web.json`, `web-version.txt`) de üretilir ama repoya girmez.
 
 Üretim: `python3 scripts/build_all.py`. Şablonu ya da kaynak JS'i değiştirdikten sonra

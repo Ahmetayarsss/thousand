@@ -28,7 +28,7 @@ APP_HEAD = '<script src="updater.js"></script><script src="tts-bridge.js"></scri
 # Uygulama içi güncelleme paketine giren dosyalar (ses HARİÇ — ses APK'da gömülü).
 WEB_BUNDLE_FILES = [
     "index.html", "kartlar.html", "sozluk.html", "istatistik.html", "ayarlar.html", "analiz.html", "arkadaslar.html",
-    "tts-bridge.js", "srs.js", "log.js", "hesap.js", "updater.js", "three.min.js",
+    "tts-bridge.js", "srs.js", "log.js", "hesap.js", "updater.js", "three.min.js", "kelimeler.js",
 ]
 
 
@@ -209,18 +209,6 @@ def sort_items(groups):
 
 def render(groups):
     groups = sort_items(groups)
-    sesli_groups = groups
-    kart_groups = [
-        {
-            "no": g["no"], "level": g["level"], "lo": g["lo"], "hi": g["hi"],
-            "items": [
-                {"w": it["w"], "tr": it["tr"], "ok": it.get("ok", ""),
-                 "ex": [re.sub(r"</?b>", "", s) for s in it.get("ex", [])]}
-                for it in g["items"]
-            ],
-        }
-        for g in groups
-    ]
     # Uygulama sayfaları (app/www). Her sayfaya güncelleyici + TTS köprüsü + kaydırma eklenir.
     # Ses yolu MUTLAK ('/audio/...') olur: hem gömülü hem güncellenmiş (cihaz hafızasından
     # yüklenen) sayfalarda APK içindeki sese erişir.
@@ -237,26 +225,25 @@ def render(groups):
         path.write_text(html, encoding="utf-8")
         print(f"app/www/{out}: {len(html)} bayt")
 
-    def blob(data):
-        return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-
-    # İstatistik / ilerleme sayfaları (kelime listesi + Türkçe: no, level, ws, tr)
-    stats_data = [
-        {"no": g["no"], "level": g["level"], "ws": [it["w"] for it in g["items"]],
-         "tr": [it["tr"] for it in g["items"]]}
-        for g in groups
-    ]
+    # Kelime verisi tek dosyada (adım 24): window.KELIMELER. Eskiden her sayfaya ayrı gömülüyordu
+    # (liste, sözlük, kartlar, istatistik, analiz → aynı veri 5 kez). Sayfalar kendi ihtiyacı olan
+    # biçimi yüklenince türetir.
+    veri = json.dumps(groups, ensure_ascii=False, separators=(",", ":"))
+    (ROOT / "app/www/kelimeler.js").write_text(
+        "// Üretilen dosya (scripts/build_all.py) — elle düzenleme; kaynak data/all_groups.json.\n"
+        "window.KELIMELER=" + veri + ";\n", encoding="utf-8")
+    print(f"app/www/kelimeler.js: {len(veri)} bayt")
     nav = (("__SOZLUK__", "sozluk.html"),)
     # Liste (açılış): sola kartlar, sağa sözlük.
     page("sesli_template.html", "index.html", ("kartlar.html", "sozluk.html"),
-         (("__GROUPS_JSON__", blob(sesli_groups)),) + nav)
+         nav)
     # Kartlar: sola istatistik, sağa liste.
     page("kartlar_template.html", "kartlar.html", ("istatistik.html", "index.html"),
-         (("__GROUPS_JSON__", blob(kart_groups)),) + nav, head='<script src="three.min.js"></script>')
+         nav, head='<script src="three.min.js"></script>')
     # Sözlük (tüm 3000 kelime; aranınca o kelimenin kartı): sola liste, aşağı çek → ayarlar,
     # yukarı it → arkadaşlar.
     page("sozluk_template.html", "sozluk.html", ("index.html", "", "ayarlar.html", "arkadaslar.html"),
-         (("__GROUPS_JSON__", blob(sesli_groups)), ("__BACK__", "index.html")))
+         (("__BACK__", "index.html"),))
     # Arkadaşlar (sözlüğün altı): aşağı çek → sözlük.
     page("arkadaslar_template.html", "arkadaslar.html", ("", "", "sozluk.html", ""), nav)
     # Ayarlar (sözlüğün üstü): sola analiz, yukarı it → sözlük.
@@ -264,10 +251,10 @@ def render(groups):
          nav + (("__INDEX__", "index.html"),))
     # Ayrıntılı istatistik (ayarların sağı): sağa ayarlar.
     page("analiz_template.html", "analiz.html", ("", "ayarlar.html"),
-         (("__GROUPS_JSON__", blob(stats_data)), ("__AYARLAR__", "ayarlar.html")), sekme="istatistik.html")
+         (("__AYARLAR__", "ayarlar.html"),), sekme="istatistik.html")
     # İlerleme: sağa kartlar.
     page("stats_template.html", "istatistik.html", ("", "kartlar.html"),
-         (("__GROUPS_JSON__", blob(stats_data)), ("__BACK__", "kartlar.html")))
+         (("__BACK__", "kartlar.html"),))
 
 def main():
     groups = apply_enrichment(load_groups())

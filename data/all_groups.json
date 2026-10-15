@@ -96,7 +96,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "karşı; zıt",
-    "ok": "O-pı-zit",
+    "ok": "A-pı-zit",
     "en": "completely different; facing",
     "ex": [
      "'Hot' is the <b>opposite</b> of 'cold'.",
@@ -183,7 +183,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "saat (tam)",
-    "ok": "ı-KLOK",
+    "ok": "ı-KLAK",
     "en": "used to say the exact hour",
     "ex": [
      "I get up at seven <b>o'clock</b>."
@@ -342,7 +342,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "yarın",
-    "ok": "tı-MO-rou",
+    "ok": "tı-MA-rou",
     "en": "the day after today",
     "ex": [
      "We have an exam <b>tomorrow</b>."
@@ -527,7 +527,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "saat",
-    "ok": "KLOK",
+    "ok": "KLAK",
     "en": "a device that shows the time",
     "ex": [
      "The <b>clock</b> on the wall is slow."
@@ -660,7 +660,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "model",
-    "ok": "MO-dıl",
+    "ok": "MA-dıl",
     "en": "a small copy; a type; a person in fashion",
     "ex": [
      "This is the latest <b>model</b> of the phone."
@@ -1084,7 +1084,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "sarışın",
-    "ok": "BLOND",
+    "ok": "BLAND",
     "en": "having light yellow hair",
     "ex": [
      "She has <b>blonde</b> hair."
@@ -1280,7 +1280,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "mümkün",
-    "ok": "PO-sı-bıl",
+    "ok": "PA-sı-bıl",
     "en": "able to happen or be done",
     "ex": [
      "Is it <b>possible</b> to change my ticket?"
@@ -1644,7 +1644,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "vücut, beden",
-    "ok": "BO-di",
+    "ok": "BA-di",
     "en": "the whole physical form of a person or animal",
     "ex": [
      "Exercise is good for your <b>body</b>."
@@ -1741,7 +1741,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "izlemek; saat",
-    "ok": "UOÇ",
+    "ok": "UAÇ",
     "en": "to look at something for some time; a small clock",
     "ex": [
      "We <b>watch</b> TV in the evening.",
@@ -1913,7 +1913,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "cevap",
-    "ok": "AN-sır",
+    "ok": "EN-sır",
     "en": "what you say or write to a question",
     "ex": [
      "Do you know the <b>answer</b>?"
@@ -2098,7 +2098,7 @@
     "pos": "edat",
     "sec": "Diğer",
     "tr": "-den sonra",
-    "ok": "AF-tır",
+    "ok": "EF-tır",
     "en": "later than something",
     "ex": [
      "Let's meet <b>after</b> lunch."
@@ -2110,7 +2110,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ekim",
-    "ok": "ok-TOU-bır",
+    "ok": "ak-TOU-bır",
     "en": "the tenth month of the year",
     "ex": [
      "The weather gets cooler in <b>October</b>."
@@ -2146,7 +2146,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "geçmiş; -in ötesinde",
-    "ok": "PAST",
+    "ok": "PEST",
     "en": "the time before now; beyond",
     "ex": [
      "Forget the <b>past</b> and look forward.",
@@ -2195,7 +2195,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dans etme",
-    "ok": "DAN-sing",
+    "ok": "DEN-sing",
     "en": "moving your body to music",
     "ex": [
      "She loves <b>dancing</b> at parties."
@@ -2389,7 +2389,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "hobi",
-    "ok": "HO-bi",
+    "ok": "HA-bi",
     "en": "an activity you enjoy in your free time",
     "ex": [
      "Painting is my favourite <b>hobby</b>."
@@ -2401,7 +2401,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sınıf; ders",
-    "ok": "KLAS",
+    "ok": "KLES",
     "en": "a group of students; a lesson",
     "ex": [
      "My <b>class</b> has twenty students.",
@@ -2543,7 +2543,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sorun, problem",
-    "ok": "PROB-lım",
+    "ok": "PRAB-lım",
     "en": "something difficult that needs an answer",
     "ex": [
      "There is a <b>problem</b> with my computer."
@@ -2579,7 +2579,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "cam; bardak",
-    "ok": "GLAS",
+    "ok": "GLES",
     "en": "a hard clear material; a cup made of it",
     "ex": [
      "The window is made of <b>glass</b>.",
@@ -2749,7 +2749,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "değil",
-    "ok": "NOT",
+    "ok": "NAT",
     "en": "used to make a sentence negative",
     "ex": [
      "I'm <b>not</b> hungry right now."
@@ -3017,7 +3017,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dolar",
-    "ok": "DO-lır",
+    "ok": "DA-lır",
     "en": "the money used in the USA",
     "ex": [
      "The book costs ten <b>dollars</b>."
@@ -3090,7 +3090,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "blog",
-    "ok": "BLOG",
+    "ok": "BLAG",
     "en": "a website where someone writes regularly",
     "ex": [
      "She writes a <b>blog</b> about travel."
@@ -3102,7 +3102,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "yıkamak",
-    "ok": "UOŞ",
+    "ok": "UAŞ",
     "en": "to clean something with water",
     "ex": [
      "<b>Wash</b> your hands before dinner."
@@ -3236,7 +3236,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "coğrafya",
-    "ok": "ci-YOG-rı-fi",
+    "ok": "ci-YAG-rı-fi",
     "en": "the study of countries, mountains and seas",
     "ex": [
      "<b>Geography</b> is my favourite subject."
@@ -3321,7 +3321,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "alışveriş",
-    "ok": "ŞO-ping",
+    "ok": "ŞA-ping",
     "en": "buying things from shops",
     "ex": [
      "We go <b>shopping</b> on Saturdays."
@@ -3740,7 +3740,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "proje",
-    "ok": "PRO-cekt",
+    "ok": "PRA-cekt",
     "en": "a planned piece of work",
     "ex": [
      "We finished the school <b>project</b> together."
@@ -3909,7 +3909,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "-emez",
-    "ok": "KE-not",
+    "ok": "KE-nat",
     "en": "to not be able to do something",
     "ex": [
      "I <b>cannot</b> swim very well."
@@ -3921,7 +3921,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "teyze, hala",
-    "ok": "ANT",
+    "ok": "ENT",
     "en": "the sister of your mother or father",
     "ex": [
      "My <b>aunt</b> lives in Ankara."
@@ -3970,7 +3970,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sınıf, derslik",
-    "ok": "KLAS-rum",
+    "ok": "KLES-rum",
     "en": "a room where students have lessons",
     "ex": [
      "Our <b>classroom</b> is on the second floor."
@@ -4080,7 +4080,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sohbet, konuşma",
-    "ok": "kon-vır-SEY-şın",
+    "ok": "kan-vır-SEY-şın",
     "en": "a talk between people",
     "ex": [
      "We had a long <b>conversation</b>."
@@ -4116,7 +4116,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "sıcak",
-    "ok": "HOT",
+    "ok": "HAT",
     "en": "having a high temperature",
     "ex": [
      "The soup is very <b>hot</b>."
@@ -4153,7 +4153,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kolej, yüksekokul",
-    "ok": "KO-liç",
+    "ok": "KA-liç",
     "en": "a place for study after school",
     "ex": [
      "My sister studies at a <b>college</b>."
@@ -4213,7 +4213,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "nesne; itiraz etmek",
-    "ok": "OB-cekt",
+    "ok": "AB-cekt",
     "en": "a thing you can see or touch",
     "ex": [
      "What is that strange <b>object</b>?",
@@ -4274,7 +4274,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "tatil",
-    "ok": "HO-lı-dey",
+    "ok": "HA-lı-dey",
     "en": "a time of rest away from work",
     "ex": [
      "We went to Antalya on <b>holiday</b>."
@@ -4807,7 +4807,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "üzgün, pardon",
-    "ok": "SO-ri",
+    "ok": "SA-ri",
     "en": "feeling sad; used to apologise",
     "ex": [
      "I'm <b>sorry</b> I'm late."
@@ -4843,7 +4843,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ofis, büro",
-    "ok": "O-fis",
+    "ok": "A-fis",
     "en": "a place where people work at desks",
     "ex": [
      "She works in an <b>office</b>."
@@ -4912,7 +4912,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "öğleden sonra",
-    "ok": "af-tır-NUN",
+    "ok": "ef-tır-NUN",
     "en": "the time between noon and evening",
     "ex": [
      "We play football in the <b>afternoon</b>."
@@ -4924,7 +4924,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dükkan, mağaza",
-    "ok": "ŞOP",
+    "ok": "ŞAP",
     "en": "a place where you buy things",
     "ex": [
      "I bought bread at the <b>shop</b>."
@@ -5057,7 +5057,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "bitki; fabrika; dikmek",
-    "ok": "PLANT",
+    "ok": "PLENT",
     "en": "a living thing that grows in soil; to put in the ground",
     "ex": [
      "Water the <b>plant</b> every day.",
@@ -5216,7 +5216,7 @@
     "pos": "edat",
     "sec": "Diğer",
     "tr": "üzerinde; açık",
-    "ok": "ON",
+    "ok": "AN",
     "en": "touching the top of; working",
     "ex": [
      "The book is <b>on</b> the table.",
@@ -5472,7 +5472,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "doktor",
-    "ok": "DOK-tır",
+    "ok": "DAK-tır",
     "en": "a person who treats sick people",
     "ex": [
      "You should see a <b>doctor</b>."
@@ -5679,7 +5679,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yarım, yarı",
-    "ok": "HAF",
+    "ok": "HEF",
     "en": "one of two equal parts",
     "ex": [
      "I ate <b>half</b> of the cake."
@@ -5727,7 +5727,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dansçı",
-    "ok": "DAN-sır",
+    "ok": "DEN-sır",
     "en": "a person who dances",
     "ex": [
      "She is a talented <b>dancer</b>."
@@ -5824,7 +5824,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "konu",
-    "ok": "TO-pik",
+    "ok": "TA-pik",
     "en": "the subject of a talk or text",
     "ex": [
      "Today's <b>topic</b> is health."
@@ -5995,7 +5995,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "modern",
-    "ok": "MO-dın",
+    "ok": "MA-dın",
     "en": "of the present time; new in style",
     "ex": [
      "They live in a <b>modern</b> flat."
@@ -6233,7 +6233,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "gülmek",
-    "ok": "LAF",
+    "ok": "LEF",
     "en": "to make sounds because something is funny",
     "ex": [
      "The joke made everyone <b>laugh</b>."
@@ -6510,7 +6510,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "pasaport",
-    "ok": "PAS-port",
+    "ok": "PES-port",
     "en": "a document for foreign travel",
     "ex": [
      "Don't forget your <b>passport</b>."
@@ -7062,7 +7062,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "banyo, küvet",
-    "ok": "BAT",
+    "ok": "BET",
     "en": "washing your whole body in a tub",
     "ex": [
      "She takes a <b>bath</b> every evening."
@@ -7111,7 +7111,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "durmak, durdurmak",
-    "ok": "STOP",
+    "ok": "STAP",
     "en": "to end movement or action",
     "ex": [
      "The car <b>stopped</b> at the light."
@@ -7159,7 +7159,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "yaygın; ortak",
-    "ok": "KO-mın",
+    "ok": "KA-mın",
     "en": "happening often; shared",
     "ex": [
      "Rain is <b>common</b> in spring.",
@@ -7698,7 +7698,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "muz",
-    "ok": "bı-NA-nı",
+    "ok": "bı-NE-nı",
     "en": "a long yellow fruit",
     "ex": [
      "Monkeys love <b>bananas</b>."
@@ -7782,7 +7782,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kutu",
-    "ok": "BOKS",
+    "ok": "BAKS",
     "en": "a container with straight sides",
     "ex": [
      "Put the toys in the <b>box</b>."
@@ -7866,7 +7866,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "fotoğraf",
-    "ok": "FOU-tı-graf",
+    "ok": "FOU-tı-gref",
     "en": "a picture made with a camera",
     "ex": [
      "This <b>photograph</b> is very old."
@@ -8231,7 +8231,7 @@
     "pos": "zamir",
     "sec": "Diğer",
     "tr": "çok, bir sürü",
-    "ok": "LOT",
+    "ok": "LAT",
     "en": "a large amount or number",
     "ex": [
      "There is a <b>lot</b> of work to do."
@@ -8533,7 +8533,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "banyo",
-    "ok": "BAT-rum",
+    "ok": "BET-rum",
     "en": "the room with a toilet and bath",
     "ex": [
      "The <b>bathroom</b> is upstairs."
@@ -8570,7 +8570,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "hastane",
-    "ok": "HOS-pi-tıl",
+    "ok": "HAS-pi-tıl",
     "en": "a place where sick people are treated",
     "ex": [
      "He is in <b>hospital</b> after the accident."
@@ -8825,7 +8825,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dans",
-    "ok": "DANS",
+    "ok": "DENS",
     "en": "to move your body to music",
     "ex": [
      "They love to <b>dance</b> at parties."
@@ -9348,7 +9348,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "hızlı",
-    "ok": "FAST",
+    "ok": "FEST",
     "en": "moving quickly",
     "ex": [
      "He is a <b>fast</b> runner."
@@ -9469,7 +9469,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "iş",
-    "ok": "COB",
+    "ok": "CAB",
     "en": "the work a person does for money",
     "ex": [
      "She has a good <b>job</b>."
@@ -9819,7 +9819,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "çevrimiçi",
-    "ok": "on-LAYN",
+    "ok": "an-LAYN",
     "en": "connected to the internet",
     "ex": [
      "I bought the tickets <b>online</b>."
@@ -10035,7 +10035,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "istemek",
-    "ok": "UONT",
+    "ok": "UANT",
     "en": "to wish for something",
     "ex": [
      "I <b>want</b> a cup of tea."
@@ -10083,7 +10083,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "takip etmek, izlemek",
-    "ok": "FO-lou",
+    "ok": "FA-lou",
     "en": "to go after; to do as told",
     "ex": [
      "<b>Follow</b> me to the exit."
@@ -10215,7 +10215,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "restoran",
-    "ok": "RES-tı-ront",
+    "ok": "RES-tı-rant",
     "en": "a place where you buy and eat meals",
     "ex": [
      "We ate at an Italian <b>restaurant</b>."
@@ -10239,7 +10239,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "paragraf",
-    "ok": "PE-rı-graf",
+    "ok": "PE-rı-gref",
     "en": "a group of sentences about one idea",
     "ex": [
      "Write a short <b>paragraph</b> about your day."
@@ -10323,7 +10323,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "sormak; istemek",
-    "ok": "ASK",
+    "ok": "ESK",
     "en": "to say a question; to request",
     "ex": [
      "May I <b>ask</b> a question?",
@@ -10361,7 +10361,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ürün",
-    "ok": "PRO-dakt",
+    "ok": "PRA-dakt",
     "en": "something made or grown to sell",
     "ex": [
      "This <b>product</b> is very popular."
@@ -10542,7 +10542,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "konser",
-    "ok": "KON-sırt",
+    "ok": "KAN-sırt",
     "en": "a live music show",
     "ex": [
      "We went to a rock <b>concert</b>."
@@ -10614,7 +10614,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "popüler",
-    "ok": "PO-pyu-lır",
+    "ok": "PA-pyu-lır",
     "en": "liked by many people",
     "ex": [
      "This song is very <b>popular</b>."
@@ -10748,7 +10748,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "muhtemelen",
-    "ok": "PRO-bıb-li",
+    "ok": "PRA-bıb-li",
     "en": "very likely",
     "ex": [
      "It will <b>probably</b> rain tomorrow."
@@ -10797,7 +10797,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "şişe",
-    "ok": "BO-tıl",
+    "ok": "BA-tıl",
     "en": "a container for liquids",
     "ex": [
      "She drank a <b>bottle</b> of water."
@@ -10845,7 +10845,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "olumlu, pozitif",
-    "ok": "PO-zı-tiv",
+    "ok": "PA-zı-tiv",
     "en": "good; hopeful; sure",
     "ex": [
      "Try to stay <b>positive</b>."
@@ -11096,7 +11096,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "futbol",
-    "ok": "SO-kır",
+    "ok": "SA-kır",
     "en": "football (mainly US)",
     "ex": [
      "They play <b>soccer</b> after school."
@@ -11341,7 +11341,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kale, şato",
-    "ok": "KAA-sıl",
+    "ok": "KE-sıl",
     "en": "a large strong building from the past",
     "ex": [
      "We visited an old <b>castle</b> on the hill."
@@ -11523,7 +11523,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "şans; ihtimal",
-    "ok": "ÇAANS",
+    "ok": "ÇENS",
     "en": "a possibility; an opportunity",
     "ex": [
      "This is your last <b>chance</b>.",
@@ -11645,7 +11645,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kalite; nitelik",
-    "ok": "KUO-lı-ti",
+    "ok": "KUA-lı-ti",
     "en": "how good or bad something is",
     "ex": [
      "This shirt is of very high <b>quality</b>.",
@@ -11853,7 +11853,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "teknoloji",
-    "ok": "tek-NO-lı-ci",
+    "ok": "tek-NA-lı-ci",
     "en": "knowledge and machines based on science",
     "ex": [
      "Modern <b>technology</b> makes life easier."
@@ -11877,7 +11877,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "memur, subay",
-    "ok": "O-fi-sır",
+    "ok": "A-fi-sır",
     "en": "a person with a position of authority",
     "ex": [
      "A police <b>officer</b> stopped the car."
@@ -12195,7 +12195,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "hokey",
-    "ok": "HO-ki",
+    "ok": "HA-ki",
     "en": "a team game played with sticks and a ball or puck",
     "ex": [
      "They play <b>hockey</b> on the ice."
@@ -12337,7 +12337,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kıta",
-    "ok": "KON-ti-nınt",
+    "ok": "KAN-ti-nınt",
     "en": "a very large area of land, like Asia",
     "ex": [
      "Africa is a huge <b>continent</b>."
@@ -12507,7 +12507,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "daha çok; oldukça",
-    "ok": "RA-dır",
+    "ok": "RE-dır",
     "en": "quite; more willingly",
     "ex": [
      "I would <b>rather</b> stay at home tonight.",
@@ -12520,7 +12520,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "miktar",
-    "ok": "KUON-tı-ti",
+    "ok": "KUAN-tı-ti",
     "en": "an amount or number",
     "ex": [
      "Add a small <b>quantity</b> of salt."
@@ -12594,7 +12594,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "içermek, dahil etmek",
-    "ok": "in-VOLV",
+    "ok": "in-VALV",
     "en": "to include as a necessary part",
     "ex": [
      "The job <b>involves</b> a lot of travel."
@@ -13159,7 +13159,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "meslektaş",
-    "ok": "KO-liig",
+    "ok": "KA-liig",
     "en": "a person you work with",
     "ex": [
      "My <b>colleague</b> helped me finish the report."
@@ -13244,7 +13244,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "golf",
-    "ok": "GOLF",
+    "ok": "GALF",
     "en": "a game played with clubs and a small ball",
     "ex": [
      "My uncle plays <b>golf</b> on Sundays."
@@ -13269,7 +13269,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "üretmek",
-    "ok": "PRO-dus",
+    "ok": "PRA-dus",
     "en": "to make or grow something",
     "ex": [
      "This factory <b>produces</b> cars."
@@ -13497,7 +13497,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "vurmak, çalmak",
-    "ok": "NOK",
+    "ok": "NAK",
     "en": "to hit a door to be let in",
     "ex": [
      "Please <b>knock</b> before you enter."
@@ -13570,7 +13570,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "olasılık, ihtimal",
-    "ok": "po-sı-Bİ-lı-ti",
+    "ok": "pa-sı-Bİ-lı-ti",
     "en": "a thing that may happen",
     "ex": [
      "There is a <b>possibility</b> of rain."
@@ -13691,7 +13691,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "basketbol",
-    "ok": "BAS-kit-bol",
+    "ok": "BES-kit-bol",
     "en": "a game where you throw a ball through a hoop",
     "ex": [
      "They play <b>basketball</b> after school."
@@ -13739,7 +13739,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sütun",
-    "ok": "KO-lım",
+    "ok": "KA-lım",
     "en": "a tall post; a narrow part of a page",
     "ex": [
      "The roof rests on stone <b>columns</b>."
@@ -13837,7 +13837,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kurbağa",
-    "ok": "FROG",
+    "ok": "FRAG",
     "en": "a small jumping animal that lives near water",
     "ex": [
      "A <b>frog</b> jumped into the pond."
@@ -14485,7 +14485,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kopya",
-    "ok": "KO-pi",
+    "ok": "KA-pi",
     "en": "something made to look the same",
     "ex": [
      "Please make a <b>copy</b> of this page."
@@ -14522,7 +14522,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "yanıt vermek",
-    "ok": "ris-POND",
+    "ok": "ris-PAND",
     "en": "to answer or react",
     "ex": [
      "She didn't <b>respond</b> to my email."
@@ -14679,7 +14679,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "fırsat",
-    "ok": "o-pır-TU-nı-ti",
+    "ok": "a-pır-TU-nı-ti",
     "en": "a good chance to do something",
     "ex": [
      "This job is a great <b>opportunity</b>."
@@ -14882,7 +14882,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "üst; tepe",
-    "ok": "TOP",
+    "ok": "TAP",
     "en": "the highest part",
     "ex": [
      "The cat sat on <b>top</b> of the wall.",
@@ -14968,7 +14968,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yarışma; rekabet",
-    "ok": "kom-pı-Tİ-şın",
+    "ok": "kam-pı-Tİ-şın",
     "en": "an event where people try to win",
     "ex": [
      "She won first place in the <b>competition</b>.",
@@ -15139,7 +15139,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "imkânsız",
-    "ok": "im-PO-sı-bıl",
+    "ok": "im-PA-sı-bıl",
     "en": "not able to happen or be done",
     "ex": [
      "It's <b>impossible</b> to finish in one day."
@@ -15371,7 +15371,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "avantaj",
-    "ok": "ıd-VAN-tic",
+    "ok": "ıd-VEN-tic",
     "en": "something that helps you",
     "ex": [
      "Speaking English is a big <b>advantage</b>."
@@ -15542,7 +15542,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "seçenek",
-    "ok": "OP-şın",
+    "ok": "AP-şın",
     "en": "a choice",
     "ex": [
      "You have two <b>options</b>: stay or go."
@@ -15932,7 +15932,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "tanrı",
-    "ok": "GOD",
+    "ok": "GAD",
     "en": "a being that people worship",
     "ex": [
      "Many people believe in <b>God</b>."
@@ -16098,7 +16098,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "bilgi",
-    "ok": "NO-lic",
+    "ok": "NA-lic",
     "en": "the things a person knows",
     "ex": [
      "He has a lot of <b>knowledge</b> about history."
@@ -16355,7 +16355,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "görev",
-    "ok": "TASK",
+    "ok": "TESK",
     "en": "a piece of work to do",
     "ex": [
      "Cleaning the house is a big <b>task</b>."
@@ -16480,7 +16480,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "düşürmek; damla",
-    "ok": "DROP",
+    "ok": "DRAP",
     "en": "to let fall; a small amount of liquid",
     "ex": [
      "Be careful not to <b>drop</b> the plate.",
@@ -16505,7 +16505,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kaya; rock müzik",
-    "ok": "ROK",
+    "ok": "RAK",
     "en": "hard stone; a type of music",
     "ex": [
      "The children climbed on the <b>rocks</b>.",
@@ -16959,7 +16959,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "aşağıdaki; sonraki",
-    "ok": "FO-lou-ing",
+    "ok": "FA-lou-ing",
     "en": "coming next; below",
     "ex": [
      "Answer the <b>following</b> questions.",
@@ -17070,7 +17070,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "pop; patlamak",
-    "ok": "POP",
+    "ok": "PAP",
     "en": "popular music; a sudden sound",
     "ex": [
      "She loves <b>pop</b> music.",
@@ -17134,7 +17134,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "söz vermek; söz",
-    "ok": "PRO-mis",
+    "ok": "PRA-mis",
     "en": "to say you will surely do something",
     "ex": [
      "I <b>promise</b> to call you tomorrow.",
@@ -17464,7 +17464,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "çorap",
-    "ok": "SOK",
+    "ok": "SAK",
     "en": "clothing for your foot",
     "ex": [
      "I can't find my other <b>sock</b>."
@@ -17500,7 +17500,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "çamaşır; yıkama",
-    "ok": "UO-şing",
+    "ok": "UA-şing",
     "en": "clothes that need cleaning; cleaning",
     "ex": [
      "I hung the <b>washing</b> outside.",
@@ -17623,7 +17623,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "cep",
-    "ok": "PO-kit",
+    "ok": "PA-kit",
     "en": "a small bag sewn into clothes",
     "ex": [
      "He put the keys in his <b>pocket</b>."
@@ -17745,7 +17745,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kaya; rock müzik",
-    "ok": "ROK",
+    "ok": "RAK",
     "en": "hard stone; a type of loud music",
     "ex": [
      "We sat on a large <b>rock</b>.",
@@ -17770,7 +17770,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "komedi",
-    "ok": "KO-mı-di",
+    "ok": "KA-mı-di",
     "en": "a funny play or film",
     "ex": [
      "We watched a <b>comedy</b> last night."
@@ -17844,7 +17844,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kahkaha, gülüş",
-    "ok": "LAF-tır",
+    "ok": "LEF-tır",
     "en": "the sound of laughing",
     "ex": [
      "The room was full of <b>laughter</b>."
@@ -18259,7 +18259,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "roman",
-    "ok": "NO-vıl",
+    "ok": "NA-vıl",
     "en": "a long written story",
     "ex": [
      "She is reading a <b>novel</b> by a Turkish author."
@@ -18271,7 +18271,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dizüstü bilgisayar",
-    "ok": "LEP-top",
+    "ok": "LEP-tap",
     "en": "a small computer you can carry",
     "ex": [
      "I do my work on a <b>laptop</b>."
@@ -18501,7 +18501,7 @@
     "pos": "edat",
     "sec": "Diğer",
     "tr": "üstüne",
-    "ok": "ON-tu",
+    "ok": "AN-tu",
     "en": "to a position on",
     "ex": [
      "The cat jumped <b>onto</b> the roof."
@@ -18538,7 +18538,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "konferans",
-    "ok": "KON-fı-rıns",
+    "ok": "KAN-fı-rıns",
     "en": "a large formal meeting",
     "ex": [
      "She spoke at a science <b>conference</b>."
@@ -18869,7 +18869,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "biyoloji",
-    "ok": "bay-O-lı-ci",
+    "ok": "bay-A-lı-ci",
     "en": "the study of living things",
     "ex": [
      "We studied plants in <b>biology</b> class."
@@ -19053,7 +19053,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dip, alt",
-    "ok": "BO-tım",
+    "ok": "BA-tım",
     "en": "the lowest part",
     "ex": [
      "The keys are at the <b>bottom</b> of the bag."
@@ -19201,7 +19201,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "kilit; kilitlemek",
-    "ok": "LOK",
+    "ok": "LAK",
     "en": "a device to keep something shut; to shut with a key",
     "ex": [
      "Don't forget to <b>lock</b> the door.",
@@ -19385,7 +19385,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "elektronik",
-    "ok": "i-lek-TRO-nik",
+    "ok": "i-lek-TRA-nik",
     "en": "using computers or small electric parts",
     "ex": [
      "We use <b>electronic</b> tickets now."
@@ -19542,7 +19542,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "belge",
-    "ok": "DOK-yu-mınt",
+    "ok": "DAK-yu-mınt",
     "en": "an official paper or file",
     "ex": [
      "Please sign this <b>document</b>."
@@ -19566,7 +19566,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "felaket",
-    "ok": "di-ZAS-tır",
+    "ok": "di-ZES-tır",
     "en": "a very bad event",
     "ex": [
      "The flood was a terrible <b>disaster</b>."
@@ -19660,7 +19660,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "çimen, ot",
-    "ok": "GRAS",
+    "ok": "GRES",
     "en": "the green plant that covers fields",
     "ex": [
      "The children played on the <b>grass</b>."
@@ -19810,7 +19810,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "nüfus",
-    "ok": "pop-yu-LEY-şın",
+    "ok": "pap-yu-LEY-şın",
     "en": "the number of people in a place",
     "ex": [
      "The city has a large <b>population</b>."
@@ -19883,7 +19883,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "geçmek; geçirmek",
-    "ok": "PAS",
+    "ok": "PES",
     "en": "to go by; to succeed in a test",
     "ex": [
      "Did you <b>pass</b> your exam?",
@@ -20006,7 +20006,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "bağlam",
-    "ok": "KON-tekst",
+    "ok": "KAN-tekst",
     "en": "the situation around something",
     "ex": [
      "In this <b>context</b>, the word means 'happy'."
@@ -20286,7 +20286,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yorum",
-    "ok": "KO-ment",
+    "ok": "KA-ment",
     "en": "a remark; an opinion",
     "ex": [
      "She made a kind <b>comment</b> about my work."
@@ -20382,7 +20382,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "veri",
-    "ok": "DA-tı",
+    "ok": "DEY-tı",
     "en": "facts and information",
     "ex": [
      "The scientist collected a lot of <b>data</b>."
@@ -20677,7 +20677,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "çözmek",
-    "ok": "SOLV",
+    "ok": "SALV",
     "en": "to find an answer to a problem",
     "ex": [
      "Can you <b>solve</b> this puzzle?"
@@ -20726,7 +20726,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yanıt, tepki",
-    "ok": "ris-PONS",
+    "ok": "ris-PANS",
     "en": "an answer or reaction",
     "ex": [
      "I got a quick <b>response</b> to my email."
@@ -20903,7 +20903,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "özür dilemek",
-    "ok": "ı-PO-lı-cayz",
+    "ok": "ı-PA-lı-cayz",
     "en": "to say you are sorry",
     "ex": [
      "He <b>apologized</b> for being late."
@@ -21331,7 +21331,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dezavantaj",
-    "ok": "di-sıd-VAN-tic",
+    "ok": "di-sıd-VEN-tic",
     "en": "something that makes things harder",
     "ex": [
      "The high price is a <b>disadvantage</b>."
@@ -21392,7 +21392,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "iletişim; temas",
-    "ok": "KON-tekt",
+    "ok": "KAN-tekt",
     "en": "communication; to get in touch with",
     "ex": [
      "Please <b>contact</b> me by email.",
@@ -21590,7 +21590,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "ekonomik",
-    "ok": "e-kı-NO-mik",
+    "ok": "e-kı-NA-mik",
     "en": "relating to money and business",
     "ex": [
      "The country has <b>economic</b> problems."
@@ -21831,7 +21831,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "alkollü; alkolik",
-    "ok": "el-kı-HO-lik",
+    "ok": "el-kı-HA-lik",
     "en": "containing alcohol; addicted to alcohol",
     "ex": [
      "They don't serve <b>alcoholic</b> drinks here.",
@@ -22433,7 +22433,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sonuç",
-    "ok": "KON-si-kuıns",
+    "ok": "KAN-si-kuıns",
     "en": "a result of an action",
     "ex": [
      "One <b>consequence</b> of the rain was a flood."
@@ -22748,7 +22748,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kostüm",
-    "ok": "KOS-tum",
+    "ok": "KAS-tum",
     "en": "special clothes for a role or event",
     "ex": [
      "She wore a witch <b>costume</b> to the party."
@@ -22822,7 +22822,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "politika; poliçe",
-    "ok": "PO-lı-si",
+    "ok": "PA-lı-si",
     "en": "a plan of action; an insurance document",
     "ex": [
      "The company changed its <b>policy</b>.",
@@ -22944,7 +22944,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "personel, kadro",
-    "ok": "STAF",
+    "ok": "STEF",
     "en": "the people who work somewhere",
     "ex": [
      "The hotel <b>staff</b> were very friendly."
@@ -22968,7 +22968,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "operasyon; ameliyat",
-    "ok": "o-pı-REY-şın",
+    "ok": "a-pı-REY-şın",
     "en": "a medical procedure; a planned activity",
     "ex": [
      "He had an <b>operation</b> on his knee.",
@@ -23005,7 +23005,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "apaçık, belli",
-    "ok": "OB-vi-ıs",
+    "ok": "AB-vi-ıs",
     "en": "easy to see or understand",
     "ex": [
      "It was <b>obvious</b> that she was tired."
@@ -23113,7 +23113,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "fotoğrafçılık",
-    "ok": "fı-TOG-rı-fi",
+    "ok": "fı-TAG-rı-fi",
     "en": "the art of taking photos",
     "ex": [
      "She studies <b>photography</b> at college."
@@ -23261,7 +23261,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "bomba",
-    "ok": "BOM",
+    "ok": "BAM",
     "en": "a weapon that explodes",
     "ex": [
      "The old <b>bomb</b> was found in the field."
@@ -23440,7 +23440,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "sorumlu",
-    "ok": "ris-PON-sı-bıl",
+    "ok": "ris-PAN-sı-bıl",
     "en": "having a duty; to blame",
     "ex": [
      "Parents are <b>responsible</b> for their children."
@@ -23754,7 +23754,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "ileri düzey",
-    "ok": "ıd-VANST",
+    "ok": "ıd-VENST",
     "en": "at a high level",
     "ex": [
      "She takes an <b>advanced</b> English class."
@@ -23841,7 +23841,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "uygun, doğru düzgün",
-    "ok": "PRO-pır",
+    "ok": "PRA-pır",
     "en": "correct; suitable",
     "ex": [
      "Wear <b>proper</b> shoes for hiking."
@@ -24328,7 +24328,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "tuhaf; tek (sayı)",
-    "ok": "OD",
+    "ok": "AD",
     "en": "strange; not even (of numbers)",
     "ex": [
      "It's <b>odd</b> that he didn't call.",
@@ -24378,7 +24378,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "olay örgüsü; komplo",
-    "ok": "PLOT",
+    "ok": "PLAT",
     "en": "the story of a book or film; a secret plan",
     "ex": [
      "The <b>plot</b> of the film was very exciting.",
@@ -24490,7 +24490,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "siyaset, politika",
-    "ok": "PO-lı-tiks",
+    "ok": "PA-lı-tiks",
     "en": "activities relating to government",
     "ex": [
      "He is interested in <b>politics</b>."
@@ -24554,7 +24554,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "karmaşık",
-    "ok": "KOM-pleks",
+    "ok": "KAM-pleks",
     "en": "having many connected parts; not simple",
     "ex": [
      "The machine has a <b>complex</b> design."
@@ -24709,7 +24709,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "kendinden emin",
-    "ok": "KON-fi-dınt",
+    "ok": "KAN-fi-dınt",
     "en": "sure of yourself",
     "ex": [
      "He felt <b>confident</b> before the exam."
@@ -24913,7 +24913,7 @@
     "pos": "edat",
     "sec": "Diğer",
     "tr": "üzerine",
-    "ok": "ı-PON",
+    "ok": "ı-PAN",
     "en": "on",
     "ex": [
      "The decision depends <b>upon</b> the results."
@@ -24961,7 +24961,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "engellemek; blok",
-    "ok": "BLOK",
+    "ok": "BLAK",
     "en": "a solid piece; to stop movement",
     "ex": [
      "A fallen tree <b>blocked</b> the road.",
@@ -25010,7 +25010,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "robot",
-    "ok": "ROU-bot",
+    "ok": "ROU-bat",
     "en": "a machine that can do tasks",
     "ex": [
      "The factory uses a <b>robot</b> to build cars."
@@ -25154,7 +25154,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "fotoğrafçı",
-    "ok": "fı-TOG-rı-fır",
+    "ok": "fı-TAG-rı-fır",
     "en": "a person who takes photos",
     "ex": [
      "The wedding <b>photographer</b> took many pictures."
@@ -25202,7 +25202,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "dal; şube",
-    "ok": "BRANÇ",
+    "ok": "BRENÇ",
     "en": "a part of a tree; an office of a company",
     "ex": [
      "A bird sat on a <b>branch</b>.",
@@ -25336,7 +25336,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "belgesel",
-    "ok": "dok-yu-MEN-tri",
+    "ok": "dak-yu-MEN-tri",
     "en": "a film about real events",
     "ex": [
      "We watched a <b>documentary</b> about lions."
@@ -25372,7 +25372,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sorumluluk",
-    "ok": "ris-pon-sı-Bİ-lı-ti",
+    "ok": "ris-pan-sı-Bİ-lı-ti",
     "en": "a duty to deal with something",
     "ex": [
      "Cleaning the kitchen is my <b>responsibility</b>."
@@ -25468,7 +25468,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "tencere; saksı",
-    "ok": "POT",
+    "ok": "PAT",
     "en": "a deep round container for cooking or plants",
     "ex": [
      "Boil the water in a <b>pot</b>.",
@@ -25493,7 +25493,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "bağlamak, tutturmak",
-    "ok": "FA-sın",
+    "ok": "FE-sın",
     "en": "to join or fix firmly",
     "ex": [
      "Please <b>fasten</b> your seat belt."
@@ -25914,7 +25914,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "politikacı",
-    "ok": "po-lı-Tİ-şın",
+    "ok": "pa-lı-Tİ-şın",
     "en": "a person in government or politics",
     "ex": [
      "The <b>politician</b> gave a long speech."
@@ -26245,7 +26245,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "rahatsız etmek; zahmet",
-    "ok": "BO-dır",
+    "ok": "BA-dır",
     "en": "to annoy; to make an effort",
     "ex": [
      "Don't <b>bother</b> him while he's working.",
@@ -26295,7 +26295,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ekonomi",
-    "ok": "i-KO-nı-mi",
+    "ok": "i-KA-nı-mi",
     "en": "the money and business of a country",
     "ex": [
      "The country's <b>economy</b> is growing."
@@ -26319,7 +26319,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "katı; sağlam",
-    "ok": "SO-lid",
+    "ok": "SA-lid",
     "en": "hard and firm; not liquid",
     "ex": [
      "Ice is water in a <b>solid</b> form.",
@@ -26332,7 +26332,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yoksulluk",
-    "ok": "PO-vır-ti",
+    "ok": "PA-vır-ti",
     "en": "the state of being poor",
     "ex": [
      "Many families live in <b>poverty</b>."
@@ -26635,7 +26635,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "zıtlık, kontrast",
-    "ok": "KON-trast",
+    "ok": "KAN-trest",
     "en": "a clear difference",
     "ex": [
      "There is a big <b>contrast</b> between the two cities."
@@ -26671,7 +26671,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "konsantre olmak",
-    "ok": "KON-sınt-reyt",
+    "ok": "KAN-sınt-reyt",
     "en": "to give all your attention",
     "ex": [
      "I can't <b>concentrate</b> with the TV on."
@@ -26708,7 +26708,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "konaklama",
-    "ok": "ı-ko-mı-DEY-şın",
+    "ok": "ı-ka-mı-DEY-şın",
     "en": "a place to stay",
     "ex": [
      "The price includes <b>accommodation</b>."
@@ -26984,7 +26984,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "helikopter",
-    "ok": "HE-li-kop-tır",
+    "ok": "HE-li-kap-tır",
     "en": "an aircraft with turning blades on top",
     "ex": [
      "A <b>helicopter</b> flew over the city."
@@ -27106,7 +27106,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "dahil, ilgili",
-    "ok": "in-VOLVD",
+    "ok": "in-VALVD",
     "en": "taking part; connected",
     "ex": [
      "Many people were <b>involved</b> in the project."
@@ -27205,7 +27205,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kâr",
-    "ok": "PRO-fit",
+    "ok": "PRA-fit",
     "en": "money gained in business",
     "ex": [
      "The shop made a good <b>profit</b> this year."
@@ -27329,7 +27329,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "dürüst",
-    "ok": "O-nist",
+    "ok": "A-nist",
     "en": "truthful; not lying",
     "ex": [
      "She is an <b>honest</b> person."
@@ -27378,7 +27378,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "yaklaşık olarak",
-    "ok": "ıp-ROK-si-mıt-li",
+    "ok": "ıp-RAK-si-mıt-li",
     "en": "about; roughly",
     "ex": [
      "The trip takes <b>approximately</b> two hours."
@@ -27609,7 +27609,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "mülk; özellik",
-    "ok": "PRO-pır-ti",
+    "ok": "PRA-pır-ti",
     "en": "something you own; land and buildings",
     "ex": [
      "The house is his personal <b>property</b>.",
@@ -27634,7 +27634,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "patika, yol",
-    "ok": "PAT",
+    "ok": "PET",
     "en": "a narrow way for walking",
     "ex": [
      "We followed the <b>path</b> to the lake."
@@ -27831,7 +27831,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "nitelikli, yeterli",
-    "ok": "KUO-li-fayd",
+    "ok": "KUA-li-fayd",
     "en": "having the right training or skills",
     "ex": [
      "She is a <b>qualified</b> nurse."
@@ -27855,7 +27855,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "muhtemelen",
-    "ok": "PO-sıb-li",
+    "ok": "PA-sıb-li",
     "en": "perhaps; maybe",
     "ex": [
      "He is <b>possibly</b> the best player in the team."
@@ -28336,7 +28336,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "nitelik; yeterlilik",
-    "ok": "kuo-li-fi-KEY-şın",
+    "ok": "kua-li-fi-KEY-şın",
     "en": "an exam or skill that makes you able to do a job",
     "ex": [
      "She has the right <b>qualifications</b> for the job.",
@@ -28399,7 +28399,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "pamuk",
-    "ok": "KO-tın",
+    "ok": "KA-tın",
     "en": "a soft white plant fibre used for cloth",
     "ex": [
      "This shirt is made of <b>cotton</b>."
@@ -28424,7 +28424,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "düzgün, uygun şekilde",
-    "ok": "PRO-pı-li",
+    "ok": "PRA-pı-li",
     "en": "correctly; in the right way",
     "ex": [
      "Close the door <b>properly</b>."
@@ -28655,7 +28655,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "hak kazanmak; nitelendirmek",
-    "ok": "KUO-li-fay",
+    "ok": "KUA-li-fay",
     "en": "to reach the needed level; to gain the right",
     "ex": [
      "Our team <b>qualified</b> for the final.",
@@ -28706,7 +28706,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "nokta; leke; fark etmek",
-    "ok": "SPOT",
+    "ok": "SPAT",
     "en": "a small mark; a place; to notice",
     "ex": [
      "There is a <b>spot</b> of ink on the page.",
@@ -28918,7 +28918,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "örnek, numune",
-    "ok": "SAM-pıl",
+    "ok": "SEM-pıl",
     "en": "a small part that shows the whole",
     "ex": [
      "The nurse took a blood <b>sample</b>."
@@ -28930,7 +28930,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "gönüllü",
-    "ok": "vo-lın-Tİ-ır",
+    "ok": "va-lın-Tİ-ır",
     "en": "a person who works without pay",
     "ex": [
      "She works as a <b>volunteer</b> at the hospital."
@@ -28954,7 +28954,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "laboratuvar",
-    "ok": "lı-BO-rıt-ri",
+    "ok": "LEB-rı-to-ri",
     "en": "a room for scientific work",
     "ex": [
      "The samples were tested in a <b>laboratory</b>."
@@ -29002,7 +29002,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "açıkça, belli ki",
-    "ok": "OB-vi-ıs-li",
+    "ok": "AB-vi-ıs-li",
     "en": "clearly; as anyone can see",
     "ex": [
      "She was <b>obviously</b> very tired."
@@ -29161,7 +29161,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kır evi",
-    "ok": "KO-tic",
+    "ok": "KA-tic",
     "en": "a small house in the countryside",
     "ex": [
      "They spent the weekend in a <b>cottage</b>."
@@ -29534,7 +29534,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "sponsor",
-    "ok": "SPON-sır",
+    "ok": "SPAN-sır",
     "en": "a company that pays for an event; to pay for",
     "ex": [
      "A local bank will <b>sponsor</b> the team."
@@ -29571,7 +29571,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "çalıştırmak; ameliyat etmek",
-    "ok": "O-pı-reyt",
+    "ok": "A-pı-reyt",
     "en": "to make work; to do surgery",
     "ex": [
      "Do you know how to <b>operate</b> this machine?",
@@ -29622,7 +29622,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "sabit, sürekli",
-    "ok": "KON-stınt",
+    "ok": "KAN-stınt",
     "en": "happening all the time; not changing",
     "ex": [
      "There was a <b>constant</b> noise from the road."
@@ -29671,7 +29671,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kombinasyon",
-    "ok": "kom-bi-NEY-şın",
+    "ok": "kam-bi-NEY-şın",
     "en": "a mix of two or more things",
     "ex": [
      "The dish is a <b>combination</b> of sweet and sour."
@@ -29839,7 +29839,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "olasılık, beklenti",
-    "ok": "PROS-pekt",
+    "ok": "PRAS-pekt",
     "en": "a chance that something will happen",
     "ex": [
      "There is little <b>prospect</b> of rain."
@@ -29913,7 +29913,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "bilinçli, farkında",
-    "ok": "KON-şıs",
+    "ok": "KAN-şıs",
     "en": "awake and aware",
     "ex": [
      "The patient is now <b>conscious</b>."
@@ -29963,7 +29963,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "sürekli olarak",
-    "ok": "KON-stınt-li",
+    "ok": "KAN-stınt-li",
     "en": "all the time; again and again",
     "ex": [
      "He is <b>constantly</b> late."
@@ -29975,7 +29975,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "güven",
-    "ok": "KON-fi-dıns",
+    "ok": "KAN-fi-dıns",
     "en": "belief in yourself; trust",
     "ex": [
      "Speaking in public gives you <b>confidence</b>."
@@ -30036,7 +30036,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "çatışma",
-    "ok": "KON-flikt",
+    "ok": "KAN-flikt",
     "en": "a serious disagreement; a fight",
     "ex": [
      "There was a <b>conflict</b> between the two groups."
@@ -30120,7 +30120,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "dürüst olmayan",
-    "ok": "dis-O-nist",
+    "ok": "dis-A-nist",
     "en": "not truthful",
     "ex": [
      "It was <b>dishonest</b> of him to lie."
@@ -30144,7 +30144,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "uçak",
-    "ok": "E-ır-kraft",
+    "ok": "E-ır-kreft",
     "en": "a vehicle that flies, like a plane",
     "ex": [
      "The <b>aircraft</b> landed safely."
@@ -30192,7 +30192,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "çözmek; kararlı olmak",
-    "ok": "ri-ZOLV",
+    "ok": "ri-ZALV",
     "en": "to solve a problem; to decide firmly",
     "ex": [
      "They tried to <b>resolve</b> the argument.",
@@ -30254,7 +30254,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "muhalefet; karşıtlık",
-    "ok": "o-pı-Zİ-şın",
+    "ok": "a-pı-Zİ-şın",
     "en": "strong disagreement; the other side",
     "ex": [
      "There was a lot of <b>opposition</b> to the plan.",
@@ -30292,7 +30292,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yükümlülük, zorunluluk",
-    "ok": "ob-li-GEY-şın",
+    "ok": "ab-li-GEY-şın",
     "en": "something you must do",
     "ex": [
      "You are under no <b>obligation</b> to buy."
@@ -30389,7 +30389,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ilerlemek; avans",
-    "ok": "ıd-VANS",
+    "ok": "ıd-VENS",
     "en": "to move forward; progress",
     "ex": [
      "Science continues to <b>advance</b>.",
@@ -30402,7 +30402,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "komut, emir",
-    "ok": "kı-MAND",
+    "ok": "kı-MEND",
     "en": "an order; to order",
     "ex": [
      "The soldiers followed the <b>command</b>."
@@ -30451,7 +30451,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "felsefe",
-    "ok": "fı-LO-sı-fi",
+    "ok": "fı-LA-sı-fi",
     "en": "the study of ideas about life and knowledge",
     "ex": [
      "He studied <b>philosophy</b> at university."
@@ -30523,7 +30523,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "taslak",
-    "ok": "DRAFT",
+    "ok": "DREFT",
     "en": "an early version of a piece of writing",
     "ex": [
      "This is only the first <b>draft</b> of my essay."
@@ -30547,7 +30547,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "kavram",
-    "ok": "KON-sept",
+    "ok": "KAN-sept",
     "en": "an idea",
     "ex": [
      "Time is a difficult <b>concept</b> to explain."
@@ -30584,7 +30584,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "yarışma",
-    "ok": "KON-test",
+    "ok": "KAN-test",
     "en": "a competition",
     "ex": [
      "She won the singing <b>contest</b>."
@@ -30621,7 +30621,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "olgu, fenomen",
-    "ok": "fı-NO-mi-nın",
+    "ok": "fı-NA-mi-nın",
     "en": "something that happens and can be seen",
     "ex": [
      "Rainbows are a natural <b>phenomenon</b>."
@@ -30933,7 +30933,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "içi boş",
-    "ok": "HO-lou",
+    "ok": "HA-lou",
     "en": "empty inside",
     "ex": [
      "The tree trunk was <b>hollow</b>."
@@ -31044,7 +31044,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "benimsemek; evlat edinmek",
-    "ok": "ı-DOPT",
+    "ok": "ı-DAPT",
     "en": "to take as your own; to start using",
     "ex": [
      "They decided to <b>adopt</b> a child.",
@@ -31093,7 +31093,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "talep",
-    "ok": "di-MAND",
+    "ok": "di-MEND",
     "en": "a firm request; a need for a product",
     "ex": [
      "There is a high <b>demand</b> for houses."
@@ -31154,7 +31154,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "sonrasında",
-    "ok": "AF-tır-uıdz",
+    "ok": "EF-tır-uıdz",
     "en": "later; after that",
     "ex": [
      "We had dinner and went for a walk <b>afterwards</b>."
@@ -31277,7 +31277,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "bilinçsiz, baygın",
-    "ok": "an-KON-şıs",
+    "ok": "an-KAN-şıs",
     "en": "not awake; not aware",
     "ex": [
      "The blow knocked him <b>unconscious</b>."
@@ -31314,7 +31314,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "popülerlik",
-    "ok": "pop-yu-LE-rı-ti",
+    "ok": "pap-yu-LE-rı-ti",
     "en": "the state of being liked by many",
     "ex": [
      "The singer's <b>popularity</b> grew quickly."
@@ -31450,7 +31450,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "geliştirmek, artırmak",
-    "ok": "in-HANS",
+    "ok": "in-HENS",
     "en": "to improve or increase",
     "ex": [
      "Good lighting can <b>enhance</b> a photo."
@@ -31546,7 +31546,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "mantıklı",
-    "ok": "LO-ci-kıl",
+    "ok": "LA-ci-kıl",
     "en": "sensible; based on clear reasons",
     "ex": [
      "That's a <b>logical</b> explanation."
@@ -31655,7 +31655,7 @@
     "pos": "edat",
     "sec": "Diğer",
     "tr": "ötesinde",
-    "ok": "bi-YOND",
+    "ok": "bi-YAND",
     "en": "on the far side of; more than",
     "ex": [
      "The mountains lie <b>beyond</b> the river."
@@ -31717,7 +31717,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "kabul etmek, teslim etmek",
-    "ok": "ık-NO-lic",
+    "ok": "ık-NA-lic",
     "en": "to accept that something is true",
     "ex": [
      "He <b>acknowledged</b> his mistake."
@@ -31777,7 +31777,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "karmaşık",
-    "ok": "KOMP-li-key-tid",
+    "ok": "KAMP-li-key-tid",
     "en": "difficult to understand; complex",
     "ex": [
      "The instructions are too <b>complicated</b>."
@@ -31875,7 +31875,7 @@
     "pos": "zarf",
     "sec": "Zarflar",
     "tr": "yaygın olarak",
-    "ok": "KO-mın-li",
+    "ok": "KA-mın-li",
     "en": "often; usually",
     "ex": [
      "This plant is <b>commonly</b> found in gardens."
@@ -32203,7 +32203,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "tropikal",
-    "ok": "TRO-pi-kıl",
+    "ok": "TRA-pi-kıl",
     "en": "relating to hot wet areas near the equator",
     "ex": [
      "Bananas grow in <b>tropical</b> countries."
@@ -32774,7 +32774,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "değiştirmek, düzenlemek",
-    "ok": "MO-di-fay",
+    "ok": "MA-di-fay",
     "en": "to change slightly",
     "ex": [
      "We had to <b>modify</b> the design."
@@ -33078,7 +33078,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "psikolog",
-    "ok": "say-KO-lı-cist",
+    "ok": "say-KA-lı-cist",
     "en": "a person who studies the mind",
     "ex": [
      "The <b>psychologist</b> helped her deal with stress."
@@ -33183,7 +33183,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "hacim; ses seviyesi; cilt",
-    "ok": "VOL-yum",
+    "ok": "VAL-yum",
     "en": "the amount of space; how loud a sound is",
     "ex": [
      "The tank holds a large <b>volume</b> of water.",
@@ -33197,7 +33197,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "stok; hisse senedi",
-    "ok": "STOK",
+    "ok": "STAK",
     "en": "a supply of goods for sale",
     "ex": [
      "The shop has a large <b>stock</b> of shoes.",
@@ -33404,7 +33404,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ekran; izlemek",
-    "ok": "MO-ni-tır",
+    "ok": "MA-ni-tır",
     "en": "to watch and check; a screen",
     "ex": [
      "The words appeared on the <b>monitor</b>.",
@@ -33441,7 +33441,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "atış; çekim",
-    "ok": "ŞOT",
+    "ok": "ŞAT",
     "en": "the firing of a gun; an attempt",
     "ex": [
      "We heard a <b>shot</b> in the distance.",
@@ -33574,7 +33574,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "gözlem",
-    "ok": "ob-zır-VEY-şın",
+    "ok": "ab-zır-VEY-şın",
     "en": "the act of watching carefully; a remark",
     "ex": [
      "Careful <b>observation</b> is important in science."
@@ -33684,7 +33684,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "ürün, ekin",
-    "ok": "KROP",
+    "ok": "KRAP",
     "en": "a plant grown for food",
     "ex": [
      "The <b>crop</b> of wheat was good this year."
@@ -33746,7 +33746,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "şok",
-    "ok": "ŞOK",
+    "ok": "ŞAK",
     "en": "a sudden upsetting surprise",
     "ex": [
      "The news came as a great <b>shock</b>."
@@ -33879,7 +33879,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "yayın; yayınlamak",
-    "ok": "BROD-kast",
+    "ok": "BROD-kest",
     "en": "to send out on radio or TV; a programme",
     "ex": [
      "The match was <b>broadcast</b> live.",
@@ -34258,7 +34258,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "usta; efendi; ustalaşmak",
-    "ok": "MAS-tır",
+    "ok": "MES-tır",
     "en": "to learn fully; a skilled person",
     "ex": [
      "It takes years to <b>master</b> a language.",
@@ -34487,7 +34487,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "konsantrasyon",
-    "ok": "kon-sın-TREY-şın",
+    "ok": "kan-sın-TREY-şın",
     "en": "the ability to give full attention",
     "ex": [
      "The noise broke my <b>concentration</b>."
@@ -34696,7 +34696,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "bağ; tahvil",
-    "ok": "BOND",
+    "ok": "BAND",
     "en": "a close connection; to join",
     "ex": [
      "There is a strong <b>bond</b> between the sisters.",
@@ -34734,7 +34734,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "sözleşme",
-    "ok": "KON-trekt",
+    "ok": "KAN-trekt",
     "en": "a written legal agreement",
     "ex": [
      "She signed a two-year <b>contract</b>."
@@ -35613,7 +35613,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "şaşkın, şoke olmuş",
-    "ok": "ŞOKT",
+    "ok": "ŞAKT",
     "en": "very surprised and upset",
     "ex": [
      "We were <b>shocked</b> by the sad news."
@@ -35781,7 +35781,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "hâkim olmak, egemen olmak",
-    "ok": "DO-mi-neyt",
+    "ok": "DA-mi-neyt",
     "en": "to control or be the strongest",
     "ex": [
      "One team <b>dominated</b> the match."
@@ -36145,7 +36145,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "katkı",
-    "ok": "kont-ri-BYU-şın",
+    "ok": "kant-ri-BYU-şın",
     "en": "something you give to help",
     "ex": [
      "Everyone made a <b>contribution</b> to the gift."
@@ -36350,7 +36350,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "oyuncu kadrosu; atmak",
-    "ok": "KAST",
+    "ok": "KEST",
     "en": "the actors in a play; to throw",
     "ex": [
      "The whole <b>cast</b> took a bow.",
@@ -36412,7 +36412,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "onur, şeref",
-    "ok": "O-nır",
+    "ok": "A-nır",
     "en": "great respect; to show respect",
     "ex": [
      "It is an <b>honour</b> to meet you."
@@ -36449,7 +36449,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "yürütmek; davranış",
-    "ok": "KON-dakt",
+    "ok": "KAN-dakt",
     "en": "behaviour; to organize or lead",
     "ex": [
      "His <b>conduct</b> at school was excellent.",
@@ -36571,7 +36571,7 @@
     "pos": "isim",
     "sec": "İsimler",
     "tr": "psikoloji",
-    "ok": "say-KO-lı-ci",
+    "ok": "say-KA-lı-ci",
     "en": "the study of the mind and behaviour",
     "ex": [
      "She has a degree in <b>psychology</b>."
@@ -36583,7 +36583,7 @@
     "pos": "sıfat",
     "sec": "Sıfatlar",
     "tr": "engin, uçsuz bucaksız",
-    "ok": "VAST",
+    "ok": "VEST",
     "en": "extremely large",
     "ex": [
      "A <b>vast</b> desert stretched before them."
@@ -36764,7 +36764,7 @@
     "pos": "fiil",
     "sec": "Fiiller",
     "tr": "bağış, hibe; vermek",
-    "ok": "GRANT",
+    "ok": "GRENT",
     "en": "money given for a purpose; to allow",
     "ex": [
      "She won a <b>grant</b> to study abroad.",

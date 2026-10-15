@@ -49,10 +49,9 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 - [x] 12. Varsayılan yeni kelime sayısı 100 → 20 (ayarı elle değiştirmiş kullanıcıya dokunulmaz;
       yarım kalan tur kendi sayısıyla biter, sonraki tur 20'lik kurulur).
-- [ ] 13. Yazılı cevap: tek harf hatası "neredeyse doğru" (doğru sayılır, doğrusu gösterilir)
-      + yanlış sayılan cevapta "doğru saydır" düğmesi.
-- [ ] 14. Okunuş tutarlılığı: uygulama US sesi çalıyor, bazı okunuşlar UK (`proper → PRO-pır`).
-      Şüpheli kayıtlar scriptle bulunur, düzeltilir; validate.py'ye kural.
+- [x] 13. Yazılı cevap esnekliği: yapılmadı (kullanıcı kararı; aşağıda "Bilerek bırakılanlar").
+- [x] 14. Okunuş tutarlılığı (kullanıcı kararı: Amerikan'a çevir): 243 okunuş düzeltildi
+      (`proper → PRA-pır`, `ask → ESK`); validate.py İngiliz söyleyişinde kalanı yakalar.
 - [ ] 15. İsteğe bağlı IPA gösterimi (`data/sources/ipa_ref.json` hazır).
 - [ ] 16. Hile tespiti: eşik ve mesaj tonu gözden geçirilir (bilen kullanıcı yanlışlıkla yakalanmasın).
 
@@ -93,6 +92,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
   geçiren onu da kullanırdı — ek koruma çok az. Asıl koruma GitHub hesabında iki adımlı
   doğrulama. (Kullanıcı kararı, Ekim 2026.)
 
+- Yazılı cevapta tek harf hatası yine yanlış sayılıyor, "doğru saydır" düğmesi yok (13): hazırlanan
+  değişiklik (kapatılan PR #9) kullanıcı tarafından istenmedi — mevcut katı kontrolden memnun (Ekim 2026).
 - Arkadaş istatistikleri telefondan geldiği için sahtelenebilir — yalnız arkadaşlar arası
   görünüyor, ödül/sıralama yok.
 - Kurtarma koduyla hesap taşınınca eski anonim giriş kaydı sunucuda kalıyor — zararsız,

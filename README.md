@@ -48,6 +48,10 @@ Heceler tireli, vurgulu hece BÜYÜK harf, yalnız Türkçe harfler
 (w→u/v, th→t/d yaklaşık). Örnek: `apartment → ı-PART-mınt`,
 `language → LENG-güiç`, `winter → UİN-tır`.
 
+Söyleyiş **Amerikan** (uygulama US sesi çalar): `hot → HAT`, `body → BA-di`,
+`ask → ESK`, `after → EF-tır`. `validate.py`, `data/sources/ipa_ref.json`'a bakarak
+İngiliz söyleyişinde kalan okunuşu yakalar.
+
 ## İçerik düzeltme
 
 1. Grubun `scripts/enrich/gN.py` dosyasında

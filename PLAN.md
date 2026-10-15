@@ -73,7 +73,7 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 - [x] 22. `log.js`: olaylar bellekte birikir, en geç 1 sn sonra tek seferde yazılır; sayfadan çıkarken /
       arka plana geçerken hemen yazılır (`tests/log.test.js`). Dolu kayıtta 100 olay: 272 ms → <1 ms.
-- [ ] 23. Kart çevirme: 600 KB three.js + WebGL yerine CSS 3D (önce/sonra ekran kaydıyla).
+- [x] 23. Kart çevirme: yapılmadı (kullanıcı kararı; aşağıda "Bilerek bırakılanlar"). three.js kalıyor.
 - [ ] 24. Kelime verisi her sayfaya ayrı gömülmez; tek veri dosyası (paket ~3 MB → ~1 MB).
 - [ ] 25. `scripts/enrich/g*.py` (veri kod içinde) → veri dosyası.
 - [ ] 26. Testler: `hesap.js` ve Supabase fonksiyonları için (güncelleyici testi adım 3'te geldi).
@@ -102,6 +102,9 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
   değişiklik (kapatılan PR #9) kullanıcı tarafından istenmedi — mevcut katı kontrolden memnun (Ekim 2026).
 - IPA gösterimi (15, kapatılan PR #11), ilk açılışta takma ad sorusunun ertelenmesi (17) ve kart
   ekranı düzeni (20) yapılmadı: kullanıcı istemedi (Ekim 2026).
+- Kart çevirme three.js + WebGL ile kalıyor (23): CSS 3D sürümü (kapatılan PR #15) kartın kâğıt gibi
+  bükülmesini yapamıyordu; kullanıcı birebir aynısı olmayacaksa istemedi (Ekim 2026). Bedeli: paket
+  ~600 KB büyük.
 - Arkadaş istatistikleri telefondan geldiği için sahtelenebilir — yalnız arkadaşlar arası
   görünüyor, ödül/sıralama yok.
 - Kurtarma koduyla hesap taşınınca eski anonim giriş kaydı sunucuda kalıyor — zararsız,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Thousand üretim hattı (içerik: Oxford 3000 kelime listesi).
+"""Thousand üretim hattı.
 
 1. data/all_groups.json'u yükler (30 grup x 100 kelime; okunuş, açıklama, örnekler dahil —
    içeriğin tek kaynağı bu dosya).

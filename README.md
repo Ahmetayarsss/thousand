@@ -1,8 +1,7 @@
 # Thousand — İngilizce kelime çalışma uygulaması
 
-Türkçe konuşanlar için İngilizce kelime çalışma uygulaması (Android, `app/`). İçerik, Oxford 3000
-kelime listesinin (A1–B2) kelimeleri üzerine kurulu; uygulamanın adı ve kimliği Oxford'la ilişkili
-değildir.
+Türkçe konuşanlar için İngilizce kelime çalışma uygulaması (Android, `app/`). İçerik: CEFR A1–B2
+seviyelerinde 3000 İngilizce kelime.
 
 Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 
@@ -17,7 +16,6 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | Dosya | Açıklama |
 |---|---|
 | `data/all_groups.json` | Tek doğruluk kaynağı — 30 grup, kelime başına `w, pos, sec, tr, ok, en, ex` |
-| `data/sources/ipa_ref.json` | Okunuş yazarken referans IPA (Oxford Learner's, [tyypgzl/Oxford-5000-words](https://github.com/tyypgzl/Oxford-5000-words)) |
 | `templates/` | Sayfa şablonları (`__SOZLUK__` vb. yer tutucular build'de doldurulur; kelime verisi `app/www/kelimeler.js`'ten gelir) ve `updater.js` |
 | `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`), sayfaların ortak kelime verisini (`app/www/kelimeler.js`) ve güncelleme paketini (`web.json`, `web-version.txt`, `app/www/updater.js` — repoda tutulmaz) üretir |
 | `scripts/validate.py` | Veri tutarlılık kontrolleri |
@@ -46,8 +44,7 @@ Heceler tireli, vurgulu hece BÜYÜK harf, yalnız Türkçe harfler
 `language → LENG-güiç`, `winter → UİN-tır`.
 
 Söyleyiş **Amerikan** (uygulama US aksanıyla okur): `hot → HAT`, `body → BA-di`,
-`ask → ESK`, `after → EF-tır`. `validate.py`, `data/sources/ipa_ref.json`'a bakarak
-İngiliz söyleyişinde kalan okunuşu yakalar.
+`ask → ESK`, `after → EF-tır`.
 
 ## İçerik düzeltme
 

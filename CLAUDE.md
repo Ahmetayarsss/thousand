@@ -15,7 +15,8 @@ kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 
 - **Kaynak (elle düzenlenir):** `data/all_groups.json` (bütün kelime içeriği), `templates/*.html`,
   `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js`,
-  `supabase/kurulum.sql`, `app/android/**`.
+  `supabase/kurulum.sql`, `app/android/**`, `app/www/audio/*.mp3` (kelime ses kayıtları; adları
+  `slugOf` kuralıyla, `validate.py` denetler).
 - **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html` ve `app/www/kelimeler.js` (repoda). Güncelleme paketi
   (`app/www/updater.js`, `web.json`, `web-version.txt`) de üretilir ama repoya girmez.
 

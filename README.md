@@ -16,9 +16,10 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | Dosya | Açıklama |
 |---|---|
 | `data/all_groups.json` | Tek doğruluk kaynağı — 30 grup, kelime başına `w, pos, sec, tr, ok, en, ex` |
+| `app/www/audio/` | Kelimelerin insan sesi kayıtları (`<kelime>.mp3`, ad sayfalardaki `slugOf` kuralıyla; eş yazılan kelimeler tek kaydı paylaşır). APK'ya gömülür, güncelleme paketine girmez; kaydı olmayan kelimeyi cihazın TTS'i okur |
 | `templates/` | Sayfa şablonları (`__SOZLUK__` vb. yer tutucular build'de doldurulur; kelime verisi `app/www/kelimeler.js`'ten gelir) ve `updater.js` |
 | `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`), sayfaların ortak kelime verisini (`app/www/kelimeler.js`) ve güncelleme paketini (`web.json`, `web-version.txt`, `app/www/updater.js` — repoda tutulmaz) üretir |
-| `scripts/validate.py` | Veri tutarlılık kontrolleri |
+| `scripts/validate.py` | Veri tutarlılık kontrolleri; sahipsiz ses dosyası hata, sesi olmayan kelime bildirilir |
 | `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, ölü dosya, belge kayması, paket tutarlılığı; bilinen borçlar `scripts/bekci_borc.json` |
 | `tests/srs.test.js` | Tekrar sistemi (`app/www/srs.js`) testleri |
 | `tests/updater.test.js` | Uygulama içi güncelleyici (`templates/updater.js`) testleri |

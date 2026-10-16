@@ -35,8 +35,10 @@ istatistik ⇄ kartlar ⇄ liste ⇄ sözlük
 aralıklar 1 → 3 → 7 gün, sonra olgun 7 → 14 → 30 → 60 gün. Yanlış cevap bir kutu
 düşürür (en az 1. kutu; olgun kelime 2. kutuya iner). Günler yerel saatle gece yarısı değişir.
 
-**Ses:** kelime için `www/audio/<kelime>.mp3` varsa o çalar, yoksa cihazın TTS'i
-(`www/tts-bridge.js`, yalnız US aksanı).
+**Ses:** kelime için `www/audio/<kelime>.mp3` (insan sesi, 2976 kayıt) varsa o çalar, yoksa
+cihazın TTS'i (`www/tts-bridge.js`, yalnız US aksanı). Dosya adı sayfalardaki `slugOf` ile
+türetilir (`next to` → `next-to.mp3`); eş yazılan kelimeler (`live`, `close`, `IT`/`it`…) tek
+kaydı paylaşır. Sesler APK'nın içindedir, güncelleme paketiyle gelmez: yeni ses yeni APK ister.
 
 ```
 app/
@@ -49,6 +51,7 @@ app/
     log.js             # kullanım kaydı — elle yazılır
     tts-bridge.js      # native TTS köprüsü + bildirimden sayfa açma — elle yazılır
     three.min.js       # kart çevirme animasyonu
+    audio/*.mp3        # kelimelerin insan sesi kayıtları — elle eklenir, APK'ya gömülür
   android/             # native proje; io/github/ahmetayarsss/thousand/ altında:
                        #   GroupTts*  "Listeyi oku" servisi, Bildirim* / *Worker bildirimler,
                        #   Uygulama   geri tuşu, MainActivity eklenti kaydı

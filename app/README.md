@@ -1,5 +1,9 @@
 # Thousand — Android uygulaması (Capacitor)
 
+Capacitor 7, hedef Android 15 (`targetSdk` 35), en düşük Android 6 (`minSdk` 23). Sürümler
+`android/variables.gradle`'da; Android 15'te sayfa durum/gezinme çubuklarının altına girmesin diye
+`capacitor.config.json` → `android.adjustMarginsForEdgeToEdge: auto`.
+
 Kelime listesi, kartlar (test + sınav), sözlük, istatistik, ayarlar ve arkadaşlar
 sayfalarını tek bir Android uygulamasında toplar. İlerleme telefonda (`localStorage`)
 saklanır; hesap açılırsa Supabase'e yedeklenir.

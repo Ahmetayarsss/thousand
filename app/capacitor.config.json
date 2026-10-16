@@ -3,7 +3,8 @@
   "appName": "Thousand",
   "webDir": "www",
   "android": {
-    "allowMixedContent": false
+    "allowMixedContent": false,
+    "adjustMarginsForEdgeToEdge": "auto"
   },
   "plugins": {
     "CapacitorHttp": {

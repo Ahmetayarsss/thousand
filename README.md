@@ -30,14 +30,11 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + üretilen dosyaların güncelliği |
 | `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK'yı (release, mühürlü) ve güncelleme paketini derleyip `apk-latest` release'ine koyar. PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
-| `.github/workflows/fetch-audio.yml` | Sözlük US seslerini `app/www/audio/`'ya indirir (elle, bir çalışma dalında) |
 | `app/` | Android uygulaması (Capacitor) — yapı ve APK için `app/README.md` |
 
 ## Alanlar
 
 - `tr`: Türkçe anlam. Birden çok anlam `;`, eş anlamlılar `,` ile ayrılır.
-- `cam`: Sözlük linki — `/dictionary/english-turkish/SLUG`
-  (küçük harf, boşluk/özel karakter → tire, `o'clock → o-clock`).
 - `ok` (okunuş), `en` (İngilizce açıklama), `ex` (örnek cümleler, kelime `<b>` içinde).
 
 30 grubun hepsinde bütün alanlar dolu; `validate.py` bunu denetler.
@@ -61,5 +58,3 @@ Söyleyiş **Amerikan** (uygulama US sesi çalar): `hot → HAT`, `body → BA-d
 
 ## Notlar
 
-- CEFR seviyeleri Oxford'a göredir; Sözlük bazı kelimeleri bir seviye farklı
-  gösterebilir (ör. apartment: Oxford A1, Sözlük A2) — ikisi de geçerli.

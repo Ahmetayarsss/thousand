@@ -35,7 +35,7 @@ istatistik ⇄ kartlar ⇄ liste ⇄ sözlük
 aralıklar 1 → 3 → 7 gün, sonra olgun 7 → 14 → 30 → 60 gün. Yanlış cevap bir kutu
 düşürür (en az 1. kutu; olgun kelime 2. kutuya iner). Günler yerel saatle gece yarısı değişir.
 
-**Ses:** önce APK'ya gömülü Sözlük US kaydı (`www/audio/`), yoksa cihazın TTS'i
+**Ses:** önce APK'ya gömülü US kaydı (`www/audio/`), yoksa cihazın TTS'i
 (`www/tts-bridge.js`, yalnız US aksanı).
 
 ```

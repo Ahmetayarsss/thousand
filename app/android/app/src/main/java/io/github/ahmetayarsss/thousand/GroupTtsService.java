@@ -48,7 +48,7 @@ import java.util.Map;
 /**
  * "Listeyi oku" — Spotify tarzı okuma hizmeti (FOREGROUND SERVICE).
  *
- * Her kelime bir "parça" gibi: önce uygulamaya GÖMÜLÜ Sözlük mp3'ü (assets:
+ * Her kelime bir "parça" gibi: önce uygulamaya GÖMÜLÜ mp3'ü (assets:
  * public/audio/{slug}.mp3) MediaPlayer ile çalınır, yoksa cihaz TTS'i (İngilizce).
  * Ayarda açıksa ardından Türkçe anlamı TTS ile okunur. Liste bitince döngü açıksa
  * baştan başlar, kapalıysa durur.

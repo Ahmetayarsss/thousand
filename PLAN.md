@@ -41,7 +41,6 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 9. Kullanım kayıtları yalnız izinle (kullanıcı kararı: bir kez sorulsun): hesap açılınca, kurtarma
       kodundan sonra ve izni hiç sorulmamış hesaplarda ana sayfada bir kez sorulur; "evet" anından önceki
       olaylar gönderilmez. Ayarlar → Gizlilik: aç/kapa + sunucuda neyin tutulduğunu anlatan kısa metin.
-- [x] 10. Sözlük ses dosyaları: kullanıcı kararıyla kalıyor (aşağıda "Bilerek bırakılanlar").
 - [x] 11. Ad "Thousand", paket `io.github.ahmetayarsss.thousand` (kullanıcı kararı; uygulama herkese
       dağıtılacak). Eski uygulamada taşıma rehberi; bekçi `marka-adi` kuralı adın geri girmesini engeller.
 
@@ -92,9 +91,6 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Bilerek bırakılanlar (şimdilik)
 
-- Sözlük ses dosyaları (10): telif Sözlük'in; uygulama herkese dağıtılınca ihlal sayılır,
-  şikâyet gelirse Play Store uygulamayı kaldırabilir / hesaba uyarı gelebilir. Kullanıcı bu riski
-  bilerek sesleri tuttu (Ekim 2026). Çıkış yolu: cihaz sesi (TTS) ya da lisanslı ses.
 - İmza anahtarının iç adı (`keyAlias "oxford"`) ve sertifikadaki "CN=Oxford 3000": kullanıcıya
   görünmez; değiştirmek yeni anahtar + yeni gizli ayar ister. Bekçinin marka kuralı yalnız
   "Oxford 3000" biçimini yakalar, bu yüzden takılmaz.

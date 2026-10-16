@@ -3,7 +3,7 @@
 """data/all_groups.json tutarlılık kontrolleri.
 
 - 30 grup x 100 kelime; seviye toplamları A1=900, A2=800, B1=700, B2=600.
-- Her kelimede tr ve cam dolu; cam linki english-turkish biçiminde.
+- Her kelimede tr dolu.
 - ok dolu ise: yalnız Türkçe harfler + tire, heceler tireli, en az bir hece
   TAMAMEN BÜYÜK (vurgu). en/ex de dolu olmalı.
 - ex dolu ise kelimeyi (ya da bir çekimini) içermeli — <b>...</b> işaretli.
@@ -100,9 +100,6 @@ def main():
             w = it["w"]
             if not it.get("tr"):
                 err(f"G{gno} {w!r}: tr boş")
-            cam = it.get("cam", "")
-            if not re.match(r"^https://dictionary\.sozluk\.org/dictionary/english-turkish/[a-z0-9-]+$", cam):
-                err(f"G{gno} {w!r}: cam linki bozuk: {cam!r}")
             ok, en, ex = it.get("ok", ""), it.get("en", ""), it.get("ex", "")
             if ok:
                 check_ok(gno, w, ok)

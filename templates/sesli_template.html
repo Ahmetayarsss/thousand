@@ -44,8 +44,6 @@ select{flex:1;min-width:0;border:1px solid var(--line);background:var(--field);b
 .tr{color:var(--tr);font-size:14px;margin-top:3px}
 .en{color:var(--en);font-size:13px;margin-top:3px}
 .ex{color:var(--ex);font-size:13px;font-style:italic;margin-top:5px;border-top:1px dashed var(--line);padding-top:5px}
-.cam{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:var(--cam);text-decoration:none;background:var(--cam-bg);border:1px solid var(--cam-line);border-radius:7px;padding:3px 8px}
-.cam:active{opacity:.8}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
 .seclabel{font-size:16px;font-weight:800;color:var(--ink);padding:6px 2px 4px}
 /* 3000 kelimenin hepsi döngüye girince: küçük havai fişek gösterisi + OLMİŞDUR */
@@ -82,7 +80,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-
   <input class="search" id="search" placeholder="Listede ara… (İngilizce/Türkçe)">
 </header>
 <a class="hint kurban" id="kurban" href="ayarlar.html#kurulum">⚠️ <b>Uygulama yeni adıyla (Thousand) taşınıyor.</b> İlerlemen kaybolmasın diye nasıl yapılacağını gör →</a>
-<div class="hint warn" id="warn">Bu tarayıcı sesli okumayı desteklemiyor gibi. Her karttaki <b>Sözlük</b> bağlantısını kullan.</div>
+<div class="hint warn" id="warn">Bu tarayıcı sesli okumayı desteklemiyor gibi.</div>
 <div id="list"></div>
 </div>
 <script>
@@ -106,7 +104,7 @@ const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNative
 const GT=NATIVE?((window.Capacitor.Plugins&&Capacitor.Plugins.GroupTts)||(typeof Capacitor.registerPlugin==='function'&&Capacitor.registerPlugin('GroupTts'))||null):null;
 function clr(){if(cur){cur.classList.remove('playing');cur=null;}}
 function clrWord(){if(wordCard){wordCard.classList.remove('playing');wordCard=null;}}
-// Geçici teşhis balonu: Sözlük sesi neden gelmedi görünsün.
+// Geçici teşhis balonu: ses neden gelmedi görünsün.
 let toastEl=null,toastTimer=null;
 function toast(msg){if(!toastEl){toastEl=document.createElement('div');toastEl.style.cssText='position:fixed;left:50%;bottom:calc(22px + var(--navh,0px) + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1B2430;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;pointer-events:none';document.body.appendChild(toastEl);}toastEl.textContent=msg;toastEl.style.opacity='1';if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(toastEl)toastEl.style.opacity='0';},4000);}
 // Kalıcı teşhis çubuğu (üstte, dokununca kapanır). Toast'tan daha görünür.
@@ -154,7 +152,7 @@ function playAudioUrl(url,card){return new Promise(res=>{
   a.addEventListener('playing',ok);a.onended=()=>clrWord();a.onerror=()=>{if(!done){done=true;clrWord();res(false);}};
   a.play().then(ok).catch(()=>{if(!done){done=true;clrWord();res(false);}});
 });}
-// Tek kelime 🔊: 1) uygulamaya gömülü Sözlük sesi (offline) → 2) cihaz sesi.
+// Tek kelime 🔊: 1) uygulamaya gömülü ses (offline) → 2) cihaz sesi.
 async function one(t,card){
   if(synth)synth.cancel();stop();
   try{if(await playAudioUrl('audio/'+slugOf(t)+'.mp3',card))return;}catch(e){}

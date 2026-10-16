@@ -191,7 +191,7 @@ function loadV(){voices=synth?synth.getVoices():[];}
 if(synth){loadV();synth.onvoiceschanged=loadV;}else{document.getElementById('warn').style.display='block';}
 function pick(l){if(!voices.length)loadV();return voices.find(v=>v.lang===l)||voices.find(v=>v.lang&&v.lang.slice(0,2)===l.slice(0,2))||null;}
 function speak(t){if(!synth)return;synth.cancel();const u=new SpeechSynthesisUtterance(t);const v=pick(LANG);if(v)u.voice=v;u.lang=LANG;u.rate=0.85;synth.speak(u);}
-// Native Sözlük sesi (varsa): 🔊 → gerçek insan sesi, yoksa cihaz TTS'i.
+// Native ses (varsa): 🔊 → gerçek insan sesi, yoksa cihaz TTS'i.
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 // Eklenti nesnesi: Capacitor'un sayfaya enjekte ettiği Capacitor.Plugins.GroupTts (@capacitor/core
 // paketlenmediği için registerPlugin YOK — eskiden yalnız ona bakıldığından native okuma hiç çalışmıyordu).
@@ -212,7 +212,7 @@ function playAudioUrl(url){return new Promise(res=>{
   a.addEventListener('playing',ok);a.onerror=()=>{if(!done){done=true;res(false);}};
   a.play().then(ok).catch(()=>{if(!done){done=true;res(false);}});
 });}
-// 🔊: 1) uygulamaya gömülü Sözlük sesi (offline) → 2) cihaz sesi.
+// 🔊: 1) uygulamaya gömülü ses (offline) → 2) cihaz sesi.
 async function sayWord(t){
   try{if(await playAudioUrl('audio/'+slugOf(t)+'.mp3'))return;}catch(e){}
   speak(t);}

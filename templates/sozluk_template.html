@@ -59,7 +59,7 @@ function playAudioUrl(url,btn){return new Promise(res=>{
   a.addEventListener('playing',ok);a.onended=()=>clrBtn();a.onerror=()=>{if(!done){done=true;clrBtn();res(false);}};
   a.play().then(ok).catch(()=>{if(!done){done=true;clrBtn();res(false);}});
 });}
-// 🔊: uygulamaya gömülü Sözlük sesi → yoksa cihaz sesi.
+// 🔊: uygulamaya gömülü ses → yoksa cihaz sesi.
 async function say(w,btn){
   if(synth)synth.cancel();
   try{if(await playAudioUrl('audio/'+slugOf(w)+'.mp3',btn))return;}catch(e){}

@@ -93,7 +93,7 @@ THEME_HEAD = (
     # Açık tema: şablonlarda olmayan ortak değişkenler (şablonların kendi :root'u önce gelir).
     ":root{--solid:#1B2430;--on-solid:#fff;--field:#fff;--soft:#E9EDF3;--soft2:#EEF2F7;--en:#33414F;--ex:#5B6B7B;"
     "--sep:#D5DCE7;--face-line:#c7d2e3;--hdr:rgba(245,246,248,.95);--bad-bg:#FDECEA;--bad-line:#F5C4BD;--bad-ink:#8A2A1E;"
-    "--good-bg:#E9F7EF;--warn-bg:#FCF3E3;--warn-line:#F2E0BE;--warn-ink:#8A6D3B;--cam:#0B5FA5;--cam-bg:#E8F1FB;--cam-line:#C4DBF3;"
+    "--good-bg:#E9F7EF;--warn-bg:#FCF3E3;--warn-line:#F2E0BE;--warn-ink:#8A6D3B;"
     "--kb:#D9E0EA;--key:#fff;--key2:#B9C4D4;--key3:#AEB9C9;--key4:#8E9BB0;--shade:rgba(20,30,50,.06);--scrim:rgba(20,27,38,.5);--bar:#fff}"
     ":root[data-theme=dark]{color-scheme:dark;--bg:#0F141B;--card:#19202A;--ink:#E4E9F0;--ink2:#C5CDD8;--muted:#8D99AA;"
     "--line:#2B3542;--accent:#5B8FD0;--green:#35A867;--green-d:#2E9A5E;--red:#DE5F57;--red-d:#E87A72;--tr:#EE8579;"
@@ -101,7 +101,7 @@ THEME_HEAD = (
     "--secgray-ink:#7C8899;--gold:#D4AE3A;--gold-bg:#3A3218;--dev:#B27AD0;"
     "--solid:#2F3B4C;--on-solid:#F2F5F9;--field:#222B36;--soft:#222B36;--soft2:#1E2631;--en:#C5CDD8;--ex:#9AA6B6;"
     "--sep:#3A4554;--face-line:#2B3542;--hdr:rgba(15,20,27,.95);--bad-bg:#3A1E1C;--bad-line:#5A2C28;--bad-ink:#F2A59D;"
-    "--good-bg:#17352A;--warn-bg:#3A2C1A;--warn-line:#5A4428;--warn-ink:#E8C48A;--cam:#8DB8E8;--cam-bg:#1D2A3A;--cam-line:#2D4560;"
+    "--good-bg:#17352A;--warn-bg:#3A2C1A;--warn-line:#5A4428;--warn-ink:#E8C48A;"
     "--kb:#151B23;--key:#2A3442;--key2:#3A4656;--key3:#3A4656;--key4:#4A5768;--shade:rgba(0,0,0,.35);--scrim:rgba(0,0,0,.6);--bar:#151B23}"
     "</style>"
 )

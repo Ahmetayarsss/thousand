@@ -36,7 +36,6 @@ BORC_DOSYASI = ROOT / "scripts" / "bekci_borc.json"
 IZINLI_ALANLAR = {
     "ezztsktfyangyzrdkszb.supabase.co": "hesap, arkadaşlar, yedek, kayıtlar (supabase/kurulum.sql)",
     "github.com": "uygulama içi güncelleme: yalnız apk-latest release'i (templates/updater.js)",
-    "": "yalnız kullanıcının açtığı sözlük bağlantıları (veri gönderilmez)",
     "schemas.android.com": "XML ad alanı (ağ isteği değil)",
     "www.w3.org": "SVG/XML ad alanı (ağ isteği değil)",
     "d.android.com": "yorum içindeki belge bağlantısı",

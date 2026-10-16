@@ -91,9 +91,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 
 ## Bilerek bırakılanlar (şimdilik)
 
-- İmza anahtarının iç adı (`keyAlias "oxford"`) ve sertifikadaki "CN=Oxford 3000": kullanıcıya
-  görünmez; değiştirmek yeni anahtar + yeni gizli ayar ister. Bekçinin marka kuralı yalnız
-  "Oxford 3000" biçimini yakalar, bu yüzden takılmaz.
+- İmza anahtarının iç adı (`keyAlias "oxford"`): kullanıcıya görünmez; değiştirmek `build.gradle`,
+  `build-apk.yml` ve anahtarın kendisini birlikte değiştirmeyi ister. Sertifika adı "CN=Thousand".
 
 - Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele
   geçiren onu da kullanırdı — ek koruma çok az. Asıl koruma GitHub hesabında iki adımlı

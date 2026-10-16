@@ -58,8 +58,8 @@ jobs:
           java-version: "21"
 
       # İmza anahtarı repoda değil: GitHub → Settings → Secrets and variables → Actions'taki
-      # IMZA_ANAHTARI (base64 PKCS12) ve IMZA_PAROLA'dan açılır. Yoksa yayın yapılmaz (yanlış
-      # anahtarla imzalı APK telefondakinin üstüne kurulamaz).
+      # IMZA_ANAHTARI (base64 PKCS12, takma adı "oxford") ve IMZA_PAROLA'dan açılır. Yoksa yayın
+      # yapılmaz (yanlış anahtarla imzalı APK telefondakinin üstüne kurulamaz).
       - name: İmza anahtarını hazırla
         if: github.event_name != 'pull_request'
         env:

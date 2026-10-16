@@ -35,7 +35,7 @@ istatistik ⇄ kartlar ⇄ liste ⇄ sözlük
 aralıklar 1 → 3 → 7 gün, sonra olgun 7 → 14 → 30 → 60 gün. Yanlış cevap bir kutu
 düşürür (en az 1. kutu; olgun kelime 2. kutuya iner). Günler yerel saatle gece yarısı değişir.
 
-**Ses:** önce APK'ya gömülü US kaydı (`www/audio/`), yoksa cihazın TTS'i
+**Ses:** kelime için `www/audio/<kelime>.mp3` varsa o çalar, yoksa cihazın TTS'i
 (`www/tts-bridge.js`, yalnız US aksanı).
 
 ```
@@ -49,7 +49,6 @@ app/
     log.js             # kullanım kaydı — elle yazılır
     tts-bridge.js      # native TTS köprüsü + bildirimden sayfa açma — elle yazılır
     three.min.js       # kart çevirme animasyonu
-    audio/             # gömülü sesler
   android/             # native proje; io/github/ahmetayarsss/thousand/ altında:
                        #   GroupTts*  "Listeyi oku" servisi, Bildirim* / *Worker bildirimler,
                        #   Uygulama   geri tuşu, MainActivity eklenti kaydı
@@ -62,8 +61,7 @@ app/
 bakar; daha yeniyse `web.json`'u indirir, içindeki sürüm aynıysa cihaza yazıp hemen uygular.
 Paketi yalnız CI (`main`'e birleşince) üretir. İndirilen paket üst üste 3 açılışta açılamazsa
 uygulama kendiliğinden APK'daki sürüme döner, o sürümü bir daha indirmez ve kullanıcıya
-"Güncelleme açılamadı — önceki sürüm kullanılıyor" der (bu koruma APK'daki güncelleyicide
-çalışır: bu sürümü içeren APK kurulduktan sonra etkindir).
+"Güncelleme açılamadı — önceki sürüm kullanılıyor" der.
 
 **Karanlık mod:** telefon karanlık moddaysa sayfalar da koyu olur (`scripts/build_all.py` →
 `THEME_HEAD`: `<html data-theme="dark">` + renk değişkenleri). Şablonda sabit renk yazma; değişken
@@ -78,7 +76,7 @@ derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script 
 `.github/workflows/build-apk.yml` `main`'e her birleşmede veya Actions sekmesinden elle
 ("Run workflow") çalışır ve **yayın (release)** APK'sını derler: hata ayıklanamaz (USB ile
 bağlanan biri uygulamanın verisini okuyamaz), `versionCode` her derlemede artar (GitHub çalışma
-numarası). APK `apk-latest` release'inde **`Thousand.apk`** adıyla durur; telefona oradan
+numarası). `apk-latest` etiketi her yayında derlenen commit'e taşınır. APK `apk-latest` release'inde **`Thousand.apk`** adıyla durur; telefona oradan
 kurulur (Ayarlar > bilinmeyen kaynaklara izin). Release'te yalnız `Thousand.apk`, `web.json`,
 `web-version.txt` kalır; başka (eski adlı) dosyalar her yayından sonra silinir.
 
@@ -102,12 +100,9 @@ cd android
 > ayarlar yoksa yayın yapılmaz. Anahtar repoda değil. Yerel derleme Android'in debug anahtarını
 > kullanır; o APK telefondakinin üstüne kurulamaz (yalnız deneme için).
 >
-> **Ad ve paket kimliği:** uygulama "Thousand", paket `io.github.ahmetayarsss.thousand` (Ekim 2026'ya
-> kadar "3000" / `com.oxford3000.study`). Paket değişince Android onu ayrı uygulama sayar: eski
-> uygulamada ana sayfada uyarı ve Ayarlar'da taşıma rehberi çıkar (yedek doğrula → kurtarma kodu →
-> yeni uygulamayı yanına kur → kodu gir → eskisini sil). İşaret: gömülü güncelleyicinin yazdığı
-> `ox_apk_imza = "3"`; eski uygulamalarda yok ya da `"2"`.
+> **Ad ve paket kimliği:** uygulama "Thousand", paket `io.github.ahmetayarsss.thousand`.
 >
-> Eski anahtar (repoda açıktı) Ekim 2026'da değiştirildi. Eski APK'lı telefonlarda ana sayfada
-> uyarı ve Ayarlar'da "Uygulamayı bir kez yeniden kur" kartı çıkar: yedek doğrulanır
-> (`OXACC.yedekDogrula`), kurtarma kodu gösterilir, sonra sil-kur yapılır.
+> **Yeniden kurma uyarısı:** APK'daki güncelleyici açılışta `ox_apk_imza` işaretini yazar
+> (`templates/updater.js`). İşaret `hesap.js`'teki `APK_IMZA` değerinden farklıysa (telefondaki APK
+> güncel paket ya da imzayla kurulmamış) ana sayfada uyarı ve Ayarlar'da rehber çıkar: yedek doğrulanır
+> (`OXACC.yedekDogrula`), kurtarma kodu gösterilir, sonra yeni APK kurulur.

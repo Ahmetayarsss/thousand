@@ -30,7 +30,7 @@ android {
                 storeFile file(imzaDosyasi)
                 storeType "pkcs12"
                 storePassword System.getenv("IMZA_PAROLA")
-                keyAlias "oxford"
+                keyAlias "thousand"
                 keyPassword System.getenv("IMZA_PAROLA")
             }
         }

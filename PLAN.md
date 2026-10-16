@@ -9,7 +9,7 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 1. Ölü kod: `progress.js` (eski kilitli bölüm sistemi) silinir; paket listesi, CI ve
       belgeler temizlenir. README'ler gerçek yapıya göre yeniden yazılır.
 - [x] 2. Artık dosyalar: `proto_*.html`, `media/` ve kökteki tarayıcı sürümleri
-      (`Oxford3000_*.html` + kopya JS'ler) silindi — kullanıcı: tarayıcı sürümü kullanılmıyor.
+      (tarayıcı sürümü sayfaları + kopya JS'ler) silindi — kullanıcı: tarayıcı sürümü kullanılmıyor.
 
 ## Aşama 2 — Güvenlik ve yayın
 
@@ -42,7 +42,7 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
       kodundan sonra ve izni hiç sorulmamış hesaplarda ana sayfada bir kez sorulur; "evet" anından önceki
       olaylar gönderilmez. Ayarlar → Gizlilik: aç/kapa + sunucuda neyin tutulduğunu anlatan kısa metin.
 - [x] 11. Ad "Thousand", paket `io.github.ahmetayarsss.thousand` (kullanıcı kararı; uygulama herkese
-      dağıtılacak). Eski uygulamada taşıma rehberi; bekçi `marka-adi` kuralı adın geri girmesini engeller.
+      dağıtılacak). Eski uygulamada taşıma rehberi.
 
 ## Aşama 5 — Öğrenme (pedagoji)
 
@@ -90,9 +90,6 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
       (minSdk 23; eskiden 5.1). Android 15'te ekran kenarı payı: `adjustMarginsForEdgeToEdge: auto`. Yeni APK ile etkin.
 
 ## Bilerek bırakılanlar (şimdilik)
-
-- İmza anahtarının iç adı (`keyAlias "oxford"`): kullanıcıya görünmez; değiştirmek `build.gradle`,
-  `build-apk.yml` ve anahtarın kendisini birlikte değiştirmeyi ister. Sertifika adı "CN=Thousand".
 
 - Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele
   geçiren onu da kullanırdı — ek koruma çok az. Asıl koruma GitHub hesabında iki adımlı

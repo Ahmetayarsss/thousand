@@ -7,8 +7,7 @@ uymayan değişiklik CI'da (`.github/workflows/kontrol.yml`) kırmızı yanar.
 ## Proje
 
 **Thousand**: Türkçe konuşanlara İngilizce kelime çalışma uygulaması, Android (Capacitor + WebView),
-paket `io.github.ahmetayarsss.thousand`. İçerik Oxford 3000 kelime listesine dayanır ama uygulamanın
-adında, başlıklarında ve kimliğinde "Oxford" kullanılmaz (marka; kullanıcı kararı, Ekim 2026). Hesap, arkadaşlar,
+paket `io.github.ahmetayarsss.thousand`. İçerik CEFR A1–B2 seviyelerinde 3000 İngilizce kelime. Hesap, arkadaşlar,
 yedek ve kullanım kayıtları Supabase'de (`supabase/kurulum.sql`). Kullanıcı Türkçe konuşur;
 kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 
@@ -51,7 +50,6 @@ Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekir
   içinde bütün telefonlarda olur.
 - **`main`'e doğrudan push yok.** İş bir çalışma dalında yapılır, PR açılır, kullanıcı
   birleştirir. PR açıklaması telefonda neyin değişeceğini sade dille söyler.
-- **Eski yayın dalı** (`claude/oxford-3000-pronunciation-defs-inzs33`) donduruldu: ona push edilmez.
 - Güncelleme paketi (`web.json`, `web-version.txt`, `app/www/updater.js`) repoda tutulmaz;
   yalnız CI üretir (bekçi `paket-repoda` kuralı).
 

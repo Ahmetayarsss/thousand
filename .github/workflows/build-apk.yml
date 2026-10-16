@@ -58,7 +58,7 @@ jobs:
           java-version: "21"
 
       # İmza anahtarı repoda değil: GitHub → Settings → Secrets and variables → Actions'taki
-      # IMZA_ANAHTARI (base64 PKCS12, takma adı "oxford") ve IMZA_PAROLA'dan açılır. Yoksa yayın
+      # IMZA_ANAHTARI (base64 PKCS12, takma adı "thousand") ve IMZA_PAROLA'dan açılır. Yoksa yayın
       # yapılmaz (yanlış anahtarla imzalı APK telefondakinin üstüne kurulamaz).
       - name: İmza anahtarını hazırla
         if: github.event_name != 'pull_request'
@@ -71,7 +71,7 @@ jobs:
             exit 1
           fi
           printf '%s' "$IMZA_ANAHTARI" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/imza.p12"
-          keytool -list -storetype PKCS12 -keystore "$RUNNER_TEMP/imza.p12" -storepass "$IMZA_PAROLA" -alias oxford > /dev/null \
+          keytool -list -storetype PKCS12 -keystore "$RUNNER_TEMP/imza.p12" -storepass "$IMZA_PAROLA" -alias thousand > /dev/null \
             || { echo "::error::İmza anahtarı açılamadı (gizli ayar eksik/yanlış kopyalanmış olabilir)."; exit 1; }
           echo "IMZA_DOSYASI=$RUNNER_TEMP/imza.p12" >> "$GITHUB_ENV"
 
@@ -190,7 +190,7 @@ jobs:
         env:
           IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
         run: |
-          beklenen=$(keytool -list -storetype PKCS12 -keystore "$IMZA_DOSYASI" -storepass "$IMZA_PAROLA" -alias oxford | grep -o 'SHA-256): .*' | cut -d' ' -f2)
+          beklenen=$(keytool -list -storetype PKCS12 -keystore "$IMZA_DOSYASI" -storepass "$IMZA_PAROLA" -alias thousand | grep -o 'SHA-256): .*' | cut -d' ' -f2)
           apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -n 1)
           gercek=$("$apksigner" verify --print-certs Thousand.apk | grep -m1 'SHA-256 digest' | awk '{print $NF}')
           echo "beklenen: $beklenen"; echo "APK:      $gercek"
@@ -225,7 +225,7 @@ jobs:
             Telefona kurmak için: indir → aç → "bilinmeyen kaynaklara izin ver".
 
       # Yayın aracı eski dosyaları silmez: adı değişen ya da artık üretilmeyen dosyalar (ör. eski
-      # Oxford3000.apk) release sayfasında kalıp yanlışlıkla indirilmesin. Yeni dosyalar yüklendikten
+      # adlı APK) release sayfasında kalıp yanlışlıkla indirilmesin. Yeni dosyalar yüklendikten
       # SONRA silinir, böylece sayfada hiçbir an APK'sız kalınmaz.
       - name: Release'teki eski dosyaları temizle
         if: github.event_name != 'pull_request'

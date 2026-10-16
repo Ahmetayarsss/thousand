@@ -2,7 +2,7 @@
 
 Türkçe konuşanlar için İngilizce kelime çalışma uygulaması (Android, `app/`). İçerik, Oxford 3000
 kelime listesinin (A1–B2) kelimeleri üzerine kurulu; uygulamanın adı ve kimliği Oxford'la ilişkili
-değildir (Ekim 2026'da "Oxford 3000"den "Thousand"a değiştirildi).
+değildir.
 
 Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 
@@ -16,7 +16,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 
 | Dosya | Açıklama |
 |---|---|
-| `data/all_groups.json` | Tek doğruluk kaynağı — 30 grup, kelime başına `w, pos, sec, tr, ok, en, ex, cam` |
+| `data/all_groups.json` | Tek doğruluk kaynağı — 30 grup, kelime başına `w, pos, sec, tr, ok, en, ex` |
 | `data/sources/ipa_ref.json` | Okunuş yazarken referans IPA (Oxford Learner's, [tyypgzl/Oxford-5000-words](https://github.com/tyypgzl/Oxford-5000-words)) |
 | `templates/` | Sayfa şablonları (`__SOZLUK__` vb. yer tutucular build'de doldurulur; kelime verisi `app/www/kelimeler.js`'ten gelir) ve `updater.js` |
 | `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`), sayfaların ortak kelime verisini (`app/www/kelimeler.js`) ve güncelleme paketini (`web.json`, `web-version.txt`, `app/www/updater.js` — repoda tutulmaz) üretir |
@@ -29,7 +29,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `tests/sunucu.test.sh` | Sunucu (`supabase/kurulum.sql`): geçici PostgreSQL'de kurulumu iki kez çalıştırır, `tests/sunucu/testler.sql`'i (yetkiler, hesap, yedek, arkadaşlık, dürtme, bildirim, kayıtlar, taşıma, silme) koşar; Supabase'in parçaları `tests/sunucu/supabase_taklit.sql`'de taklit edilir |
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + üretilen dosyaların güncelliği |
-| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK'yı (release, mühürlü) ve güncelleme paketini derleyip `apk-latest` release'ine koyar. PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
+| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK'yı (release, mühürlü) ve güncelleme paketini derleyip `apk-latest` release'ine koyar (etiket derlenen commit'e taşınır). PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
 | `app/` | Android uygulaması (Capacitor) — yapı ve APK için `app/README.md` |
 
 ## Alanlar
@@ -45,7 +45,7 @@ Heceler tireli, vurgulu hece BÜYÜK harf, yalnız Türkçe harfler
 (w→u/v, th→t/d yaklaşık). Örnek: `apartment → ı-PART-mınt`,
 `language → LENG-güiç`, `winter → UİN-tır`.
 
-Söyleyiş **Amerikan** (uygulama US sesi çalar): `hot → HAT`, `body → BA-di`,
+Söyleyiş **Amerikan** (uygulama US aksanıyla okur): `hot → HAT`, `body → BA-di`,
 `ask → ESK`, `after → EF-tır`. `validate.py`, `data/sources/ipa_ref.json`'a bakarak
 İngiliz söyleyişinde kalan okunuşu yakalar.
 
@@ -55,6 +55,4 @@ Söyleyiş **Amerikan** (uygulama US sesi çalar): `hot → HAT`, `body → BA-d
    cümle listesi — kelime `<b>` içinde). İçeriğin tek kaynağı bu dosya.
 2. `python3 scripts/build_all.py && python3 scripts/validate.py && python3 scripts/bekci.py`
 3. Üretilen dosyaları da commit'le, PR aç; `main`'e birleşince telefonlara gider.
-
-## Notlar
 

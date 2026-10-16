@@ -7,6 +7,8 @@
 - ok dolu ise: yalnız Türkçe harfler + tire, heceler tireli, en az bir hece
   TAMAMEN BÜYÜK (vurgu). en/ex de dolu olmalı.
 - ex dolu ise kelimeyi (ya da bir çekimini) içermeli — <b>...</b> işaretli.
+- app/www/audio/*.mp3: her ses bir kelimeye ait olmalı (adı sayfalardaki slugOf ile aynı
+  kurala uyar). Sesi olmayan kelimeler yalnız bildirilir; onları cihazın TTS'i okur.
 """
 import json
 import re
@@ -23,6 +25,12 @@ errors = []
 
 def err(msg):
     errors.append(msg)
+
+
+def slug_of(w):
+    # templates/*.html içindeki slugOf ile aynı: parantez atılır, virgülden önceki ilk biçim.
+    b = re.sub(r"\(.*?\)", "", w).split(",")[0]
+    return re.sub(r"^-|-$", "", re.sub(r"[^a-z0-9]+", "-", b.lower()))
 
 
 def check_ok(gno, w, ok):
@@ -80,6 +88,11 @@ def main():
     want = {"A1": 900, "A2": 800, "B1": 700, "B2": 600}
     if totals != want:
         err(f"seviye toplamları {totals} != {want}")
+    slugs = {slug_of(it["w"]) for g in groups for it in g["items"]}
+    sesler = {f.stem for f in (ROOT / "app" / "www" / "audio").glob("*.mp3")}
+    for s in sorted(sesler - slugs):
+        err(f"app/www/audio/{s}.mp3: hiçbir kelimeye ait değil")
+    sessiz = sorted(slugs - sesler)
     if errors:
         print(f"{len(errors)} HATA:")
         for e in errors[:80]:
@@ -87,6 +100,8 @@ def main():
         sys.exit(1)
     done = [g["no"] for g in groups if all(it.get("ok") for it in g["items"])]
     print("OK — kontrol geçti. Okunuşu tam gruplar:", done)
+    print(f"Ses: {len(slugs) - len(sessiz)}/{len(slugs)} kelimenin kaydı var"
+          + (f"; TTS okuyacak: {', '.join(sessiz)}" if sessiz else ""))
 
 
 if __name__ == "__main__":

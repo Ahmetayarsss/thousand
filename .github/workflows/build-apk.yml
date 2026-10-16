@@ -202,6 +202,11 @@ jobs:
             echo "::error::APK hata ayıklanabilir (debuggable) derlenmiş"; exit 1
           fi
 
+      # Yayın aracı var olan etiketi taşımaz; etiket hep yayınlanan commit'i göstersin.
+      - name: apk-latest etiketini bu commit'e taşı
+        if: github.event_name != 'pull_request'
+        run: git push --force origin "HEAD:refs/tags/apk-latest"
+
       - name: Release olarak yayınla (apk-latest)
         if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2

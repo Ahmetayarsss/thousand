@@ -18,6 +18,7 @@ Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`).
 | `src/tema.js` | Açık / koyu tema renkleri |
 | `src/bilesenler/` | Ekranların ortak parçaları: `KelimeKarti.js`, `Pano.js` (İlerleme kartı), `HavaiFisek.js` (bütün kelimeler bitince, Skia), `Tasiniyor.js` |
 | `src/ilerleme/` | İlerleme / İstatistikler: `veri.js` (hesaplar, ekrandan bağımsız), `Grafikler.js` (SVG grafikler, eskisinin ölçüleriyle) |
+| `src/sozluk/arama.js` | Sözlük araması (ekrandan bağımsız) |
 | `src/skiaWeb.web.js` | Webde Skia'yı yükler; Skia kullanan bileşenler webde `…Katmani.web.js` ile tembel yüklenir |
 | `src/kartlar/` | Kartlar ekranının parçaları: `oturum.js` (Test/Sınav kuralları, ekrandan bağımsız), `Deste.js` (üst üste kartlar, fırlatma), `KartYuzu.js`, `Klavye.js` (yazılı kart için uygulama içi klavye), `Cevirme.js` + `cevirmeGeometri.js` (kart çevirme, Skia — eski three.js çevirmesiyle birebir), `yuzYakala.js` (kart yüzünün resmi; `.web.js` webde) |
 | `src/cikis.js` | Sınav sürerken başka sekmeye geçişte onay |

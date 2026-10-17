@@ -41,6 +41,7 @@ node tests/hesap.test.js
 node tests/log.test.js
 TZ=Europe/Istanbul node tests/oturum.test.js   # yeni uygulama: Kartlar mantığı
 TZ=Europe/Istanbul node tests/ilerleme.test.js # yeni uygulama: İlerleme / İstatistikler hesapları
+node tests/sozluk.test.js      # yeni uygulama: Sözlük araması
 node tests/cevirme.test.js     # yeni uygulama: kart çevirme three.js ile birebir mi
 bash tests/sunucu.test.sh      # sunucu (kurulum.sql) — geçici PostgreSQL açar
 python3 scripts/validate.py

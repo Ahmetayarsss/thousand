@@ -114,7 +114,8 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       `react-native-svg`), İlerleme'den açılan İstatistikler (eskiden yalnız Ayarlar'dan kaydırarak açılıyordu).
       Hesaplar ekrandan ayrı (`src/ilerleme/veri.js`, `tests/ilerleme.test.js`). Bütün kelimeler bitince Liste'de
       havai fişek (Skia; eskisinin her karede soldurma yöntemiyle aynı görüntü).
-- [ ] 33. Sözlük.
+- [x] 33. Sözlük: 3000 kelimede arama (İngilizce/Türkçe), eskisiyle aynı sıra ve kart; arama ekrandan ayrı
+      (`src/sozluk/arama.js`, `tests/sozluk.test.js`).
 - [ ] 34. Hesap ve Arkadaşlar (`hesap.js`'in ekrandan bağımsız hali; aynı Supabase işlevleri), Ayarlar,
       ilk açılış penceresi, kullanım kaydı izni.
 - [ ] 35. Listeyi oku: arka planda ses, kilit ekranı / bildirim denetimleri (Android + iOS), Türkçe okuma,

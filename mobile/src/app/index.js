@@ -2,13 +2,15 @@
  * Liste (açılış): sıradaki yeni kelimeler — ayarlardaki sayı kadar, sınavın soracağı sırayla
  * (SRS.newList). Sınavda cevaplanan kelime listeden düşer, alttan sıradaki gelir. Kelimeye
  * dokununca okunur. Ekrana her dönüşte liste yeniden hesaplanır.
+ * Bütün kelimeler çalışılıyorsa liste yerine havai fişek (webde denemek için: /?kutla=1).
  * Henüz yok: "Listeyi oku" ve bekleme sürgüsü (adım 35), ilk açılış penceresi ve arkadaş
- * haberleri (adım 34), bütün kelimeler bitince havai fişek (adım 32).
+ * haberleri (adım 34).
  */
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import HavaiFisek from "../bilesenler/HavaiFisekKatmani";
 import KelimeKarti from "../bilesenler/KelimeKarti";
 import { ANAHTARLA, OXLOG, SRS } from "../cekirdek";
 import { durdur, kelimeyiOku } from "../ses";
@@ -25,6 +27,7 @@ export default function Liste() {
   const [baslik, setBaslik] = useState("");
   const [ara, setAra] = useState("");
   const [okunan, setOkunan] = useState(null);
+  const { kutla } = useLocalSearchParams();
 
   useFocusEffect(useCallback(() => {
     setAnahtarlar(SRS.newList(SRS.listSize()));
@@ -44,10 +47,12 @@ export default function Liste() {
     kelimeyiOku(ANAHTARLA[k].d.w, () => setOkunan((o) => (o === k ? null : o)));
   }, []);
 
+  const kutlama = (!anahtarlar.length && baslik !== "") || (Platform.OS === "web" && kutla === "1");
   return (
     <SafeAreaView edges={["top"]} style={[s.ekran, { backgroundColor: t.bg }]}>
       <View style={[s.ust, { borderBottomColor: t.line }]}>
         <Text style={[s.baslik, { color: t.ink }]} accessibilityRole="header">{baslik}</Text>
+        {kutlama ? null : (
         <TextInput
           value={ara}
           onChangeText={setAra}
@@ -59,7 +64,9 @@ export default function Liste() {
           clearButtonMode="while-editing"
           style={[s.ara, { color: t.ink, backgroundColor: t.field, borderColor: t.line }]}
         />
+        )}
       </View>
+      {kutlama ? <View style={s.liste}><HavaiFisek /></View> : (
       <FlatList
         data={gorunen}
         keyExtractor={(k) => k}
@@ -70,12 +77,9 @@ export default function Liste() {
         extraData={okunan}
         contentContainerStyle={s.liste}
         keyboardDismissMode="on-drag"
-        ListEmptyComponent={
-          <Text style={[s.bos, { color: t.muted }]}>
-            {anahtarlar.length ? "Aramaya uyan kelime yok." : "Bütün kelimeler çalışılıyor. 🎉"}
-          </Text>
-        }
+        ListEmptyComponent={<Text style={[s.bos, { color: t.muted }]}>Aramaya uyan kelime yok.</Text>}
       />
+      )}
     </SafeAreaView>
   );
 }

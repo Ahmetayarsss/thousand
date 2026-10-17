@@ -87,14 +87,15 @@ jobs:
         working-directory: mobile
         run: npx expo prebuild --platform android --no-install
 
-      # Yayın derlemesi (hata ayıklanamaz). Telefonlar için iki işlemci türü: arm64 ve eski 32 bit arm.
+      # Yayın derlemesi (hata ayıklanamaz). Yalnız 64 bit arm (kullanıcı kararı: APK yarıya iner; 32 bit
+      # işlemcili çok eski telefonlara kurulmaz).
       - name: APK derle (release)
         working-directory: mobile/android
         env:
           IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
         run: |
           set -o pipefail
-          args=(assembleRelease --no-daemon -PreactNativeArchitectures=armeabi-v7a,arm64-v8a)
+          args=(assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a)
           if [ -n "${IMZA_DOSYASI:-}" ]; then   # PR denemesinde yok: Expo'nun hata ayıklama anahtarı
             args+=("-Pandroid.injected.signing.store.file=$IMZA_DOSYASI" "-Pandroid.injected.signing.store.password=$IMZA_PAROLA"
                    "-Pandroid.injected.signing.key.alias=thousand" "-Pandroid.injected.signing.key.password=$IMZA_PAROLA")

@@ -12,11 +12,13 @@ Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`).
 
 | Yol | Ne |
 |---|---|
-| `src/app/` | Ekranlar (Expo Router: her dosya bir sekme). `_layout.js` alt sekmeleri kurar |
+| `src/app/` | Ekranlar (Expo Router: her dosya bir sekme). `_layout.js` alt sekmeleri kurar; `ilerleme/` bir yığın: İlerleme ve ondan açılan İstatistikler (`analiz.js`) |
 | `src/cekirdek.js` | Ortak çekirdeği yükler: `app/www/srs.js` ve `app/www/log.js`, değiştirilmeden. localStorage'ı telefonda `expo-sqlite` karşılar |
 | `src/ses.js` | Kelime sesi: gömülü kayıt (`app/www/audio`), yoksa cihazın konuşma sentezi |
 | `src/tema.js` | Açık / koyu tema renkleri |
-| `src/bilesenler/` | Ekranların ortak parçaları |
+| `src/bilesenler/` | Ekranların ortak parçaları: `KelimeKarti.js`, `Pano.js` (İlerleme kartı), `HavaiFisek.js` (bütün kelimeler bitince, Skia), `Tasiniyor.js` |
+| `src/ilerleme/` | İlerleme / İstatistikler: `veri.js` (hesaplar, ekrandan bağımsız), `Grafikler.js` (SVG grafikler, eskisinin ölçüleriyle) |
+| `src/skiaWeb.web.js` | Webde Skia'yı yükler; Skia kullanan bileşenler webde `…Katmani.web.js` ile tembel yüklenir |
 | `src/kartlar/` | Kartlar ekranının parçaları: `oturum.js` (Test/Sınav kuralları, ekrandan bağımsız), `Deste.js` (üst üste kartlar, fırlatma), `KartYuzu.js`, `Klavye.js` (yazılı kart için uygulama içi klavye), `Cevirme.js` + `cevirmeGeometri.js` (kart çevirme, Skia — eski three.js çevirmesiyle birebir), `yuzYakala.js` (kart yüzünün resmi; `.web.js` webde) |
 | `src/cikis.js` | Sınav sürerken başka sekmeye geçişte onay |
 | `src/uretilen/` | **Üretilen, elle düzenlenmez** (`scripts/build_all.py`): `kelimeler.json` (sıralı kelime verisi), `sesler.js` (ses haritası) |

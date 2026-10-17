@@ -110,7 +110,10 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       (`mobil-apk.yml`; ana uygulamanın `main` → `apk-latest` yayınına dokunmaz). İmza: ana uygulamayla aynı anahtar.
       Kullanılmayan izinler (mikrofon, dosya, başka uygulamaların üstüne çizim) APK'dan çıkarıldı. Yalnız 64 bit arm
       (kullanıcı kararı; iki işlemci türüyle APK 98 MB'tı).
-- [ ] 32. İlerleme, İstatistik, Analiz; bütün kelimeler bitince havai fişek.
+- [x] 32. İlerleme ve İstatistikler (eski istatistik + analiz sayfaları; aynı veriyle aynı sayılar ve grafikler,
+      `react-native-svg`), İlerleme'den açılan İstatistikler (eskiden yalnız Ayarlar'dan kaydırarak açılıyordu).
+      Hesaplar ekrandan ayrı (`src/ilerleme/veri.js`, `tests/ilerleme.test.js`). Bütün kelimeler bitince Liste'de
+      havai fişek (Skia; eskisinin her karede soldurma yöntemiyle aynı görüntü).
 - [ ] 33. Sözlük.
 - [ ] 34. Hesap ve Arkadaşlar (`hesap.js`'in ekrandan bağımsız hali; aynı Supabase işlevleri), Ayarlar,
       ilk açılış penceresi, kullanım kaydı izni.
@@ -118,8 +121,10 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       bekleme sürgüsü.
 - [ ] 36. Bildirimler: yerel seri/tekrar hatırlatmaları; arkadaş isteği ve dürtme.
       🔸 iOS'ta bunlar için push (APNs) gerekir: yeni ağ adresi + sunucu işi.
-- [ ] 37. Android'de geçiş: 🔸 deneme bitince yeni uygulama ana paket adını (`io.github.ahmetayarsss.thousand`) alıp
-      eskisinin üstüne kurulur (aynı imza). Capacitor'ın son
+- [ ] 37. Android'de geçiş (kullanıcı kararı, Ekim 2026: "önce tamamla, sonra geç" — tek uygulamaya dönülecek ama
+      ancak 33–36 bitip eski ilerlemeyi taşıyan kod hazır olunca): yeni uygulama ana paket adını
+      (`io.github.ahmetayarsss.thousand`) ve "Thousand" adını alır, `main`'den yayınlanır, eskisinin üstüne kurulur
+      (aynı imza); ayrı deneme uygulaması ve `mobil` dalı kalkar. Capacitor'ın son
       web paketi ilerlemeyi bir dosyaya yazar, yeni uygulama ilk açılışta onu okur (6. kural); kurtarma
       kodu ve yedek ikinci yol. 🔸 Geçiş zamanı.
 - [ ] 38. Yayın hattı: GitHub Actions'ta `expo prebuild` + Gradle (APK/AAB), macOS'ta iOS; imza anahtarları

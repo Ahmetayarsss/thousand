@@ -1,9 +1,8 @@
-// Webde Skia (CanvasKit) önce yüklenmeli; katman ondan sonra içeri alınır. canvaskit.wasm public/'tedir
-// (repoda değil: `npm run web-hazirla` kopyalar).
-import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+// Webde Skia (CanvasKit) önce yüklenmeli; katman ondan sonra içeri alınır (src/skiaWeb.web.js).
 import { lazy, Suspense } from "react";
+import { skiaHazir } from "../skiaWeb";
 
-const Cevirme = lazy(() => LoadSkiaWeb({ locateFile: (f) => "/" + f }).then(() => import("./Cevirme")));
+const Cevirme = lazy(() => skiaHazir().then(() => import("./Cevirme")));
 
 export default function CevirmeKatmani({ ref }) {
   return <Suspense fallback={null}><Cevirme ref={ref} /></Suspense>;

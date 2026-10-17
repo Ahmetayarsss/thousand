@@ -53,6 +53,7 @@ jobs:
           TZ=Europe/Istanbul node tests/srs.test.js
           node tests/log.test.js
           TZ=Europe/Istanbul node tests/oturum.test.js
+          TZ=Europe/Istanbul node tests/ilerleme.test.js
           node tests/cevirme.test.js
           python3 scripts/validate.py
           python3 scripts/bekci.py

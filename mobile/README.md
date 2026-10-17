@@ -12,6 +12,8 @@ Yayındaki uygulama hâlâ Capacitor sürümü (`app/`).
 | `src/ses.js` | Kelime sesi: gömülü kayıt (`app/www/audio`), yoksa cihazın konuşma sentezi |
 | `src/tema.js` | Açık / koyu tema renkleri |
 | `src/bilesenler/` | Ekranların ortak parçaları |
+| `src/kartlar/` | Kartlar ekranının parçaları: `oturum.js` (Test/Sınav kuralları, ekrandan bağımsız), `Deste.js` (üst üste kartlar, fırlatma), `KartYuzu.js`, `Klavye.js` (yazılı kart için uygulama içi klavye), `Cevirme.js` + `cevirmeGeometri.js` (kart çevirme, Skia — eski three.js çevirmesiyle birebir), `yuzYakala.js` (kart yüzünün resmi; `.web.js` webde) |
+| `src/cikis.js` | Sınav sürerken başka sekmeye geçişte onay |
 | `src/uretilen/` | **Üretilen, elle düzenlenmez** (`scripts/build_all.py`): `kelimeler.json` (sıralı kelime verisi), `sesler.js` (ses haritası) |
 | `metro.config.js` | `app/www`'daki ortak dosyaları pakete katar |
 
@@ -25,6 +27,9 @@ npm ci
 npx expo start                                      # geliştirme
 npx expo export --platform android --output-dir dist/android   # paketleniyor mu (CI da bunu yapar)
 ```
+
+Webde deneme (ekran görüntüsü vb.): önce `npm run web-hazirla` (Skia'nın `canvaskit.wasm`'ını `public/`'e
+kopyalar; repoya girmez), sonra `npx expo start --web`. Webde kart yüzü SVG ile yakalanır; telefonda Skia yakalar.
 
 Telefonda denemek için geliştirme derlemesi: `npx expo run:android` (Android SDK gerekir) ya da Mac'te
 `npx expo run:ios`.

@@ -100,8 +100,11 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       değişmeden çalışır (`expo-sqlite` localStorage'ı), kelime verisi ve ses haritası build'den
       (`mobile/src/uretilen/`), Liste ekranı (kelimeye dokununca ses). CI'da Android paketleme denetimi;
       bekçi `mobile/`'daki ağ adreslerini de tarar.
-- [ ] 31. Kartlar: Test + Sınav, yazılı kart ve uygulama içi klavye, çıkış onayı.
-      🔸 Kart çevirme: three.js'deki kâğıt gibi bükülme Skia ile birebir mi, yoksa sade 3D çevirme mi?
+- [x] 31. Kartlar: Test + Sınav, yazılı kart ve uygulama içi klavye, çıkış onayı (Test'e geçiş, Bitir, başka
+      sekme, geri tuşu), sonuç ekranı. Kart çevirme Skia ile (kullanıcı kararı: birebir): kartın iki yüzü resim
+      olarak yakalanır, aynı geometriyle kıvrılır; her köşe noktası three.js ile aynı yerde (`tests/cevirme.test.js`).
+      Kurallar ekrandan ayrı (`oturum.js`, `tests/oturum.test.js`). Sınav oturumu kaydı artık `SRS.yaz` ile
+      (yazılamazsa uyarı). Eksik (adım 34): cevaptan sonra özetin arkadaşlara gitmesi, hatırlatmaların kurulması.
 - [ ] 32. İlerleme, İstatistik, Analiz; bütün kelimeler bitince havai fişek.
 - [ ] 33. Sözlük.
 - [ ] 34. Hesap ve Arkadaşlar (`hesap.js`'in ekrandan bağımsız hali; aynı Supabase işlevleri), Ayarlar,

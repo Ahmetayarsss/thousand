@@ -3,6 +3,7 @@ import "../cekirdek";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { cikisSor } from "../cikis";
 import { useTema } from "../tema";
 
 const SEKMELER = [
@@ -20,6 +21,12 @@ export default function Duzen() {
     <>
       <StatusBar style={t.koyu ? "light" : "dark"} />
       <Tabs
+        screenListeners={({ navigation, route }) => ({
+          // Sınav sürerken başka sekmeye geçiş: önce onay (kartlar ekranı sorar).
+          tabPress: (e) => {
+            if (route.name !== "kartlar" && cikisSor(() => navigation.navigate(route.name))) e.preventDefault();
+          },
+        })}
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: t.ink,

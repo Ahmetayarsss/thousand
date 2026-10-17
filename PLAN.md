@@ -89,6 +89,38 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 29. Capacitor 7, `targetSdk`/`compileSdk` 35 (Play Store şartı), Gradle 8.11.1 / AGP 8.7.2. En düşük Android 6
       (minSdk 23; eskiden 5.1). Android 15'te ekran kenarı payı: `adjustMarginsForEdgeToEdge: auto`. Yeni APK ile etkin.
 
+## Aşama 9 — Yeni uygulama: React Native (Expo), iOS + Android
+
+Kullanıcı kararı (Ekim 2026): App Store'un 4.2 kuralı ("paketlenmiş web sitesi") ve iOS için HTML yapısından
+çıkılır; tek kod tabanı iki platformu besler. Yeni uygulama `mobile/`'da yazılır. Capacitor uygulaması (`app/`)
+yeni uygulama onun yaptığı her şeyi yapana ve geçiş yapılana dek yayında kalır. Tekrar sistemi (`srs.js`) ve
+kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; localStorage anahtarları (`ox3000_*`) aynı.
+
+- [x] 30. İskelet: Expo (JavaScript), alt sekmeler, çekirdek (`srs.js`, `log.js`) telefonda SQLite üstünde
+      değişmeden çalışır (`expo-sqlite` localStorage'ı), kelime verisi ve ses haritası build'den
+      (`mobile/src/uretilen/`), Liste ekranı (kelimeye dokununca ses). CI'da Android paketleme denetimi;
+      bekçi `mobile/`'daki ağ adreslerini de tarar.
+- [ ] 31. Kartlar: Test + Sınav, yazılı kart ve uygulama içi klavye, çıkış onayı.
+      🔸 Kart çevirme: three.js'deki kâğıt gibi bükülme Skia ile birebir mi, yoksa sade 3D çevirme mi?
+- [ ] 32. İlerleme, İstatistik, Analiz; bütün kelimeler bitince havai fişek.
+- [ ] 33. Sözlük.
+- [ ] 34. Hesap ve Arkadaşlar (`hesap.js`'in ekrandan bağımsız hali; aynı Supabase işlevleri), Ayarlar,
+      ilk açılış penceresi, kullanım kaydı izni.
+- [ ] 35. Listeyi oku: arka planda ses, kilit ekranı / bildirim denetimleri (Android + iOS), Türkçe okuma,
+      bekleme sürgüsü.
+- [ ] 36. Bildirimler: yerel seri/tekrar hatırlatmaları; arkadaş isteği ve dürtme.
+      🔸 iOS'ta bunlar için push (APNs) gerekir: yeni ağ adresi + sunucu işi.
+- [ ] 37. Android'de geçiş: aynı paket adı ve imza, yeni uygulama eskisinin üstüne kurulur. Capacitor'ın son
+      web paketi ilerlemeyi bir dosyaya yazar, yeni uygulama ilk açılışta onu okur (6. kural); kurtarma
+      kodu ve yedek ikinci yol. 🔸 Geçiş zamanı.
+- [ ] 38. Yayın hattı: GitHub Actions'ta `expo prebuild` + Gradle (APK/AAB), macOS'ta iOS; imza anahtarları
+      GitHub gizli ayarlarında. 🔸 Uzaktan JS güncellemesi (EAS Update) olacak mı — yeni ağ adresi ve
+      App Store 2.5.2; önerilen: yok, güncellemeler mağazadan.
+- [ ] 39. App Store hazırlığı: gizlilik politikası, App Privacy etiketi, şikâyet/engelleme ve takma ad
+      süzgeci (1.2), iOS'a özgü özellikler (widget, kilit ekranından okuma).
+- [ ] 40. Capacitor uygulaması kaldırılır (`app/`, `templates/`, güncelleyici, `build-apk.yml`); ortak
+      çekirdek ve sesler `mobile/`'a taşınır (8. kural).
+
 ## Bilerek bırakılanlar (şimdilik)
 
 - Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele

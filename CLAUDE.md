@@ -11,13 +11,17 @@ paket `io.github.ahmetayarsss.thousand`. İçerik CEFR A1–B2 seviyelerinde 300
 yedek ve kullanım kayıtları Supabase'de (`supabase/kurulum.sql`). Kullanıcı Türkçe konuşur;
 kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 
+**Yeni uygulama yapılıyor** (`mobile/`, React Native / Expo, iOS + Android; `PLAN.md` Aşama 9). Yayındaki
+hâlâ Capacitor sürümü (`app/`). `app/www/srs.js` ve `log.js` iki uygulamada ortak: değişiklik ikisini
+birden etkiler.
+
 ## Kaynak ve üretilen dosyalar
 
 - **Kaynak (elle düzenlenir):** `data/all_groups.json` (bütün kelime içeriği), `templates/*.html`,
   `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js`,
   `supabase/kurulum.sql`, `app/android/**`, `app/www/audio/*.mp3` (kelime ses kayıtları; adları
-  `slugOf` kuralıyla, `validate.py` denetler).
-- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html` ve `app/www/kelimeler.js` (repoda). Güncelleme paketi
+  `slugOf` kuralıyla, `validate.py` denetler), `mobile/` (`src/uretilen/` hariç).
+- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html`, `app/www/kelimeler.js` ve `mobile/src/uretilen/*` (repoda). Güncelleme paketi
   (`app/www/updater.js`, `web.json`, `web-version.txt`) de üretilir ama repoya girmez.
 
 Üretim: `python3 scripts/build_all.py`. Şablonu ya da kaynak JS'i değiştirdikten sonra
@@ -38,6 +42,7 @@ bash tests/sunucu.test.sh      # sunucu (kurulum.sql) — geçici PostgreSQL aç
 python3 scripts/validate.py
 python3 scripts/build_all.py
 python3 scripts/bekci.py
+(cd mobile && npx expo export --platform android --output-dir dist/android)   # mobile/ değiştiyse
 ```
 
 Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekirse ekran görüntüsü

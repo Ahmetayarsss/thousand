@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Thousand",
+    "slug": "thousand",
+    "scheme": "thousand",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "io.github.ahmetayarsss.thousand",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "io.github.ahmetayarsss.thousand",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon-foreground.png",
+        "backgroundImage": "./assets/icon-background.png"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-audio",
+      "expo-asset"
+    ]
+  }
+}

@@ -105,6 +105,10 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       olarak yakalanır, aynı geometriyle kıvrılır; her köşe noktası three.js ile aynı yerde (`tests/cevirme.test.js`).
       Kurallar ekrandan ayrı (`oturum.js`, `tests/oturum.test.js`). Sınav oturumu kaydı artık `SRS.yaz` ile
       (yazılamazsa uyarı). Eksik (adım 34): cevaptan sonra özetin arkadaşlara gitmesi, hatırlatmaların kurulması.
+- [x] 31b. Ayrı deneme uygulaması (kullanıcı kararı): ad "Thousand Yeni", paket `io.github.ahmetayarsss.thousand.yeni`
+      (telefonda ana uygulamanın yanına kurulur, verisi ayrı), yayın dalı `mobil` → `mobil-latest` release'i
+      (`mobil-apk.yml`; ana uygulamanın `main` → `apk-latest` yayınına dokunmaz). İmza: ana uygulamayla aynı anahtar.
+      Kullanılmayan izinler (mikrofon, dosya, başka uygulamaların üstüne çizim) APK'dan çıkarıldı.
 - [ ] 32. İlerleme, İstatistik, Analiz; bütün kelimeler bitince havai fişek.
 - [ ] 33. Sözlük.
 - [ ] 34. Hesap ve Arkadaşlar (`hesap.js`'in ekrandan bağımsız hali; aynı Supabase işlevleri), Ayarlar,
@@ -113,7 +117,8 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       bekleme sürgüsü.
 - [ ] 36. Bildirimler: yerel seri/tekrar hatırlatmaları; arkadaş isteği ve dürtme.
       🔸 iOS'ta bunlar için push (APNs) gerekir: yeni ağ adresi + sunucu işi.
-- [ ] 37. Android'de geçiş: aynı paket adı ve imza, yeni uygulama eskisinin üstüne kurulur. Capacitor'ın son
+- [ ] 37. Android'de geçiş: 🔸 deneme bitince yeni uygulama ana paket adını (`io.github.ahmetayarsss.thousand`) alıp
+      eskisinin üstüne kurulur (aynı imza). Capacitor'ın son
       web paketi ilerlemeyi bir dosyaya yazar, yeni uygulama ilk açılışta onu okur (6. kural); kurtarma
       kodu ve yedek ikinci yol. 🔸 Geçiş zamanı.
 - [ ] 38. Yayın hattı: GitHub Actions'ta `expo prebuild` + Gradle (APK/AAB), macOS'ta iOS; imza anahtarları

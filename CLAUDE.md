@@ -12,7 +12,8 @@ yedek ve kullanım kayıtları Supabase'de (`supabase/kurulum.sql`). Kullanıcı
 kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 
 **Yeni uygulama yapılıyor** (`mobile/`, React Native / Expo, iOS + Android; `PLAN.md` Aşama 9). Yayındaki
-hâlâ Capacitor sürümü (`app/`). `app/www/srs.js` ve `log.js` iki uygulamada ortak: değişiklik ikisini
+hâlâ Capacitor sürümü (`app/`). Yeni uygulama şimdilik **ayrı bir deneme uygulaması**: ad "Thousand Yeni",
+paket `io.github.ahmetayarsss.thousand.yeni` (ana uygulamanın yanına kurulur, verisi ayrı). `app/www/srs.js` ve `log.js` iki uygulamada ortak: değişiklik ikisini
 birden etkiler.
 
 ## Kaynak ve üretilen dosyalar
@@ -60,6 +61,10 @@ Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekir
   birleştirir. PR açıklaması telefonda neyin değişeceğini sade dille söyler.
 - Güncelleme paketi (`web.json`, `web-version.txt`, `app/www/updater.js`) repoda tutulmaz;
   yalnız CI üretir (bekçi `paket-repoda` kuralı).
+- **Yeni uygulamanın yayını ayrı:** `mobil` dalı → `mobil-apk.yml` → `mobil-latest` release'i
+  (`ThousandYeni.apk`). Yeni uygulama işleri `mobil`'e PR ile girer; `main`'e (ana uygulamanın
+  yayınına) geçiş adımına (PLAN.md adım 37) kadar girmez. Ortak dosyalardaki (`app/www/srs.js`,
+  `log.js`, `data/`) değişiklikler `main`'den `mobil`'e birleştirilir.
 
 ## Değişmez kurallar
 

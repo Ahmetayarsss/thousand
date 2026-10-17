@@ -3,6 +3,11 @@
 iOS ve Android için tek kod tabanı. Yapım aşamasında: hangi ekranın taşındığı `PLAN.md` → Aşama 9.
 Yayındaki uygulama hâlâ Capacitor sürümü (`app/`).
 
+**Ayrı deneme uygulaması:** ad "Thousand Yeni", paket `io.github.ahmetayarsss.thousand.yeni` — telefonda ana
+uygulamanın (Thousand) yanına kurulur, ilerlemesi ayrı tutulur. Yayın dalı `mobil`: her push'ta
+`.github/workflows/mobil-apk.yml` APK'yı derleyip `mobil-latest` release'ine koyar (`ThousandYeni.apk`).
+Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`).
+
 ## Yapı
 
 | Yol | Ne |
@@ -15,6 +20,7 @@ Yayındaki uygulama hâlâ Capacitor sürümü (`app/`).
 | `src/kartlar/` | Kartlar ekranının parçaları: `oturum.js` (Test/Sınav kuralları, ekrandan bağımsız), `Deste.js` (üst üste kartlar, fırlatma), `KartYuzu.js`, `Klavye.js` (yazılı kart için uygulama içi klavye), `Cevirme.js` + `cevirmeGeometri.js` (kart çevirme, Skia — eski three.js çevirmesiyle birebir), `yuzYakala.js` (kart yüzünün resmi; `.web.js` webde) |
 | `src/cikis.js` | Sınav sürerken başka sekmeye geçişte onay |
 | `src/uretilen/` | **Üretilen, elle düzenlenmez** (`scripts/build_all.py`): `kelimeler.json` (sıralı kelime verisi), `sesler.js` (ses haritası) |
+| `app.config.js` | `app.json`'un üstüne derleme numarası (sürüm kodu) |
 | `metro.config.js` | `app/www`'daki ortak dosyaları pakete katar |
 
 `android/` ve `ios/` klasörleri repoda yok: `npx expo prebuild` `app.json`'dan üretir.

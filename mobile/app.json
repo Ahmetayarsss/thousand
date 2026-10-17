@@ -1,22 +1,28 @@
 {
   "expo": {
-    "name": "Thousand",
-    "slug": "thousand",
-    "scheme": "thousand",
-    "version": "1.0.0",
+    "name": "Thousand Yeni",
+    "slug": "thousand-yeni",
+    "scheme": "thousandyeni",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "io.github.ahmetayarsss.thousand",
+      "bundleIdentifier": "io.github.ahmetayarsss.thousand.yeni",
       "supportsTablet": false
     },
     "android": {
-      "package": "io.github.ahmetayarsss.thousand",
+      "package": "io.github.ahmetayarsss.thousand.yeni",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon-foreground.png",
         "backgroundImage": "./assets/icon-background.png"
-      }
+      },
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -25,7 +31,13 @@
     "plugins": [
       "expo-router",
       "expo-sqlite",
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
       "expo-asset"
     ]
   }

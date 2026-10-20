@@ -32,7 +32,7 @@ yedek yüklenir).
 | `src/okuma/` | "Listeyi oku": `index.js` (Android'de `modules/okuma` servisi; başka yerde ekran açıkken JS ile), `liste.js` (okuma listesi, ekrandan bağımsız) |
 | `modules/okuma/` | Android "Listeyi oku" servisi (Expo yerel modülü): eski uygulamanın `GroupTtsService`'i (`OkumaServisi.java`; bildirim, kilit ekranı, kulaklık düğmeleri, ekran kapalıyken okuma) ve köprüsü (`OkumaModule.kt`). `expo prebuild` kendiliğinden bağlar |
 | `src/bildirim/Kurulum.js` | Bildirim kurulumu penceresi (izin, otomatik başlatma); bildirim ayarları ve hatırlatma planı `src/hesap/hesap.js`'te |
-| `modules/bildirim/` | Android bildirimleri (Expo yerel modülü): eski uygulamanın `Bildirimler`, `HatirlatmaWorker` (seri / tekrar hatırlatması), `ArkadasWorker` (arkadaşlık isteği, dürtme; uygulama kapalıyken de) sınıfları aynen; köprü `BildirimModule.kt`, bildirime dokununca hedef ekran `BildirimPackage.kt` |
+| `modules/bildirim/` | Android bildirimleri (Expo yerel modülü): eski uygulamanın `Bildirimler`, `HatirlatmaWorker` (seri / tekrar hatırlatması), `ArkadasWorker` (arkadaşlık isteği, dürtme; uygulama kapalıyken de) sınıfları aynen; köprü `BildirimModule.kt`, bildirime dokununca hedef ekran `BildirimPackage.kt`; yayın derlemesinin küçültmesi (R8) için koruma kuralları `consumer-rules.pro` |
 | `src/cikis.js` | Sınav sürerken başka sekmeye geçişte onay |
 | `src/uretilen/` | **Üretilen, elle düzenlenmez** (`scripts/build_all.py`): `kelimeler.json` (sıralı kelime verisi), `sesler.js` (ses haritası) |
 | `app.config.js` | `app.json`'un üstüne derleme numarası (sürüm kodu) |

@@ -1,5 +1,5 @@
 /*
- * Sözlük araması — Capacitor'daki sözlük sayfasıyla (templates/sozluk_template.html) aynı: 3000 kelimenin hepsinde,
+ * Sözlük araması — eski uygulamanın sözlük sayfasıyla aynı: 3000 kelimenin hepsinde,
  * İngilizce kelimede ya da Türkçe anlamda geçen; tam eşleşme önce, sonra baştan eşleşen, sonra alfabetik; en çok 60.
  * tests/sozluk.test.js denetler.
  */

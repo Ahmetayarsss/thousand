@@ -1,5 +1,5 @@
 /*
- * İlerleme — Capacitor'daki istatistik.html (templates/stats_template.html) ile aynı: genel olgun/öğreniliyor/yeni,
+ * İlerleme — eski uygulamanın istatistik sayfasıyla aynı: genel olgun/öğreniliyor/yeni,
  * seviyeye göre, 30 kısım, son sınavlar. Hesaplar src/ilerleme/veri.js'te. Yeni: alttaki bağlantı İstatistikler'i
  * açar (eskiden Ayarlar'dan kaydırarak açılıyordu; yeni uygulamada kaydırarak geçiş yok).
  */

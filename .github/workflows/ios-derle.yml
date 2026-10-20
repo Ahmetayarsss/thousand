@@ -1,0 +1,68 @@
+name: iOS derleniyor mu
+
+# Yeni uygulama (mobile/) iOS'ta derleniyor mu: imzasız, simülatör için (PLAN.md adım 38). Kullanıcı kararı: Apple
+# Developer hesabı henüz yok — telefona kurulacak (imzalı) derleme ve TestFlight hesap açılınca. Hiçbir şey
+# yayınlanmaz. Android'e özgü yerel modüller (mobile/modules) iOS'a girmez; JS onların yokluğunda çalışır.
+# Her değişiklik yayın dalına PR ile girdiği için PR'da çalışması yeter (elle de çalıştırılabilir).
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "mobile/**"
+      - "data/**"
+      - ".github/workflows/ios-derle.yml"
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Bağımlılıklar (npm ci)
+        working-directory: mobile
+        run: |
+          for i in 1 2 3; do
+            npm ci && break
+            echo "npm ci denemesi $i başarısız, tekrar..."; sleep $((i * 10))
+          done
+
+      # ios/ repoda yok: app.json'dan üretilir; CocoaPods kurulumu da burada.
+      - name: iOS projesini üret (expo prebuild)
+        working-directory: mobile
+        run: npx expo prebuild --platform ios 2>&1 | tee "$RUNNER_TEMP/prebuild.log"
+
+      - name: Derle (simülatör, imzasız)
+        working-directory: mobile/ios
+        run: |
+          xcodebuild -version
+          ws=$(ls -d *.xcworkspace | head -n 1); sema="${ws%.xcworkspace}"
+          echo "çalışma alanı: $ws, şema: $sema"
+          if ! xcodebuild -workspace "$ws" -scheme "$sema" -configuration Release -sdk iphonesimulator \
+              -destination "generic/platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO build > "$RUNNER_TEMP/xcode.log" 2>&1; then
+            grep -E " error: |error: " "$RUNNER_TEMP/xcode.log" | head -n 60 || true
+            tail -n 80 "$RUNNER_TEMP/xcode.log"
+            exit 1
+          fi
+          tail -n 3 "$RUNNER_TEMP/xcode.log"
+
+      - name: Hata logunu yükle (teşhis)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-derleme-log
+          path: |
+            ${{ runner.temp }}/prebuild.log
+            ${{ runner.temp }}/xcode.log
+          if-no-files-found: warn

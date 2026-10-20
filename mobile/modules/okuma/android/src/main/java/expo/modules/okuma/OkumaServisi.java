@@ -48,9 +48,9 @@ import java.util.Map;
 /**
  * "Listeyi oku" — Spotify tarzı okuma hizmeti (FOREGROUND SERVICE).
  *
- * Eski uygulamanın GroupTtsService'i (app/android), aynen; değişen yalnız sesin bulunduğu yer (playMp3) ve paket.
+ * Eski uygulamanın GroupTtsService'i, aynen; değişen yalnız sesin bulunduğu yer (playMp3) ve paket.
  *
- * Her kelime bir "parça" gibi: önce uygulamaya GÖMÜLÜ mp3'ü (app/www/audio; APK'da res/raw) MediaPlayer ile
+ * Her kelime bir "parça" gibi: önce uygulamaya GÖMÜLÜ mp3'ü (mobile/assets/audio; APK'da res/raw) MediaPlayer ile
  * çalınır, yoksa cihaz TTS'i (İngilizce).
  * Ayarda açıksa ardından Türkçe anlamı TTS ile okunur. Liste bitince döngü açıksa
  * baştan başlar, kapalıysa durur.

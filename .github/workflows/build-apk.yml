@@ -1,14 +1,12 @@
 name: Android APK derle
 
-# YAYIN: main dalına giren her değişiklikte uygulamanın APK'sını (mobile/, React Native) ve eski
-# (Capacitor) uygulamanın güncelleme paketini (web.json + web-version.txt) derleyip apk-latest
+# YAYIN: main dalına giren her değişiklikte uygulamanın APK'sını (mobile/, React Native) derleyip apk-latest
 # release'ine koyar. Testler, doğrulama ya da bekçi kırmızıysa hiçbir şey yayınlanmaz.
 # Elle: Actions > "Android APK derle" > Run workflow (main seçili).
 # PR'larda yalnız DENEME: APK mühürsüz derlenir (derleniyor mu?), hiçbir şey yayınlanmaz.
-#
-# Geçiş dönemi: yeni uygulama eskisiyle aynı paket adı ve imzada, eskisinin üstüne kurulur; ilerleme kurtarma
-# koduyla (sunucudaki yedekten) gelir. Telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini buradan
-# indirmeye devam eder. Eski uygulama kaldırılınca (PLAN.md adım 40) web paketi de kalkar.
+# Uygulama eski (Capacitor) uygulamayla aynı paket adı ve imzada: onun üstüne kurulur; ilerleme kurtarma koduyla
+# (sunucudaki yedekten) gelir. Eski uygulamanın güncelleme paketi artık üretilmiyor (adım 40); eski uygulama
+# son aldığı paketle çalışmaya devam eder.
 
 on:
   workflow_dispatch:
@@ -16,16 +14,12 @@ on:
     branches:
       - main
     paths:
-      - "app/**"
-      - "templates/**"
       - "data/**"
       - "scripts/**"
       - "mobile/**"
       - ".github/workflows/build-apk.yml"
   pull_request:
     paths:
-      - "app/**"
-      - "templates/**"
       - "data/**"
       - "scripts/**"
       - "mobile/**"
@@ -89,8 +83,6 @@ jobs:
       - name: Testler
         run: |
           TZ=Europe/Istanbul node tests/srs.test.js
-          node tests/updater.test.js
-          node tests/hesap.test.js
           node tests/log.test.js
           TZ=Europe/Istanbul node tests/hesap_yeni.test.js
           TZ=Europe/Istanbul node tests/oturum.test.js
@@ -103,13 +95,12 @@ jobs:
       - name: Veri doğrulama
         run: python3 scripts/validate.py
 
-      # Bekçi kırmızıysa APK ve güncelleme paketi yayınlanmaz (kurallar: CLAUDE.md).
+      # Bekçi kırmızıysa APK yayınlanmaz (kurallar: CLAUDE.md).
       - name: Bekçi
         run: python3 scripts/bekci.py
 
-      # Eski uygulamanın güncelleme paketi: sayfalar + updater.js (yeni sürüm numarasıyla) + web.json +
-      # web-version.txt. Yeni uygulamanın üretilen verisi (mobile/src/uretilen) de buradan.
-      - name: Sayfaları ve güncelleme paketini üret
+      # Uygulamanın kelime verisi ve ses haritası (mobile/src/uretilen) data/'dan.
+      - name: Kelime verisini üret
         run: python3 scripts/build_all.py
 
       - name: Bağımlılıkları kur (npm ci)
@@ -135,6 +126,9 @@ jobs:
         run: |
           set -o pipefail
           args=(assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a)
+          # Yayında Google Play için AAB de (kullanıcı kararı: şimdilik Play'e çıkılmıyor, hazır dursun; yalnız
+          # iş akışı çıktısı, release'e konmaz). Aynı anahtarla imzalı, aynı işlemci (arm64).
+          if [ "${{ github.event_name }}" != "pull_request" ]; then args+=(bundleRelease); fi
           if [ -n "${IMZA_DOSYASI:-}" ]; then   # PR denemesinde yok: Expo'nun hata ayıklama anahtarı
             args+=("-Pandroid.injected.signing.store.file=$IMZA_DOSYASI" "-Pandroid.injected.signing.store.password=$IMZA_PAROLA"
                    "-Pandroid.injected.signing.key.alias=thousand" "-Pandroid.injected.signing.key.password=$IMZA_PAROLA")
@@ -170,6 +164,14 @@ jobs:
           name: ci-error-log
           path: ci-error.log
           if-no-files-found: warn
+
+      - name: AAB'yi artifact olarak yükle (Google Play için hazır)
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: thousand-aab
+          path: mobile/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
 
       - name: APK'yı artifact olarak yükle
         if: github.event_name != 'pull_request'
@@ -216,20 +218,15 @@ jobs:
           tag_name: apk-latest
           name: "Thousand — son APK"
           prerelease: true
-          # web.json + web-version.txt: uygulama içi güncelleme paketi (APK'yı tekrar
-          # kurmadan arayüzü günceller). Yukarıda build_all.py üretti; repoda tutulmaz.
-          files: |
-            Thousand.apk
-            web.json
-            web-version.txt
+          files: Thousand.apk
           body: |
             main dalından otomatik derlenen APK (main'e her birleşmede güncellenir).
             Telefona kurmak için: indir → aç → "bilinmeyen kaynaklara izin ver".
             Eski uygulamadan geçiyorsan: önce eski uygulamada Ayarlar → Hesap → kurtarma kodunu bir yere yaz, sonra
             bu APK'yı kur ve "Hesabım var → kurtarma kodu gir" ile hesabını ve ilerlemeni geri al.
 
-      # Yayın aracı eski dosyaları silmez: adı değişen ya da artık üretilmeyen dosyalar (ör. eski
-      # adlı APK) release sayfasında kalıp yanlışlıkla indirilmesin. Yeni dosyalar yüklendikten
+      # Yayın aracı eski dosyaları silmez: artık üretilmeyen dosyalar (ör. eski uygulamanın güncelleme paketi
+      # web.json / web-version.txt) release sayfasında kalıp yanlışlıkla indirilmesin. Yeni dosyalar yüklendikten
       # SONRA silinir, böylece sayfada hiçbir an APK'sız kalınmaz.
       - name: Release'teki eski dosyaları temizle
         if: github.event_name != 'pull_request'
@@ -237,8 +234,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           for a in $(gh release view apk-latest --json assets -q '.assets[].name'); do
-            case "$a" in
-              Thousand.apk|web.json|web-version.txt) ;;
-              *) echo "siliniyor: $a"; gh release delete-asset apk-latest "$a" -y ;;
-            esac
+            [ "$a" = "Thousand.apk" ] || { echo "siliniyor: $a"; gh release delete-asset apk-latest "$a" -y; }
           done

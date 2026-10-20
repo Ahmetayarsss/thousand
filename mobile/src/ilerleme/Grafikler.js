@@ -1,5 +1,5 @@
 /*
- * İstatistikler sayfasının grafikleri — Capacitor'daki analiz sayfasının (templates/analiz_template.html) SVG
+ * İstatistikler sayfasının grafikleri — eski uygulamanın analiz sayfasının SVG
  * çizimlerinin aynısı (ölçüler, eksenler, renkler), react-native-svg ile. Bir işarete dokununca ipucu kutusu
  * açılır (değer önde, etiket arkada), işaretin alanı hafifçe koyulaşır; doğruluk çizgisinde parmak en yakın
  * güne oturur.

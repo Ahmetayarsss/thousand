@@ -1,6 +1,6 @@
 /*
  * İlerleme ve İstatistikler ekranlarının hesapları, ekrandan bağımsız. Capacitor'daki
- * templates/stats_template.html ve templates/analiz_template.html ile aynı kurallar; tests/ilerleme.test.js denetler.
+ * eski uygulamanın istatistik ve analiz sayfalarıyla aynı kurallar; tests/ilerleme.test.js denetler.
  * Hepsi SRS'in kayıtlarından (ox3000_srs_v1), günlük özetten (ox3000_daily_v1) ve sınav oturumlarından
  * (ox3000_sessions_v1) okur; hiçbir şey yazmaz.
  */

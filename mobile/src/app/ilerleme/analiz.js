@@ -1,5 +1,5 @@
 /*
- * İstatistikler — Capacitor'daki analiz.html (templates/analiz_template.html) ile aynı: genel kutucuklar, son 30
+ * İstatistikler — eski uygulamanın analiz sayfasıyla aynı: genel kutucuklar, son 30
  * günün cevapları ve doğruluğu, kutu dağılımı, önümüzdeki 7 günün tekrar yükü, en çok yanlış yapılanlar.
  * Hesaplar src/ilerleme/veri.js'te, grafikler src/ilerleme/Grafikler.js'te. Grafiğin dışına dokununca ipucu kapanır.
  */

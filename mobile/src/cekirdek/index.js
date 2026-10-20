@@ -1,14 +1,13 @@
 /*
- * Ortak çekirdek: Capacitor uygulamasıyla AYNI srs.js (tekrar sistemi) ve log.js (kullanım kaydı),
- * hiç değiştirilmeden. İkisi de localStorage kullanır; telefonda onu expo-sqlite karşılar
- * (uygulamanın kendi veritabanı — iOS'un WebView verisi gibi silinmez). Anahtarlar (ox3000_*) aynı.
- * Webde (yalnız geliştirme) tarayıcının localStorage'ı kullanılır.
+ * Çekirdek: srs.js (tekrar sistemi) ve log.js (kullanım kaydı) — eski (Capacitor) uygulamadan, aynı localStorage
+ * anahtarlarıyla (ox3000_*). İkisi de localStorage kullanır; telefonda onu expo-sqlite karşılar (uygulamanın kendi
+ * veritabanı). Webde (yalnız geliştirme) tarayıcının localStorage'ı kullanılır. Testler: tests/srs.test.js, log.test.js.
  */
 import "expo-sqlite/localStorage/install";   // srs.js / log.js yüklenmeden ÖNCE
 import { AppState } from "react-native";
-import "../../app/www/log.js";
-import "../../app/www/srs.js";
-import KELIMELER from "./uretilen/kelimeler.json";
+import "./log.js";
+import "./srs.js";
+import KELIMELER from "../uretilen/kelimeler.json";
 
 export const SRS = globalThis.SRS;
 export const OXLOG = globalThis.OXLOG;

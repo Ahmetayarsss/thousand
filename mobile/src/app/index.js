@@ -4,8 +4,8 @@
  * dokununca okunur. Ekrana her dönüşte liste yeniden hesaplanır.
  * Bütün kelimeler çalışılıyorsa liste yerine havai fişek (geliştirici modunda Ayarlar'dan ya da /?kutla=1).
  * Açılışta (bir kez): eski uygulamadan ilerleme aktarıldıysa (ya da aktarılamadıysa) söylenir (gecis.js); hesap
- * yoksa takma ad sorulur, varsa ve kullanım kaydı izni hiç sorulmadıysa izin; yeni arkadaşlık istekleri ve
- * dürtmeler haber verilir.
+ * yoksa takma ad sorulur, varsa ve kullanım kaydı izni hiç sorulmadıysa izin, bildirim ayarları eksikse kurulum
+ * (bir kez); yeni arkadaşlık istekleri ve dürtmeler haber verilir.
  * "Listeyi oku": listedeki kelimeler sırayla (src/okuma — Android'de ekran kapalıyken de, bildirim ve kilit ekranı
  * düğmeleriyle; ekrandan çıkınca sürer, Spotify gibi). Okunan kart işaretlenir ve ortaya kaydırılır. Kelime arası
  * bekleme sürgüyle (sürerken de uygulanır); döngü ve Türkçe okuma Ayarlar'da.
@@ -21,6 +21,7 @@ import KelimeKarti from "../bilesenler/KelimeKarti";
 import { Baslik, Dugme, Metin, pencereAc } from "../bilesenler/Pencere";
 import { ANAHTARLA, GECIS, OXLOG, SRS } from "../cekirdek";
 import { HESAP, useHesap } from "../hesap";
+import { bildirimKurulumu } from "../bildirim/Kurulum";
 import { karsilama } from "../hesap/Karsilama";
 import * as Okuma from "../okuma";
 import { durdur, kelimeyiOku } from "../ses";
@@ -61,6 +62,7 @@ function acilis() {
   setTimeout(() => {
     if (!HESAP.account()) { karsilama(); return; }
     if (HESAP.kayitIzni() === null) karsilama({ adim: "izin" });
+    bildirimKurulumu();   // telefon ayarları (bildirim izni, otomatik başlatma): eksikse bir kez
     HESAP.dashboard().then(haberler, () => {});
   }, 800);
 }

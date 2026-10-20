@@ -2,7 +2,7 @@
 
 iOS ve Android için tek kod tabanı; yayındaki uygulama bu. Eski Capacitor uygulamasının (`app/`) yerine geçti:
 ad "Thousand", paket `io.github.ahmetayarsss.thousand`, aynı imza — telefonda eskisinin üstüne kurulur.
-Henüz olmayanlar (bildirimler): `PLAN.md` → Aşama 9.
+Eskisinin yaptığı her şey Android'de var; iOS'a özgü işler (arka planda okuma, bildirimler): `PLAN.md` → Aşama 9.
 
 **Yayın:** `main`'e her birleşmede `.github/workflows/build-apk.yml` APK'yı derleyip `apk-latest` release'ine
 koyar (`Thousand.apk`). Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`); eski uygulama da aynı
@@ -28,6 +28,8 @@ bu uygulama ilk açılışta onu alır (`src/gecis.js`, kuralları `src/gecisAkt
 | `src/kartlar/` | Kartlar ekranının parçaları: `oturum.js` (Test/Sınav kuralları, ekrandan bağımsız), `Deste.js` (üst üste kartlar, fırlatma), `KartYuzu.js`, `Klavye.js` (yazılı kart için uygulama içi klavye), `Cevirme.js` + `cevirmeGeometri.js` (kart çevirme, Skia — eski three.js çevirmesiyle birebir), `yuzYakala.js` (kart yüzünün resmi; `.web.js` webde) |
 | `src/okuma/` | "Listeyi oku": `index.js` (Android'de `modules/okuma` servisi; başka yerde ekran açıkken JS ile), `liste.js` (okuma listesi, ekrandan bağımsız) |
 | `modules/okuma/` | Android "Listeyi oku" servisi (Expo yerel modülü): eski uygulamanın `GroupTtsService`'i (`OkumaServisi.java`; bildirim, kilit ekranı, kulaklık düğmeleri, ekran kapalıyken okuma) ve köprüsü (`OkumaModule.kt`). `expo prebuild` kendiliğinden bağlar |
+| `src/bildirim/Kurulum.js` | Bildirim kurulumu penceresi (izin, otomatik başlatma); bildirim ayarları ve hatırlatma planı `src/hesap/hesap.js`'te |
+| `modules/bildirim/` | Android bildirimleri (Expo yerel modülü): eski uygulamanın `Bildirimler`, `HatirlatmaWorker` (seri / tekrar hatırlatması), `ArkadasWorker` (arkadaşlık isteği, dürtme; uygulama kapalıyken de) sınıfları aynen; köprü `BildirimModule.kt`, bildirime dokununca hedef ekran `BildirimPackage.kt` |
 | `src/cikis.js` | Sınav sürerken başka sekmeye geçişte onay |
 | `src/uretilen/` | **Üretilen, elle düzenlenmez** (`scripts/build_all.py`): `kelimeler.json` (sıralı kelime verisi), `sesler.js` (ses haritası) |
 | `app.config.js` | `app.json`'un üstüne derleme numarası (sürüm kodu) |

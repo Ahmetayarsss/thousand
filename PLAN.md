@@ -129,8 +129,13 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       okunan kart işaretlenir; Ayarlar'da "Başa dön" ve "Türkçesini de oku". Okuma listesi ekrandan ayrı
       (`src/okuma/liste.js`, `tests/okuma.test.js`). iOS'ta (ve webde) şimdilik ekran açıkken JS ile okunur;
       iOS'ta arka plan sesi ve kilit ekranı adım 39'da.
-- [ ] 36. Bildirimler: yerel seri/tekrar hatırlatmaları; arkadaş isteği ve dürtme.
-      🔸 iOS'ta bunlar için push (APNs) gerekir: yeni ağ adresi + sunucu işi.
+- [x] 36. Bildirimler (Android): eski uygulamanın bildirim kodu aynen (`mobile/modules/bildirim`, Expo yerel modülü:
+      seri/tekrar hatırlatmaları, arkadaşlık isteği ve dürtme — uygulama kapalıyken de, 22:00–08:00 sessiz), JS tarafı
+      (`hatirlatmaPlani`, bildirim anahtarı, ayarlar) `src/hesap/hesap.js`'te; `tests/hesap_yeni.test.js` planı eskisiyle
+      karşılaştırır. Ayarlar'da Bildirimler kartı (saat seçimi), telefon ayarları penceresi (izin, otomatik başlatma;
+      hesap açılınca bir kez), bildirime dokununca ilgili ekran. Eski uygulamanın ayarları (`ox_bildirim`) aynen sürer;
+      eski arka plan işi yeni adla kurulup eskisi silinir.
+      🔸 iOS'ta bunlar için push (APNs) gerekir: yeni ağ adresi + sunucu işi (adım 39).
 - [x] 37. Android'de geçiş (kullanıcı kararı, Ekim 2026: önce "önce tamamla, sonra geç" denmişti, sonra "direkt
       yeni uygulamayı ana uygulama yap, eksikleri sonra tamamla" — 34–36 geçişten SONRA yapılır): yeni uygulama
       "Thousand" adını ve ana paket adını (`io.github.ahmetayarsss.thousand`) aldı, `main`'den `build-apk.yml` ile

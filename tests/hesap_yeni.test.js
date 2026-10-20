@@ -20,7 +20,8 @@ function sunucu(ayar = {}) {
     if (fn === "get_backup") return cevap(s.yedek);
     if (fn === "push_backup") { s.yedek = JSON.parse(JSON.stringify(body.p)); return cevap(null); }
     if (fn === "push_logs") { (s.loglar = s.loglar || []).push(body.p); return cevap(null); }
-    if (fn === "dashboard") return cevap({ me: { nick: "Test" }, friends: [], incoming: [], outgoing: [], durtmeler: [] });
+    if (fn === "dashboard") return cevap({ me: { nick: "Test" }, friends: [], incoming: [{ id: "i1", at: "2026-10-20T10:00:00.123456+00:00" }], outgoing: [], durtmeler: [{ id: "d1", from: "f", at: "2026-10-20T11:00:00.5+00:00" }] });
+    if (fn === "bildirim_anahtari") { s.anahtarNo = (s.anahtarNo || 0) + 1; return cevap({ anahtar: "k" + s.anahtarNo }); }
     return cevap(null);
   };
   return s;
@@ -40,8 +41,25 @@ function ortam(ls = {}, ayar = {}, eski = false) {
   ctx.window = ctx;
   vm.createContext(ctx);
   for (const f of eski ? ["log.js", "srs.js", "hesap.js"] : ["log.js", "srs.js"]) vm.runInContext(fs.readFileSync(path.join(WWW, f), "utf8"), ctx);
-  const A = H.kur({ depo, fetch: sv.fetch, SRS: ctx.SRS, OXLOG: ctx.OXLOG, cihaz: "Android 14; Test", surum: "2.5", zamanla: () => 0 });
+  const A = H.kur({ depo, fetch: sv.fetch, SRS: ctx.SRS, OXLOG: ctx.OXLOG, B: ayar.B, cihaz: "Android 14; Test", surum: "2.5",
+    zamanla: ayar.zamanla || (() => 0) });
   return { A, ls, sv, ctx };
+}
+// Native bildirim modülü taklidi: çağrıları kaydeder.
+function sahteB({ izin = "granted", gecersiz = [] } = {}) {
+  const c = [];
+  return {
+    c,
+    configure: (o) => { c.push(["configure", o.secret, o.arkadas, o.durt, o.son]); return gecersiz.includes(o.secret) ? { ok: false, gecersiz: true } : { ok: true, izin }; },
+    disable: () => c.push(["disable"]),
+    planla: (items) => { c.push(["planla", items.length]); return { ok: true, n: items.length }; },
+    seen: (son) => c.push(["seen", son]),
+    permission: () => ({ display: izin }),
+    requestPermission: async () => { c.push(["izinIste"]); return { display: "granted" }; },
+    openSettings: () => c.push(["ayarlar"]),
+    cihaz: () => ({ marka: "xiaomi redmi", sdk: 34, otobas: true }),
+    otomatikBaslatma: () => { c.push(["otobas"]); return { acildi: "otobas" }; },
+  };
 }
 const OTURUM = () => JSON.stringify({ at: "tok", rt: "r", exp: Date.now() + 3600e3, uid: "u1" });
 
@@ -83,7 +101,7 @@ const t = async (ad, f) => { await f(); n++; console.log("ok -", ad); };
       ox3000_hesap_v1: JSON.stringify({ nick: "T", code: "AB12CD", recovery: "ABCD-EFGH-JKLM" }),
       ox3000_oturum_v1: JSON.stringify({ at: "eski", rt: "r", exp: 0 }),
       ox3000_bildirim_v1: JSON.stringify({ anahtar: "x", izin: 1 }),
-    }, { yenilemeYok: true });
+    }, { yenilemeYok: true, zamanla: (f) => { f(); return 0; } });
     await o.A.dashboard();
     assert.deepStrictEqual(o.sv.cagri, ["/auth/v1/token?grant_type=refresh_token", "/auth/v1/signup", "claim_account", "dashboard"]);
     assert.strictEqual(JSON.parse(o.ls.ox3000_oturum_v1).at, "yeni");
@@ -129,6 +147,52 @@ const t = async (ad, f) => { await f(); n++; console.log("ok -", ad); };
     assert.strictEqual(o.A.account(), null);
     for (const k of ["ox3000_oturum_v1", "ox3000_pano_v1"]) assert.strictEqual(o.ls[k], undefined, k);
     assert.strictEqual(o.ls.ox3000_srs_v1, "{}");
+  });
+
+  await t("hatırlatma planı eskisiyle aynı (seri, tekrar, saatler, 3 gün)", async () => {
+    const ls = {
+      ox3000_srs_v1: JSON.stringify({ "1|apple": { b: 2, n: 1, l: 1, f: 20380, due: 20380, a: 20379 }, "1|area": { b: 1, n: 0, l: 1, f: 20380, due: 20382, a: 20380 } }),
+      ox3000_daily_v1: JSON.stringify({ 20378: { n: 5, ok: 4, nw: 1 }, 20379: { n: 3, ok: 3, nw: 0 } }),
+      ox3000_settings_v1: JSON.stringify({ bildirim: { seriSaat: "19:30", tekrarSaat: "08:15" } }),
+    };
+    const yeni = ortam({ ...ls }), eski = ortam({ ...ls }, {}, true);
+    for (const now of [Date.now(), new Date(2026, 9, 20, 7, 0).getTime(), new Date(2026, 9, 20, 21, 0).getTime()]) {
+      assert.strictEqual(JSON.stringify(yeni.A.hatirlatmaPlani(now)), JSON.stringify(eski.ctx.OXACC.hatirlatmaPlani(now)));   // vm nesneleri: metinle
+    }
+    assert.ok(yeni.A.hatirlatmaPlani(Date.now()).length > 0);
+    assert.strictEqual(H.saatOk("21:59"), true);
+    assert.strictEqual(H.saatOk("22:00"), false);
+  });
+
+  await t("bildirimler: anahtar alınır, native'e verilir; geçersizse yenisi; ikisi kapalıysa durur; görülen iletilir", async () => {
+    const B = sahteB({ gecersiz: ["k1"] });
+    const o = ortam({ ox3000_hesap_v1: JSON.stringify({ nick: "T", code: "AB12CD" }), ox3000_oturum_v1: OTURUM() }, { B });
+    assert.strictEqual(await o.A.bildirimKur(false), true);
+    assert.deepStrictEqual(B.c.map((x) => x.slice(0, 2)), [["configure", "k1"], ["configure", "k2"]]);
+    assert.strictEqual(JSON.parse(o.ls.ox3000_bildirim_v1).anahtar, "k2");
+    await o.A.dashboard();
+    assert.deepStrictEqual(B.c[B.c.length - 1], ["seen", "2026-10-20T11:00:00.5+00:00"]);
+    await o.A.bildirimAyarla({ arkadas: false });
+    await o.A.bildirimAyarla({ durt: false });
+    assert.deepStrictEqual(B.c[B.c.length - 1], ["disable"]);
+    assert.deepStrictEqual(o.A.bildirimAyar(), { seri: true, seriSaat: "20:00", tekrar: true, tekrarSaat: "09:00", arkadas: false, durt: false });
+    await o.A.bildirimAyarla({ seriSaat: "23:00" });   // sessiz saatte: yok sayılır
+    assert.strictEqual(o.A.bildirimAyar().seriSaat, "20:00");
+  });
+
+  await t("bildirimler yoksa (iOS, web) hiçbir şey denenmez; kurulum penceresi bir kez", async () => {
+    const o = ortam({ ox3000_hesap_v1: JSON.stringify({ nick: "T", code: "AB12CD" }), ox3000_oturum_v1: OTURUM() });
+    assert.strictEqual(await o.A.bildirimKur(false), false);
+    assert.strictEqual(o.A.hatirlatmaPlanla(true), false);
+    assert.strictEqual(o.A.kurulumDurum(), null);
+    assert.ok(!o.sv.cagri.includes("bildirim_anahtari"));
+    const B = sahteB({ izin: "prompt" }), b = ortam({}, { B });
+    const d = b.A.kurulumDurum();
+    assert.deepStrictEqual(d.adim.map((x) => [x.id, x.ok]), [["izin", false], ["otobas", false]]);
+    assert.strictEqual(b.A.kurulumGosterilsin(), true);
+    assert.strictEqual(b.A.kurulumGosterilsin(), false);
+    await b.A.kurulumAdim("izin");
+    assert.ok(B.c.some((x) => x[0] === "izinIste"));
   });
 
   await t("hata metinleri eskisiyle aynı", async () => {

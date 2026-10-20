@@ -1,11 +1,13 @@
 /*
  * Karşılama penceresi (eski hesap.js'teki onboard / stepNick / stepCodes / stepRecover / kayitSor):
- * takma ad → kodlar → kullanım kaydı izni; ya da kurtarma kodu → (gerekirse yedek mi telefon mu) → hoş geldin.
+ * takma ad → kodlar → kullanım kaydı izni; ya da kurtarma kodu → (gerekirse yedek mi telefon mu) → hoş geldin;
+ * sonra bildirim kurulumu (Android, bir kez).
  * karsilama({ zorla, adim, bitti }): zorla değilse "Sonra" denmişse bu açılışta bir daha sorulmaz.
  * adim: "ad" (varsayılan), "kurtar" ya da "izin" (yalnız kullanım kaydı izni).
  */
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { bildirimKurulumu } from "../bildirim/Kurulum";
 import { pencereAc, Baslik, Dugme, Girdi, Hata, Metin } from "../bilesenler/Pencere";
 import { OXLOG, SRS } from "../cekirdek";
 import { useTema } from "../tema";
@@ -21,7 +23,8 @@ export function karsilama({ zorla = false, adim = "ad", bitti } = {}) {
 
 function Akis({ ilk, kapat, bitti }) {
   const [adim, setAdim] = useState({ ad: ilk });
-  const bitir = (a) => { kapat(); hesapDegisti(); if (bitti) bitti(a); };
+  // Hesap açıldı ya da geri geldi: bildirimler için telefon ayarları (eksikse bir kez) ya da yalnız izin.
+  const bitir = (a) => { kapat(); hesapDegisti(); if (ilk !== "izin") bildirimKurulumu(); if (bitti) bitti(a); };
   const izinSonra = (a) => { if (HESAP.kayitIzni() === null) setAdim({ ad: "izin", a }); else bitir(a); };
   switch (adim.ad) {
     case "kodlar": return <Kodlar a={adim.a} devam={() => izinSonra(adim.a)} />;

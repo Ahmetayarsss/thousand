@@ -13,8 +13,9 @@ kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 
 **Yayındaki uygulama yeni uygulama** (`mobile/`, React Native / Expo, iOS + Android; `PLAN.md` Aşama 9). Eski
 Capacitor uygulamasının (`app/`) yerine geçti: aynı ad ("Thousand"), paket ve imzayla onun üstüne kurulur;
-eski ilerlemeyi ilk açılışta alır (`app/www/gecis.js` yazar, `mobile/src/gecis.js` okur). Eski uygulamanın yaptığı
-her şey henüz yok (kullanıcı kararı: önce geç, eksikler sonra — PLAN.md adım 36: bildirimler). `app/` geçiş için duruyor:
+eski ilerlemeyi ilk açılışta alır (`app/www/gecis.js` yazar, `mobile/src/gecis.js` okur). Android'e özgü işler
+(Listeyi oku servisi, bildirimler) eski uygulamanın Java kodundan Expo yerel modülleri olarak geldi (`mobile/modules/`);
+iOS karşılıkları henüz yok (PLAN.md adım 39). `app/` geçiş için duruyor:
 telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini indirmeye devam eder. `app/www/srs.js` ve
 `log.js` iki uygulamada ortak: değişiklik ikisini birden etkiler.
 
@@ -42,7 +43,7 @@ node tests/updater.test.js
 node tests/hesap.test.js
 node tests/log.test.js
 node tests/gecis.test.js       # eski uygulamadan yeni uygulamaya ilerleme aktarımı
-TZ=Europe/Istanbul node tests/hesap_yeni.test.js  # yeni uygulama: hesap, arkadaşlar, yedek, kayıt izni
+TZ=Europe/Istanbul node tests/hesap_yeni.test.js  # yeni uygulama: hesap, arkadaşlar, yedek, kayıt izni, bildirimler
 TZ=Europe/Istanbul node tests/oturum.test.js   # yeni uygulama: Kartlar mantığı
 TZ=Europe/Istanbul node tests/ilerleme.test.js # yeni uygulama: İlerleme / İstatistikler hesapları
 node tests/sozluk.test.js      # yeni uygulama: Sözlük araması

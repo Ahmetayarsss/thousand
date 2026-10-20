@@ -2,16 +2,18 @@
  * Ayarlar (eski ayarlar sayfası): Hesap (takma ad, arkadaş kodu, kurtarma kodu, başka hesaba geç, sil), Gizlilik
  * (kullanım kaydı izni), Çalışma (listedeki kelime sayısı), Listeyi oku (döngü, Türkçesi; süren okumaya da hemen
  * uygulanır). Başlığa 3 sn içinde 7 kez dokununca geliştirici modu (tarih kaydırma, kutlama, kayıtlar, sıfırlama).
- * Henüz yok: Bildirimler (adım 36).
+ * Bildirimler (yalnız Android): seri / tekrar hatırlatması (saatiyle), arkadaşlık istekleri, dürtmeler, telefon
+ * ayarları (izin, otomatik başlatma). Telefonun ayarlarından dönünce durum yenilenir.
  */
 import * as Clipboard from "expo-clipboard";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { duyur } from "../bilesenler/Duyuru";
 import Pano from "../bilesenler/Pano";
-import { Dugme, girdiIste, onayla } from "../bilesenler/Pencere";
+import { bildirimKurulumu } from "../bildirim/Kurulum";
+import { Baslik, Dugme, girdiIste, onayla, pencereAc } from "../bilesenler/Pencere";
 import { OXLOG, SRS } from "../cekirdek";
 import { errText, HESAP, hesapDegisti, useHesap } from "../hesap";
 import { karsilama } from "../hesap/Karsilama";
@@ -19,6 +21,37 @@ import * as Okuma from "../okuma";
 import { useTema } from "../tema";
 
 const HAZIR = [10, 20, 30, 50, 100];
+const BIL = [
+  { k: "seri", t: "Seri hatırlatma", s: "Çalışmadığın günlerde, serin bozulmasın diye.", saat: "seriSaat" },
+  { k: "tekrar", t: "Tekrar zamanı", s: "O gün tekrarı gelen kelime varsa.", saat: "tekrarSaat" },
+  { k: "arkadas", t: "Arkadaşlık istekleri", s: "Biri sana istek gönderince, uygulama kapalıyken de." },
+  { k: "durt", t: "Dürtmeler", s: "Bir arkadaşın seni dürtünce." },
+];
+// Saatler 08:00–21:45, 15 dk arayla (22:00–08:00 sessiz saatler: o arada bildirim gelmez).
+const SAATLER = [];
+for (let m = 8 * 60; m < 22 * 60; m += 15) SAATLER.push(("0" + Math.floor(m / 60)).slice(-2) + ":" + ("0" + (m % 60)).slice(-2));
+function saatSec(baslik, deger) {
+  return new Promise((coz) => {
+    pencereAc((kapat) => <SaatListesi baslik={baslik} deger={deger} sec={(v) => { kapat(); coz(v); }} />);
+  });
+}
+function SaatListesi({ baslik, deger, sec }) {
+  const t = useTema();
+  return (
+    <View>
+      <Baslik>{baslik}</Baslik>
+      <ScrollView style={{ maxHeight: 320 }} contentContainerStyle={s.saatler}>
+        {SAATLER.map((v) => (
+          <Pressable key={v} onPress={() => sec(v)} accessibilityRole="button" accessibilityState={{ selected: v === deger }}
+            style={[s.saat, { borderColor: v === deger ? t.accent : t.kartLine, backgroundColor: v === deger ? t.accent : t.kartBg }]}>
+            <Text style={[s.saatYazi, { color: v === deger ? "#fff" : t.ink }]}>{v}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+      <Dugme metin="Vazgeç" tur="bos" onBas={() => sec(null)} />
+    </View>
+  );
+}
 const p2 = (n) => ("0" + n).slice(-2);
 function tarih(ms) { const d = new Date(ms); return p2(d.getDate()) + "." + p2(d.getMonth() + 1) + "." + d.getFullYear(); }
 function ne(ms) {
@@ -36,6 +69,9 @@ export default function Ayarlar() {
   const dokunuslar = useRef([]);
 
   useFocusEffect(useCallback(() => { OXLOG.add("sayfa", { p: "ayarlar" }); ciz(); }, [ciz]));
+  // Telefonun ayarlarından dönünce izin durumu yenilensin.
+  useEffect(() => { const a = AppState.addEventListener("change", (d) => { if (d === "active") ciz(); }); return () => a.remove(); }, [ciz]);
+  const bilDegistir = async (p, metin) => { await HESAP.bildirimAyarla(p); ciz(); duyur(metin, 1800); };
 
   const hesapIsi = async (ad, fn, tamam) => {
     setMesgul(ad);
@@ -50,7 +86,7 @@ export default function Ayarlar() {
     if (dokunuslar.current.length < 7) return;
     dokunuslar.current = [];
     const ac = !SRS.dev().on;
-    SRS.setDev({ on: ac }); OXLOG.add("dev", { a: ac ? "ac" : "kapat" }); ciz();
+    SRS.setDev({ on: ac }); OXLOG.add("dev", { a: ac ? "ac" : "kapat" }); ciz(); HESAP.hatirlatmaPlanla(true);
     duyur(ac ? "Geliştirici modu açıldı 🛠" : "Geliştirici modu kapandı", 1800);
   };
 
@@ -63,6 +99,8 @@ export default function Ayarlar() {
   };
 
   const iz = HESAP.kayitIzni(), dev = SRS.dev(), n = SRS.listSize(), ld = HESAP.logDurum();
+  const bd = HESAP.bildirimDurum(), ba = bd.ayar, kd = HESAP.kurulumDurum();
+  const izinYok = !kd && bd.var && bd.izin && bd.izin !== "granted" && BIL.some((b) => ba[b.k]);
   const kb = Math.max(1, Math.round(OXLOG.size() / 1024));
 
   return (
@@ -165,11 +203,43 @@ export default function Ayarlar() {
           </Satir>
         </Pano>
 
+        {bd.var ? (
+          <Pano t={t} baslik="Bildirimler">
+            {BIL.map((b, i) => (
+              <Satir key={b.k} t={t} ilk={i === 0} baslik={b.t} alt={b.s}
+                ek={b.saat ? (
+                  <Pressable disabled={!ba[b.k]} accessibilityRole="button" accessibilityLabel={b.t + " saati"}
+                    onPress={async () => { const v = await saatSec(b.t + " saati", ba[b.saat]); if (v) bilDegistir({ [b.saat]: v }, b.t + ": " + v); }}
+                    style={[s.saatSecici, { borderColor: t.kartLine, backgroundColor: t.kartBg, opacity: ba[b.k] ? 1 : 0.5 }]}>
+                    <Text style={[s.saatYazi, { color: t.ink }]}>{ba[b.saat]} ▾</Text>
+                  </Pressable>
+                ) : null}>
+                <Anahtar t={t} acik={!!ba[b.k]} etiket={b.t} onBas={() => bilDegistir({ [b.k]: !ba[b.k] }, b.t + ": " + (!ba[b.k] ? "açık" : "kapalı"))} />
+              </Satir>
+            ))}
+            {kd ? (
+              <Satir t={t} baslik="Telefon ayarları"
+                alt={kd.tamam ? "✓ Tamam, bildirimler zamanında gelir." : "Eksik: " + kd.adim.filter((x) => !x.ok).map((x) => x.t.toLocaleLowerCase("tr-TR")).join(", ") + "."}>
+                <Dugme kucuk metin={kd.tamam ? "Aç" : "Kur"} onBas={() => bildirimKurulumu({ zorla: true, bitti: ciz })} />
+              </Satir>
+            ) : null}
+            {izinYok ? (
+              <Satir t={t} baslik="Bildirim izni kapalı" alt="Telefon bu uygulamanın bildirim göstermesine izin vermiyor.">
+                <Dugme kucuk metin={bd.izin === "prompt" ? "İzin ver" : "Ayarları aç"} onBas={async () => { await HESAP.bildirimIzinIste(); ciz(); }} />
+              </Satir>
+            ) : null}
+            <Text style={[s.not, { color: t.muted }]}>
+              {(!bd.hesap && (ba.arkadas || ba.durt) ? "Arkadaşlık istekleri ve dürtmeler için önce hesap oluştur. " : "") +
+                "Gece 22:00–08:00 arası bildirim gelmez (arkadaş bildirimleri sabah gelir). Uygulamayı 3 gün açmazsan hatırlatmalar durur."}
+            </Text>
+          </Pano>
+        ) : null}
+
         {dev.on ? (
           <Pano t={t} baslik="Geliştirici modu" style={{ borderStyle: "dashed", borderWidth: 1.5, borderColor: "#8E44AD" }}>
             <Satir t={t} ilk baslik="Uygulama tarihi" alt={tarih(SRS.now()) + (dev.off ? " (+" + dev.off + " gün)" : " (gerçek)")}>
-              <Dugme kucuk metin="+1 gün" onBas={() => { SRS.setDev({ off: SRS.dev().off + 1 }); OXLOG.add("dev", { a: "gun+1", off: SRS.dev().off }); ciz(); duyur("1 gün ileri sarıldı", 1800); }} />
-              <Dugme kucuk tur="bos" metin="Bugün" onBas={() => { SRS.setDev({ off: 0 }); OXLOG.add("dev", { a: "bugun" }); ciz(); duyur("Gerçek tarihe dönüldü", 1800); }} />
+              <Dugme kucuk metin="+1 gün" onBas={() => { SRS.setDev({ off: SRS.dev().off + 1 }); OXLOG.add("dev", { a: "gun+1", off: SRS.dev().off }); ciz(); HESAP.hatirlatmaPlanla(true); duyur("1 gün ileri sarıldı", 1800); }} />
+              <Dugme kucuk tur="bos" metin="Bugün" onBas={() => { SRS.setDev({ off: 0 }); OXLOG.add("dev", { a: "bugun" }); ciz(); HESAP.hatirlatmaPlanla(true); duyur("Gerçek tarihe dönüldü", 1800); }} />
             </Satir>
             <Satir t={t} baslik="Kutlama" alt="3000 kelime bitince çıkan gösteri.">
               <Dugme kucuk metin="Göster" onBas={() => router.navigate({ pathname: "/", params: { kutla: "1" } })} />
@@ -187,7 +257,7 @@ export default function Ayarlar() {
                 OXLOG.add("dev", { a: "sifirla" });
                 SRS.reset(); SRS.setDev({ off: 0 });
                 try { localStorage.removeItem("ox3000_sessions_v1"); } catch (e) {}
-                ciz(); duyur("İlerleme sıfırlandı", 1800);
+                ciz(); HESAP.hatirlatmaPlanla(true); duyur("İlerleme sıfırlandı", 1800);
               }} />
             </Satir>
           </Pano>
@@ -197,7 +267,7 @@ export default function Ayarlar() {
   );
 }
 
-function Satir({ t, ilk, baslik, alt, alt2, deger, aralik, mono, tehlike, children }) {
+function Satir({ t, ilk, baslik, alt, alt2, deger, aralik, mono, tehlike, ek, children }) {
   return (
     <View style={[s.satir, !ilk && { borderTopWidth: 1, borderTopColor: t.kartLine }, ilk && { paddingTop: 0 }]}>
       <View style={{ flex: 1 }}>
@@ -205,6 +275,7 @@ function Satir({ t, ilk, baslik, alt, alt2, deger, aralik, mono, tehlike, childr
         {alt ? <Text style={[s.alt, { color: t.muted }]}>{alt}</Text> : null}
         {alt2 ? <Text style={[s.alt, { color: t.muted }]}>{alt2}</Text> : null}
         {deger != null ? <Text selectable style={[s.v, { color: t.ink, letterSpacing: aralik || 0 }, mono && s.mono]}>{deger}</Text> : null}
+        {ek}
       </View>
       <View style={s.dugmeler}>{children}</View>
     </View>
@@ -240,5 +311,9 @@ const s = StyleSheet.create({
   cip: { flex: 1, borderWidth: 1, borderRadius: 10, paddingVertical: 8, alignItems: "center" },
   cipYazi: { fontSize: 13, fontWeight: "800" },
   sw: { width: 50, height: 30, borderRadius: 15 },
+  saatSecici: { alignSelf: "flex-start", marginTop: 8, borderWidth: 1, borderRadius: 10, paddingVertical: 6, paddingHorizontal: 8 },
+  saatler: { flexDirection: "row", flexWrap: "wrap", gap: 6, paddingBottom: 8 },
+  saat: { width: "23%", borderWidth: 1, borderRadius: 10, paddingVertical: 8, alignItems: "center" },
+  saatYazi: { fontSize: 13, fontWeight: "800" },
   swTop: { position: "absolute", top: 3, width: 24, height: 24, borderRadius: 12, backgroundColor: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,.25)" },
 });

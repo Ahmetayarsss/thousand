@@ -6,9 +6,9 @@ name: Android APK derle
 # Elle: Actions > "Android APK derle" > Run workflow (main seçili).
 # PR'larda yalnız DENEME: APK mühürsüz derlenir (derleniyor mu?), hiçbir şey yayınlanmaz.
 #
-# Geçiş dönemi: yeni uygulama eskisiyle aynı paket adı ve imzada, eskisinin üstüne kurulur. Telefonunda hâlâ
-# eski uygulama olanların güncelleyicisi web paketini buradan indirmeye devam eder; o paketteki gecis.js
-# ilerlemeyi yeni uygulamanın okuyacağı dosyaya yazar. Eski uygulama kaldırılınca (PLAN.md adım 40) web paketi de kalkar.
+# Geçiş dönemi: yeni uygulama eskisiyle aynı paket adı ve imzada, eskisinin üstüne kurulur; ilerleme kurtarma
+# koduyla (sunucudaki yedekten) gelir. Telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini buradan
+# indirmeye devam eder. Eski uygulama kaldırılınca (PLAN.md adım 40) web paketi de kalkar.
 
 on:
   workflow_dispatch:
@@ -92,7 +92,6 @@ jobs:
           node tests/updater.test.js
           node tests/hesap.test.js
           node tests/log.test.js
-          node tests/gecis.test.js
           TZ=Europe/Istanbul node tests/hesap_yeni.test.js
           TZ=Europe/Istanbul node tests/oturum.test.js
           TZ=Europe/Istanbul node tests/ilerleme.test.js
@@ -226,8 +225,8 @@ jobs:
           body: |
             main dalından otomatik derlenen APK (main'e her birleşmede güncellenir).
             Telefona kurmak için: indir → aç → "bilinmeyen kaynaklara izin ver".
-            Eski uygulamadan geçiyorsan: önce eski uygulamayı bir kez aç ("güncellendi ✓" çıksın), sonra bu
-            APK'yı kur — ilerlemen yeni uygulamaya aktarılır, ilk açılışta söylenir.
+            Eski uygulamadan geçiyorsan: önce eski uygulamada Ayarlar → Hesap → kurtarma kodunu bir yere yaz, sonra
+            bu APK'yı kur ve "Hesabım var → kurtarma kodu gir" ile hesabını ve ilerlemeni geri al.
 
       # Yayın aracı eski dosyaları silmez: adı değişen ya da artık üretilmeyen dosyalar (ör. eski
       # adlı APK) release sayfasında kalıp yanlışlıkla indirilmesin. Yeni dosyalar yüklendikten

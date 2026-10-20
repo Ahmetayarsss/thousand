@@ -8,15 +8,14 @@ Eskisinin yaptığı her şey Android'de var; iOS'a özgü işler (arka planda o
 koyar (`Thousand.apk`). Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`); eski uygulama da aynı
 numarayı kullandığı için yeni APK onun üstüne kurulur. Uzaktan (APK'sız) güncelleme yok.
 
-**Eski ilerlemenin aktarımı:** eski uygulama ilerlemeyi uygulama klasörüne bir dosyaya yazar (`app/www/gecis.js`);
-bu uygulama ilk açılışta onu alır (`src/gecis.js`, kuralları `src/gecisAktar.js`) ve Liste'de bir kez söyler.
+**Eski uygulamadan geçiş:** ilerleme kurtarma koduyla gelir (ilk açılışta "Hesabım var → kurtarma kodu gir"; sunucudaki
+yedek yüklenir).
 
 ## Yapı
 
 | Yol | Ne |
 |---|---|
 | `src/app/` | Ekranlar (Expo Router: her dosya bir sekme). `_layout.js` alt sekmeleri kurar; `ilerleme/` bir yığın: İlerleme ve ondan açılan İstatistikler (`analiz.js`) |
-| `src/gecis.js`, `src/gecisAktar.js` | Eski uygulamanın ilerlemesini ilk açılışta alır (çekirdekten önce) |
 | `src/cekirdek.js` | Ortak çekirdeği yükler: `app/www/srs.js` ve `app/www/log.js`, değiştirilmeden. localStorage'ı telefonda `expo-sqlite` karşılar |
 | `src/ses.js` | Kelime sesi: gömülü kayıt (`app/www/audio`), yoksa cihazın konuşma sentezi |
 | `src/tema.js` | Açık / koyu tema renkleri |

@@ -23,7 +23,7 @@ APP_HEAD = '<script src="updater.js"></script><script src="tts-bridge.js"></scri
 # Uygulama içi güncelleme paketine giren dosyalar (ses HARİÇ — ses APK'da gömülü).
 WEB_BUNDLE_FILES = [
     "index.html", "kartlar.html", "sozluk.html", "istatistik.html", "ayarlar.html", "analiz.html", "arkadaslar.html",
-    "tts-bridge.js", "srs.js", "log.js", "gecis.js", "hesap.js", "updater.js", "three.min.js", "kelimeler.js",
+    "tts-bridge.js", "srs.js", "log.js", "hesap.js", "updater.js", "three.min.js", "kelimeler.js",
 ]
 
 

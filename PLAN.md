@@ -140,13 +140,9 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       yeni uygulamayı ana uygulama yap, eksikleri sonra tamamla" — 34–36 geçişten SONRA yapılır): yeni uygulama
       "Thousand" adını ve ana paket adını (`io.github.ahmetayarsss.thousand`) aldı, `main`'den `build-apk.yml` ile
       yayınlanır, eskisinin üstüne kurulur (aynı imza, sürüm kodu aynı iş akışından → büyük). Ayrı deneme uygulaması
-      (`mobil-apk.yml`, `mobil-latest`) kalktı. Eski ilerleme (6. kural): eski uygulamanın son web paketindeki
-      `app/www/gecis.js` bütün `ox3000_*` anahtarlarını uygulama klasörüne iki dosyaya yazar, yeni uygulama ilk
-      açılışta okur (`mobile/src/gecis.js`; `tests/gecis.test.js`). Eski WebView verisi telefonda kalır.
-      Bedeli: hesap/arkadaşlar/ayarlar, listeyi oku, bildirimler 34–36 bitene dek yok; uzaktan arayüz güncellemesi yok
-      (değişiklik yeni APK ile gelir).
-      Henüz yapılmadı: dosya hiç yazılmadan yeni APK kurulduysa (eski uygulama güncelleme paketini almadan) WebView
-      verisini doğrudan okuyan ikinci yol.
+      (`mobil-apk.yml`, `mobil-latest`) kalktı. Eski ilerleme kurtarma koduyla (sunucudaki yedekten) gelir: kullanıcı
+      kararı, ayrı aktarım yok (yazılan dosya aktarımı kaldırıldı).
+      Bedeli: uzaktan arayüz güncellemesi yok (değişiklik yeni APK ile gelir).
 - [ ] 38. Yayın hattı: GitHub Actions'ta `expo prebuild` + Gradle (Android APK: adım 37'de yapıldı; AAB), macOS'ta iOS; imza anahtarları
       GitHub gizli ayarlarında. 🔸 Uzaktan JS güncellemesi (EAS Update) olacak mı — yeni ağ adresi ve
       App Store 2.5.2; önerilen: yok, güncellemeler mağazadan.
@@ -170,5 +166,8 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
   ~600 KB büyük.
 - Arkadaş istatistikleri telefondan geldiği için sahtelenebilir — yalnız arkadaşlar arası
   görünüyor, ödül/sıralama yok.
+- Eski (Capacitor) uygulamadan yeni uygulamaya ilerleme ayrıca aktarılmıyor (6. kural istisnası; kullanıcı kararı,
+  Ekim 2026: "hesap kurtarmayla ilerleme kurtarılabiliyor"). Bedeli: hesabı olmayanın ilerlemesi gelmez; yedek değişince
+  en çok 5 dakikada bir gittiği için son dakikalar gelmeyebilir. Eski WebView verisi telefonda silinmeden kalır.
 - Kurtarma koduyla hesap taşınınca eski anonim giriş kaydı sunucuda kalıyor — zararsız,
   ileride temizlik işiyle silinebilir.

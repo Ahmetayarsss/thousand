@@ -3,9 +3,8 @@
  * (SRS.newList). Sınavda cevaplanan kelime listeden düşer, alttan sıradaki gelir. Kelimeye
  * dokununca okunur. Ekrana her dönüşte liste yeniden hesaplanır.
  * Bütün kelimeler çalışılıyorsa liste yerine havai fişek (geliştirici modunda Ayarlar'dan ya da /?kutla=1).
- * Açılışta (bir kez): eski uygulamadan ilerleme aktarıldıysa (ya da aktarılamadıysa) söylenir (gecis.js); hesap
- * yoksa takma ad sorulur, varsa ve kullanım kaydı izni hiç sorulmadıysa izin, bildirim ayarları eksikse kurulum
- * (bir kez); yeni arkadaşlık istekleri ve dürtmeler haber verilir.
+ * Açılışta (bir kez): hesap yoksa takma ad (ya da kurtarma kodu) sorulur; varsa ve kullanım kaydı izni hiç
+ * sorulmadıysa izin, bildirim ayarları eksikse kurulum (bir kez); yeni arkadaşlık istekleri ve dürtmeler haber verilir.
  * "Listeyi oku": listedeki kelimeler sırayla (src/okuma — Android'de ekran kapalıyken de, bildirim ve kilit ekranı
  * düğmeleriyle; ekrandan çıkınca sürer, Spotify gibi). Okunan kart işaretlenir ve ortaya kaydırılır. Kelime arası
  * bekleme sürgüyle (sürerken de uygulanır); döngü ve Türkçe okuma Ayarlar'da.
@@ -19,25 +18,13 @@ import { duyur } from "../bilesenler/Duyuru";
 import HavaiFisek from "../bilesenler/HavaiFisekKatmani";
 import KelimeKarti from "../bilesenler/KelimeKarti";
 import { Baslik, Dugme, Metin, pencereAc } from "../bilesenler/Pencere";
-import { ANAHTARLA, GECIS, OXLOG, SRS } from "../cekirdek";
+import { ANAHTARLA, OXLOG, SRS } from "../cekirdek";
 import { HESAP, useHesap } from "../hesap";
 import { bildirimKurulumu } from "../bildirim/Kurulum";
 import { karsilama } from "../hesap/Karsilama";
 import * as Okuma from "../okuma";
 import { durdur, kelimeyiOku } from "../ses";
 import { useTema } from "../tema";
-
-function gecisiSoyle() {
-  const ac = (baslik, metin) => pencereAc((kapat) => (
-    <View><Baslik>{baslik}</Baslik><Metin>{metin}</Metin><Dugme metin="Tamam" onBas={kapat} /></View>
-  ));
-  if (GECIS.durum === "aktarildi") {
-    ac("İlerlemen aktarıldı", "Eski uygulamadaki ilerlemen bu uygulamaya geçti: " + GECIS.kelime + " kelime.");
-  } else if (GECIS.durum === "bozuk") {
-    ac("İlerleme aktarılamadı", "Eski uygulamadaki ilerlemen okunamadı (" + GECIS.hata + "). Eski veriler telefonda duruyor; " +
-      "uygulamayı silme, bu ekranın görüntüsünü gönder.");
-  }
-}
 
 // Arkadaş haberleri: görülmemiş istekler ve (son 24 saatteki) dürtmeler; görülenler eskisiyle aynı anahtarlarda.
 function haberler(d) {
@@ -58,7 +45,6 @@ let acildi = false;
 function acilis() {
   if (acildi) return;
   acildi = true;
-  gecisiSoyle();
   setTimeout(() => {
     if (!HESAP.account()) { karsilama(); return; }
     if (HESAP.kayitIzni() === null) karsilama({ adim: "izin" });

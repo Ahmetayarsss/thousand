@@ -1,9 +1,9 @@
 # Thousand — eski Android uygulaması (Capacitor)
 
 > **Artık APK'sı derlenmiyor.** Yayındaki uygulama yeni uygulama (`mobile/`, React Native): aynı ad, aynı paket
-> ve imzayla bunun üstüne kurulur (`mobile/README.md`). Bu klasör geçiş için duruyor: telefonunda hâlâ eski
-> uygulama olanların güncelleyicisi web paketini (`build-apk.yml`) indirmeye devam eder; paketteki `www/gecis.js`
-> ilerlemeyi yeni uygulamanın ilk açılışta okuyacağı dosyaya yazar. Eski uygulama tamamen kalkınca (PLAN.md adım 40) silinir.
+> ve imzayla bunun üstüne kurulur (`mobile/README.md`); ilerleme kurtarma koduyla (sunucudaki yedekten) gelir. Bu
+> klasör geçiş için duruyor: telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini (`build-apk.yml`)
+> indirmeye devam eder. Eski uygulama tamamen kalkınca (PLAN.md adım 40) silinir.
 
 Capacitor 7, hedef Android 15 (`targetSdk` 35), en düşük Android 6 (`minSdk` 23). Sürümler
 `android/variables.gradle`'da; Android 15'te sayfa durum/gezinme çubuklarının altına girmesin diye
@@ -78,12 +78,7 @@ kullan (`--card`, `--ink`, `--solid`…), yoksa karanlık modda o parça açık 
 Kelime içeriği ya da şablon değişince: `python3 scripts/build_all.py` çalıştır. Yerel
 derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script üretir.
 
-## Geçiş: yeni uygulamaya ilerleme aktarımı
-
-`www/gecis.js` her sayfa açılışında ve uygulama arka plana geçerken bütün `ox3000_*` anahtarlarını uygulamanın
-kendi dosya klasörüne (gecis klasörü, aynı içerikte iki kopya) yazar; dosya telefondan çıkmaz. Yeni
-uygulama eskisinin üstüne kurulunca ilk açılışta bu dosyayı okur (`mobile/src/gecis.js`). Sıra: eski uygulamayı
-bir kez aç (güncelleme paketi gelir, "güncellendi ✓"), sonra yeni APK'yı kur. Testi: `tests/gecis.test.js`.
+## Geçiş: yeni uygulama
 
 **İmza ve paket:** yeni uygulama da GitHub gizli ayarlarındaki anahtarla (`IMZA_ANAHTARI`, `IMZA_PAROLA`) imzalanır,
 paket `io.github.ahmetayarsss.thousand`; `build-apk.yml` ikisini de yayından önce doğrular.

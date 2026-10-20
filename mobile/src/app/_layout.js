@@ -1,8 +1,12 @@
 // Alt sekmeler: Capacitor uygulamasındaki sırayla (Liste · Kartlar · İlerleme · Sözlük · Arkadaş · Ayarlar).
+// Kökte bir kez: ortadaki pencere (karşılama, onaylar) ve alttaki kısa bildirimler.
 import "../cekirdek";
+import "../hesap";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { DuyuruAlani } from "../bilesenler/Duyuru";
+import { PencereAlani } from "../bilesenler/Pencere";
 import { cikisSor } from "../cikis";
 import { useTema } from "../tema";
 
@@ -43,6 +47,8 @@ export default function Duzen() {
           />
         ))}
       </Tabs>
+      <DuyuruAlani />
+      <PencereAlani />
     </>
   );
 }

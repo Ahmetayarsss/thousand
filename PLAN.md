@@ -116,8 +116,13 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       havai fişek (Skia; eskisinin her karede soldurma yöntemiyle aynı görüntü).
 - [x] 33. Sözlük: 3000 kelimede arama (İngilizce/Türkçe), eskisiyle aynı sıra ve kart; arama ekrandan ayrı
       (`src/sozluk/arama.js`, `tests/sozluk.test.js`).
-- [ ] 34. Hesap ve Arkadaşlar (`hesap.js`'in ekrandan bağımsız hali; aynı Supabase işlevleri), Ayarlar,
-      ilk açılış penceresi, kullanım kaydı izni.
+- [x] 34. Hesap ve Arkadaşlar: `hesap.js`'in ekrandan bağımsız hali (`mobile/src/hesap/hesap.js`; aynı Supabase
+      işlevleri, aynı sırayla, aynı anahtarlar — `tests/hesap_yeni.test.js` eskisiyle karşılaştırır), Arkadaşlar ekranı
+      (kod, ekle, istekler, dürt, çıkar), Ayarlar (hesap, gizlilik, liste sayısı, gizli geliştirici modu), ilk açılış
+      penceresi (takma ad / kurtarma kodu, telefonda da ilerleme varsa hangisi kalsın), kullanım kaydı izni (bir kez,
+      görünür açıklamayla), Liste'de arkadaş haberleri, sınav cevabından sonra özet ve yedek. Eski uygulamadan
+      aktarılan hesap ve oturum aynen devam eder. Sonraya kalanlar: Ayarlar'daki "Listeyi oku" seçenekleri (adım 35),
+      Bildirimler kartı ve telefon ayarları penceresi (adım 36); kayıtları dosyaya dışa aktarma yerine panoya kopyalama.
 - [ ] 35. Listeyi oku: arka planda ses, kilit ekranı / bildirim denetimleri (Android + iOS), Türkçe okuma,
       bekleme sürgüsü.
 - [ ] 36. Bildirimler: yerel seri/tekrar hatırlatmaları; arkadaş isteği ve dürtme.

@@ -7,7 +7,7 @@
  *   - Sınavda kuyruğun %10'u yazılı (altın kart): uygulama içi klavyeyle yazılır, sistem denetler.
  *   - Sınav sürerken çıkışta onay (Test'e geçiş, Bitir, başka sekme, geri tuşu). Cevaplar anında kaydedilir.
  * Ekrana her gelişte yeni Test başlar (?exam=1 ile gelindiyse Sınav) — eski uygulamada sayfa yeniden açılırdı.
- * Henüz yok (adım 34): cevaptan sonra özetin arkadaşlara gönderilmesi ve hatırlatmaların yeniden kurulması.
+ * Cevaptan sonra özet arkadaşlara gider (HESAP.syncSoon). Henüz yok (adım 36): hatırlatmaların yeniden kurulması.
  */
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -15,6 +15,7 @@ import { BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ANAHTARLA, OXLOG, SRS } from "../cekirdek";
 import { cikisBekcisi } from "../cikis";
+import { HESAP } from "../hesap";
 import CevirmeKatmani from "../kartlar/CevirmeKatmani";
 import { PAY } from "../kartlar/cevirmeGeometri";
 import Yuva, { DERINLIK, rastgeleEgim, rastgeleKayma } from "../kartlar/Deste";
@@ -106,6 +107,7 @@ export default function Kartlar() {
   function sinavBitti() {
     const r = O.sinavSonu(SRS, D.o);
     OXLOG.add("sinav_bit", { n: r.n, ok: r.ok, tum: r.tumu ? 1 : 0, yz: D.o.ot.ty, yzOk: D.o.ot.tyOk });
+    if (r.n) HESAP.syncSoon(true, true);   // sınav bitince özet hemen, yedek (5 dk'da bir)
     setSonuc(r); setBaslik(ustBaslik());
   }
   function baslat() {
@@ -185,6 +187,7 @@ export default function Kartlar() {
     OXLOG.add("cevap", { k, y: yon === "tr2en" ? "te" : "et", ok: dogru ? 1 : 0, b: [r.from, r.to],
       ms: Math.round(performance.now() - D.tPrompt), yz: yz ? 1 : 0, g: yz ? yazilan : undefined });
     D.yazili = null;
+    HESAP.syncSoon(false);   // arkadaşların görsün (dakikada en çok bir)
     setBaslik(ustBaslik());
     if (D.o.i === D.o.tekrar && D.o.tekrar > 0 && D.o.cur) balon("Tekrarlar bitti — yeni kelimelere geçiliyor.");
     ilerle(dogru ? "right" : "left");   // Bildim → sağa, Bilemedim → sola

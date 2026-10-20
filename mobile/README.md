@@ -2,7 +2,7 @@
 
 iOS ve Android için tek kod tabanı; yayındaki uygulama bu. Eski Capacitor uygulamasının (`app/`) yerine geçti:
 ad "Thousand", paket `io.github.ahmetayarsss.thousand`, aynı imza — telefonda eskisinin üstüne kurulur.
-Henüz olmayanlar (hesap, arkadaşlar, ayarlar, listeyi oku, bildirimler): `PLAN.md` → Aşama 9.
+Henüz olmayanlar (listeyi oku, bildirimler): `PLAN.md` → Aşama 9.
 
 **Yayın:** `main`'e her birleşmede `.github/workflows/build-apk.yml` APK'yı derleyip `apk-latest` release'ine
 koyar (`Thousand.apk`). Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`); eski uygulama da aynı
@@ -20,7 +20,8 @@ bu uygulama ilk açılışta onu alır (`src/gecis.js`, kuralları `src/gecisAkt
 | `src/cekirdek.js` | Ortak çekirdeği yükler: `app/www/srs.js` ve `app/www/log.js`, değiştirilmeden. localStorage'ı telefonda `expo-sqlite` karşılar |
 | `src/ses.js` | Kelime sesi: gömülü kayıt (`app/www/audio`), yoksa cihazın konuşma sentezi |
 | `src/tema.js` | Açık / koyu tema renkleri |
-| `src/bilesenler/` | Ekranların ortak parçaları: `KelimeKarti.js`, `Pano.js` (İlerleme kartı), `HavaiFisek.js` (bütün kelimeler bitince, Skia), `Tasiniyor.js` |
+| `src/bilesenler/` | Ekranların ortak parçaları: `KelimeKarti.js`, `Pano.js` (beyaz kart), `HavaiFisek.js` (bütün kelimeler bitince, Skia), `Pencere.js` (ortadaki pencere, onay, girdi), `Duyuru.js` (alttaki kısa bildirim) |
+| `src/hesap/` | Hesap ve arkadaşlar: `hesap.js` (eski `app/www/hesap.js`'in ekrandan bağımsız hali; aynı sunucu işlevleri ve anahtarlar), `index.js` (bu telefonda kurulumu, açılış/arka plan gönderimleri, `useHesap`), `Karsilama.js` (takma ad, kodlar, kurtarma kodu, kayıt izni) |
 | `src/ilerleme/` | İlerleme / İstatistikler: `veri.js` (hesaplar, ekrandan bağımsız), `Grafikler.js` (SVG grafikler, eskisinin ölçüleriyle) |
 | `src/sozluk/arama.js` | Sözlük araması (ekrandan bağımsız) |
 | `src/skiaWeb.web.js` | Webde Skia'yı yükler; Skia kullanan bileşenler webde `…Katmani.web.js` ile tembel yüklenir |

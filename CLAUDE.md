@@ -42,6 +42,7 @@ node tests/updater.test.js
 node tests/hesap.test.js
 node tests/log.test.js
 node tests/gecis.test.js       # eski uygulamadan yeni uygulamaya ilerleme aktarımı
+TZ=Europe/Istanbul node tests/hesap_yeni.test.js  # yeni uygulama: hesap, arkadaşlar, yedek, kayıt izni
 TZ=Europe/Istanbul node tests/oturum.test.js   # yeni uygulama: Kartlar mantığı
 TZ=Europe/Istanbul node tests/ilerleme.test.js # yeni uygulama: İlerleme / İstatistikler hesapları
 node tests/sozluk.test.js      # yeni uygulama: Sözlük araması

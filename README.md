@@ -29,6 +29,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `tests/sozluk.test.js` | Yeni uygulamanın Sözlük araması (`mobile/src/sozluk/arama.js`): sıra ve 60 sonuç sınırı |
 | `tests/cevirme.test.js` | Yeni uygulamanın kart çevirmesi (`mobile/src/kartlar/cevirmeGeometri.js`): her köşe noktası eski uygulamadaki çevirmeyle (three kütüphanesi) aynı yerde mi |
 | `tests/gecis.test.js` | Eski uygulamadan yeni uygulamaya ilerleme aktarımı: eskinin yazdığı dosyadan (`app/www/gecis.js`) yeninin aldığı (`mobile/src/gecisAktar.js`) birebir aynı mı, yarım kalmış dosya, hata |
+| `tests/hesap_yeni.test.js` | Yeni uygulamanın hesabı (`mobile/src/hesap/hesap.js`): eski `hesap.js`'le aynı sunucu çağrıları ve kayıtlar; kurtarma, yedek, oturum yenileme, kullanım kaydı izni, hesap silme |
 | `tests/log.test.js` | Kullanım kaydı (`app/www/log.js`): toplu/ertelenmiş yazma, sayfadan çıkarken kaybolmama |
 | `tests/sunucu.test.sh` | Sunucu (`supabase/kurulum.sql`): geçici PostgreSQL'de kurulumu iki kez çalıştırır, `tests/sunucu/testler.sql`'i (yetkiler, hesap, yedek, arkadaşlık, dürtme, bildirim, kayıtlar, taşıma, silme) koşar; Supabase'in parçaları `tests/sunucu/supabase_taklit.sql`'de taklit edilir |
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |

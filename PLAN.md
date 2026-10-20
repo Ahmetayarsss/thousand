@@ -143,9 +143,11 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       (`mobil-apk.yml`, `mobil-latest`) kalktı. Eski ilerleme kurtarma koduyla (sunucudaki yedekten) gelir: kullanıcı
       kararı, ayrı aktarım yok (yazılan dosya aktarımı kaldırıldı).
       Bedeli: uzaktan arayüz güncellemesi yok (değişiklik yeni APK ile gelir).
-- [ ] 38. Yayın hattı: GitHub Actions'ta `expo prebuild` + Gradle (Android APK: adım 37'de yapıldı; AAB), macOS'ta iOS; imza anahtarları
-      GitHub gizli ayarlarında. 🔸 Uzaktan JS güncellemesi (EAS Update) olacak mı — yeni ağ adresi ve
-      App Store 2.5.2; önerilen: yok, güncellemeler mağazadan.
+- [x] 38. Yayın hattı (kullanıcı kararları, Ekim 2026: uzaktan JS güncellemesi yok — güncellemeler APK / mağazadan,
+      yeni ağ adresi yok; Google Play'e şimdilik çıkılmıyor; Apple Developer hesabı henüz yok). Android: `build-apk.yml`
+      `expo prebuild` + Gradle, APK release'e, AAB iş akışı çıktısı (`thousand-aab`, aynı anahtar, arm64). iOS:
+      `ios-derle.yml` PR'larda macOS'ta simülatör için imzasız derler (iOS'ta derleniyor mu). Hesap açılınca: imzalı
+      derleme + TestFlight (sertifika ve App Store Connect API anahtarı GitHub gizli ayarlarında).
 - [ ] 39. App Store hazırlığı: gizlilik politikası, App Privacy etiketi, şikâyet/engelleme ve takma ad
       süzgeci (1.2), iOS'a özgü özellikler (widget, kilit ekranından okuma; "Listeyi oku" arka planda).
 - [ ] 40. Capacitor uygulaması kaldırılır (`app/`, `templates/`, güncelleyici, `build-apk.yml`); ortak

@@ -135,6 +135,9 @@ jobs:
         run: |
           set -o pipefail
           args=(assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a)
+          # Yayında Google Play için AAB de (kullanıcı kararı: şimdilik Play'e çıkılmıyor, hazır dursun; yalnız
+          # iş akışı çıktısı, release'e konmaz). Aynı anahtarla imzalı, aynı işlemci (arm64).
+          if [ "${{ github.event_name }}" != "pull_request" ]; then args+=(bundleRelease); fi
           if [ -n "${IMZA_DOSYASI:-}" ]; then   # PR denemesinde yok: Expo'nun hata ayıklama anahtarı
             args+=("-Pandroid.injected.signing.store.file=$IMZA_DOSYASI" "-Pandroid.injected.signing.store.password=$IMZA_PAROLA"
                    "-Pandroid.injected.signing.key.alias=thousand" "-Pandroid.injected.signing.key.password=$IMZA_PAROLA")
@@ -170,6 +173,14 @@ jobs:
           name: ci-error-log
           path: ci-error.log
           if-no-files-found: warn
+
+      - name: AAB'yi artifact olarak yükle (Google Play için hazır)
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: thousand-aab
+          path: mobile/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
 
       - name: APK'yı artifact olarak yükle
         if: github.event_name != 'pull_request'

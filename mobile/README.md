@@ -6,7 +6,9 @@ Eskisinin yaptığı her şey Android'de var; iOS'a özgü işler (arka planda o
 
 **Yayın:** `main`'e her birleşmede `.github/workflows/build-apk.yml` APK'yı derleyip `apk-latest` release'ine
 koyar (`Thousand.apk`). Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`); eski uygulama da aynı
-numarayı kullandığı için yeni APK onun üstüne kurulur. Uzaktan (APK'sız) güncelleme yok.
+numarayı kullandığı için yeni APK onun üstüne kurulur. Uzaktan (APK'sız) güncelleme yok (kullanıcı kararı). Google Play
+için AAB de derlenir (iş akışı çıktısı `thousand-aab`; Play'e çıkılmıyor). iOS: PR'larda `ios-derle.yml` simülatör için
+imzasız derler (telefona kurulmaz; Apple Developer hesabı açılınca imzalı derleme).
 
 **Eski uygulamadan geçiş:** ilerleme kurtarma koduyla gelir (ilk açılışta "Hesabım var → kurtarma kodu gir"; sunucudaki
 yedek yüklenir).

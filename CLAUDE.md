@@ -63,7 +63,9 @@ Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekir
 - **`main` = yayın.** `main`'e giren her değişiklikte `build-apk.yml` testleri, doğrulamayı ve
   bekçiyi çalıştırır, geçerse yeni uygulamanın APK'sını (`Thousand.apk`) ve eski uygulamanın güncelleme
   paketini `apk-latest` release'ine koyar. Yeni uygulamada uzaktan güncelleme yok: değişiklik telefona yeni
-  APK kurulunca gelir. Eski uygulamadaki güncelleyici paketi YALNIZ oradan indirir.
+  APK kurulunca gelir (kullanıcı kararı: uzaktan JS güncellemesi yok). Eski uygulamadaki güncelleyici paketi YALNIZ oradan
+  indirir. Google Play AAB'si iş akışı çıktısı olarak derlenir, yayınlanmaz. iOS yalnız derleniyor mu diye denetlenir
+  (`ios-derle.yml`, PR'larda); Apple Developer hesabı açılınca imzalı derleme ve TestFlight eklenir.
 - **`main`'e doğrudan push yok.** İş bir çalışma dalında yapılır, PR açılır, kullanıcı
   birleştirir. PR açıklaması telefonda neyin değişeceğini sade dille söyler.
 - Güncelleme paketi (`web.json`, `web-version.txt`, `app/www/updater.js`) repoda tutulmaz;

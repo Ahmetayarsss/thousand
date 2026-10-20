@@ -10,9 +10,14 @@ version = '1.0.0'
 
 android {
   namespace "expo.modules.bildirim"
+  defaultConfig {
+    consumerProguardFiles "consumer-rules.pro"
+  }
 }
 
 dependencies {
   implementation "androidx.core:core-ktx:1.17.0"
-  implementation "androidx.work:work-runtime:2.9.1"   // arka planda kontrol ve zamanlı hatırlatmalar
+  // Arka planda kontrol ve zamanlı hatırlatmalar. 2.9.1 yayın derlemesinde açılışta çöküyordu ("Failed to create an
+  // instance of ... WorkDatabase": küçültme (R8) veritabanı sınıfının kurucusunu atmış); güncel sürüm + consumer-rules.pro.
+  implementation "androidx.work:work-runtime:2.11.2"
 }

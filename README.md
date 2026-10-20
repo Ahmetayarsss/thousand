@@ -36,6 +36,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + uygulamanın paketlenmesi + üretilen dosyaların güncelliği |
 | `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK'yı (release, mühürlü, paket `io.github.ahmetayarsss.thousand`) derleyip `apk-latest` release'ine koyar (etiket derlenen commit'e taşınır); Google Play için AAB'yi de iş akışı çıktısı olarak derler (Play'e çıkılmıyor, hazır dursun). PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
 | `.github/workflows/ios-derle.yml` | PR'larda uygulama iOS'ta derleniyor mu (macOS, simülatör, imzasız; Apple Developer hesabı yok, hiçbir şey yayınlanmaz) |
+| `.github/workflows/acilis-denemesi.yml` | PR'larda uygulama açılıyor mu: yayın ayarlarıyla (küçültme açık) derleyip Android emülatöründe açar, çökerse kırmızı; betik `.github/betikler/acilis-denemesi.sh` |
 | `.gitattributes` | GitHub'ın dil istatistiğinde üretilen dosyalar (`mobile/src/uretilen/`) ve teste konan hazır kütüphane sayılmasın |
 
 Eski Capacitor (WebView) uygulaması (`app/`, `templates/`) kaldırıldı (PLAN.md adım 40); git geçmişinde duruyor.

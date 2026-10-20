@@ -89,6 +89,68 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
 - [x] 29. Capacitor 7, `targetSdk`/`compileSdk` 35 (Play Store şartı), Gradle 8.11.1 / AGP 8.7.2. En düşük Android 6
       (minSdk 23; eskiden 5.1). Android 15'te ekran kenarı payı: `adjustMarginsForEdgeToEdge: auto`. Yeni APK ile etkin.
 
+## Aşama 9 — Yeni uygulama: React Native (Expo), iOS + Android
+
+Kullanıcı kararı (Ekim 2026): App Store'un 4.2 kuralı ("paketlenmiş web sitesi") ve iOS için HTML yapısından
+çıkılır; tek kod tabanı iki platformu besler. Yeni uygulama `mobile/`'da yazılır. Capacitor uygulaması (`app/`)
+yeni uygulama onun yaptığı her şeyi yapana ve geçiş yapılana dek yayında kalır. Tekrar sistemi (`srs.js`) ve
+kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; localStorage anahtarları (`ox3000_*`) aynı.
+
+- [x] 30. İskelet: Expo (JavaScript), alt sekmeler, çekirdek (`srs.js`, `log.js`) telefonda SQLite üstünde
+      değişmeden çalışır (`expo-sqlite` localStorage'ı), kelime verisi ve ses haritası build'den
+      (`mobile/src/uretilen/`), Liste ekranı (kelimeye dokununca ses). CI'da Android paketleme denetimi;
+      bekçi `mobile/`'daki ağ adreslerini de tarar.
+- [x] 31. Kartlar: Test + Sınav, yazılı kart ve uygulama içi klavye, çıkış onayı (Test'e geçiş, Bitir, başka
+      sekme, geri tuşu), sonuç ekranı. Kart çevirme Skia ile (kullanıcı kararı: birebir): kartın iki yüzü resim
+      olarak yakalanır, aynı geometriyle kıvrılır; her köşe noktası three.js ile aynı yerde (`tests/cevirme.test.js`).
+      Kurallar ekrandan ayrı (`oturum.js`, `tests/oturum.test.js`). Sınav oturumu kaydı artık `SRS.yaz` ile
+      (yazılamazsa uyarı). Eksik (adım 34): cevaptan sonra özetin arkadaşlara gitmesi, hatırlatmaların kurulması.
+- [x] 31b. Ayrı deneme uygulaması (kullanıcı kararı; adım 37'de kalktı): ad "Thousand Yeni", paket `io.github.ahmetayarsss.thousand.yeni`
+      (telefonda ana uygulamanın yanına kurulur, verisi ayrı), yayın dalı `mobil` → `mobil-latest` release'i
+      (`mobil-apk.yml`; ana uygulamanın `main` → `apk-latest` yayınına dokunmaz). İmza: ana uygulamayla aynı anahtar.
+      Kullanılmayan izinler (mikrofon, dosya, başka uygulamaların üstüne çizim) APK'dan çıkarıldı. Yalnız 64 bit arm
+      (kullanıcı kararı; iki işlemci türüyle APK 98 MB'tı).
+- [x] 32. İlerleme ve İstatistikler (eski istatistik + analiz sayfaları; aynı veriyle aynı sayılar ve grafikler,
+      `react-native-svg`), İlerleme'den açılan İstatistikler (eskiden yalnız Ayarlar'dan kaydırarak açılıyordu).
+      Hesaplar ekrandan ayrı (`src/ilerleme/veri.js`, `tests/ilerleme.test.js`). Bütün kelimeler bitince Liste'de
+      havai fişek (Skia; eskisinin her karede soldurma yöntemiyle aynı görüntü).
+- [x] 33. Sözlük: 3000 kelimede arama (İngilizce/Türkçe), eskisiyle aynı sıra ve kart; arama ekrandan ayrı
+      (`src/sozluk/arama.js`, `tests/sozluk.test.js`).
+- [x] 34. Hesap ve Arkadaşlar: `hesap.js`'in ekrandan bağımsız hali (`mobile/src/hesap/hesap.js`; aynı Supabase
+      işlevleri, aynı sırayla, aynı anahtarlar — `tests/hesap_yeni.test.js` eskisiyle karşılaştırır), Arkadaşlar ekranı
+      (kod, ekle, istekler, dürt, çıkar), Ayarlar (hesap, gizlilik, liste sayısı, gizli geliştirici modu), ilk açılış
+      penceresi (takma ad / kurtarma kodu, telefonda da ilerleme varsa hangisi kalsın), kullanım kaydı izni (bir kez,
+      görünür açıklamayla), Liste'de arkadaş haberleri, sınav cevabından sonra özet ve yedek. Eski uygulamadan
+      aktarılan hesap ve oturum aynen devam eder. Sonraya kalanlar: Ayarlar'daki "Listeyi oku" seçenekleri (adım 35),
+      Bildirimler kartı ve telefon ayarları penceresi (adım 36); kayıtları dosyaya dışa aktarma yerine panoya kopyalama.
+- [x] 35. Listeyi oku (Android): eski uygulamanın okuma servisi aynen (`mobile/modules/okuma`, Expo yerel modülü:
+      ön plan servisi, bildirim + kilit ekranı düğmeleri, kulaklık tuşları, ekran kapalıyken okuma, Türkçe okuma,
+      döngü); değişen yalnız sesin bulunduğu yer (APK'da res/raw). Liste'de bekleme sürgüsü (sürerken de uygulanır),
+      okunan kart işaretlenir; Ayarlar'da "Başa dön" ve "Türkçesini de oku". Okuma listesi ekrandan ayrı
+      (`src/okuma/liste.js`, `tests/okuma.test.js`). iOS'ta (ve webde) şimdilik ekran açıkken JS ile okunur;
+      iOS'ta arka plan sesi ve kilit ekranı adım 39'da.
+- [x] 36. Bildirimler (Android): eski uygulamanın bildirim kodu aynen (`mobile/modules/bildirim`, Expo yerel modülü:
+      seri/tekrar hatırlatmaları, arkadaşlık isteği ve dürtme — uygulama kapalıyken de, 22:00–08:00 sessiz), JS tarafı
+      (`hatirlatmaPlani`, bildirim anahtarı, ayarlar) `src/hesap/hesap.js`'te; `tests/hesap_yeni.test.js` planı eskisiyle
+      karşılaştırır. Ayarlar'da Bildirimler kartı (saat seçimi), telefon ayarları penceresi (izin, otomatik başlatma;
+      hesap açılınca bir kez), bildirime dokununca ilgili ekran. Eski uygulamanın ayarları (`ox_bildirim`) aynen sürer;
+      eski arka plan işi yeni adla kurulup eskisi silinir.
+      🔸 iOS'ta bunlar için push (APNs) gerekir: yeni ağ adresi + sunucu işi (adım 39).
+- [x] 37. Android'de geçiş (kullanıcı kararı, Ekim 2026: önce "önce tamamla, sonra geç" denmişti, sonra "direkt
+      yeni uygulamayı ana uygulama yap, eksikleri sonra tamamla" — 34–36 geçişten SONRA yapılır): yeni uygulama
+      "Thousand" adını ve ana paket adını (`io.github.ahmetayarsss.thousand`) aldı, `main`'den `build-apk.yml` ile
+      yayınlanır, eskisinin üstüne kurulur (aynı imza, sürüm kodu aynı iş akışından → büyük). Ayrı deneme uygulaması
+      (`mobil-apk.yml`, `mobil-latest`) kalktı. Eski ilerleme kurtarma koduyla (sunucudaki yedekten) gelir: kullanıcı
+      kararı, ayrı aktarım yok (yazılan dosya aktarımı kaldırıldı).
+      Bedeli: uzaktan arayüz güncellemesi yok (değişiklik yeni APK ile gelir).
+- [ ] 38. Yayın hattı: GitHub Actions'ta `expo prebuild` + Gradle (Android APK: adım 37'de yapıldı; AAB), macOS'ta iOS; imza anahtarları
+      GitHub gizli ayarlarında. 🔸 Uzaktan JS güncellemesi (EAS Update) olacak mı — yeni ağ adresi ve
+      App Store 2.5.2; önerilen: yok, güncellemeler mağazadan.
+- [ ] 39. App Store hazırlığı: gizlilik politikası, App Privacy etiketi, şikâyet/engelleme ve takma ad
+      süzgeci (1.2), iOS'a özgü özellikler (widget, kilit ekranından okuma; "Listeyi oku" arka planda).
+- [ ] 40. Capacitor uygulaması kaldırılır (`app/`, `templates/`, güncelleyici, `build-apk.yml`); ortak
+      çekirdek ve sesler `mobile/`'a taşınır (8. kural).
+
 ## Bilerek bırakılanlar (şimdilik)
 
 - Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele
@@ -104,5 +166,8 @@ Yeni oturum: ilk işaretlenmemiş adımdan devam et.
   ~600 KB büyük.
 - Arkadaş istatistikleri telefondan geldiği için sahtelenebilir — yalnız arkadaşlar arası
   görünüyor, ödül/sıralama yok.
+- Eski (Capacitor) uygulamadan yeni uygulamaya ilerleme ayrıca aktarılmıyor (6. kural istisnası; kullanıcı kararı,
+  Ekim 2026: "hesap kurtarmayla ilerleme kurtarılabiliyor"). Bedeli: hesabı olmayanın ilerlemesi gelmez; yedek değişince
+  en çok 5 dakikada bir gittiği için son dakikalar gelmeyebilir. Eski WebView verisi telefonda silinmeden kalır.
 - Kurtarma koduyla hesap taşınınca eski anonim giriş kaydı sunucuda kalıyor — zararsız,
   ileride temizlik işiyle silinebilir.

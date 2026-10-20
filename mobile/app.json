@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Thousand",
+    "slug": "thousand",
+    "scheme": "thousand",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "io.github.ahmetayarsss.thousand",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "io.github.ahmetayarsss.thousand",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon-foreground.png",
+        "backgroundImage": "./assets/icon-background.png"
+      },
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-asset"
+    ]
+  }
+}

@@ -6,18 +6,26 @@ uymayan değişiklik CI'da (`.github/workflows/kontrol.yml`) kırmızı yanar.
 
 ## Proje
 
-**Thousand**: Türkçe konuşanlara İngilizce kelime çalışma uygulaması, Android (Capacitor + WebView),
+**Thousand**: Türkçe konuşanlara İngilizce kelime çalışma uygulaması, Android (React Native / Expo, `mobile/`),
 paket `io.github.ahmetayarsss.thousand`. İçerik CEFR A1–B2 seviyelerinde 3000 İngilizce kelime. Hesap, arkadaşlar,
 yedek ve kullanım kayıtları Supabase'de (`supabase/kurulum.sql`). Kullanıcı Türkçe konuşur;
 kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
+
+**Yayındaki uygulama yeni uygulama** (`mobile/`, React Native / Expo, iOS + Android; `PLAN.md` Aşama 9). Eski
+Capacitor uygulamasının (`app/`) yerine geçti: aynı ad ("Thousand"), paket ve imzayla onun üstüne kurulur;
+ilerleme kurtarma koduyla (sunucudaki yedekten) gelir (kullanıcı kararı: ayrı aktarım yok). Android'e özgü işler
+(Listeyi oku servisi, bildirimler) eski uygulamanın Java kodundan Expo yerel modülleri olarak geldi (`mobile/modules/`);
+iOS karşılıkları henüz yok (PLAN.md adım 39). `app/` geçiş için duruyor:
+telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini indirmeye devam eder. `app/www/srs.js` ve
+`log.js` iki uygulamada ortak: değişiklik ikisini birden etkiler.
 
 ## Kaynak ve üretilen dosyalar
 
 - **Kaynak (elle düzenlenir):** `data/all_groups.json` (bütün kelime içeriği), `templates/*.html`,
   `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js`,
   `supabase/kurulum.sql`, `app/android/**`, `app/www/audio/*.mp3` (kelime ses kayıtları; adları
-  `slugOf` kuralıyla, `validate.py` denetler).
-- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html` ve `app/www/kelimeler.js` (repoda). Güncelleme paketi
+  `slugOf` kuralıyla, `validate.py` denetler), `mobile/` (`src/uretilen/` hariç).
+- **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html`, `app/www/kelimeler.js` ve `mobile/src/uretilen/*` (repoda). Güncelleme paketi
   (`app/www/updater.js`, `web.json`, `web-version.txt`) de üretilir ama repoya girmez.
 
 Üretim: `python3 scripts/build_all.py`. Şablonu ya da kaynak JS'i değiştirdikten sonra
@@ -34,10 +42,17 @@ TZ=Europe/Istanbul node tests/srs.test.js
 node tests/updater.test.js
 node tests/hesap.test.js
 node tests/log.test.js
+TZ=Europe/Istanbul node tests/hesap_yeni.test.js  # yeni uygulama: hesap, arkadaşlar, yedek, kayıt izni, bildirimler
+TZ=Europe/Istanbul node tests/oturum.test.js   # yeni uygulama: Kartlar mantığı
+TZ=Europe/Istanbul node tests/ilerleme.test.js # yeni uygulama: İlerleme / İstatistikler hesapları
+node tests/sozluk.test.js      # yeni uygulama: Sözlük araması
+node tests/okuma.test.js       # yeni uygulama: Listeyi oku listesi, Türkçe okuma metni
+node tests/cevirme.test.js     # yeni uygulama: kart çevirme three.js ile birebir mi
 bash tests/sunucu.test.sh      # sunucu (kurulum.sql) — geçici PostgreSQL açar
 python3 scripts/validate.py
 python3 scripts/build_all.py
 python3 scripts/bekci.py
+(cd mobile && npx expo export --platform android --output-dir dist/android)   # mobile/ değiştiyse
 ```
 
 Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekirse ekran görüntüsü
@@ -46,9 +61,9 @@ Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekir
 ## Yayın — nasıl telefona ulaşır
 
 - **`main` = yayın.** `main`'e giren her değişiklikte `build-apk.yml` testleri, doğrulamayı ve
-  bekçiyi çalıştırır, geçerse APK'yı ve güncelleme paketini `apk-latest` release'ine koyar.
-  Telefonlardaki güncelleyici paketi YALNIZ oradan indirir; arayüz değişikliği dakikalar
-  içinde bütün telefonlarda olur.
+  bekçiyi çalıştırır, geçerse yeni uygulamanın APK'sını (`Thousand.apk`) ve eski uygulamanın güncelleme
+  paketini `apk-latest` release'ine koyar. Yeni uygulamada uzaktan güncelleme yok: değişiklik telefona yeni
+  APK kurulunca gelir. Eski uygulamadaki güncelleyici paketi YALNIZ oradan indirir.
 - **`main`'e doğrudan push yok.** İş bir çalışma dalında yapılır, PR açılır, kullanıcı
   birleştirir. PR açıklaması telefonda neyin değişeceğini sade dille söyler.
 - Güncelleme paketi (`web.json`, `web-version.txt`, `app/www/updater.js`) repoda tutulmaz;

@@ -6,6 +6,7 @@
    içeriğin tek kaynağı bu dosya).
 2. Örnek alanını (ex) liste biçimine getirip dosyayı geri yazar (biçim tek düze kalsın).
 3. Kelime verisini (app/www/kelimeler.js) ve şablonlardan sayfaları (app/www/*.html) üretir.
+   Yeni uygulama için de (mobile/src/uretilen/: kelimeler.json, sesler.js).
 4. Güncelleme paketini (web.json, web-version.txt, app/www/updater.js) yazar.
 """
 import json
@@ -215,6 +216,26 @@ def render(groups):
     # İlerleme: sağa kartlar.
     page("stats_template.html", "istatistik.html", ("", "kartlar.html"),
          (("__BACK__", "kartlar.html"),))
+    render_mobile(groups)
+
+
+def render_mobile(groups):
+    """Yeni uygulama (mobile/, React Native) için: sıralı kelime verisi ve ses haritası.
+
+    Veri app/www/kelimeler.js ile aynı (aynı sıra → srs.js aynı anahtarları ve sırayı üretir).
+    Ses haritası: Metro sesleri yalnız statik require ile paketler; kelimenin adı slug_of ile.
+    """
+    out = ROOT / "mobile" / "src" / "uretilen"
+    out.mkdir(parents=True, exist_ok=True)
+    veri = json.dumps(groups, ensure_ascii=False, separators=(",", ":"))
+    (out / "kelimeler.json").write_text(veri + "\n", encoding="utf-8")
+    sesler = sorted(p.stem for p in (ROOT / "app/www/audio").glob("*.mp3"))
+    satirlar = "".join(f'  "{s}": require("../../../app/www/audio/{s}.mp3"),\n' for s in sesler)
+    (out / "sesler.js").write_text(
+        "// Üretilen dosya (scripts/build_all.py) — elle düzenleme; kaynak app/www/audio/*.mp3.\n"
+        "// Kelimenin ses kaydı: slugOf(kelime) → paketlenmiş mp3.\n"
+        "export default {\n" + satirlar + "};\n", encoding="utf-8")
+    print(f"mobile/src/uretilen: kelimeler.json {len(veri)} bayt, {len(sesler)} ses")
 
 def main():
     groups = load_groups()

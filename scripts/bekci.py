@@ -57,11 +57,13 @@ TARAMA_DISI = {"scripts/bekci.py", "scripts/bekci_borc.json", "CLAUDE.md"}
 PAKET_DOSYALARI = ("web.json", "web-version.txt", "app/www/updater.js")
 BUYUK_SINIR = 1_500_000
 
-# Uygulama kodu (ağ adresi taraması): şablonlar, app/www'daki elle yazılan JS, native Java.
+# Uygulama kodu (ağ adresi taraması): şablonlar, app/www'daki elle yazılan JS, native Java,
+# yeni uygulamanın (mobile/) kodu ve yapılandırması.
 def uygulama_kodu(dosyalar):
     for d in dosyalar:
         if d.startswith("templates/") or (d.startswith("app/www/") and d.endswith(".js")) \
-                or (d.startswith("app/android/app/src/main/") and d.endswith((".java", ".xml"))):
+                or (d.startswith("app/android/app/src/main/") and d.endswith((".java", ".xml"))) \
+                or (d.startswith("mobile/") and d.endswith((".js", ".json")) and not d.endswith("package-lock.json")):
             if not d.endswith("three.min.js"):
                 yield d
 

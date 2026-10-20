@@ -1,0 +1,5 @@
+# GitHub'ın dil istatistiği yalnız elle yazılan kodu saysın: build_all.py'nin ürettikleri ve hazır kütüphane hariç.
+app/www/*.html linguist-generated
+app/www/kelimeler.js linguist-generated
+mobile/src/uretilen/** linguist-generated
+app/www/three.min.js linguist-vendored

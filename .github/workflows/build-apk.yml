@@ -1,10 +1,14 @@
 name: Android APK derle
 
-# YAYIN: main dalına giren her değişiklikte APK'yı ve uygulama içi güncelleme paketini
-# (web.json + web-version.txt) derleyip apk-latest release'ine koyar. Telefonlardaki
-# güncelleyici paketi YALNIZ oradan indirir. Testler, doğrulama ya da bekçi kırmızıysa
-# hiçbir şey yayınlanmaz. Elle: Actions > "Android APK derle" > Run workflow (main seçili).
+# YAYIN: main dalına giren her değişiklikte uygulamanın APK'sını (mobile/, React Native) ve eski
+# (Capacitor) uygulamanın güncelleme paketini (web.json + web-version.txt) derleyip apk-latest
+# release'ine koyar. Testler, doğrulama ya da bekçi kırmızıysa hiçbir şey yayınlanmaz.
+# Elle: Actions > "Android APK derle" > Run workflow (main seçili).
 # PR'larda yalnız DENEME: APK mühürsüz derlenir (derleniyor mu?), hiçbir şey yayınlanmaz.
+#
+# Geçiş dönemi: yeni uygulama eskisiyle aynı paket adı ve imzada, eskisinin üstüne kurulur; ilerleme kurtarma
+# koduyla (sunucudaki yedekten) gelir. Telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini buradan
+# indirmeye devam eder. Eski uygulama kaldırılınca (PLAN.md adım 40) web paketi de kalkar.
 
 on:
   workflow_dispatch:
@@ -16,6 +20,7 @@ on:
       - "templates/**"
       - "data/**"
       - "scripts/**"
+      - "mobile/**"
       - ".github/workflows/build-apk.yml"
   pull_request:
     paths:
@@ -23,6 +28,7 @@ on:
       - "templates/**"
       - "data/**"
       - "scripts/**"
+      - "mobile/**"
       - ".github/workflows/build-apk.yml"
 
 # Aynı anda iki yayın olmasın (sonraki, öncekinin bitmesini bekler). PR denemeleri ayrı sırada.
@@ -49,13 +55,18 @@ jobs:
       - name: Node kur
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
-      - name: JDK 21 kur
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: JDK 17 kur
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
 
       # İmza anahtarı repoda değil: GitHub → Settings → Secrets and variables → Actions'taki
       # IMZA_ANAHTARI (base64 PKCS12, takma adı "thousand") ve IMZA_PAROLA'dan açılır. Yoksa yayın
@@ -75,34 +86,18 @@ jobs:
             || { echo "::error::İmza anahtarı açılamadı (gizli ayar eksik/yanlış kopyalanmış olabilir)."; exit 1; }
           echo "IMZA_DOSYASI=$RUNNER_TEMP/imza.p12" >> "$GITHUB_ENV"
 
-      - name: Android SDK kur
-        uses: android-actions/setup-android@v3
-        with:
-          # Eylül 2025'te Google eski "tools" paketini depodan kaldırdı; action'ın
-          # varsayılanı onu kurmaya çalışıp patlıyordu. Boş bırakıyoruz; gerekli
-          # paketleri aşağıdaki adım (platform-tools / android-34 / build-tools) kurar.
-          packages: ""
-
-      - name: Gerekli SDK paketlerini yükle
-        run: |
-          ok=0
-          for i in 1 2 3 4 5; do
-            yes | sdkmanager --licenses > /tmp/sdk.log 2>&1 || true
-            if sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" >> /tmp/sdk.log 2>&1; then
-              ok=1; break
-            fi
-            echo "sdkmanager denemesi $i başarısız — tekrar deneniyor..." | tee -a /tmp/sdk.log
-            sleep $((i * 10))
-          done
-          tail -n 40 /tmp/sdk.log || true
-          [ "$ok" = "1" ] || { echo "SDK paketleri 5 denemede kurulamadı"; exit 1; }
-
       - name: Testler
         run: |
           TZ=Europe/Istanbul node tests/srs.test.js
           node tests/updater.test.js
           node tests/hesap.test.js
           node tests/log.test.js
+          TZ=Europe/Istanbul node tests/hesap_yeni.test.js
+          TZ=Europe/Istanbul node tests/oturum.test.js
+          TZ=Europe/Istanbul node tests/ilerleme.test.js
+          node tests/sozluk.test.js
+          node tests/okuma.test.js
+          node tests/cevirme.test.js
           bash tests/sunucu.test.sh
 
       - name: Veri doğrulama
@@ -112,38 +107,45 @@ jobs:
       - name: Bekçi
         run: python3 scripts/bekci.py
 
-      # Sayfalar + updater.js (yeni sürüm numarasıyla) + web.json + web-version.txt.
-      # APK'ya giren app/www ile release'e giden paket böylece aynı derlemeden çıkar.
+      # Eski uygulamanın güncelleme paketi: sayfalar + updater.js (yeni sürüm numarasıyla) + web.json +
+      # web-version.txt. Yeni uygulamanın üretilen verisi (mobile/src/uretilen) de buradan.
       - name: Sayfaları ve güncelleme paketini üret
         run: python3 scripts/build_all.py
 
       - name: Bağımlılıkları kur (npm ci)
-        working-directory: app
+        working-directory: mobile
         run: |
           for i in 1 2 3; do
             npm ci && break
             echo "npm ci denemesi $i başarısız, tekrar..."; sleep $((i * 10))
           done
 
-      - name: Web varlıklarını senkronla (cap sync)
-        working-directory: app
-        run: npx cap sync android 2>&1 | tee /tmp/capsync.log
+      # android/ repoda yok: app.json'dan üretilir (sürüm kodu = bu iş akışının çalışma numarası, app.config.js).
+      - name: Android projesini üret (expo prebuild)
+        working-directory: mobile
+        run: npx expo prebuild --platform android --no-install 2>&1 | tee /tmp/prebuild.log
 
       # Yayın (release) derlemesi: hata ayıklanamaz — USB ile bağlanan biri uygulamanın verisini
-      # (ilerleme, kurtarma kodu) okuyamaz, WebView uzaktan incelenemez.
+      # (ilerleme, kurtarma kodu) okuyamaz. Yalnız 64 bit arm (kullanıcı kararı: APK küçülür; 32 bit
+      # işlemcili çok eski telefonlara kurulmaz).
       - name: APK derle (release)
-        working-directory: app/android
+        working-directory: mobile/android
         env:
           IMZA_PAROLA: ${{ secrets.IMZA_PAROLA }}
         run: |
           set -o pipefail
-          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
+          args=(assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a)
+          if [ -n "${IMZA_DOSYASI:-}" ]; then   # PR denemesinde yok: Expo'nun hata ayıklama anahtarı
+            args+=("-Pandroid.injected.signing.store.file=$IMZA_DOSYASI" "-Pandroid.injected.signing.store.password=$IMZA_PAROLA"
+                   "-Pandroid.injected.signing.key.alias=thousand" "-Pandroid.injected.signing.key.password=$IMZA_PAROLA")
+          fi
+          ./gradlew "${args[@]}" 2>&1 | tee /tmp/gradle.log
 
       - name: "Deneme: APK hata ayıklanamaz mı"
         if: github.event_name == 'pull_request'
         run: |
           aapt=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n 1)
-          apk=$(ls app/android/app/build/outputs/apk/release/*.apk | head -n 1)
+          apk=$(ls mobile/android/app/build/outputs/apk/release/*.apk | head -n 1)
           "$aapt" dump badging "$apk" | grep -E "^package:"
           if "$aapt" dump badging "$apk" | grep -q "application-debuggable"; then
             echo "::error::APK hata ayıklanabilir (debuggable) derlenmiş"; exit 1
@@ -153,11 +155,8 @@ jobs:
         if: failure()
         run: |
           {
-            echo "===== SDK paketleri (son 60) ====="
-            tail -n 60 /tmp/sdk.log 2>/dev/null || echo "sdk.log yok"
-            echo
-            echo "===== cap sync (son 40) ====="
-            tail -n 40 /tmp/capsync.log 2>/dev/null || echo "capsync.log yok → cap sync'e gelinmedi"
+            echo "===== expo prebuild (son 40) ====="
+            tail -n 40 /tmp/prebuild.log 2>/dev/null || echo "prebuild.log yok → prebuild'e gelinmedi"
             echo
             echo "===== gradle (son 250) ====="
             tail -n 250 /tmp/gradle.log 2>/dev/null || echo "gradle.log yok → gradle'a gelinmedi"
@@ -177,12 +176,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: thousand-apk
-          path: app/android/app/build/outputs/apk/release/app-release.apk
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
       - name: APK'yı sabit adlandır
         if: github.event_name != 'pull_request'
-        run: cp app/android/app/build/outputs/apk/release/app-release.apk Thousand.apk
+        run: cp mobile/android/app/build/outputs/apk/release/app-release.apk Thousand.apk
 
       # APK gerçekten yeni anahtarla mı imzalandı? (Yanlış imzalı APK yayınlanmasın.)
       - name: İmzayı doğrula
@@ -195,9 +194,12 @@ jobs:
           gercek=$("$apksigner" verify --print-certs Thousand.apk | grep -m1 'SHA-256 digest' | awk '{print $NF}')
           echo "beklenen: $beklenen"; echo "APK:      $gercek"
           [ "$(echo "$beklenen" | tr -d ':' | tr 'A-F' 'a-f')" = "$gercek" ] || { echo "::error::APK yanlış anahtarla imzalı"; exit 1; }
-          # Hata ayıklanabilir APK yayınlanmasın; sürüm numarası da yazılsın.
+          # Paket adı eskisiyle aynı olmalı (yoksa üstüne kurulmaz, ilerleme aktarılamaz); hata ayıklanabilir APK
+          # yayınlanmasın; sürüm numarası da yazılsın.
           aapt=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n 1)
-          "$aapt" dump badging Thousand.apk | grep -E "^package:" 
+          "$aapt" dump badging Thousand.apk | grep -E "^package:|^application-label:"
+          "$aapt" dump badging Thousand.apk | grep -q "^package: name='io.github.ahmetayarsss.thousand'" \
+            || { echo "::error::Paket adı eski uygulamanınkiyle aynı değil"; exit 1; }
           if "$aapt" dump badging Thousand.apk | grep -q "application-debuggable"; then
             echo "::error::APK hata ayıklanabilir (debuggable) derlenmiş"; exit 1
           fi
@@ -223,6 +225,8 @@ jobs:
           body: |
             main dalından otomatik derlenen APK (main'e her birleşmede güncellenir).
             Telefona kurmak için: indir → aç → "bilinmeyen kaynaklara izin ver".
+            Eski uygulamadan geçiyorsan: önce eski uygulamada Ayarlar → Hesap → kurtarma kodunu bir yere yaz, sonra
+            bu APK'yı kur ve "Hesabım var → kurtarma kodu gir" ile hesabını ve ilerlemeni geri al.
 
       # Yayın aracı eski dosyaları silmez: adı değişen ya da artık üretilmeyen dosyalar (ör. eski
       # adlı APK) release sayfasında kalıp yanlışlıkla indirilmesin. Yeni dosyalar yüklendikten

@@ -1,4 +1,9 @@
-# Thousand — Android uygulaması (Capacitor)
+# Thousand — eski Android uygulaması (Capacitor)
+
+> **Artık APK'sı derlenmiyor.** Yayındaki uygulama yeni uygulama (`mobile/`, React Native): aynı ad, aynı paket
+> ve imzayla bunun üstüne kurulur (`mobile/README.md`); ilerleme kurtarma koduyla (sunucudaki yedekten) gelir. Bu
+> klasör geçiş için duruyor: telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini (`build-apk.yml`)
+> indirmeye devam eder. Eski uygulama tamamen kalkınca (PLAN.md adım 40) silinir.
 
 Capacitor 7, hedef Android 15 (`targetSdk` 35), en düşük Android 6 (`minSdk` 23). Sürümler
 `android/variables.gradle`'da; Android 15'te sayfa durum/gezinme çubuklarının altına girmesin diye
@@ -73,38 +78,11 @@ kullan (`--card`, `--ink`, `--solid`…), yoksa karanlık modda o parça açık 
 Kelime içeriği ya da şablon değişince: `python3 scripts/build_all.py` çalıştır. Yerel
 derlemeden önce de çalıştır: `app/www/updater.js` repoda değil, bu script üretir.
 
-## APK nasıl üretilir
+## Geçiş: yeni uygulama
 
-### Yol 1 — GitHub Actions (önerilen, kurulum gerektirmez)
-`.github/workflows/build-apk.yml` `main`'e her birleşmede veya Actions sekmesinden elle
-("Run workflow") çalışır ve **yayın (release)** APK'sını derler: hata ayıklanamaz (USB ile
-bağlanan biri uygulamanın verisini okuyamaz), `versionCode` her derlemede artar (GitHub çalışma
-numarası). `apk-latest` etiketi her yayında derlenen commit'e taşınır. APK `apk-latest` release'inde **`Thousand.apk`** adıyla durur; telefona oradan
-kurulur (Ayarlar > bilinmeyen kaynaklara izin). Release'te yalnız `Thousand.apk`, `web.json`,
-`web-version.txt` kalır; başka (eski adlı) dosyalar her yayından sonra silinir.
+**İmza ve paket:** yeni uygulama da GitHub gizli ayarlarındaki anahtarla (`IMZA_ANAHTARI`, `IMZA_PAROLA`) imzalanır,
+paket `io.github.ahmetayarsss.thousand`; `build-apk.yml` ikisini de yayından önce doğrular.
 
-**Yedekleme:** `allowBackup` açık bırakıldı: Android'in Google yedeği uygulama verisini
-(ilerleme dahil) telefonun ekran kilidiyle şifreli olarak saklar; yeni telefonda işe yarar.
-İçinde kurtarma kodu da var, ama yedeğe yalnız kullanıcının kendi Google hesabı erişir.
-
-### Yol 2 — Yerel makine (Android SDK gerekir)
-```bash
-python3 scripts/build_all.py   # sayfalar + updater.js
-cd app
-npm ci
-npx cap sync android
-cd android
-./gradlew assembleDebug
-# çıktı: app/android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-> **İmza:** CI, APK'yı GitHub gizli ayarlarındaki anahtarla (`IMZA_ANAHTARI` = base64 PKCS12,
-> `IMZA_PAROLA`) imzalar ve yayından önce APK'nın gerçekten o anahtarla imzalandığını doğrular;
-> ayarlar yoksa yayın yapılmaz. Anahtar repoda değil. Yerel derleme Android'in debug anahtarını
-> kullanır; o APK telefondakinin üstüne kurulamaz (yalnız deneme için).
->
-> **Ad ve paket kimliği:** uygulama "Thousand", paket `io.github.ahmetayarsss.thousand`.
->
 > **Yeniden kurma uyarısı:** APK'daki güncelleyici açılışta `ox_apk_imza` işaretini yazar
 > (`templates/updater.js`). İşaret `hesap.js`'teki `APK_IMZA` değerinden farklıysa (telefondaki APK
 > güncel paket ya da imzayla kurulmamış) ana sayfada uyarı ve Ayarlar'da rehber çıkar: yedek doğrulanır

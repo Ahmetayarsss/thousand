@@ -32,6 +32,12 @@ jobs:
           node tests/updater.test.js
           node tests/hesap.test.js
           node tests/log.test.js
+          TZ=Europe/Istanbul node tests/hesap_yeni.test.js
+          TZ=Europe/Istanbul node tests/oturum.test.js
+          TZ=Europe/Istanbul node tests/ilerleme.test.js
+          node tests/sozluk.test.js
+          node tests/okuma.test.js
+          node tests/cevirme.test.js
           bash tests/sunucu.test.sh
 
       - name: Veri doğrulama
@@ -39,6 +45,18 @@ jobs:
 
       - name: Bekçi
         run: python3 scripts/bekci.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Yeni uygulama (mobile/, PLAN.md Aşama 9): bağımlılıklar kurulup Android paketi derlenebiliyor mu.
+      - name: Yeni uygulama paketleniyor mu
+        working-directory: mobile
+        run: |
+          npm ci
+          npx expo export --platform android --output-dir "$RUNNER_TEMP/mobil-paket" > "$RUNNER_TEMP/mobil.log" 2>&1 \
+            || { grep -av '\.mp3' "$RUNNER_TEMP/mobil.log" | tail -n 60; exit 1; }
 
       - name: Üretilen dosyalar şablonlarla güncel mi
         run: |

@@ -14,7 +14,7 @@ kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 **Yayındaki uygulama yeni uygulama** (`mobile/`, React Native / Expo, iOS + Android; `PLAN.md` Aşama 9). Eski
 Capacitor uygulamasının (`app/`) yerine geçti: aynı ad ("Thousand"), paket ve imzayla onun üstüne kurulur;
 eski ilerlemeyi ilk açılışta alır (`app/www/gecis.js` yazar, `mobile/src/gecis.js` okur). Eski uygulamanın yaptığı
-her şey henüz yok (kullanıcı kararı: önce geç, eksikler sonra — PLAN.md adım 34–36). `app/` geçiş için duruyor:
+her şey henüz yok (kullanıcı kararı: önce geç, eksikler sonra — PLAN.md adım 36: bildirimler). `app/` geçiş için duruyor:
 telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini indirmeye devam eder. `app/www/srs.js` ve
 `log.js` iki uygulamada ortak: değişiklik ikisini birden etkiler.
 
@@ -46,6 +46,7 @@ TZ=Europe/Istanbul node tests/hesap_yeni.test.js  # yeni uygulama: hesap, arkada
 TZ=Europe/Istanbul node tests/oturum.test.js   # yeni uygulama: Kartlar mantığı
 TZ=Europe/Istanbul node tests/ilerleme.test.js # yeni uygulama: İlerleme / İstatistikler hesapları
 node tests/sozluk.test.js      # yeni uygulama: Sözlük araması
+node tests/okuma.test.js       # yeni uygulama: Listeyi oku listesi, Türkçe okuma metni
 node tests/cevirme.test.js     # yeni uygulama: kart çevirme three.js ile birebir mi
 bash tests/sunucu.test.sh      # sunucu (kurulum.sql) — geçici PostgreSQL açar
 python3 scripts/validate.py

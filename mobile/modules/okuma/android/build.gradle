@@ -1,0 +1,17 @@
+// "Listeyi oku" servisi (src/main/java/expo/modules/okuma). Uygulamaya Expo'nun yerel modül yoluyla girer (modules/).
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'io.github.ahmetayarsss.thousand'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.okuma"
+}
+
+dependencies {
+  implementation "androidx.core:core-ktx:1.17.0"
+  implementation "androidx.media:media:1.7.0"   // MediaSession, kilit ekranı / kulaklık düğmeleri
+}

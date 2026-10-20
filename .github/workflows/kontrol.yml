@@ -37,6 +37,7 @@ jobs:
           TZ=Europe/Istanbul node tests/oturum.test.js
           TZ=Europe/Istanbul node tests/ilerleme.test.js
           node tests/sozluk.test.js
+          node tests/okuma.test.js
           node tests/cevirme.test.js
           bash tests/sunucu.test.sh
 

@@ -1,8 +1,8 @@
 /*
  * Ayarlar (eski ayarlar sayfası): Hesap (takma ad, arkadaş kodu, kurtarma kodu, başka hesaba geç, sil), Gizlilik
- * (kullanım kaydı izni), Çalışma (listedeki kelime sayısı). Başlığa 3 sn içinde 7 kez dokununca geliştirici modu
- * (tarih kaydırma, kutlama, kayıtlar, ilerlemeyi sıfırlama).
- * Henüz yok: "Listeyi oku" ayarları (adım 35) ve Bildirimler (adım 36).
+ * (kullanım kaydı izni), Çalışma (listedeki kelime sayısı), Listeyi oku (döngü, Türkçesi; süren okumaya da hemen
+ * uygulanır). Başlığa 3 sn içinde 7 kez dokununca geliştirici modu (tarih kaydırma, kutlama, kayıtlar, sıfırlama).
+ * Henüz yok: Bildirimler (adım 36).
  */
 import * as Clipboard from "expo-clipboard";
 import { router, useFocusEffect } from "expo-router";
@@ -15,6 +15,7 @@ import { Dugme, girdiIste, onayla } from "../bilesenler/Pencere";
 import { OXLOG, SRS } from "../cekirdek";
 import { errText, HESAP, hesapDegisti, useHesap } from "../hesap";
 import { karsilama } from "../hesap/Karsilama";
+import * as Okuma from "../okuma";
 import { useTema } from "../tema";
 
 const HAZIR = [10, 20, 30, 50, 100];
@@ -51,6 +52,14 @@ export default function Ayarlar() {
     const ac = !SRS.dev().on;
     SRS.setDev({ on: ac }); OXLOG.add("dev", { a: ac ? "ac" : "kapat" }); ciz();
     duyur(ac ? "Geliştirici modu açıldı 🛠" : "Geliştirici modu kapandı", 1800);
+  };
+
+  const okumaAyari = (ad, k, varsayilan) => {
+    const v = SRS.setOpt(k, !SRS.opt(k, varsayilan));
+    const loop = !!SRS.opt("loop", true), readTr = !!SRS.opt("readTr", false);
+    Okuma.secenekler(loop, readTr);
+    OXLOG.add("ayar", { dongu: loop ? 1 : 0, tr: readTr ? 1 : 0 });
+    ciz(); duyur(ad + " " + (v ? "açık" : "kapalı"), 1800);
   };
 
   const iz = HESAP.kayitIzni(), dev = SRS.dev(), n = SRS.listSize(), ld = HESAP.logDurum();
@@ -145,6 +154,15 @@ export default function Ayarlar() {
               </Pressable>
             ))}
           </View>
+        </Pano>
+
+        <Pano t={t} baslik="Listeyi oku">
+          <Satir t={t} ilk baslik="Başa dön" alt="Liste bitince baştan başlasın.">
+            <Anahtar t={t} acik={!!SRS.opt("loop", true)} etiket="Başa dön" onBas={() => okumaAyari("Başa dön", "loop", true)} />
+          </Satir>
+          <Satir t={t} baslik="Türkçesini de oku" alt="Her kelimeden sonra Türkçe anlamı okunur (telefonda Türkçe ses paketi gerekir).">
+            <Anahtar t={t} acik={!!SRS.opt("readTr", false)} etiket="Türkçesini de oku" onBas={() => okumaAyari("Türkçe okuma", "readTr", false)} />
+          </Satir>
         </Pano>
 
         {dev.on ? (

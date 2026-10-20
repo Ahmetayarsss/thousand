@@ -123,8 +123,12 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       görünür açıklamayla), Liste'de arkadaş haberleri, sınav cevabından sonra özet ve yedek. Eski uygulamadan
       aktarılan hesap ve oturum aynen devam eder. Sonraya kalanlar: Ayarlar'daki "Listeyi oku" seçenekleri (adım 35),
       Bildirimler kartı ve telefon ayarları penceresi (adım 36); kayıtları dosyaya dışa aktarma yerine panoya kopyalama.
-- [ ] 35. Listeyi oku: arka planda ses, kilit ekranı / bildirim denetimleri (Android + iOS), Türkçe okuma,
-      bekleme sürgüsü.
+- [x] 35. Listeyi oku (Android): eski uygulamanın okuma servisi aynen (`mobile/modules/okuma`, Expo yerel modülü:
+      ön plan servisi, bildirim + kilit ekranı düğmeleri, kulaklık tuşları, ekran kapalıyken okuma, Türkçe okuma,
+      döngü); değişen yalnız sesin bulunduğu yer (APK'da res/raw). Liste'de bekleme sürgüsü (sürerken de uygulanır),
+      okunan kart işaretlenir; Ayarlar'da "Başa dön" ve "Türkçesini de oku". Okuma listesi ekrandan ayrı
+      (`src/okuma/liste.js`, `tests/okuma.test.js`). iOS'ta (ve webde) şimdilik ekran açıkken JS ile okunur;
+      iOS'ta arka plan sesi ve kilit ekranı adım 39'da.
 - [ ] 36. Bildirimler: yerel seri/tekrar hatırlatmaları; arkadaş isteği ve dürtme.
       🔸 iOS'ta bunlar için push (APNs) gerekir: yeni ağ adresi + sunucu işi.
 - [x] 37. Android'de geçiş (kullanıcı kararı, Ekim 2026: önce "önce tamamla, sonra geç" denmişti, sonra "direkt
@@ -142,7 +146,7 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       GitHub gizli ayarlarında. 🔸 Uzaktan JS güncellemesi (EAS Update) olacak mı — yeni ağ adresi ve
       App Store 2.5.2; önerilen: yok, güncellemeler mağazadan.
 - [ ] 39. App Store hazırlığı: gizlilik politikası, App Privacy etiketi, şikâyet/engelleme ve takma ad
-      süzgeci (1.2), iOS'a özgü özellikler (widget, kilit ekranından okuma).
+      süzgeci (1.2), iOS'a özgü özellikler (widget, kilit ekranından okuma; "Listeyi oku" arka planda).
 - [ ] 40. Capacitor uygulaması kaldırılır (`app/`, `templates/`, güncelleyici, `build-apk.yml`); ortak
       çekirdek ve sesler `mobile/`'a taşınır (8. kural).
 

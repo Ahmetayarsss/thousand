@@ -1,5 +1,6 @@
 // Liste kartı: kelime, tür · seviye, okunuş, Türkçe anlam, İngilizce açıklama, örnekler.
 // Dokununca kelime okunur; okunurken kartın çevresi turuncu.
+// sozluk: Sözlük'teki biçim (eskisi gibi biraz büyük yazı, sol şerit bölüm renginde değil gri).
 import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { bolumRengi } from "../tema";
@@ -16,23 +17,24 @@ function Ornek({ metin, stil }) {
   );
 }
 
-function KelimeKarti({ d, seviye, okunuyor, onBas, t }) {
+function KelimeKarti({ d, seviye, okunuyor, onBas, t, sozluk }) {
+  const b = sozluk ? sz : {};
   return (
     <Pressable
       onPress={onBas}
       accessibilityRole="button"
       accessibilityLabel={`${d.w}, ${d.tr}. Dinlemek için dokun`}
-      style={[s.kart, { backgroundColor: t.card, borderColor: okunuyor ? t.speak : t.line, borderLeftColor: bolumRengi(t, d.sec) }]}
+      style={[s.kart, b.kart, { backgroundColor: t.card, borderColor: okunuyor ? t.speak : t.line, borderLeftColor: sozluk ? t.diger : bolumRengi(t, d.sec) }]}
     >
       <View style={s.satir}>
-        <Text style={[s.kelime, { color: t.ink }]}>{d.w}</Text>
-        <Text style={[s.etiket, { color: t.muted }]}>{(TUR[d.pos] || d.pos)} · {seviye}</Text>
+        <Text style={[s.kelime, b.kelime, { color: t.ink }]}>{d.w}</Text>
+        <Text style={[s.etiket, { color: t.muted }]}>{(TUR[d.pos] || d.pos)}{d.pos ? " · " : ""}{seviye}</Text>
       </View>
-      {d.ok ? <Text style={[s.okunus, { color: t.ok }]}>Okunuş: {d.ok}</Text> : null}
-      <Text style={[s.tr, { color: t.tr }]}>{d.tr}</Text>
-      {d.en ? <Text style={[s.en, { color: t.en }]}>{d.en}</Text> : null}
+      {d.ok ? <Text style={[s.okunus, b.okunus, { color: t.ok }]}>Okunuş: {d.ok}</Text> : null}
+      <Text style={[s.tr, b.tr, { color: t.tr }]}>{d.tr}</Text>
+      {d.en ? <Text style={[s.en, b.en, { color: t.en }]}>{d.en}</Text> : null}
       {(d.ex || []).map((x, i) => (
-        <Ornek key={i} metin={x} stil={[s.ornek, { color: t.ex, borderTopColor: t.line }]} />
+        <Ornek key={i} metin={x} stil={[s.ornek, b.ornek, { color: t.ex, borderTopColor: t.line }]} />
       ))}
     </Pressable>
   );
@@ -50,4 +52,12 @@ const s = StyleSheet.create({
   en: { fontSize: 13, marginTop: 3 },
   ornek: { fontSize: 13, fontStyle: "italic", marginTop: 5, paddingTop: 5, borderTopWidth: 1, borderStyle: "dashed" },
   kalin: { fontWeight: "800" },
+});
+const sz = StyleSheet.create({
+  kart: { paddingVertical: 12, paddingHorizontal: 14, marginVertical: 4.5 },
+  kelime: { fontSize: 21 },
+  okunus: { fontSize: 14, marginTop: 7 },
+  tr: { fontSize: 15, marginTop: 4 },
+  en: { fontSize: 13.5, marginTop: 4 },
+  ornek: { fontSize: 13.5, marginTop: 6, paddingTop: 6 },
 });

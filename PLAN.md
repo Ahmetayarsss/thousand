@@ -150,6 +150,7 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       derleme + TestFlight (sertifika ve App Store Connect API anahtarı GitHub gizli ayarlarında).
 - [ ] 39. App Store hazırlığı: gizlilik politikası, App Privacy etiketi, şikâyet/engelleme ve takma ad
       süzgeci (1.2), iOS'a özgü özellikler (widget, kilit ekranından okuma; "Listeyi oku" arka planda).
+      Kullanıcı kararı (Ekim 2026): Apple Developer hesabı açılınca yapılır; o zamana dek atlanır, sıradaki iş 40.
 - [ ] 40. Capacitor uygulaması kaldırılır (`app/`, `templates/`, güncelleyici, `build-apk.yml`); ortak
       çekirdek ve sesler `mobile/`'a taşınır (8. kural).
 

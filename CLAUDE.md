@@ -6,20 +6,22 @@ uymayan değişiklik CI'da (`.github/workflows/kontrol.yml`) kırmızı yanar.
 
 ## Proje
 
-**Thousand**: Türkçe konuşanlara İngilizce kelime çalışma uygulaması, Android (Capacitor + WebView),
+**Thousand**: Türkçe konuşanlara İngilizce kelime çalışma uygulaması, Android (React Native / Expo, `mobile/`),
 paket `io.github.ahmetayarsss.thousand`. İçerik CEFR A1–B2 seviyelerinde 3000 İngilizce kelime. Hesap, arkadaşlar,
 yedek ve kullanım kayıtları Supabase'de (`supabase/kurulum.sql`). Kullanıcı Türkçe konuşur;
 kod yorumları, commit mesajları ve arayüz metinleri Türkçe.
 
-**Yeni uygulama yapılıyor** (`mobile/`, React Native / Expo, iOS + Android; `PLAN.md` Aşama 9). Yayındaki
-hâlâ Capacitor sürümü (`app/`). Yeni uygulama şimdilik **ayrı bir deneme uygulaması**: ad "Thousand Yeni",
-paket `io.github.ahmetayarsss.thousand.yeni` (ana uygulamanın yanına kurulur, verisi ayrı). `app/www/srs.js` ve `log.js` iki uygulamada ortak: değişiklik ikisini
-birden etkiler.
+**Yayındaki uygulama yeni uygulama** (`mobile/`, React Native / Expo, iOS + Android; `PLAN.md` Aşama 9). Eski
+Capacitor uygulamasının (`app/`) yerine geçti: aynı ad ("Thousand"), paket ve imzayla onun üstüne kurulur;
+eski ilerlemeyi ilk açılışta alır (`app/www/gecis.js` yazar, `mobile/src/gecis.js` okur). Eski uygulamanın yaptığı
+her şey henüz yok (kullanıcı kararı: önce geç, eksikler sonra — PLAN.md adım 34–36). `app/` geçiş için duruyor:
+telefonunda hâlâ eski uygulama olanların güncelleyicisi web paketini indirmeye devam eder. `app/www/srs.js` ve
+`log.js` iki uygulamada ortak: değişiklik ikisini birden etkiler.
 
 ## Kaynak ve üretilen dosyalar
 
 - **Kaynak (elle düzenlenir):** `data/all_groups.json` (bütün kelime içeriği), `templates/*.html`,
-  `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `tts-bridge.js`,
+  `templates/updater.js`, `app/www/srs.js`, `hesap.js`, `log.js`, `gecis.js`, `tts-bridge.js`,
   `supabase/kurulum.sql`, `app/android/**`, `app/www/audio/*.mp3` (kelime ses kayıtları; adları
   `slugOf` kuralıyla, `validate.py` denetler), `mobile/` (`src/uretilen/` hariç).
 - **Üretilen (elle DÜZENLENMEZ):** `app/www/*.html`, `app/www/kelimeler.js` ve `mobile/src/uretilen/*` (repoda). Güncelleme paketi
@@ -39,6 +41,7 @@ TZ=Europe/Istanbul node tests/srs.test.js
 node tests/updater.test.js
 node tests/hesap.test.js
 node tests/log.test.js
+node tests/gecis.test.js       # eski uygulamadan yeni uygulamaya ilerleme aktarımı
 TZ=Europe/Istanbul node tests/oturum.test.js   # yeni uygulama: Kartlar mantığı
 TZ=Europe/Istanbul node tests/ilerleme.test.js # yeni uygulama: İlerleme / İstatistikler hesapları
 node tests/sozluk.test.js      # yeni uygulama: Sözlük araması
@@ -56,17 +59,13 @@ Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekir
 ## Yayın — nasıl telefona ulaşır
 
 - **`main` = yayın.** `main`'e giren her değişiklikte `build-apk.yml` testleri, doğrulamayı ve
-  bekçiyi çalıştırır, geçerse APK'yı ve güncelleme paketini `apk-latest` release'ine koyar.
-  Telefonlardaki güncelleyici paketi YALNIZ oradan indirir; arayüz değişikliği dakikalar
-  içinde bütün telefonlarda olur.
+  bekçiyi çalıştırır, geçerse yeni uygulamanın APK'sını (`Thousand.apk`) ve eski uygulamanın güncelleme
+  paketini `apk-latest` release'ine koyar. Yeni uygulamada uzaktan güncelleme yok: değişiklik telefona yeni
+  APK kurulunca gelir. Eski uygulamadaki güncelleyici paketi YALNIZ oradan indirir.
 - **`main`'e doğrudan push yok.** İş bir çalışma dalında yapılır, PR açılır, kullanıcı
   birleştirir. PR açıklaması telefonda neyin değişeceğini sade dille söyler.
 - Güncelleme paketi (`web.json`, `web-version.txt`, `app/www/updater.js`) repoda tutulmaz;
   yalnız CI üretir (bekçi `paket-repoda` kuralı).
-- **Yeni uygulamanın yayını ayrı:** `mobil` dalı → `mobil-apk.yml` → `mobil-latest` release'i
-  (`ThousandYeni.apk`). Yeni uygulama işleri `mobil`'e PR ile girer; `main`'e (ana uygulamanın
-  yayınına) geçiş adımına (PLAN.md adım 37) kadar girmez. Ortak dosyalardaki (`app/www/srs.js`,
-  `log.js`, `data/`) değişiklikler `main`'den `mobil`'e birleştirilir.
 
 ## Değişmez kurallar
 

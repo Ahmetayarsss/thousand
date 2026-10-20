@@ -6,12 +6,15 @@
  */
 import "expo-sqlite/localStorage/install";   // srs.js / log.js yüklenmeden ÖNCE
 import { AppState } from "react-native";
+import { GECIS } from "./gecis";             // eski uygulamanın ilerlemesi: o da srs.js'ten ÖNCE
 import "../../app/www/log.js";
 import "../../app/www/srs.js";
 import KELIMELER from "./uretilen/kelimeler.json";
 
 export const SRS = globalThis.SRS;
 export const OXLOG = globalThis.OXLOG;
+export { GECIS };
+if (GECIS.durum === "aktarildi" || GECIS.durum === "bozuk") OXLOG.add("gecis", GECIS);
 
 // Kelimeler sırasıyla katalog (grup 1 → 30); her kelimeye anahtarı (_k) iliştirilir.
 SRS.setCatalog(SRS.catalogFromGroups(KELIMELER));

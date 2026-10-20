@@ -1,7 +1,7 @@
 # Thousand — İngilizce kelime çalışma uygulaması
 
-Türkçe konuşanlar için İngilizce kelime çalışma uygulaması (Android, `app/`). İçerik: CEFR A1–B2
-seviyelerinde 3000 İngilizce kelime.
+Türkçe konuşanlar için İngilizce kelime çalışma uygulaması (Android; React Native / Expo, `mobile/`). İçerik:
+CEFR A1–B2 seviyelerinde 3000 İngilizce kelime.
 
 Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 
@@ -28,14 +28,14 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `tests/ilerleme.test.js` | Yeni uygulamanın İlerleme ve İstatistikler hesapları (`mobile/src/ilerleme/veri.js`): seri, tahmini bitiş, kutu dağılımı, 7 gün, en çok yanlış |
 | `tests/sozluk.test.js` | Yeni uygulamanın Sözlük araması (`mobile/src/sozluk/arama.js`): sıra ve 60 sonuç sınırı |
 | `tests/cevirme.test.js` | Yeni uygulamanın kart çevirmesi (`mobile/src/kartlar/cevirmeGeometri.js`): her köşe noktası eski uygulamadaki çevirmeyle (three kütüphanesi) aynı yerde mi |
+| `tests/gecis.test.js` | Eski uygulamadan yeni uygulamaya ilerleme aktarımı: eskinin yazdığı dosyadan (`app/www/gecis.js`) yeninin aldığı (`mobile/src/gecisAktar.js`) birebir aynı mı, yarım kalmış dosya, hata |
 | `tests/log.test.js` | Kullanım kaydı (`app/www/log.js`): toplu/ertelenmiş yazma, sayfadan çıkarken kaybolmama |
 | `tests/sunucu.test.sh` | Sunucu (`supabase/kurulum.sql`): geçici PostgreSQL'de kurulumu iki kez çalıştırır, `tests/sunucu/testler.sql`'i (yetkiler, hesap, yedek, arkadaşlık, dürtme, bildirim, kayıtlar, taşıma, silme) koşar; Supabase'in parçaları `tests/sunucu/supabase_taklit.sql`'de taklit edilir |
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + yeni uygulamanın paketlenmesi + üretilen dosyaların güncelliği |
-| `.github/workflows/mobil-apk.yml` | **Yeni uygulamanın deneme yayını, ana uygulamadan ayrı:** `mobil` dalına her push'ta "Thousand Yeni" APK'sını (paket `io.github.ahmetayarsss.thousand.yeni`, ana uygulamanın yanına kurulur) derleyip `mobil-latest` release'ine koyar. PR'larda (`mobil`'e) yalnız deneme derlemesi |
-| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK'yı (release, mühürlü) ve güncelleme paketini derleyip `apk-latest` release'ine koyar (etiket derlenen commit'e taşınır). PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
-| `app/` | Android uygulaması (Capacitor) — yapı ve APK için `app/README.md` |
-| `mobile/` | **Yeni uygulama (yapım aşamasında, ayrı deneme uygulaması "Thousand Yeni"):** React Native / Expo, iOS + Android. `srs.js` ve `log.js`'i `app/www`'dan aynen kullanır; `mobile/src/uretilen/` (`kelimeler.json`, `sesler.js`) `build_all.py`'nin ürünü. Ayrıntı: `mobile/README.md`, plan: `PLAN.md` Aşama 9 |
+| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede yeni uygulamanın APK'sını (`mobile/`, release, mühürlü, paket `io.github.ahmetayarsss.thousand`) ve eski uygulamanın güncelleme paketini derleyip `apk-latest` release'ine koyar (etiket derlenen commit'e taşınır). PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
+| `app/` | Eski Android uygulaması (Capacitor): APK'sı artık derlenmiyor; geçiş için duruyor (eski uygulamadaki güncelleme paketi, ilerlemeyi yeni uygulamaya aktaran `www/gecis.js`). Ortak çekirdek (`www/srs.js`, `www/log.js`) ve sesler (`www/audio/`) yeni uygulamada da kullanılıyor — `app/README.md` |
+| `mobile/` | **Uygulama (yayındaki):** React Native / Expo, iOS + Android; eksik özellikler PLAN.md Aşama 9'da. `srs.js` ve `log.js`'i `app/www`'dan aynen kullanır; `mobile/src/uretilen/` (`kelimeler.json`, `sesler.js`) `build_all.py`'nin ürünü. Ayrıntı: `mobile/README.md`, plan: `PLAN.md` Aşama 9 |
 
 ## Alanlar
 

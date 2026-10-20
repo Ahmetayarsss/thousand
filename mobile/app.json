@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Thousand Yeni",
-    "slug": "thousand-yeni",
-    "scheme": "thousandyeni",
-    "version": "0.1.0",
+    "name": "Thousand",
+    "slug": "thousand",
+    "scheme": "thousand",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "io.github.ahmetayarsss.thousand.yeni",
+      "bundleIdentifier": "io.github.ahmetayarsss.thousand",
       "supportsTablet": false
     },
     "android": {
-      "package": "io.github.ahmetayarsss.thousand.yeni",
+      "package": "io.github.ahmetayarsss.thousand",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon-foreground.png",
         "backgroundImage": "./assets/icon-background.png"

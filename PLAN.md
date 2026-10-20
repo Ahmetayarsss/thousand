@@ -105,7 +105,7 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       olarak yakalanır, aynı geometriyle kıvrılır; her köşe noktası three.js ile aynı yerde (`tests/cevirme.test.js`).
       Kurallar ekrandan ayrı (`oturum.js`, `tests/oturum.test.js`). Sınav oturumu kaydı artık `SRS.yaz` ile
       (yazılamazsa uyarı). Eksik (adım 34): cevaptan sonra özetin arkadaşlara gitmesi, hatırlatmaların kurulması.
-- [x] 31b. Ayrı deneme uygulaması (kullanıcı kararı): ad "Thousand Yeni", paket `io.github.ahmetayarsss.thousand.yeni`
+- [x] 31b. Ayrı deneme uygulaması (kullanıcı kararı; adım 37'de kalktı): ad "Thousand Yeni", paket `io.github.ahmetayarsss.thousand.yeni`
       (telefonda ana uygulamanın yanına kurulur, verisi ayrı), yayın dalı `mobil` → `mobil-latest` release'i
       (`mobil-apk.yml`; ana uygulamanın `main` → `apk-latest` yayınına dokunmaz). İmza: ana uygulamayla aynı anahtar.
       Kullanılmayan izinler (mikrofon, dosya, başka uygulamaların üstüne çizim) APK'dan çıkarıldı. Yalnız 64 bit arm
@@ -122,13 +122,18 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       bekleme sürgüsü.
 - [ ] 36. Bildirimler: yerel seri/tekrar hatırlatmaları; arkadaş isteği ve dürtme.
       🔸 iOS'ta bunlar için push (APNs) gerekir: yeni ağ adresi + sunucu işi.
-- [ ] 37. Android'de geçiş (kullanıcı kararı, Ekim 2026: "önce tamamla, sonra geç" — tek uygulamaya dönülecek ama
-      ancak 33–36 bitip eski ilerlemeyi taşıyan kod hazır olunca): yeni uygulama ana paket adını
-      (`io.github.ahmetayarsss.thousand`) ve "Thousand" adını alır, `main`'den yayınlanır, eskisinin üstüne kurulur
-      (aynı imza); ayrı deneme uygulaması ve `mobil` dalı kalkar. Capacitor'ın son
-      web paketi ilerlemeyi bir dosyaya yazar, yeni uygulama ilk açılışta onu okur (6. kural); kurtarma
-      kodu ve yedek ikinci yol. 🔸 Geçiş zamanı.
-- [ ] 38. Yayın hattı: GitHub Actions'ta `expo prebuild` + Gradle (APK/AAB), macOS'ta iOS; imza anahtarları
+- [x] 37. Android'de geçiş (kullanıcı kararı, Ekim 2026: önce "önce tamamla, sonra geç" denmişti, sonra "direkt
+      yeni uygulamayı ana uygulama yap, eksikleri sonra tamamla" — 34–36 geçişten SONRA yapılır): yeni uygulama
+      "Thousand" adını ve ana paket adını (`io.github.ahmetayarsss.thousand`) aldı, `main`'den `build-apk.yml` ile
+      yayınlanır, eskisinin üstüne kurulur (aynı imza, sürüm kodu aynı iş akışından → büyük). Ayrı deneme uygulaması
+      (`mobil-apk.yml`, `mobil-latest`) kalktı. Eski ilerleme (6. kural): eski uygulamanın son web paketindeki
+      `app/www/gecis.js` bütün `ox3000_*` anahtarlarını uygulama klasörüne iki dosyaya yazar, yeni uygulama ilk
+      açılışta okur (`mobile/src/gecis.js`; `tests/gecis.test.js`). Eski WebView verisi telefonda kalır.
+      Bedeli: hesap/arkadaşlar/ayarlar, listeyi oku, bildirimler 34–36 bitene dek yok; uzaktan arayüz güncellemesi yok
+      (değişiklik yeni APK ile gelir).
+      Henüz yapılmadı: dosya hiç yazılmadan yeni APK kurulduysa (eski uygulama güncelleme paketini almadan) WebView
+      verisini doğrudan okuyan ikinci yol.
+- [ ] 38. Yayın hattı: GitHub Actions'ta `expo prebuild` + Gradle (Android APK: adım 37'de yapıldı; AAB), macOS'ta iOS; imza anahtarları
       GitHub gizli ayarlarında. 🔸 Uzaktan JS güncellemesi (EAS Update) olacak mı — yeni ağ adresi ve
       App Store 2.5.2; önerilen: yok, güncellemeler mağazadan.
 - [ ] 39. App Store hazırlığı: gizlilik politikası, App Privacy etiketi, şikâyet/engelleme ve takma ad

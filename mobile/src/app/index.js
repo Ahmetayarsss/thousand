@@ -5,16 +5,30 @@
  * Bütün kelimeler çalışılıyorsa liste yerine havai fişek (webde denemek için: /?kutla=1).
  * Henüz yok: "Listeyi oku" ve bekleme sürgüsü (adım 35), ilk açılış penceresi ve arkadaş
  * haberleri (adım 34).
+ * Eski uygulamadan ilerleme aktarıldıysa (ya da aktarılamadıysa) ilk açılışta bir kez söylenir (gecis.js).
  */
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
-import { FlatList, Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert, FlatList, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HavaiFisek from "../bilesenler/HavaiFisekKatmani";
 import KelimeKarti from "../bilesenler/KelimeKarti";
-import { ANAHTARLA, OXLOG, SRS } from "../cekirdek";
+import { ANAHTARLA, GECIS, OXLOG, SRS } from "../cekirdek";
 import { durdur, kelimeyiOku } from "../ses";
 import { useTema } from "../tema";
+
+let gecisSoylendi = false;
+function gecisiSoyle() {
+  if (gecisSoylendi) return;
+  gecisSoylendi = true;
+  if (GECIS.durum === "aktarildi") {
+    Alert.alert("İlerlemen aktarıldı", "Eski uygulamadaki ilerlemen bu uygulamaya geçti: " + GECIS.kelime + " kelime.");
+  } else if (GECIS.durum === "bozuk") {
+    Alert.alert("İlerleme aktarılamadı",
+      "Eski uygulamadaki ilerlemen okunamadı (" + GECIS.hata + "). Eski veriler telefonda duruyor; " +
+      "uygulamayı silme, bu ekranın görüntüsünü gönder.");
+  }
+}
 
 function ustBaslik() {
   const lv = SRS.topLevel();
@@ -28,6 +42,7 @@ export default function Liste() {
   const [ara, setAra] = useState("");
   const [okunan, setOkunan] = useState(null);
   const { kutla } = useLocalSearchParams();
+  useEffect(gecisiSoyle, []);
 
   useFocusEffect(useCallback(() => {
     setAnahtarlar(SRS.newList(SRS.listSize()));

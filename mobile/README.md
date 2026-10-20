@@ -1,18 +1,22 @@
-# Thousand — yeni uygulama (React Native / Expo)
+# Thousand — uygulama (React Native / Expo)
 
-iOS ve Android için tek kod tabanı. Yapım aşamasında: hangi ekranın taşındığı `PLAN.md` → Aşama 9.
-Yayındaki uygulama hâlâ Capacitor sürümü (`app/`).
+iOS ve Android için tek kod tabanı; yayındaki uygulama bu. Eski Capacitor uygulamasının (`app/`) yerine geçti:
+ad "Thousand", paket `io.github.ahmetayarsss.thousand`, aynı imza — telefonda eskisinin üstüne kurulur.
+Henüz olmayanlar (hesap, arkadaşlar, ayarlar, listeyi oku, bildirimler): `PLAN.md` → Aşama 9.
 
-**Ayrı deneme uygulaması:** ad "Thousand Yeni", paket `io.github.ahmetayarsss.thousand.yeni` — telefonda ana
-uygulamanın (Thousand) yanına kurulur, ilerlemesi ayrı tutulur. Yayın dalı `mobil`: her push'ta
-`.github/workflows/mobil-apk.yml` APK'yı derleyip `mobil-latest` release'ine koyar (`ThousandYeni.apk`).
-Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`).
+**Yayın:** `main`'e her birleşmede `.github/workflows/build-apk.yml` APK'yı derleyip `apk-latest` release'ine
+koyar (`Thousand.apk`). Sürüm kodu = o iş akışının çalışma numarası (`app.config.js`); eski uygulama da aynı
+numarayı kullandığı için yeni APK onun üstüne kurulur. Uzaktan (APK'sız) güncelleme yok.
+
+**Eski ilerlemenin aktarımı:** eski uygulama ilerlemeyi uygulama klasörüne bir dosyaya yazar (`app/www/gecis.js`);
+bu uygulama ilk açılışta onu alır (`src/gecis.js`, kuralları `src/gecisAktar.js`) ve Liste'de bir kez söyler.
 
 ## Yapı
 
 | Yol | Ne |
 |---|---|
 | `src/app/` | Ekranlar (Expo Router: her dosya bir sekme). `_layout.js` alt sekmeleri kurar; `ilerleme/` bir yığın: İlerleme ve ondan açılan İstatistikler (`analiz.js`) |
+| `src/gecis.js`, `src/gecisAktar.js` | Eski uygulamanın ilerlemesini ilk açılışta alır (çekirdekten önce) |
 | `src/cekirdek.js` | Ortak çekirdeği yükler: `app/www/srs.js` ve `app/www/log.js`, değiştirilmeden. localStorage'ı telefonda `expo-sqlite` karşılar |
 | `src/ses.js` | Kelime sesi: gömülü kayıt (`app/www/audio`), yoksa cihazın konuşma sentezi |
 | `src/tema.js` | Açık / koyu tema renkleri |

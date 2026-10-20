@@ -10,7 +10,7 @@ global.localStorage = {
   setItem: (k, v) => { mem[k] = String(v); },
   removeItem: (k) => { delete mem[k]; },
 };
-require(path.join(__dirname, "..", "app", "www", "srs.js"));
+require(path.join(__dirname, "..", "mobile", "src", "cekirdek", "srs.js"));
 const S = globalThis.SRS;
 const O = require(path.join(__dirname, "..", "mobile", "src", "kartlar", "oturum.js"));
 // Yeni uygulamanın kullandığı veri (build_all.py üretir; eski uygulamadaki kelimeler.js ile aynı sıra).

@@ -9,7 +9,7 @@ global.localStorage = {
   setItem: (k, v) => { mem[k] = String(v); },
   removeItem: k => { delete mem[k]; },
 };
-require(path.join(__dirname, "..", "app", "www", "srs.js"));
+require(path.join(__dirname, "..", "mobile", "src", "cekirdek", "srs.js"));
 const S = globalThis.SRS;
 
 const groups = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", "all_groups.json"), "utf8"));

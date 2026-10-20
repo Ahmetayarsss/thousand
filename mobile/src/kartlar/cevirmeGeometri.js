@@ -1,6 +1,6 @@
 /*
- * Kart çevirmenin geometrisi — Capacitor uygulamasındaki three.js çevirmesinin (templates/kartlar_template.html
- * → glFlip) aynı hesabı, three.js'siz. tests/cevirme.test.js bu dosyayı three.js'in kendisiyle karşılaştırır.
+ * Kart çevirmenin geometrisi — eski (Capacitor) uygulamadaki three.js çevirmesinin (kartlar sayfasındaki
+ * glFlip) aynı hesabı, three.js'siz. tests/cevirme.test.js bu dosyayı three.js'in kendisiyle karşılaştırır.
  *
  * Kart W×H bir düzlem; basılan yerin karşı kenarı menteşe (sağa basınca sol kenar). 650 ms'de 180° döner,
  * dönerken serbest kenar kavislenir (bombe), sona doğru kart ilk yerine oturur, 90°'yi geçince arka yüz görünür.

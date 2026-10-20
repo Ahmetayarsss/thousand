@@ -10,11 +10,8 @@ Kurallar (her ihlal "kural: dosya — açıklama" olarak yazılır):
   gizli-icerik    dosya içinde parola, özel anahtar, gizli API anahtarı
   sabit-dal       kodda/CI'da sabit "claude/..." dal adı (yayın kanalı dal adına bağlanmasın)
   ag-adresi       uygulama kodunda izin listesinde olmayan bir alan adı (yeni sunucu / veri gönderimi)
-  olu-dosya       app/www'da hiçbir sayfanın yüklemediği .js dosyası
   belge-kaymasi   README'lerde adı geçen ama repoda olmayan dosya
   buyuk-dosya     1,5 MB'tan büyük dosya (repo şişmesi)
-  paket-repoda    güncelleme paketi (web.json, web-version.txt, app/www/updater.js) repoya girmiş;
-                  paketi yalnız CI üretip release'e koyar, güncelleyici yalnız oradan indirir
 
 Bilinen, henüz düzeltilmemiş ihlaller scripts/bekci_borc.json'da gerekçesiyle durur.
 Listede olmayan her ihlal CI'ı kırar. Bir borç düzeltilince kaydı da silinmelidir:
@@ -33,7 +30,6 @@ BORC_DOSYASI = ROOT / "scripts" / "bekci_borc.json"
 # gidebileceği yeni bir yer demek: önce kullanıcıya sorulur, gerekçesi buraya yazılır.
 IZINLI_ALANLAR = {
     "ezztsktfyangyzrdkszb.supabase.co": "hesap, arkadaşlar, yedek, kayıtlar (supabase/kurulum.sql)",
-    "github.com": "uygulama içi güncelleme: yalnız apk-latest release'i (templates/updater.js)",
     "schemas.android.com": "XML ad alanı (ağ isteği değil)",
     "www.w3.org": "SVG/XML ad alanı (ağ isteği değil)",
     "d.android.com": "yorum içindeki belge bağlantısı",
@@ -54,18 +50,14 @@ GIZLI_DESENLER = [
 IKILI_UZANTILAR = (".mp3", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".jar", ".ico", ".ttf", ".woff", ".woff2") + GIZLI_UZANTILAR
 # Bekçinin kendi dosyaları ve kuralları anlatan belge içerik taramalarına girmez.
 TARAMA_DISI = {"scripts/bekci.py", "scripts/bekci_borc.json", "CLAUDE.md"}
-PAKET_DOSYALARI = ("web.json", "web-version.txt", "app/www/updater.js")
 BUYUK_SINIR = 1_500_000
 
-# Uygulama kodu (ağ adresi taraması): şablonlar, app/www'daki elle yazılan JS, native Java,
-# yeni uygulamanın (mobile/) kodu ve yapılandırması.
+# Uygulama kodu (ağ adresi taraması): mobile/'daki JS ve yapılandırma, Android yerel modülleri (Java, Kotlin, XML).
 def uygulama_kodu(dosyalar):
     for d in dosyalar:
-        if d.startswith("templates/") or (d.startswith("app/www/") and d.endswith(".js")) \
-                or (d.startswith("app/android/app/src/main/") and d.endswith((".java", ".xml"))) \
-                or (d.startswith("mobile/") and d.endswith((".js", ".json")) and not d.endswith("package-lock.json")):
-            if not d.endswith("three.min.js"):
-                yield d
+        if (d.startswith("mobile/") and d.endswith((".js", ".json")) and not d.endswith("package-lock.json")) \
+                or (d.startswith("mobile/modules/") and d.endswith((".java", ".kt", ".xml", ".gradle"))):
+            yield d
 
 
 def git_dosyalari():
@@ -115,21 +107,11 @@ def denetle():
             if alan not in IZINLI_ALANLAR:
                 ihlaller.append(("ag-adresi", d, f"izin listesinde olmayan adres: {alan}"))
 
-    # olu-dosya: app/www'daki her .js en az bir app/www sayfasında <script src> ile yüklenmeli
-    sayfalar = "".join(t or "" for d, t in metin.items() if d.startswith("app/www/") and d.endswith(".html"))
-    for d in dosyalar:
-        if d.startswith("app/www/") and d.endswith(".js") and d.count("/") == 2:
-            ad = d.rsplit("/", 1)[-1]
-            if not re.search(r"""<script[^>]+src=["']/?%s["']""" % re.escape(ad), sayfalar):
-                ihlaller.append(("olu-dosya", d, "hiçbir sayfa yüklemiyor"))
-
     # belge-kaymasi: README'lerde adı geçen dosyalar var mı (yol ya da dosya adı olarak)
-    # CI'ın ürettiği paket dosyaları repoda olmasa da belgelerde anılabilir.
-    uretilen = set(PAKET_DOSYALARI) | {d.rsplit("/", 1)[-1] for d in PAKET_DOSYALARI}
-    adlar = {d.rsplit("/", 1)[-1] for d in dosyalar} | set(dosyalar) | uretilen
-    for belge in ("README.md", "app/README.md"):
+    adlar = {d.rsplit("/", 1)[-1] for d in dosyalar} | set(dosyalar)
+    for belge in ("README.md", "mobile/README.md"):
         t = metin.get(belge) or ""
-        for ad in sorted(set(re.findall(r"[A-Za-z0-9_./-]+\.(?:html|js|py|json|md|yml|sql|java|txt)\b", t))):
+        for ad in sorted(set(re.findall(r"[A-Za-z0-9_./-]+\.(?:html|js|py|json|md|yml|sql|java|kt|txt)\b", t))):
             ad = ad.strip("./") if ad.startswith("./") else ad
             if "gN" in ad or ad.startswith("http") or "/" in ad and ad.split("/")[0].endswith(".com"):
                 continue   # yer tutucu (gN.py) ya da web adresi
@@ -140,11 +122,6 @@ def denetle():
     for d in dosyalar:
         if (ROOT / d).stat().st_size > BUYUK_SINIR:
             ihlaller.append(("buyuk-dosya", d, f"{(ROOT / d).stat().st_size // 1024} KB"))
-
-    # paket-repoda
-    for d in PAKET_DOSYALARI:
-        if d in dosyalar:
-            ihlaller.append(("paket-repoda", d, "güncelleme paketi repoda; yalnız CI üretir (.gitignore)"))
 
     return ihlaller
 

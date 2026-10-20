@@ -1,6 +1,6 @@
 /*
  * Kartlar: Test (çalışma, ilerlemeyi değiştirmez) ve Sınav (tekrar sistemi). Capacitor'daki
- * templates/kartlar_template.html'in aynısı; kurallar src/kartlar/oturum.js'te (tests/oturum.test.js).
+ * eski uygulamanın kartlar sayfasının aynısı; kurallar src/kartlar/oturum.js'te (tests/oturum.test.js).
  *   - Deste: üstte soru kartı, arkada sıradaki 3 kart (src/kartlar/Deste.js).
  *   - Açma: karta dokununca (dokunulan tarafın karşı kenarı menteşe) ya da "Aç" ile; kart Skia ile kıvrılarak
  *     döner (src/kartlar/Cevirme.js — eski three.js çevirmesiyle birebir), kelime okunur.

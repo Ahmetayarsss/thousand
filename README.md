@@ -15,30 +15,30 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 
 | Dosya | Açıklama |
 |---|---|
+| `mobile/` | **Uygulama:** React Native / Expo, iOS + Android. Ayrıntı: `mobile/README.md`, plan: `PLAN.md` Aşama 9 |
+| `mobile/src/cekirdek/` | Tekrar sistemi (`srs.js`) ve kullanım kaydı (`log.js`); localStorage anahtarları `ox3000_*` |
+| `mobile/assets/audio/` | Kelimelerin insan sesi kayıtları (`<kelime>.mp3`, ad `slugOf` kuralıyla; eş yazılan kelimeler tek kaydı paylaşır). APK'ya gömülür; kaydı olmayan kelimeyi cihazın TTS'i okur |
+| `mobile/src/uretilen/` | **Üretilen** (`build_all.py`): `kelimeler.json` (sıralı kelime verisi), `sesler.js` (ses haritası) |
 | `data/all_groups.json` | Tek doğruluk kaynağı — 30 grup, kelime başına `w, pos, sec, tr, ok, en, ex` |
-| `app/www/audio/` | Kelimelerin insan sesi kayıtları (`<kelime>.mp3`, ad sayfalardaki `slugOf` kuralıyla; eş yazılan kelimeler tek kaydı paylaşır). APK'ya gömülür, güncelleme paketine girmez; kaydı olmayan kelimeyi cihazın TTS'i okur |
-| `templates/` | Sayfa şablonları (`__SOZLUK__` vb. yer tutucular build'de doldurulur; kelime verisi `app/www/kelimeler.js`'ten gelir) ve `updater.js` |
-| `scripts/build_all.py` | İçeriği uygular, `all_groups.json`'u günceller, uygulama sayfalarını (`app/www/*.html`), sayfaların ortak kelime verisini (`app/www/kelimeler.js`) ve güncelleme paketini (`web.json`, `web-version.txt`, `app/www/updater.js` — repoda tutulmaz) üretir |
+| `scripts/build_all.py` | `all_groups.json`'u biçimler, uygulamanın kelime verisini ve ses haritasını (`mobile/src/uretilen/`) üretir |
 | `scripts/validate.py` | Veri tutarlılık kontrolleri; sahipsiz ses dosyası hata, sesi olmayan kelime bildirilir |
-| `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, ölü dosya, belge kayması, paket tutarlılığı; bilinen borçlar `scripts/bekci_borc.json` |
-| `tests/srs.test.js` | Tekrar sistemi (`app/www/srs.js`) testleri |
-| `tests/updater.test.js` | Uygulama içi güncelleyici (`templates/updater.js`) testleri |
-| `tests/hesap.test.js` | Hesap (`app/www/hesap.js`): yedek doğrulama, geri yükleme, kullanım kaydı izni testleri |
-| `tests/oturum.test.js` | Yeni uygulamanın Kartlar mantığı (`mobile/src/kartlar/oturum.js`): Test ve Sınav kuralları |
-| `tests/ilerleme.test.js` | Yeni uygulamanın İlerleme ve İstatistikler hesapları (`mobile/src/ilerleme/veri.js`): seri, tahmini bitiş, kutu dağılımı, 7 gün, en çok yanlış |
-| `tests/sozluk.test.js` | Yeni uygulamanın Sözlük araması (`mobile/src/sozluk/arama.js`): sıra ve 60 sonuç sınırı |
-| `tests/cevirme.test.js` | Yeni uygulamanın kart çevirmesi (`mobile/src/kartlar/cevirmeGeometri.js`): her köşe noktası eski uygulamadaki çevirmeyle (three kütüphanesi) aynı yerde mi |
-| `tests/hesap_yeni.test.js` | Yeni uygulamanın hesabı (`mobile/src/hesap/hesap.js`): eski `hesap.js`'le aynı sunucu çağrıları ve kayıtlar; kurtarma, yedek, oturum yenileme, kullanım kaydı izni, hesap silme; bildirimler (hatırlatma planı eskisiyle aynı, bildirim anahtarı, ayarlar) |
-| `tests/okuma.test.js` | Yeni uygulamanın "Listeyi oku" listesi (`mobile/src/okuma/liste.js`): servise giden diziler; Türkçe okuma metni 3000 kelimede eskisiyle aynı |
-| `tests/log.test.js` | Kullanım kaydı (`app/www/log.js`): toplu/ertelenmiş yazma, sayfadan çıkarken kaybolmama |
+| `scripts/bekci.py` | Bekçi: gizli bilgi, sabit dal adı, izinsiz ağ adresi, belge kayması, büyük dosya; bilinen borçlar `scripts/bekci_borc.json` |
+| `tests/srs.test.js` | Tekrar sistemi (`mobile/src/cekirdek/srs.js`) testleri |
+| `tests/log.test.js` | Kullanım kaydı (`mobile/src/cekirdek/log.js`): toplu/ertelenmiş yazma, çıkarken kaybolmama |
+| `tests/oturum.test.js` | Kartlar mantığı (`mobile/src/kartlar/oturum.js`): Test ve Sınav kuralları |
+| `tests/ilerleme.test.js` | İlerleme ve İstatistikler hesapları (`mobile/src/ilerleme/veri.js`): seri, tahmini bitiş, kutu dağılımı, 7 gün, en çok yanlış |
+| `tests/sozluk.test.js` | Sözlük araması (`mobile/src/sozluk/arama.js`): sıra ve 60 sonuç sınırı |
+| `tests/cevirme.test.js` | Kart çevirmesi (`mobile/src/kartlar/cevirmeGeometri.js`): her köşe noktası eski uygulamadaki çevirmeyle aynı yerde mi (karşılaştırma için three kütüphanesi `tests/cevirme/`'de) |
+| `tests/hesap_yeni.test.js` | Hesap (`mobile/src/hesap/hesap.js`): sunucu çağrıları ve kayıtlar; kurtarma, yedek, oturum yenileme, kullanım kaydı izni, hesap silme; bildirimler (hatırlatma planı, bildirim anahtarı, ayarlar) |
+| `tests/okuma.test.js` | "Listeyi oku" listesi (`mobile/src/okuma/liste.js`): servise giden diziler, Türkçe okuma metni |
 | `tests/sunucu.test.sh` | Sunucu (`supabase/kurulum.sql`): geçici PostgreSQL'de kurulumu iki kez çalıştırır, `tests/sunucu/testler.sql`'i (yetkiler, hesap, yedek, arkadaşlık, dürtme, bildirim, kayıtlar, taşıma, silme) koşar; Supabase'in parçaları `tests/sunucu/supabase_taklit.sql`'de taklit edilir |
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
-| `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + yeni uygulamanın paketlenmesi + üretilen dosyaların güncelliği |
-| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede yeni uygulamanın APK'sını (`mobile/`, release, mühürlü, paket `io.github.ahmetayarsss.thousand`) ve eski uygulamanın güncelleme paketini derleyip `apk-latest` release'ine koyar (etiket derlenen commit'e taşınır); Google Play için AAB'yi de iş akışı çıktısı olarak derler (Play'e çıkılmıyor, hazır dursun). PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
-| `.github/workflows/ios-derle.yml` | PR'larda yeni uygulama iOS'ta derleniyor mu (macOS, simülatör, imzasız; Apple Developer hesabı yok, hiçbir şey yayınlanmaz) |
-| `.gitattributes` | GitHub'ın dil istatistiğinde üretilen dosyalar (`app/www/*.html`, `kelimeler.js`, `mobile/src/uretilen/`) ve hazır kütüphane sayılmasın |
-| `app/` | Eski Android uygulaması (Capacitor): APK'sı artık derlenmiyor; geçiş için duruyor (eski uygulamadaki güncelleme paketi). Ortak çekirdek (`www/srs.js`, `www/log.js`) ve sesler (`www/audio/`) yeni uygulamada da kullanılıyor — `app/README.md` |
-| `mobile/` | **Uygulama (yayındaki):** React Native / Expo, iOS + Android; eksik özellikler PLAN.md Aşama 9'da. `srs.js` ve `log.js`'i `app/www`'dan aynen kullanır; `mobile/src/uretilen/` (`kelimeler.json`, `sesler.js`) `build_all.py`'nin ürünü. Ayrıntı: `mobile/README.md`, plan: `PLAN.md` Aşama 9 |
+| `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + uygulamanın paketlenmesi + üretilen dosyaların güncelliği |
+| `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede APK'yı (release, mühürlü, paket `io.github.ahmetayarsss.thousand`) derleyip `apk-latest` release'ine koyar (etiket derlenen commit'e taşınır); Google Play için AAB'yi de iş akışı çıktısı olarak derler (Play'e çıkılmıyor, hazır dursun). PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
+| `.github/workflows/ios-derle.yml` | PR'larda uygulama iOS'ta derleniyor mu (macOS, simülatör, imzasız; Apple Developer hesabı yok, hiçbir şey yayınlanmaz) |
+| `.gitattributes` | GitHub'ın dil istatistiğinde üretilen dosyalar (`mobile/src/uretilen/`) ve teste konan hazır kütüphane sayılmasın |
+
+Eski Capacitor (WebView) uygulaması (`app/`, `templates/`) kaldırıldı (PLAN.md adım 40); git geçmişinde duruyor.
 
 ## Alanlar
 
@@ -61,5 +61,5 @@ Söyleyiş **Amerikan** (uygulama US aksanıyla okur): `hot → HAT`, `body → 
 1. `data/all_groups.json`'da kelimenin kaydını düzelt (`ok` okunuş, `en` açıklama, `ex` örnek
    cümle listesi — kelime `<b>` içinde). İçeriğin tek kaynağı bu dosya.
 2. `python3 scripts/build_all.py && python3 scripts/validate.py && python3 scripts/bekci.py`
-3. Üretilen dosyaları da commit'le, PR aç; `main`'e birleşince telefonlara gider.
+3. Üretilen dosyaları da commit'le, PR aç; `main`'e birleşince yeni APK'ya girer (telefona APK kurulunca gelir).
 

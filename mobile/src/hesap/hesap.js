@@ -1,5 +1,5 @@
 /*
- * Hesap ve arkadaşlar (Supabase), ekrandan bağımsız. Eski uygulamanın app/www/hesap.js'inin aynı sunucu
+ * Hesap ve arkadaşlar (Supabase), ekrandan bağımsız. Eski uygulamanın hesap.js'inin aynı sunucu
  * işlevlerini (supabase/kurulum.sql) aynı sırayla ve aynı localStorage anahtarlarıyla (ox3000_*) çağıran hali;
  * sayfa pencereleri (karşılama, kurulum) burada değil, ekranlarda (src/hesap/Karsilama.js, src/app/ayarlar.js,
  * src/app/arkadas.js). Eski uygulama kalkınca (PLAN.md adım 40) hesap.js'in tek kopyası bu olur.

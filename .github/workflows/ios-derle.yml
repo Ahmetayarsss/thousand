@@ -10,9 +10,6 @@ on:
   pull_request:
     paths:
       - "mobile/**"
-      - "app/www/srs.js"
-      - "app/www/log.js"
-      - "app/www/audio/**"
       - "data/**"
       - ".github/workflows/ios-derle.yml"
 

@@ -1,8 +1,8 @@
 /*
  * log.js — Kullanım kaydı (olay günlüğü). Olaylar telefonda birikir; hesap VE kullanıcı izni varsa
- * hesap.js bunları arada bir sunucuya da gönderir (Supabase: kayitlar tablosu — geliştirici
- * kayitlar_gorunum'den bakar; izin bir kez sorulur, Ayarlar → Gizlilik), yoksa yalnız telefonda kalır. Ayarlar → Destek'ten
- * dosya olarak da dışa aktarılır (geliştirme için).
+ * src/hesap/hesap.js bunları arada bir sunucuya da gönderir (Supabase: kayitlar tablosu — geliştirici
+ * kayitlar_gorunum'den bakar; izin bir kez sorulur, Ayarlar → Gizlilik), yoksa yalnız telefonda kalır. Geliştirici
+ * modunda Ayarlar → Kayıtlar → Kopyala ile panoya alınır (snapshot).
  *
  * Her olay: [zaman(ms), tür, veri?]. Türler:
  *   sayfa {p}             sayfa açıldı
@@ -15,7 +15,6 @@
  *   durt {s}              arkadaşını dürttü (s: gonderildi | bugun_durttun)
  *   ayar {...}            ayar değişti        dev {a}        geliştirici işlemi
  *   hata {m, f, l}        yakalanmamış JS hatası (f: kayit = ilerleme telefona yazılamadı, k: anahtar)
- *   guncelleme {a, v}     güncelleme olayı (a: geri = v sürümü açılamadı, gömülü sürüme dönüldü)
  * Yazma toplu ve ertelenmiş: olay önce bellekte birikir, telefona en geç BEKLE ms sonra tek seferde
  * yazılır; sayfa kapanırken/arka plana geçerken hemen yazılır (eskiden her olayda 5000 olay baştan
  * yazılıyordu). Uygulama aniden çökerse en çok son BEKLE ms'nin olayları kaybolur.
@@ -96,45 +95,6 @@
       olaylar: load()
     };
   }
-  function fileName() {
-    var d = new Date(), p = function (n) { return ("0" + n).slice(-2); };
-    return "thousand_kayit_" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + ".json";
-  }
-  // Dosyaya kaydet. Telefonda: Belgeler/Thousand/ (olmazsa uygulamanın kendi klasörü).
-  // Tarayıcıda: indirme. Dönen: kaydedilen yer (metin) ya da null.
-  async function exportFile() {
-    var text = JSON.stringify(snapshot()), name = fileName();
-    var Cap = window.Capacitor, native = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
-    if (native) {
-      var Fs = (Cap.Plugins && Cap.Plugins.Filesystem) || (typeof Cap.registerPlugin === "function" && Cap.registerPlugin("Filesystem"));
-      if (!Fs) return null;
-      try {
-        await Fs.writeFile({ path: "Thousand/" + name, data: text, directory: "DOCUMENTS", encoding: "utf8", recursive: true });
-        return "Belgeler › Thousand › " + name;
-      } catch (e) {}
-      try {
-        var r = await Fs.writeFile({ path: name, data: text, directory: "EXTERNAL", encoding: "utf8", recursive: true });
-        return (r && r.uri) ? decodeURIComponent(String(r.uri).replace(/^file:\/\//, "")) : name;
-      } catch (e) {}
-      return null;
-    }
-    try {
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
-      a.download = name; document.body.appendChild(a); a.click(); a.remove();
-      return "İndirilenler › " + name;
-    } catch (e) { return null; }
-  }
-  // Panoya kopyala (dosya kaydı olmazsa yedek yol).
-  async function copy() {
-    var text = JSON.stringify(snapshot());
-    try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
-    try {
-      var t = document.createElement("textarea"); t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
-      document.body.appendChild(t); t.select(); var ok = document.execCommand("copy"); t.remove(); return ok;
-    } catch (e) { return false; }
-  }
-
   // Sayfa açılışı + yakalanmamış hatalar otomatik kaydedilir.
   try {
     if (typeof window !== "undefined" && window.addEventListener) {
@@ -154,6 +114,6 @@
     }
   } catch (e) {}
 
-  return { add: add, count: count, size: size, clear: clear, yerAc: yerAc, snapshot: snapshot, exportFile: exportFile, copy: copy, uid: uid,
+  return { add: add, count: count, size: size, clear: clear, yerAc: yerAc, snapshot: snapshot, uid: uid,
            sira: sira, events: events, yaz: yaz };
 })();

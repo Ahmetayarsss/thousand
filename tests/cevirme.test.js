@@ -1,9 +1,10 @@
 // Kart çevirme geometrisi (mobile/src/kartlar/cevirmeGeometri.js) eski uygulamadaki three.js çevirmesiyle
-// (templates/kartlar_template.html → glFlip) birebir mi: aynı sahne three.js'in kendisiyle kurulur, her
+// (eski kartlar sayfasındaki glFlip; uygulama kaldırıldı, three.js bu test için tests/cevirme/'de) birebir mi: aynı
+// sahne three.js'in kendisiyle kurulur, her
 // köşe noktasının ekrandaki yeri karşılaştırılır. Çalıştır: node tests/cevirme.test.js
 const assert = require("assert");
 const path = require("path");
-const THREE = require(path.join(__dirname, "../app/www/three.min.js"));
+const THREE = require(path.join(__dirname, "cevirme", "three.min.js"));   // yalnız bu test için: eski uygulamanın three.js'i
 const G = require(path.join(__dirname, "../mobile/src/kartlar/cevirmeGeometri.js"));
 
 let gecen = 0;

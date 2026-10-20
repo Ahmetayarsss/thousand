@@ -1,7 +1,7 @@
 name: Kontrol
 
 # Her push ve PR'da: testler, veri doğrulama, bekçi (gizli bilgi, sabit dal adı, izinsiz ağ
-# adresi, ölü dosya, belge kayması, paket tutarlılığı) ve üretilen dosyaların güncelliği.
+# adresi, belge kayması, büyük dosya), uygulamanın paketlenmesi ve üretilen dosyaların güncelliği.
 # Kurallar: CLAUDE.md. Bilinen borçlar: scripts/bekci_borc.json.
 
 on:
@@ -29,8 +29,6 @@ jobs:
       - name: Testler
         run: |
           TZ=Europe/Istanbul node tests/srs.test.js
-          node tests/updater.test.js
-          node tests/hesap.test.js
           node tests/log.test.js
           TZ=Europe/Istanbul node tests/hesap_yeni.test.js
           TZ=Europe/Istanbul node tests/oturum.test.js
@@ -61,8 +59,7 @@ jobs:
       - name: Üretilen dosyalar şablonlarla güncel mi
         run: |
           python3 scripts/build_all.py > /dev/null
-          # Güncelleme paketi (web.json, web-version.txt, app/www/updater.js) repoda değil; geri kalanında fark olmamalı.
           if ! git diff --exit-code --stat; then
-            echo "::error::Üretilen dosyalar commit'lenenden farklı. 'python3 scripts/build_all.py' çalıştırıp sonucu commit'le; app/www'daki üretilen sayfaları elle düzenleme."
+            echo "::error::Üretilen dosyalar commit'lenenden farklı. 'python3 scripts/build_all.py' çalıştırıp sonucu commit'le; mobile/src/uretilen'i elle düzenleme."
             exit 1
           fi

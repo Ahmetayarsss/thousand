@@ -1,8 +1,9 @@
-// Yeni uygulamanın hesabı (mobile/src/hesap/hesap.js): eski uygulamanın hesap.js'iyle aynı sunucu çağrıları,
-// aynı localStorage anahtarları. Sahte sunucu; srs.js ve log.js gerçek. Çalıştır: node tests/hesap_yeni.test.js
+// Uygulamanın hesabı (mobile/src/hesap/hesap.js): sunucu çağrıları (supabase/kurulum.sql), localStorage anahtarları,
+// hatırlatma planı. Beklenenler eski uygulamanın hesap.js'inden alındı (o kaldırılmadan önce birebir karşılaştırılıyordu).
+// Sahte sunucu; srs.js ve log.js gerçek. Çalıştır: TZ=Europe/Istanbul node tests/hesap_yeni.test.js
 const assert = require("assert");
 const fs = require("fs"), vm = require("vm"), path = require("path");
-const WWW = path.join(__dirname, "..", "app", "www");
+const CEKIRDEK = path.join(__dirname, "..", "mobile", "src", "cekirdek");
 const H = require(path.join(__dirname, "..", "mobile", "src", "hesap", "hesap.js"));
 
 function sunucu(ayar = {}) {
@@ -27,20 +28,17 @@ function sunucu(ayar = {}) {
   return s;
 }
 
-// srs.js + log.js gerçek, localStorage sahte. eski: eski uygulamanın hesap.js'i de yüklensin (karşılaştırma için).
-function ortam(ls = {}, ayar = {}, eski = false) {
+// srs.js + log.js gerçek, localStorage sahte.
+function ortam(ls = {}, ayar = {}) {
   const sv = sunucu(ayar);
   const depo = { getItem: (k) => (k in ls ? ls[k] : null), setItem: (k, v) => (ls[k] = String(v)), removeItem: (k) => delete ls[k] };
   const ctx = {
     localStorage: depo, sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
-    location: { href: "http://localhost/ayarlar.html", pathname: "/ayarlar.html", search: "", hash: "" },
-    document: { addEventListener() {}, hidden: false }, navigator: { userAgent: "test" },
-    addEventListener() {}, setTimeout: () => 0, clearTimeout() {}, console, JSON, Promise, Object, Date, Math, String, Error, Array,
-    fetch: sv.fetch,
+    navigator: { userAgent: "test" }, setTimeout: () => 0, clearTimeout() {}, console, JSON, Promise, Object, Date, Math, String, Error, Array,
   };
   ctx.window = ctx;
   vm.createContext(ctx);
-  for (const f of eski ? ["log.js", "srs.js", "hesap.js"] : ["log.js", "srs.js"]) vm.runInContext(fs.readFileSync(path.join(WWW, f), "utf8"), ctx);
+  for (const f of ["log.js", "srs.js"]) vm.runInContext(fs.readFileSync(path.join(CEKIRDEK, f), "utf8"), ctx);
   const A = H.kur({ depo, fetch: sv.fetch, SRS: ctx.SRS, OXLOG: ctx.OXLOG, B: ayar.B, cihaz: "Android 14; Test", surum: "2.5",
     zamanla: ayar.zamanla || (() => 0) });
   return { A, ls, sv, ctx };
@@ -67,17 +65,17 @@ let n = 0;
 const t = async (ad, f) => { await f(); n++; console.log("ok -", ad); };
 
 (async () => {
-  await t("hesap aç: giriş + create_profile, eskisiyle aynı çağrılar ve aynı kayıt", async () => {
-    const yeni = ortam(), eski = ortam({}, {}, true);
-    const a = await yeni.A.create(" Ayşe ");
-    await eski.ctx.OXACC.create(" Ayşe ");
-    assert.deepStrictEqual(yeni.sv.cagri, eski.sv.cagri);
-    assert.deepStrictEqual(yeni.sv.cagri, ["/auth/v1/signup", "create_profile"]);
+  await t("hesap aç: giriş + create_profile, kayıt eskisinin biçiminde", async () => {
+    const o = ortam();
+    const a = await o.A.create(" Ayşe ");
+    assert.deepStrictEqual(o.sv.cagri, ["/auth/v1/signup", "create_profile"]);
+    assert.deepStrictEqual(o.sv.son, ["create_profile", { p_nick: "Ayşe" }]);
     assert.strictEqual(a.nick, "Ayşe");
-    const y = JSON.parse(yeni.ls.ox3000_hesap_v1), e = JSON.parse(eski.ls.ox3000_hesap_v1);
-    delete y.at; delete e.at;
-    assert.deepStrictEqual(y, e);
-    assert.ok(yeni.ls.ox3000_oturum_v1);
+    const y = JSON.parse(o.ls.ox3000_hesap_v1);
+    assert.ok(y.at > 0);
+    delete y.at;
+    assert.deepStrictEqual(y, { nick: "Ayşe", code: "AB12CD", recovery: "ABCD-EFGH-JKLM" });
+    assert.deepStrictEqual(Object.keys(JSON.parse(o.ls.ox3000_oturum_v1)), ["at", "rt", "exp", "uid"]);
   });
 
   await t("kurtarma koduyla hesap al, yedeği geri yükle", async () => {
@@ -149,17 +147,19 @@ const t = async (ad, f) => { await f(); n++; console.log("ok -", ad); };
     assert.strictEqual(o.ls.ox3000_srs_v1, "{}");
   });
 
-  await t("hatırlatma planı eskisiyle aynı (seri, tekrar, saatler, 3 gün)", async () => {
+  await t("hatırlatma planı (seri, tekrar, saatler, 3 gün) eskisinin verdiğiyle aynı", async () => {
     const ls = {
       ox3000_srs_v1: JSON.stringify({ "1|apple": { b: 2, n: 1, l: 1, f: 20380, due: 20380, a: 20379 }, "1|area": { b: 1, n: 0, l: 1, f: 20380, due: 20382, a: 20380 } }),
       ox3000_daily_v1: JSON.stringify({ 20378: { n: 5, ok: 4, nw: 1 }, 20379: { n: 3, ok: 3, nw: 0 } }),
       ox3000_settings_v1: JSON.stringify({ bildirim: { seriSaat: "19:30", tekrarSaat: "08:15" } }),
     };
-    const yeni = ortam({ ...ls }), eski = ortam({ ...ls }, {}, true);
-    for (const now of [Date.now(), new Date(2026, 9, 20, 7, 0).getTime(), new Date(2026, 9, 20, 21, 0).getTime()]) {
-      assert.strictEqual(JSON.stringify(yeni.A.hatirlatmaPlani(now)), JSON.stringify(eski.ctx.OXACC.hatirlatmaPlani(now)));   // vm nesneleri: metinle
-    }
-    assert.ok(yeni.A.hatirlatmaPlani(Date.now()).length > 0);
+    const o = ortam({ ...ls }), now = new Date(2026, 9, 20, 7, 0).getTime();
+    const T = "📚 Bugün 2 kelimenin tekrar zamanı geldi.", S = "📖 Bugün henüz çalışmadın. Birkaç kelimeyle başla!";
+    // [kimlik, şu andan sonra ms, metin] — eski hesap.js'in aynı veriyle verdiği plan
+    assert.deepStrictEqual(o.A.hatirlatmaPlani(now).map((x) => [x.id, x.at - now, x.metin]), [
+      ["tekrar-2026-10-20", 4500000, T], ["seri-2026-10-20", 45000000, S], ["tekrar-2026-10-21", 90900000, T],
+      ["seri-2026-10-21", 131400000, S], ["tekrar-2026-10-22", 177300000, T], ["seri-2026-10-22", 217800000, S]]);
+    assert.ok(o.A.hatirlatmaPlani(now).every((x) => x.hedef === "kartlar.html?exam=1"));
     assert.strictEqual(H.saatOk("21:59"), true);
     assert.strictEqual(H.saatOk("22:00"), false);
   });
@@ -195,11 +195,9 @@ const t = async (ad, f) => { await f(); n++; console.log("ok -", ad); };
     assert.ok(B.c.some((x) => x[0] === "izinIste"));
   });
 
-  await t("hata metinleri eskisiyle aynı", async () => {
-    const eski = ortam({}, {}, true).ctx.OXACC;
-    for (const e of [{ net: true }, { message: "kod_yok" }, { message: "anonymous sign-ins are disabled" }, { message: "xyz" }, {}]) {
-      assert.strictEqual(H.errText(e), eski.errText(e));
-    }
+  await t("hata metinleri", async () => {
+    assert.deepStrictEqual([{ net: true }, { message: "kod_yok" }, { message: "anonymous sign-ins are disabled" }, { message: "xyz" }, {}].map(H.errText),
+      ["İnternet bağlantısı yok.", "Bu kodla bir kullanıcı yok.", "Sunucuda misafir girişi kapalı.", "Bir hata oldu (xyz).", "Bir hata oldu."]);
     assert.strictEqual(H.fmtRec("abcdefghjklm"), "ABCD-EFGH-JKLM");
   });
 

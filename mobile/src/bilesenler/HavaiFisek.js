@@ -1,6 +1,6 @@
 /*
  * 3000 kelimenin hepsi çalışılınca Liste'de havai fişek + OLMİŞDUR — Capacitor'daki liste sayfasındaki gösterinin
- * aynısı (templates/sesli_template.html → celebrate): koyu panelde ~7 sn boyunca roketler yükselip patlar; her
+ * aynısı (eski liste sayfasındaki celebrate): koyu panelde ~7 sn boyunca roketler yükselip patlar; her
  * karede üstüne yarı saydam koyu bir katman çizilir, eskiler izi solarak kaybolur. Dokununca baştan.
  * Fizik kare başınadır (eskisi gibi her ekran karesinde bir adım).
  */

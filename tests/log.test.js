@@ -1,7 +1,7 @@
 // log.js testleri: olaylar toplu ve ertelenmiş yazılır, sayfa kapanırken kaybolmaz.
 // Çalıştır: node tests/log.test.js
 const fs = require("fs"), vm = require("vm"), path = require("path");
-const SRC = fs.readFileSync(path.join(__dirname, "..", "app", "www", "log.js"), "utf8");
+const SRC = fs.readFileSync(path.join(__dirname, "..", "mobile", "src", "cekirdek", "log.js"), "utf8");
 
 // Bir sayfa açılışı: ls paylaşılan localStorage (sayfalar arası kalır), zamanlayıcı elle ilerletilir.
 function sayfa(ls, ad = "index.html") {

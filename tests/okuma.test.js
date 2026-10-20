@@ -1,20 +1,25 @@
-// "Listeyi oku"nun okuma listesi (mobile/src/okuma/liste.js): servise giden diziler ve Türkçe okuma metni
-// eski sayfadakiyle (templates/sesli_template.html → trSay) aynı mı. Çalıştır: node tests/okuma.test.js
+// "Listeyi oku"nun okuma listesi (mobile/src/okuma/liste.js): servise giden diziler ve Türkçe okuma metni (beklenenler
+// eski sayfanın trSay'inden alındı; o kaldırılmadan önce 3000 kelimede birebir karşılaştırılıyordu).
+// Çalıştır: node tests/okuma.test.js
 const assert = require("assert");
 const fs = require("fs"), path = require("path");
 const L = require(path.join(__dirname, "..", "mobile", "src", "okuma", "liste.js"));
 const gruplar = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "mobile", "src", "uretilen", "kelimeler.json"), "utf8"));
-const sablon = fs.readFileSync(path.join(__dirname, "..", "templates", "sesli_template.html"), "utf8");
-const eskiTrSay = new Function("return " + /function trSay\(t\)\{[^\n]*?\}(?=\n)/.exec(sablon)[0])();
 
 let n = 0;
 const t = (ad, f) => { f(); n++; console.log("ok -", ad); };
 
-t("Türkçe okuma metni: 3000 kelimenin hepsinde eskisiyle aynı", () => {
+t("Türkçe okuma metni: parantez atılır, ';' virgül olur, ek tiresi okunmaz", () => {
+  const ornek = [["saat (tam)", "saat"], ["tür; yazmak (klavye)", "tür, yazmak"], ["kurs; rota; yemek servisi", "kurs, rota, yemek servisi"],
+    ["boya; boyamak, resim yapmak", "boya, boyamak, resim yapmak"], ["ne zaman; -dığında", "ne zaman, dığında"], ["-de, -da", "de, da"],
+    ["irade; -ecek", "irade, ecek"], ["olmak, -leşmek", "olmak, leşmek"], ["(bir şeyden) -den; -e doğru", "den, e doğru"]];
+  for (const [g, b] of ornek) assert.strictEqual(L.trSay(g), b, g);
   let k = 0;
-  gruplar.forEach((g) => g.items.forEach((d) => { assert.strictEqual(L.trSay(d.tr), eskiTrSay(d.tr), d.w); k++; }));
+  gruplar.forEach((g) => g.items.forEach((d) => {
+    const s = L.trSay(d.tr); k++;
+    assert.ok(!/[();]|(^|[\s,])-|^[\s,]|[\s,]$|\s{2}/.test(s), d.w + ": " + s);
+  }));
   assert.strictEqual(k, 3000);
-  assert.strictEqual(L.trSay("(bir şeyden) -den; -e doğru"), "den, e doğru");
 });
 
 t("okuma listesi: sırayla kelime, kaynak, anlam, okunacak metin, seviye; bilinmeyen anahtar atlanır", () => {

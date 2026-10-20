@@ -1,5 +1,5 @@
 /*
- * Sözlük — Capacitor'daki sozluk.html (templates/sozluk_template.html) ile aynı: 3000 kelimenin hepsinde arama
+ * Sözlük — eski uygulamanın sözlük sayfasıyla aynı: 3000 kelimenin hepsinde arama
  * (İngilizce ya da Türkçe), en çok 60 sonuç; boşken 📖. Karta dokununca kelime okunur. Arama src/sozluk/arama.js'te.
  */
 import { useFocusEffect } from "expo-router";

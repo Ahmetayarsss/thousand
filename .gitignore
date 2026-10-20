@@ -1,23 +1,5 @@
 __pycache__/
 *.pyc
 
-# Node / Capacitor
-app/node_modules/
-
-# Android derleme çıktıları (proje dosyalarının kendisi commit'lenir)
-app/android/.gradle/
-app/android/build/
-app/android/app/build/
-app/android/captures/
-app/android/local.properties
-app/android/.idea/
-*.iml
-
 # CI teşhis çıktısı (geçici)
 ci-error.log
-
-# Uygulama içi güncelleme paketi: yalnız CI (build-apk.yml) üretir ve release'e koyar.
-# Repoda tutulmaz (güncelleyici herhangi bir dalın ham dosyasından paket indirmesin).
-web.json
-web-version.txt
-app/www/updater.js

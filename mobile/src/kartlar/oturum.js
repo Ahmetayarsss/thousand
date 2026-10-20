@@ -1,6 +1,6 @@
 /*
  * Kartlar ekranının mantığı (Test ve Sınav), ekrandan bağımsız. Capacitor uygulamasındaki
- * templates/kartlar_template.html ile aynı kurallar; tests/oturum.test.js denetler.
+ * eski uygulamanın kartlar sayfasıyla aynı kurallar; tests/oturum.test.js denetler.
  *
  * TEST (çalışma): ana sayfadaki yeni kelimeler karışık sırayla. İlerlemeyi değiştirmez. Bilemediğin kart
  *   destenin sonuna döner (yönü aynı kalır); hepsi bilinince test biter.

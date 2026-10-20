@@ -7,8 +7,8 @@
 - ok dolu ise: yalnız Türkçe harfler + tire, heceler tireli, en az bir hece
   TAMAMEN BÜYÜK (vurgu). en/ex de dolu olmalı.
 - ex dolu ise kelimeyi (ya da bir çekimini) içermeli — <b>...</b> işaretli.
-- app/www/audio/*.mp3: her ses bir kelimeye ait olmalı (adı sayfalardaki slugOf ile aynı
-  kurala uyar). Sesi olmayan kelimeler yalnız bildirilir; onları cihazın TTS'i okur.
+- mobile/assets/audio/*.mp3: her ses bir kelimeye ait olmalı (adı uygulamadaki slugOf ile aynı
+  kurala uyar — mobile/src/ses.js). Sesi olmayan kelimeler yalnız bildirilir; onları cihazın TTS'i okur.
 """
 import json
 import re
@@ -28,7 +28,7 @@ def err(msg):
 
 
 def slug_of(w):
-    # templates/*.html içindeki slugOf ile aynı: parantez atılır, virgülden önceki ilk biçim.
+    # mobile/src/ses.js içindeki slugOf ile aynı: parantez atılır, virgülden önceki ilk biçim.
     b = re.sub(r"\(.*?\)", "", w).split(",")[0]
     return re.sub(r"^-|-$", "", re.sub(r"[^a-z0-9]+", "-", b.lower()))
 
@@ -89,9 +89,9 @@ def main():
     if totals != want:
         err(f"seviye toplamları {totals} != {want}")
     slugs = {slug_of(it["w"]) for g in groups for it in g["items"]}
-    sesler = {f.stem for f in (ROOT / "app" / "www" / "audio").glob("*.mp3")}
+    sesler = {f.stem for f in (ROOT / "mobile" / "assets" / "audio").glob("*.mp3")}
     for s in sorted(sesler - slugs):
-        err(f"app/www/audio/{s}.mp3: hiçbir kelimeye ait değil")
+        err(f"mobile/assets/audio/{s}.mp3: hiçbir kelimeye ait değil")
     sessiz = sorted(slugs - sesler)
     if errors:
         print(f"{len(errors)} HATA:")

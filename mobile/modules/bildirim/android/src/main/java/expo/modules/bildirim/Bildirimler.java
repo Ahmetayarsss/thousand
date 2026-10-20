@@ -22,7 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Eski uygulamadan aynen (app/android); değişen yalnız paket. Bildirim yardımcıları — köprü (BildirimModule) ve arka plan işleri ({@link ArkadasWorker}:
+ * Eski uygulamadan aynen; değişen yalnız paket. Bildirim yardımcıları — köprü (BildirimModule) ve arka plan işleri ({@link ArkadasWorker}:
  * arkadaşlık isteği + dürtme, {@link HatirlatmaWorker}: seri/tekrar hatırlatması) ortak kullanır:
  * kanallar, bildirim gösterilebilir mi, sessiz saatler (22:00–08:00), dokununca uygulamada bir sayfayı
  * açan bildirim, dokunulan bildirimin hedef sayfası, ayarlar (SharedPreferences) ve ISO zaman karşılaştırma.

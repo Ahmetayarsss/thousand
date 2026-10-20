@@ -35,6 +35,7 @@ Bu repoda çalışırken kurallar: `CLAUDE.md`. Düzeltme planı: `PLAN.md`.
 | `supabase/kurulum.sql` | Sunucu: hesap, arkadaşlar, dürtme, yedek, kullanım kayıtları, bildirim kontrolü |
 | `.github/workflows/kontrol.yml` | Her push/PR'da testler + doğrulama + bekçi + yeni uygulamanın paketlenmesi + üretilen dosyaların güncelliği |
 | `.github/workflows/build-apk.yml` | **Yayın:** `main`'e her birleşmede yeni uygulamanın APK'sını (`mobile/`, release, mühürlü, paket `io.github.ahmetayarsss.thousand`) ve eski uygulamanın güncelleme paketini derleyip `apk-latest` release'ine koyar (etiket derlenen commit'e taşınır). PR'larda yalnız deneme derlemesi (mühürsüz, yayın yok) |
+| `.gitattributes` | GitHub'ın dil istatistiğinde üretilen dosyalar (`app/www/*.html`, `kelimeler.js`, `mobile/src/uretilen/`) ve hazır kütüphane sayılmasın |
 | `app/` | Eski Android uygulaması (Capacitor): APK'sı artık derlenmiyor; geçiş için duruyor (eski uygulamadaki güncelleme paketi). Ortak çekirdek (`www/srs.js`, `www/log.js`) ve sesler (`www/audio/`) yeni uygulamada da kullanılıyor — `app/README.md` |
 | `mobile/` | **Uygulama (yayındaki):** React Native / Expo, iOS + Android; eksik özellikler PLAN.md Aşama 9'da. `srs.js` ve `log.js`'i `app/www`'dan aynen kullanır; `mobile/src/uretilen/` (`kelimeler.json`, `sesler.js`) `build_all.py`'nin ürünü. Ayrıntı: `mobile/README.md`, plan: `PLAN.md` Aşama 9 |
 

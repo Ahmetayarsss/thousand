@@ -158,6 +158,26 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       testler beklenenleri kendi içinde tutar (karşılaştırma için three kütüphanesi `tests/cevirme/`'de). Eski
       uygulama son aldığı güncelleme paketiyle çalışmaya devam eder; release'ten paket dosyaları silinir.
 
+## Aşama 10 — Çok anlamlı kelimeler
+
+Sorun (kullanıcı, Ekim 2026): Türkçeden İngilizceye sorarken bütün anlamlar birlikte görünüyor ("kurs; rota;
+yemek servisi"); biri bilinince öbürleri öğrenilmeden kelime kutu atlıyor. 3000 kelimenin 576'sı çok anlamlı.
+Kullanıcı kararları:
+
+- [x] 41. Anlamlar ayrı ayrı sorulur, kelime bir bütün kalır:
+      - Birim kelime: tek kutu. Anlam = `tr`'de `;` ile ayrılan parça; yalnız parantezden oluşan not anlam değildir.
+      - Çok anlamlı kelime hep Türkçeden İngilizceye, her anlam ayrı kart (Sınav ve Test). "2/3" gibi gösterge yok;
+        kartlar özel olarak dağıtılmaz. Arka yüz yalnız sorulan anlamı ve İngilizce kelimeyi (okunuşuyla) gösterir.
+      - Turda sorulan anlamların hepsi cevaplanmadan kutu değişmez. Hepsi doğru → üst kutu. Biri bile yanlış → alt
+        kutu; yanlışlar kaydedilir, doğrular "normalde çıkacağı kutu"ya park edilir ve kelime o kutuya gelene dek
+        sorulmaz; sonraki turlarda yalnız kalanlar sorulur (yine hepsi cevaplanınca karar). Yanlış bilinen anlam aynı
+        sınavda tekrar gelmez. Yarım kalan turun cevapları saklanır.
+      - Belirsizlik: yazılı kartta aynı Türkçe karşılığa sahip başka bir kelime yazılırsa ("rota" için "route") yanlış
+        sayılmaz ama kart geçilmez; yeniden sorulur.
+      - İpucu yalnız ek anlamlarında ("-ecek", "-dığı için"…), `data/all_groups.json` → `ipucu`.
+      - Sayılar (günlük cevap, doğruluk, arkadaşların gördüğü, "en çok yanlış") kelime bazında: karar başına bir.
+      - Mevcut ilerleme değişmez: kutular, tarihler aynı; kayda yalnız yeni alanlar eklenir (eski kayıt geçerli).
+
 ## Bilerek bırakılanlar (şimdilik)
 
 - Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele

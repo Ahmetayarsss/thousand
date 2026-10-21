@@ -43,8 +43,12 @@ Eski Capacitor (WebView) uygulaması (`app/`, `templates/`) kaldırıldı (PLAN.
 
 ## Alanlar
 
-- `tr`: Türkçe anlam. Birden çok anlam `;`, eş anlamlılar `,` ile ayrılır.
+- `tr`: Türkçe anlam. Birden çok anlam `;`, eş anlamlılar `,` ile ayrılır. Birden çok anlamlı kelimede her anlam
+  Test'te ve Sınav'da ayrı kart olarak (Türkçe → İngilizce) sorulur; kutu kararı kelimenin bütün anlamları
+  cevaplanınca verilir (`mobile/src/cekirdek/srs.js`, PLAN.md adım 41).
 - `ok` (okunuş), `en` (İngilizce açıklama), `ex` (örnek cümleler, kelime `<b>` içinde).
+- `ipucu` (isteğe bağlı): `{anlam: açıklama}` — ek anlamlarında ("-ecek", "-dığı için") anlam kartında Türkçe
+  anlamın altında görünür. Anahtar kelimenin anlamlarından biri olmalı, açıklama İngilizce kelimeyi vermemeli.
 
 30 grubun hepsinde bütün alanlar dolu; `validate.py` bunu denetler.
 

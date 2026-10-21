@@ -6,6 +6,9 @@
  *     döner (src/kartlar/Cevirme.js — eski three.js çevirmesiyle birebir), kelime okunur.
  *   - Sınavda kuyruğun %10'u yazılı (altın kart): uygulama içi klavyeyle yazılır, sistem denetler.
  *   - Sınav sürerken çıkışta onay (Test'e geçiş, Bitir, başka sekme, geri tuşu). Cevaplar anında kaydedilir.
+ *   - Çok anlamlı kelime: her anlam ayrı kart (kimlik "anahtar#anlamNo", oturum.js); kartta yalnız o anlam görünür,
+ *     ek anlamında ipucu. Yazılı kartta aynı Türkçe karşılığın başka kelimesi yazılırsa yanlış sayılmaz, yeniden
+ *     sorulur (PLAN.md adım 41).
  * Ekrana her gelişte yeni Test başlar (?exam=1 ile gelindiyse Sınav) — eski uygulamada sayfa yeniden açılırdı.
  * Cevaptan sonra özet arkadaşlara gider (HESAP.syncSoon). Henüz yok (adım 36): hatırlatmaların yeniden kurulması.
  */
@@ -13,7 +16,7 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ANAHTARLA, OXLOG, SRS } from "../cekirdek";
+import { ANAHTARLA, GRUPLAR, OXLOG, SRS } from "../cekirdek";
 import { cikisBekcisi } from "../cikis";
 import { HESAP } from "../hesap";
 import CevirmeKatmani from "../kartlar/CevirmeKatmani";
@@ -26,6 +29,23 @@ import { durdur, kelimeyiOku } from "../ses";
 import { useTema } from "../tema";
 
 function ustBaslik() { const lv = SRS.topLevel(); return SRS.inCycle() + (lv ? " · " + lv : ""); }
+
+// Kart kimliğinden gösterilecek veri. Anlam kartında tr yalnız o anlam, örnekler yok, ek anlamında ipucu.
+const KARTLAR = new Map();
+function kart(id) {
+  if (!id) return null;
+  if (KARTLAR.has(id)) return KARTLAR.get(id);
+  const { k, i } = O.kartCoz(id), e = ANAHTARLA[k];
+  if (!e) return null;
+  let d = e.d;
+  if (i != null) { const anlam = SRS.meanings(e.d)[i]; d = { ...e.d, tr: anlam, ex: [], ipucu: (e.d.ipucu || {})[anlam] || null }; }
+  const v = { k, i, e, d };
+  KARTLAR.set(id, v);
+  return v;
+}
+const ANLAM = new Map();
+const anlamSay = (k) => { if (!ANLAM.has(k)) ANLAM.set(k, ANAHTARLA[k] ? SRS.meanings(ANAHTARLA[k].d).length : 1); return ANLAM.get(k); };
+let ES_ANLAM = null;   // aynı Türkçe karşılığın kelimeleri (ilk yazılı kartta kurulur)
 function olc(ref) {
   return new Promise((coz) => { if (!ref.current) coz(null); else ref.current.measureInWindow((x, y, w, h) => coz({ x, y, w, h })); });
 }
@@ -80,7 +100,7 @@ export default function Kartlar() {
   function yaziliKur() {
     const k = cur();
     if (!k || !yaziliMi()) { D.yazili = null; return; }
-    const d = ANAHTARLA[k].d, yon = D.o.yon[k], n = SRS.answerSlots(d, yon).length, en = yon === "tr2en";
+    const d = kart(k).d, yon = D.o.yon[k], n = SRS.answerSlots(d, yon).length, en = yon === "tr2en";
     D.yazili = {
       degerler: new Array(n).fill(""), etkin: 0, sonuc: null,
       ipuclari: Array.from({ length: n }, (_, i) => (en ? "İngilizcesi" : n > 1 ? i + 1 + ". anlam" : "Türkçesi")),
@@ -113,11 +133,11 @@ export default function Kartlar() {
   function baslat() {
     durdur(); D.busy = false; setAyrilma(null); setBaslik(ustBaslik());
     if (D.mod === "test") {
-      D.o = O.testKur(SRS);
+      D.o = O.testKur(SRS, anlamSay);
       if (!D.o.toplam) { testBitti(); ciz(); return; }
       OXLOG.add("test_bas", { n: D.o.toplam });
     } else {
-      D.o = O.sinavKur(SRS);
+      D.o = O.sinavKur(SRS, anlamSay);
       OXLOG.add("sinav_bas", { rev: D.o.tekrar, nw: D.o.liste.length - D.o.tekrar, yz: D.o.yazili.size });
       if (!D.o.cur) { sinavBitti(); ciz(); return; }
       if (!D.o.tekrar) balon("Bugün vadesi gelen tekrar yok — yeni kelimelerle başlıyoruz.");
@@ -184,7 +204,7 @@ export default function Kartlar() {
     if (D.busy || !cur()) return;
     const k = cur(), yz = yaziliMi(), yon = D.o.yon[k], yazilan = D.yazili && D.yazili.sonuc ? D.yazili.sonuc.degerler : undefined;
     const { sonuc: r } = O.sinavCevap(SRS, D.o, dogru);
-    OXLOG.add("cevap", { k, y: yon === "tr2en" ? "te" : "et", ok: dogru ? 1 : 0, b: [r.from, r.to],
+    OXLOG.add("cevap", { k, y: yon === "tr2en" ? "te" : "et", ok: dogru ? 1 : 0, b: r ? [r.from, r.to] : undefined,
       ms: Math.round(performance.now() - D.tPrompt), yz: yz ? 1 : 0, g: yz ? yazilan : undefined });
     D.yazili = null;
     HESAP.syncSoon(false);   // arkadaşların görsün (dakikada en çok bir)
@@ -202,7 +222,18 @@ export default function Kartlar() {
   function sec(i) { if (!yaziliCanli()) return; D.yazili.etkin = i; ciz(); }
   function kontrol() {
     if (!yaziliCanli()) return;
-    const k = cur(), d = ANAHTARLA[k].d, degerler = D.yazili.degerler.slice(), r = SRS.checkTyped(d, D.o.yon[k], degerler);
+    const k = cur(), d = kart(k).d, degerler = D.yazili.degerler.slice(), r = SRS.checkTyped(d, D.o.yon[k], degerler);
+    if (!r.ok && D.o.yon[k] === "tr2en") {   // aynı Türkçe karşılığın başka kelimesi: yanlış değil, yeniden sor
+      if (!ES_ANLAM) ES_ANLAM = O.esAnlamDizini(SRS, GRUPLAR);
+      const baska = SRS.meanings(d).map((a) => O.baskaKarsilik(SRS, ES_ANLAM, a, d.w, degerler[0])).find(Boolean);
+      if (baska) {
+        OXLOG.add("baska_karsilik", { k, w: baska });
+        balon("“" + baska + "” de bu anlama gelir, ama burada başka bir kelime soruluyor.");
+        D.yazili.degerler = D.yazili.degerler.map(() => ""); D.yazili.etkin = 0;
+        ciz();
+        return;
+      }
+    }
     D.yazili.sonuc = { ok: r.ok, isaret: r.marks, degerler };
     ciz();
     setTimeout(() => { if (cur() === k && D.side === 0) { ac(0.5); kelimeyiOku(d.w); } }, 120);
@@ -223,7 +254,7 @@ export default function Kartlar() {
   // ---- karta dokunma ----
   async function kartaBas(e) {
     if (D.busy || !cur()) return;
-    const d = ANAHTARLA[cur()].d;
+    const d = kart(cur()).d;
     if (D.side === 0 && yaziliMi()) { if (D.o.yon[cur()] !== "tr2en") kelimeyiOku(d.w); return; }   // yazılı kart dokunuşla açılmaz
     if (D.side === 0) {
       const { pageX } = e.nativeEvent, r = await olc(desteRef);
@@ -262,11 +293,11 @@ export default function Kartlar() {
   const sinavMi = D.mod === "sinav";
   const oran = o ? O.oran(o) : 0;
   const sayacMetni = !o || sonuc ? "" : O.sayac(o);
-  const yuzProps = (k, yuz) => {
-    const e = ANAHTARLA[k];
+  const yuzProps = (id, yuz) => {
+    const c = kart(id);
     return {
-      d: e.d, yuz, yon: D.o.yon[k], seviye: e.g.level, t,
-      etiket: sinavMi ? (SRS.isNew(k) ? "Yeni" : "Tekrar") : null, yazili: O.yaziliMi(D.o, k),
+      d: c.d, yuz, yon: D.o.yon[id], seviye: c.e.g.level, t,
+      etiket: sinavMi ? (SRS.isNew(c.k) ? "Yeni" : "Tekrar") : null, yazili: O.yaziliMi(D.o, id),
     };
   };
 
@@ -299,7 +330,7 @@ export default function Kartlar() {
           ) : (
             <View style={s.sahne}>
               <View ref={desteRef} collapsable={false} style={s.deste} onLayout={(e) => setBoy({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
-                {yakala && ANAHTARLA[yakala.k] ? (
+                {yakala && kart(yakala.k) ? (
                   <>
                     <View ref={onYakRef} collapsable={false} style={s.yakala}><KartYuzu {...yuzProps(yakala.k, "on")} golge={false} /></View>
                     <View ref={arkaYakRef} collapsable={false} style={s.yakala}><KartYuzu {...yuzProps(yakala.k, "arka")} golge={false} /></View>
@@ -308,13 +339,13 @@ export default function Kartlar() {
                 {yuvalar.map((y, d) => (
                   <Yuva key={y.id} ref={(r) => { yuvaRef.current[y.id] = r; }} derinlik={d} ucuyor={ucan === y.id}
                     gizli={d === 0 && gizliUst} boy={boy} onBas={kartaBas}>
-                    {y.k && ANAHTARLA[y.k] ? <KartYuzu {...yuzProps(y.k, d === 0 ? D.ustYuz : "on")} /> : null}
+                    {y.k && kart(y.k) ? <KartYuzu {...yuzProps(y.k, d === 0 ? D.ustYuz : "on")} /> : null}
                   </Yuva>
                 ))}
               </View>
               <View style={[s.dugmeler, yz && s.gorunmez]} pointerEvents={yz ? "none" : "auto"}>
                 {!D.acik ? (
-                  <Dugme metin="Aç" renk={t.accent} onBas={() => { if (D.busy || !ust || D.side === 1) return; ac(0.5); kelimeyiOku(ANAHTARLA[ust].d.w); }} />
+                  <Dugme metin="Aç" renk={t.accent} onBas={() => { if (D.busy || !ust || D.side === 1) return; ac(0.5); kelimeyiOku(kart(ust).d.w); }} />
                 ) : (
                   <>
                     <Dugme metin={sinavMi ? "Bilemedim" : "Tekrar"} renk={t.red} onBas={() => cevap(false)} />

@@ -19,7 +19,7 @@ yedek yüklenir).
 | Yol | Ne |
 |---|---|
 | `src/app/` | Ekranlar (Expo Router: her dosya bir sekme). `_layout.js` alt sekmeleri kurar; `ilerleme/` bir yığın: İlerleme ve ondan açılan İstatistikler (`analiz.js`) |
-| `src/cekirdek/` | Çekirdek: `srs.js` (tekrar sistemi) ve `log.js` (kullanım kaydı), eski uygulamadan; `index.js` ikisini yükler, kelime kataloğunu kurar. localStorage'ı telefonda `expo-sqlite` karşılar |
+| `src/cekirdek/` | Çekirdek: `srs.js` (tekrar sistemi; çok anlamlı kelimede anlam turu ve kutu kararı, `ox3000_parca_v1`) ve `log.js` (kullanım kaydı), eski uygulamadan; `index.js` ikisini yükler, kelime kataloğunu kurar. localStorage'ı telefonda `expo-sqlite` karşılar |
 | `assets/audio/` | Kelimelerin insan sesi kayıtları (mp3) |
 | `src/ses.js` | Kelime sesi: gömülü kayıt (`assets/audio`), yoksa cihazın konuşma sentezi |
 | `src/tema.js` | Açık / koyu tema renkleri |

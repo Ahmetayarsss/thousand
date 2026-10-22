@@ -10,14 +10,15 @@ ADIM=0
 HATA=0
 
 ekran() { adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1; adb exec-out cat /sdcard/ui.xml; }
-# Ekrandaki yazının ortası "x y" (yoksa boş).
+# Ekrandaki yazının (ya da erişilebilirlik adının) ortası "x y" (yoksa boş).
 yer() {
   ekran | python3 -c '
-import re, sys
+import re, sys, html
 x = sys.stdin.read(); aranan = sys.argv[1]
-for m in re.finditer(r"<node [^>]*?text=\"([^\"]*)\"[^>]*?bounds=\"\[(\d+),(\d+)\]\[(\d+),(\d+)\]\"", x):
-    if m.group(1) == aranan:
-        a, b, c, d = map(int, m.groups()[1:]); print((a + c) // 2, (b + d) // 2); break
+for n in re.finditer(r"<node ([^>]*)>", x):
+    oz = dict((k, html.unescape(v)) for k, v in re.findall(r"([\w-]+)=\"([^\"]*)\"", n.group(1)))
+    if aranan in (oz.get("text"), oz.get("content-desc")):
+        a, b, c, d = map(int, re.findall(r"\d+", oz["bounds"])); print((a + c) // 2, (b + d) // 2); break
 ' "$1"
 }
 var() { [ -n "$(yer "$1")" ]; }
@@ -46,9 +47,9 @@ sola;  olmali "Liste sola → Kartlar" "Sınav"
 sola;  olmali "Kartlar sola → İlerleme" "SEVİYEYE GÖRE"
 geri;  olmali "geri → Kartlar" "Sınav"
 geri;  olmali "geri → Liste" "▶ Listeyi oku"
-saga;  olmali "Liste sağa → Sözlük" "📖"
+saga;  olmali "Liste sağa → Sözlük" "Sözlükte ara (İngilizce ya da Türkçe)"
 asagi; olmali "Sözlük aşağı çek → Ayarlar" "Kullanım kayıtlarını gönder"
-geri;  olmali "geri → Sözlük" "📖"
+geri;  olmali "geri → Sözlük" "Sözlükte ara (İngilizce ya da Türkçe)"
 
 # Sınav sürerken pencere: geri tuşu pencereyi kapatır, sınav sürer.
 dokun "Kartlar"; sleep 2
@@ -60,7 +61,7 @@ if bekle "Bitir" 5; then
   foto pencere_kapandi
   # Sınavda geri tuşu: önce onay; "Çık" bir önceki sayfaya (Sözlük) döner.
   geri; olmali "sınavda geri → onay" "Emin misin?"
-  dokun "Çık"; sleep 1.5; olmali "Çık → önceki sayfa (Sözlük)" "📖"
+  dokun "Çık"; sleep 1.5; olmali "Çık → önceki sayfa (Sözlük)" "Sözlükte ara (İngilizce ya da Türkçe)"
 else
   echo "Sınavda soru yok (Bitir görünmedi); pencere adımı atlandı."
 fi

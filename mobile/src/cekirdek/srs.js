@@ -13,6 +13,11 @@
  *                olgun hangi seviyede olursa olsun → 2, Kutu 3 gibi)
  *   Yanlışta o anki yön (en2tr/tr2en) kilitlenir; doğruda kilit kalkar.
  *
+ * Çok anlamlı kelime (tr'de ";" ile ayrılan anlamlar): kelime yine tek kutu, anlamlar ayrı ayrı sorulur
+ * (answerMeaning). Turda sorulan anlamların hepsi cevaplanmadan kutu değişmez: hepsi doğru → üst kutu; biri bile
+ * yanlış → alt kutu, doğru bilinenler "normalde çıkacağı kutu"ya park edilir (kayıtta pk: {anlamNo: kutu}) ve
+ * kelime o kutuya gelene kadar sorulmaz. Turun cevapları karar verilene dek PARKEY'de durur (yarım kalan sınav).
+ *
  * Sınav kuyruğu: önce vadesi gelen tekrarlar (yüksek kutu önce, aynı kutudakiler
  * karışık), sonra "tur" (batch) yeni kelimeleri karışık. Tur, başladığı anda ana
  * sayfadaki listenin (ayarlardaki kelime sayısı kadar) kopyasıdır; sınav bırakılıp
@@ -33,6 +38,7 @@
   var SETK = "ox3000_settings_v1", DEVK = "ox3000_dev_v1";
   var BKEY = "ox3000_exam_batch_v1", DAYK = "ox3000_daily_v1";
   var LMIN = 5, LMAX = 300, LDEF = 20;
+  var PARKEY = "ox3000_parca_v1";   // çok anlamlı kelimede kararı bekleyen tur: {anahtar: {anlamNo: 1 doğru | 0 yanlış}}
   var CAT = [], IDX = {}, st = null;
 
   var G = typeof window !== "undefined" ? window : globalThis;
@@ -151,6 +157,43 @@
     return { from: from, to: to, due: r.due };
   }
 
+  // ---- çok anlamlı kelimeler ----
+  // Kelimenin anlamları: tr ";" ile ayrılır; yalnız parantezden oluşan not ("(mastar eki)") anlam sayılmaz
+  // (answerSlots'taki kuralla aynı).
+  function meanings(item) {
+    return String((item && item.tr) || "").split(";").map(function (m) { return m.trim(); })
+      .filter(function (m) { return alts(m).length > 0; });
+  }
+  // Bu turda sorulan anlamlar: park edilmemiş olanlar (park kutusu kelimenin kutusundan büyükse bekler).
+  function turAnlamlari(r, n) {
+    var pk = (r && r.pk) || {}, b = r ? r.b : 0, out = [];
+    for (var i = 0; i < n; i++) if (!(pk[i] > b)) out.push(i);
+    if (!out.length) for (i = 0; i < n; i++) out.push(i);   // veri değiştiyse: hepsi
+    return out;
+  }
+  // Sorulmayı bekleyen anlamlar (turdan, henüz cevaplanmamış olanlar).
+  function pendingMeanings(k, n) {
+    var p = (getJ(PARKEY, {}) || {})[k] || {};
+    return turAnlamlari(rec(k), n).filter(function (i) { return !(i in p); });
+  }
+  // Bir anlamın cevabı (n: kelimenin anlam sayısı). Tur bitmediyse null; bittiyse karar (answer'ın sonucu,
+  // ayrıca yanlis: yanlış bilinen anlamlar). Karar answer ile verilir: günlük sayılar kelime başına bir.
+  function answerMeaning(k, i, ok, n, now) {
+    var pa = getJ(PARKEY, {}) || {}, p = pa[k] || (pa[k] = {}), r0 = rec(k), tur = turAnlamlari(r0, n);
+    p[i] = ok ? 1 : 0;
+    if (tur.some(function (j) { return !(j in p); })) { setJ(PARKEY, pa); return null; }
+    var hepsi = tur.every(function (j) { return p[j] === 1; }), from = r0 ? r0.b : 0;
+    var hedef = from ? Math.min(BMAX, from + 1) : 2;   // hepsi doğru olsaydı çıkacağı kutu
+    var res = answer(k, hepsi, "tr2en", now), r = load()[k], pk = r.pk || {};
+    if (hepsi) { for (var j in pk) if (pk[j] <= r.b) delete pk[j]; }
+    else tur.forEach(function (j) { if (p[j] === 1) pk[j] = hedef; });
+    if (Object.keys(pk).length) r.pk = pk; else delete r.pk;
+    save();
+    delete pa[k]; setJ(PARKEY, pa);
+    res.yanlis = tur.filter(function (j) { return p[j] !== 1; });
+    return res;
+  }
+
   // Vadesi gelen döngü kelimeleri: yüksek seviye önce, eşitse en çok geciken,
   // o da eşitse katalog sırası (sayım/özet için; sınav sırası examQueue'da).
   function dueList(now) {
@@ -266,7 +309,7 @@
 
   function reset() {
     st = {};
-    try { localStorage.removeItem(KEY); localStorage.removeItem(BKEY); localStorage.removeItem(DAYK); } catch (e) {}
+    try { localStorage.removeItem(KEY); localStorage.removeItem(BKEY); localStorage.removeItem(DAYK); localStorage.removeItem(PARKEY); } catch (e) {}
   }
   function _reload() { st = null; }   // testler için
 
@@ -274,7 +317,8 @@
     IV: IV, BMAX: BMAX, today: today, now: nowMs, key: key, shuffle: shuffle,
     dev: dev, setDev: setDev, listSize: listSize, setListSize: setListSize, opt: opt, setOpt: setOpt,
     LMIN: LMIN, LMAX: LMAX, records: records, daily: daily, catalogKey: catalogKey,
-    norm: norm, answerSlots: answerSlots, checkTyped: checkTyped,
+    norm: norm, answerSlots: answerSlots, checkTyped: checkTyped, alts: alts,
+    meanings: meanings, pendingMeanings: pendingMeanings, answerMeaning: answerMeaning,
     setCatalog: setCatalog, catalogFromGroups: catalogFromGroups,
     level: level, isNew: isNew, isDue: isDue, dirOf: dirOf, answer: answer,
     dueList: dueList, newList: newList, examQueue: examQueue,

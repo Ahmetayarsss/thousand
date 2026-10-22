@@ -71,7 +71,10 @@
     "ex": [
      "I <b>will</b> call you tomorrow.",
      "She has a strong <b>will</b> to win."
-    ]
+    ],
+    "ipucu": {
+     "-ecek": "gelecek zaman: yapacak, gidecek"
+    }
    },
    {
     "w": "example",
@@ -386,7 +389,10 @@
     "ex": [
      "<b>When</b> does the film start?",
      "Call me <b>when</b> you arrive."
-    ]
+    ],
+    "ipucu": {
+     "-dığında": "zaman bağlacı: eve geldiğinde"
+    }
    },
    {
     "w": "open",
@@ -1705,7 +1711,10 @@
     "ex": [
      "Whose is <b>that</b> car?",
      "She said <b>that</b> she was tired."
-    ]
+    ],
+    "ipucu": {
+     "-dığı": "bağlaç: söylediği şey, geldiğini biliyorum"
+    }
    },
    {
     "w": "turn",
@@ -1977,7 +1986,10 @@
     "ex": [
      "Forget the <b>past</b> and look forward.",
      "We drove <b>past</b> the school."
-    ]
+    ],
+    "ipucu": {
+     "-in ötesinde": "geçerek: evin önünden geçip gitmek"
+    }
    },
    {
     "w": "become",
@@ -2821,7 +2833,10 @@
     "ex": [
      "You <b>can</b> swim very well.",
      "She opened a <b>can</b> of beans."
-    ]
+    ],
+    "ipucu": {
+     "-ebilmek": "yetenek, olanak: yüzebilmek, gidebilir"
+    }
    },
    {
     "w": "chicken",
@@ -3664,7 +3679,10 @@
      "She works <b>as</b> a nurse.",
      "<b>As</b> it was raining, we stayed home.",
      "She is <b>as</b> clever as her sister."
-    ]
+    ],
+    "ipucu": {
+     "-dığı için": "sebep: geç kaldığı için"
+    }
    },
    {
     "w": "blue",
@@ -16024,7 +16042,10 @@
     "ex": [
      "I bought a <b>can</b> of beans.",
      "She <b>can</b> speak three languages."
-    ]
+    ],
+    "ipucu": {
+     "-ebilmek": "yetenek, olanak: yüzebilmek, gidebilir"
+    }
    },
    {
     "w": "furniture",
@@ -18572,7 +18593,11 @@
     "ex": [
      "I have lived here <b>since</b> 2010.",
      "<b>Since</b> you're tired, let's rest."
-    ]
+    ],
+    "ipucu": {
+     "-den beri": "zaman: 2010'dan beri",
+     "-dığı için": "sebep: yorgun olduğu için"
+    }
    },
    {
     "w": "comfortable",
@@ -24892,7 +24917,10 @@
     "ex": [
      "I don't know <b>whether</b> to stay or go.",
      "<b>Whether</b> you like it or not, we must go."
-    ]
+    ],
+    "ipucu": {
+     "-ip -mediği": "bağlaç: gelip gelmediğini bilmiyorum"
+    }
    },
    {
     "w": "involved",
@@ -25769,7 +25797,10 @@
     "ex": [
      "<b>Though</b> it was late, they kept working.",
      "It's hard work. I enjoy it, <b>though</b>."
-    ]
+    ],
+    "ipucu": {
+     "-e rağmen": "bağlaç: yağmur yağmasına rağmen"
+    }
    },
    {
     "w": "injured",
@@ -27506,7 +27537,10 @@
     "ex": [
      "I <b>regard</b> her as a good friend.",
      "She has great <b>regard</b> for her teacher."
-    ]
+    ],
+    "ipucu": {
+     "-e bakmak, değerlendirmek": "fiil: onu dost olarak görmek"
+    }
    },
    {
     "w": "consistent",

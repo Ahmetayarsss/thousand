@@ -30,11 +30,14 @@ t("tam eşleşme önce, sonra baştan eşleşen, sonra alfabetik", () => {
   assert.deepStrictEqual(ilk, ilk.slice().sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())));
 });
 
-// Not: "İ" küçültülünce noktalı iki karakter olur ("DAİRE" bulunmaz) — eski sözlükte de böyle; Türkçe küçültme
-// ("tr") ise İngilizce aramayı bozardı ("It" → "ıt"). Telefonda klavye zaten küçük harfle başlar.
-t("Türkçe anlamda da arar, baştaki büyük harf fark etmez", () => {
+// Büyük "İ" küçük "i" sayılır (toLowerCase noktalı iki karakter yapardı; eski sözlükte "DAİRE" bulunmazdı). Türkçe
+// küçültme ("tr") ise İngilizce aramayı bozardı ("It" → "ıt"), o yüzden yalnız "İ" çevrilir.
+t("Türkçe anlamda da arar, baştaki büyük harf fark etmez; İ de i", () => {
   const r = A.ara(L, "Daire").map((x) => x.d.w);
   assert.ok(r.includes("apartment"), r.join(","));
+  assert.ok(A.ara(L, "DAİRE").map((x) => x.d.w).includes("apartment"));
+  assert.ok(A.ara(L, "İyi").map((x) => x.d.w).includes("good"));
+  assert.ok(A.ara(L, "It").length > 0);
 });
 
 t("en çok 60 sonuç", () => {

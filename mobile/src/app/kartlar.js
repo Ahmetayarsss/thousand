@@ -6,34 +6,60 @@
  *     döner (src/kartlar/Cevirme.js — eski three.js çevirmesiyle birebir), kelime okunur.
  *   - Sınavda kuyruğun %10'u yazılı (altın kart): uygulama içi klavyeyle yazılır, sistem denetler.
  *   - Sınav sürerken çıkışta onay (Test'e geçiş, Bitir, başka sekme, geri tuşu). Cevaplar anında kaydedilir.
- * Ekrana her gelişte yeni Test başlar (?exam=1 ile gelindiyse Sınav) — eski uygulamada sayfa yeniden açılırdı.
- * Cevaptan sonra özet arkadaşlara gider (HESAP.syncSoon). Henüz yok (adım 36): hatırlatmaların yeniden kurulması.
+ *   - Çok anlamlı kelime: her anlam ayrı kart (kimlik "anahtar#anlamNo", oturum.js); kartta yalnız o anlam görünür,
+ *     ek anlamında ipucu. Yazılı kartta aynı Türkçe karşılığın başka kelimesi yazılırsa yanlış sayılmaz, yeniden
+ *     sorulur (PLAN.md adım 41).
+ * Ekrana her gelişte yeni Test başlar (bildirimden gelindiyse Sınav; gezinme.js → git(ad, mod)) — eski uygulamada sayfa
+ * yeniden açılırdı. Geri tuşu bir önceki sayfaya döner (sınav sürerken önce onay). Kaydırma: sola İlerleme, sağa
+ * Liste (yazılı kartın klavyesi açıkken yok).
+ * Sayaç ve kartın Yeni/Tekrar etiketi uçan kart yerini bulunca değişir (eskisi gibi).
+ * Cevaptan sonra özet arkadaşlara gider (HESAP.syncSoon); sınavdan çıkınca özet ve yedek hemen.
  */
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Animated, BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ANAHTARLA, OXLOG, SRS } from "../cekirdek";
-import { cikisBekcisi } from "../cikis";
+import Kaydir from "../bilesenler/Kaydir";
+import { ANAHTARLA, GRUPLAR, OXLOG, SRS } from "../cekirdek";
+import { cikisBekcisi, geriGit, git, kartlarDinle, kartlarModu } from "../gezinme";
 import { HESAP } from "../hesap";
 import CevirmeKatmani from "../kartlar/CevirmeKatmani";
 import { PAY } from "../kartlar/cevirmeGeometri";
 import Yuva, { DERINLIK, rastgeleEgim, rastgeleKayma } from "../kartlar/Deste";
 import KartYuzu from "../kartlar/KartYuzu";
-import { harfEkle, Klavye, Kutular } from "../kartlar/Klavye";
+import { harfEkle, Klavye, Kutu } from "../kartlar/Klavye";
 import * as O from "../kartlar/oturum";
 import { durdur, kelimeyiOku } from "../ses";
 import { useTema } from "../tema";
 
 function ustBaslik() { const lv = SRS.topLevel(); return SRS.inCycle() + (lv ? " · " + lv : ""); }
+
+// Kart kimliğinden gösterilecek veri. Anlam kartında tr yalnız o anlam, örnekler yok, ek anlamında ipucu.
+const KARTLAR = new Map();
+function kart(id) {
+  if (!id) return null;
+  if (KARTLAR.has(id)) return KARTLAR.get(id);
+  const { k, i } = O.kartCoz(id), e = ANAHTARLA[k];
+  if (!e) return null;
+  let d = e.d;
+  if (i != null) { const anlam = SRS.meanings(e.d)[i]; d = { ...e.d, tr: anlam, ex: [], ipucu: (e.d.ipucu || {})[anlam] || null }; }
+  const v = { k, i, e, d };
+  KARTLAR.set(id, v);
+  return v;
+}
+const ANLAM = new Map();
+const anlamSay = (k) => { if (!ANLAM.has(k)) ANLAM.set(k, ANAHTARLA[k] ? SRS.meanings(ANAHTARLA[k].d).length : 1); return ANLAM.get(k); };
+let ES_ANLAM = null;   // aynı Türkçe karşılığın kelimeleri (ilk yazılı kartta kurulur)
 function olc(ref) {
   return new Promise((coz) => { if (!ref.current) coz(null); else ref.current.measureInWindow((x, y, w, h) => coz({ x, y, w, h })); });
 }
 
 export default function Kartlar() {
   const t = useTema();
-  const { exam } = useLocalSearchParams();
-  const D = useRef({ mod: "test", o: null, side: 0, busy: false, acik: false, ustYuz: "on", tPrompt: 0, yazili: null }).current;
+  // nesil: her yeni Test/Sınav'da artar (eski oturumun geç gelen çevirmesi yeni karta işlemesin).
+  // donuk: uçuş sürerken gösterilen sayaç/çubuk; yeniMi: kartın etiketi desteye girdiği andaki durum.
+  const D = useRef({ mod: "test", o: null, side: 0, busy: false, acik: false, ustYuz: "on", tPrompt: 0, yazili: null,
+    nesil: 0, donuk: null, yeniMi: {}, dugmeGizli: false }).current;
   const [, setSurum] = useState(0);
   const ciz = useCallback(() => setSurum((v) => v + 1), []);
   const [yuvalar, setYuvalar] = useState(() => [0, 1, 2, 3].map((id) => ({ id, k: null, egim: 0, kayma: 0 })));
@@ -57,12 +83,14 @@ export default function Kartlar() {
   const sinavda = () => D.mod === "sinav" && !!cur() && !sonucRef.current;
 
   // ---- bilgi balonu ----
-  const toastZaman = useRef(0);
+  const toastZaman = useRef(0), toastGor = useRef(new Animated.Value(0)).current;
   const balon = useCallback((metin) => {
     clearTimeout(toastZaman.current);
     setToast(metin);
-    toastZaman.current = setTimeout(() => setToast(null), 4000);
-  }, []);
+    toastGor.setValue(1);
+    toastZaman.current = setTimeout(() => Animated.timing(toastGor, { toValue: 0, duration: 300, useNativeDriver: true })
+      .start(({ finished }) => { if (finished) setToast(null); }), 4000);
+  }, [toastGor]);
 
   // ---- deste ----
   useLayoutEffect(() => {
@@ -80,11 +108,8 @@ export default function Kartlar() {
   function yaziliKur() {
     const k = cur();
     if (!k || !yaziliMi()) { D.yazili = null; return; }
-    const d = ANAHTARLA[k].d, yon = D.o.yon[k], n = SRS.answerSlots(d, yon).length, en = yon === "tr2en";
-    D.yazili = {
-      degerler: new Array(n).fill(""), etkin: 0, sonuc: null,
-      ipuclari: Array.from({ length: n }, (_, i) => (en ? "İngilizcesi" : n > 1 ? i + 1 + ". anlam" : "Türkçesi")),
-    };
+    // Tek kutu: çok anlamlı kelime anlam anlam ve hep Türkçeden sorulduğu için İngilizceden sorulan kartın tek anlamı var.
+    D.yazili = { degerler: [""], sonuc: null, ipucu: D.o.yon[k] === "tr2en" ? "İngilizcesi" : "Türkçesi" };
   }
   function ustHazir() {
     D.side = 0; D.acik = false; D.ustYuz = "on"; D.tPrompt = performance.now();
@@ -98,7 +123,7 @@ export default function Kartlar() {
       y.push({ id: d, k, egim: rastgeleEgim(), kayma: rastgeleKayma() });
     }
     bekleyen.current = { hepsi: true };
-    setYuvalar(y); setUcan(null); setGizliUst(false); setSonuc(null);
+    setYuvalar(y); setUcan(null); setGizliUst(false); setSonuc(null); setYakala(null);
     ustHazir(); ciz();
   }
 
@@ -112,12 +137,14 @@ export default function Kartlar() {
   }
   function baslat() {
     durdur(); D.busy = false; setAyrilma(null); setBaslik(ustBaslik());
+    D.nesil++; D.donuk = null; D.yeniMi = {}; D.dugmeGizli = false;
+    if (cevirRef.current && cevirRef.current.iptal) cevirRef.current.iptal();   // süren çevirme yeni karta işlemesin
     if (D.mod === "test") {
-      D.o = O.testKur(SRS);
+      D.o = O.testKur(SRS, anlamSay);
       if (!D.o.toplam) { testBitti(); ciz(); return; }
       OXLOG.add("test_bas", { n: D.o.toplam });
     } else {
-      D.o = O.sinavKur(SRS);
+      D.o = O.sinavKur(SRS, anlamSay);
       OXLOG.add("sinav_bas", { rev: D.o.tekrar, nw: D.o.liste.length - D.o.tekrar, yz: D.o.yazili.size });
       if (!D.o.cur) { sinavBitti(); ciz(); return; }
       if (!D.o.tekrar) balon("Bugün vadesi gelen tekrar yok — yeni kelimelerle başlıyoruz.");
@@ -129,10 +156,11 @@ export default function Kartlar() {
   function ac(rx) {
     if (D.side === 1 || D.busy || !cur()) return;
     D.side = 1;
-    setYakala({ k: cur(), s: rx >= 0.5 ? -1 : 1 });
+    setYakala({ k: cur(), s: rx >= 0.5 ? -1 : 1, nesil: D.nesil });
   }
-  const acildi = useCallback(() => {
+  const acildi = useCallback((nesil) => {
     setYakala(null); setGizliUst(false);
+    if (nesil !== D.nesil) return;   // bu arada yeni Test/Sınav başladı
     D.ustYuz = "arka"; D.acik = true; ciz();
   }, [D, ciz]);
   // Yakalanacak yüzler çizildikten sonra katman oynar.
@@ -143,13 +171,13 @@ export default function Kartlar() {
       if (iptal) return;
       const [kok, deste] = await Promise.all([olc(kokRef), olc(desteRef)]);
       if (iptal) return;
-      if (!cevirRef.current || !kok || !deste) { acildi(); return; }
+      if (!cevirRef.current || !kok || !deste) { acildi(yakala.nesil); return; }
       cevirRef.current.oynat({
         onRef: onYakRef, arkaRef: arkaYakRef, s: yakala.s,
         kart: { x: deste.x - kok.x, y: deste.y - kok.y, w: deste.w, h: deste.h },
         yakalandi: () => setYakala(null),
         ilkKare: () => setGizliUst(true),
-        bitti: () => acildi(),
+        bitti: () => acildi(yakala.nesil),
       });
     }));
     return () => { iptal = true; cancelAnimationFrame(r); };
@@ -164,29 +192,37 @@ export default function Kartlar() {
     for (let d = 1; d < DERINLIK; d++) { const y = yuvalar[d]; yuvaRef.current[y.id].yerles(d - 1, y.egim, y.kayma, true); }
     const yeniK = O.bak(D.o, DERINLIK - 1);
     if (yeniK) O.yon(SRS, D.o, yeniK);
+    const nesil = D.nesil;
     setTimeout(() => {
+      if (nesil !== D.nesil) return;
       bekleyen.current = { yeni: ayrilan.id };
       setYuvalar((ys) => [...ys.slice(1), { id: ayrilan.id, k: yeniK, egim: rastgeleEgim(), kayma: rastgeleKayma() }]);
       setUcan(null);
-      D.busy = false;
+      D.busy = false; D.donuk = null; D.dugmeGizli = false;
       if (cur()) { ustHazir(); ciz(); }
       else if (D.mod === "test") testBitti();
       else sinavBitti();
     }, 470);
   }
+  // Kayıtta kelime anahtarı; anlam kartında anlam numarası ayrıca (a).
+  const kayitK = (id) => { const { k, i } = O.kartCoz(id); return i == null ? { k } : { k, a: i }; };
+  // Uçuş bitene dek sayaç ve çubuk eski hâlinde (eskide sonraki kart hazır olunca güncellenirdi).
+  const dondur = () => { D.donuk = { oran: O.oran(D.o), sayac: O.sayac(D.o) }; };
   function testCevap(bildi) {
     if (D.busy) return;
-    OXLOG.add("test", { k: cur(), ok: bildi ? 1 : 0 });
+    dondur();
+    OXLOG.add("test", { ...kayitK(cur()), ok: bildi ? 1 : 0 });
     O.testCevap(D.o, bildi);
     ilerle(bildi ? (Math.random() < 0.5 ? "left" : "right") : "sink");   // Bilemedim → destenin altına
   }
   function sinavCevap(dogru) {
     if (D.busy || !cur()) return;
     const k = cur(), yz = yaziliMi(), yon = D.o.yon[k], yazilan = D.yazili && D.yazili.sonuc ? D.yazili.sonuc.degerler : undefined;
+    dondur();
     const { sonuc: r } = O.sinavCevap(SRS, D.o, dogru);
-    OXLOG.add("cevap", { k, y: yon === "tr2en" ? "te" : "et", ok: dogru ? 1 : 0, b: [r.from, r.to],
+    OXLOG.add("cevap", { ...kayitK(k), y: yon === "tr2en" ? "te" : "et", ok: dogru ? 1 : 0, b: r ? [r.from, r.to] : undefined,
       ms: Math.round(performance.now() - D.tPrompt), yz: yz ? 1 : 0, g: yz ? yazilan : undefined });
-    D.yazili = null;
+    D.yazili = null; D.dugmeGizli = yz;   // yazılı kartın ardından uçuşta Bilemedim/Bildim görünmesin
     HESAP.syncSoon(false);   // arkadaşların görsün (dakikada en çok bir)
     setBaslik(ustBaslik());
     if (D.o.i === D.o.tekrar && D.o.tekrar > 0 && D.o.cur) balon("Tekrarlar bitti — yeni kelimelere geçiliyor.");
@@ -196,24 +232,33 @@ export default function Kartlar() {
 
   // ---- yazılı kart ----
   const yaziliCanli = () => !D.busy && !!cur() && yaziliMi() && D.side === 0 && D.yazili && !D.yazili.sonuc;
-  function harf(ch) { if (!yaziliCanli()) return; const y = D.yazili; y.degerler[y.etkin] = harfEkle(y.degerler[y.etkin] || "", ch); ciz(); }
-  function sil() { if (!yaziliCanli()) return; const y = D.yazili, v = y.degerler[y.etkin] || ""; if (!v) return; y.degerler[y.etkin] = v.slice(0, -1); ciz(); }
-  function sonraki() { if (!yaziliCanli() || D.yazili.degerler.length < 2) return; D.yazili.etkin = (D.yazili.etkin + 1) % D.yazili.degerler.length; ciz(); }
-  function sec(i) { if (!yaziliCanli()) return; D.yazili.etkin = i; ciz(); }
+  function harf(ch) { if (!yaziliCanli()) return; const y = D.yazili; y.degerler[0] = harfEkle(y.degerler[0], ch); ciz(); }
+  function sil() { if (!yaziliCanli()) return; const y = D.yazili, v = y.degerler[0]; if (!v) return; y.degerler[0] = v.slice(0, -1); ciz(); }
   function kontrol() {
     if (!yaziliCanli()) return;
-    const k = cur(), d = ANAHTARLA[k].d, degerler = D.yazili.degerler.slice(), r = SRS.checkTyped(d, D.o.yon[k], degerler);
+    const k = cur(), d = kart(k).d, degerler = D.yazili.degerler.slice(), r = SRS.checkTyped(d, D.o.yon[k], degerler);
+    if (!r.ok && D.o.yon[k] === "tr2en") {   // aynı Türkçe karşılığın başka kelimesi: yanlış değil, yeniden sor
+      if (!ES_ANLAM) ES_ANLAM = O.esAnlamDizini(SRS, GRUPLAR);
+      const baska = SRS.meanings(d).map((a) => O.baskaKarsilik(SRS, ES_ANLAM, a, d.w, degerler[0])).find(Boolean);
+      if (baska) {
+        OXLOG.add("baska_karsilik", { k, w: baska });
+        balon("“" + baska + "” de bu anlama gelir, ama burada başka bir kelime soruluyor.");
+        D.yazili.degerler = [""];
+        ciz();
+        return;
+      }
+    }
     D.yazili.sonuc = { ok: r.ok, isaret: r.marks, degerler };
     ciz();
     setTimeout(() => { if (cur() === k && D.side === 0) { ac(0.5); kelimeyiOku(d.w); } }, 120);
   }
-  const yaziliRef = useRef({}); yaziliRef.current = { harf, sil, sonraki, kontrol };
+  const yaziliRef = useRef({}); yaziliRef.current = { harf, sil, kontrol };
   useEffect(() => {   // bilgisayarda deneme için fiziksel klavye (web)
     if (Platform.OS !== "web") return undefined;
     const f = (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const Y = yaziliRef.current;
-      if (e.key === "Enter") Y.kontrol(); else if (e.key === "Backspace") Y.sil(); else if (e.key === "Tab") { e.preventDefault(); Y.sonraki(); }
+      if (e.key === "Enter") Y.kontrol(); else if (e.key === "Backspace") Y.sil();
       else if (e.key.length === 1 && /[\p{L} ]/u.test(e.key)) Y.harf(e.key.toLocaleLowerCase("tr-TR"));
     };
     document.addEventListener("keydown", f);
@@ -223,7 +268,7 @@ export default function Kartlar() {
   // ---- karta dokunma ----
   async function kartaBas(e) {
     if (D.busy || !cur()) return;
-    const d = ANAHTARLA[cur()].d;
+    const d = kart(cur()).d;
     if (D.side === 0 && yaziliMi()) { if (D.o.yon[cur()] !== "tr2en") kelimeyiOku(d.w); return; }   // yazılı kart dokunuşla açılmaz
     if (D.side === 0) {
       const { pageX } = e.nativeEvent, r = await olc(desteRef);
@@ -244,33 +289,47 @@ export default function Kartlar() {
   }
 
   useFocusEffect(useCallback(() => {
-    D.mod = exam === "1" ? "sinav" : "test";
+    D.mod = kartlarModu() || "test";
     baslat();
-    const sok = cikisBekcisi((git) => { if (!sinavda()) return false; cikisOnayi("Sınavdan çıkıyorsun.", "Çık", git); return true; });
+    OXLOG.add("sayfa", { p: "kartlar" });
+    // Sınav sürerken başka yere geçiş: onay. Hedef zaten süren sınavsa (sınav bildirimi) hiçbir şey olmaz.
+    const sok = cikisBekcisi((gec, hedef) => {
+      if (!sinavda()) return false;
+      if (hedef.ad === "kartlar" && hedef.mod === "sinav") return true;
+      cikisOnayi("Sınavdan çıkıyorsun.", "Çık", gec);
+      return true;
+    });
+    // Kartlar açıkken gelen istek (ör. Test sürerken sınav bildirimi).
+    const dinle = kartlarDinle(() => { const m = kartlarModu(); if (m && (m !== D.mod || !sinavda())) { D.mod = m; baslat(); } });
     const geri = BackHandler.addEventListener("hardwareBackPress", () => {
       if (ayrilmaRef.current) { setAyrilma(null); return true; }
       if (!sinavda()) return false;
-      cikisOnayi("Sınavdan çıkıyorsun.", "Çık", () => router.navigate("/"));
+      cikisOnayi("Sınavdan çıkıyorsun.", "Çık", geriGit);
       return true;
     });
-    return () => { sok(); geri.remove(); durdur(); };
+    return () => {
+      sok(); dinle(); geri.remove(); durdur();
+      if (D.o && D.o.mod === "sinav" && D.o.i > 0) HESAP.syncSoon(true, true);   // eskide sayfa kapanınca özet ve yedek
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exam]));
+  }, []));
 
   // ---- çizim ----
   const o = D.o, ust = cur(), yz = !!ust && yaziliMi() && !sonuc, Y = D.yazili;
   const sinavMi = D.mod === "sinav";
-  const oran = o ? O.oran(o) : 0;
-  const sayacMetni = !o || sonuc ? "" : O.sayac(o);
-  const yuzProps = (k, yuz) => {
-    const e = ANAHTARLA[k];
+  const oran = !o ? 0 : D.donuk ? D.donuk.oran : O.oran(o);
+  const sayacMetni = !o || sonuc ? "" : D.donuk ? D.donuk.sayac : O.sayac(o);
+  const yeniMi = (k) => { if (!(k in D.yeniMi)) D.yeniMi[k] = SRS.isNew(k); return D.yeniMi[k]; };
+  const yuzProps = (id, yuz) => {
+    const c = kart(id);
     return {
-      d: e.d, yuz, yon: D.o.yon[k], seviye: e.g.level, t,
-      etiket: sinavMi ? (SRS.isNew(k) ? "Yeni" : "Tekrar") : null, yazili: O.yaziliMi(D.o, k),
+      d: c.d, yuz, yon: D.o.yon[id], seviye: c.e.g.level, t,
+      etiket: sinavMi ? (yeniMi(c.k) ? "Yeni" : "Tekrar") : null, yazili: O.yaziliMi(D.o, id),
     };
   };
 
   return (
+    <Kaydir ad="kartlar" kapali={yz}>
     <SafeAreaView edges={["top"]} style={[s.ekran, { backgroundColor: t.kartBg }]}>
       <View ref={kokRef} collapsable={false} style={s.kok}>
         <View style={s.uygulama}>
@@ -283,7 +342,7 @@ export default function Kartlar() {
             ))}
           </View>
           <Text style={[s.baslik, { color: t.ink }]} accessibilityRole="header">{baslik}</Text>
-          <View style={s.ilerleme}>
+          <View style={[s.ilerleme, sinavMi && s.ilerlemeSinav]}>
             <View style={[s.cubuk, { backgroundColor: t.kartLine }]}><View style={{ width: oran * 100 + "%", height: "100%", backgroundColor: t.green }} /></View>
             <Text style={[s.sayac, { color: t.ink }]}>{sayacMetni}</Text>
             {sinavMi && !sonuc && ust ? (
@@ -295,11 +354,11 @@ export default function Kartlar() {
           </View>
 
           {sonuc ? (
-            <Sonuc sonuc={sonuc} t={t} onTekrar={baslat} onListe={() => router.navigate("/")} />
+            <Sonuc sonuc={sonuc} t={t} onTekrar={baslat} onListe={() => git("index")} />
           ) : (
             <View style={s.sahne}>
               <View ref={desteRef} collapsable={false} style={s.deste} onLayout={(e) => setBoy({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
-                {yakala && ANAHTARLA[yakala.k] ? (
+                {yakala && kart(yakala.k) ? (
                   <>
                     <View ref={onYakRef} collapsable={false} style={s.yakala}><KartYuzu {...yuzProps(yakala.k, "on")} golge={false} /></View>
                     <View ref={arkaYakRef} collapsable={false} style={s.yakala}><KartYuzu {...yuzProps(yakala.k, "arka")} golge={false} /></View>
@@ -308,13 +367,13 @@ export default function Kartlar() {
                 {yuvalar.map((y, d) => (
                   <Yuva key={y.id} ref={(r) => { yuvaRef.current[y.id] = r; }} derinlik={d} ucuyor={ucan === y.id}
                     gizli={d === 0 && gizliUst} boy={boy} onBas={kartaBas}>
-                    {y.k && ANAHTARLA[y.k] ? <KartYuzu {...yuzProps(y.k, d === 0 ? D.ustYuz : "on")} /> : null}
+                    {y.k && kart(y.k) ? <KartYuzu {...yuzProps(y.k, d === 0 ? D.ustYuz : "on")} /> : null}
                   </Yuva>
                 ))}
               </View>
-              <View style={[s.dugmeler, yz && s.gorunmez]} pointerEvents={yz ? "none" : "auto"}>
+              <View style={[s.dugmeler, (yz || D.dugmeGizli) && s.gorunmez]} pointerEvents={yz || D.dugmeGizli ? "none" : "auto"}>
                 {!D.acik ? (
-                  <Dugme metin="Aç" renk={t.accent} onBas={() => { if (D.busy || !ust || D.side === 1) return; ac(0.5); kelimeyiOku(ANAHTARLA[ust].d.w); }} />
+                  <Dugme metin="Aç" renk={t.accent} onBas={() => { if (D.busy || !ust || D.side === 1) return; ac(0.5); kelimeyiOku(kart(ust).d.w); }} />
                 ) : (
                   <>
                     <Dugme metin={sinavMi ? "Bilemedim" : "Tekrar"} renk={t.red} onBas={() => cevap(false)} />
@@ -330,21 +389,20 @@ export default function Kartlar() {
 
         {yz && Y ? (
           <View style={[s.panel, { backgroundColor: t.klavye }]} onLayout={(e) => setPanelBoy(e.nativeEvent.layout.height)}>
-            <Kutular degerler={Y.degerler} etkin={Y.etkin} ipuclari={Y.ipuclari} isaret={Y.sonuc ? Y.sonuc.isaret : null} onSec={sec} t={t} />
+            <Kutu deger={Y.degerler[0]} ipucu={Y.ipucu} isaret={Y.sonuc ? Y.sonuc.isaret[0] : null} t={t} />
             {!Y.sonuc ? (
-              <Klavye onHarf={harf} onSil={sil} onSonraki={sonraki} onKontrol={kontrol} sonrakiYok={Y.degerler.length < 2}
-                kontrolMetni={Y.degerler.some((v) => v.trim()) ? "Kontrol et" : "Bilmiyorum"} t={t} />
+              <Klavye onHarf={harf} onSil={sil} onKontrol={kontrol} kontrolMetni={Y.degerler[0].trim() ? "Kontrol et" : "Bilmiyorum"} t={t} />
             ) : (
-              <Dugme metin={(Y.sonuc.ok ? "Doğru ✓" : "Yanlış ✗") + (D.acik ? "  ·  Devam" : "")} renk={Y.sonuc.ok ? t.green : t.red}
+              <Dugme metin={(Y.sonuc.ok ? "Doğru ✓" : "Yanlış ✗") + (D.acik ? " · Devam" : "")} renk={Y.sonuc.ok ? t.green : t.red}
                 pasif={!D.acik} onBas={() => { if (D.acik && D.side === 1) sinavCevap(Y.sonuc.ok); }} tam />
             )}
           </View>
         ) : null}
 
         {toast ? (
-          <View pointerEvents="none" style={[s.balon, { bottom: (yz ? panelBoy + 12 : 22) }]}>
+          <Animated.View pointerEvents="none" style={[s.balon, { bottom: (yz ? panelBoy + 12 : 22), opacity: toastGor }]}>
             <Text style={s.balonYazi}>{toast}</Text>
-          </View>
+          </Animated.View>
         ) : null}
       </View>
 
@@ -366,6 +424,7 @@ export default function Kartlar() {
         </Pressable>
       </Modal>
     </SafeAreaView>
+    </Kaydir>
   );
 }
 
@@ -387,7 +446,7 @@ function Sonuc({ sonuc, t, onTekrar, onListe }) {
       <View style={s.yanlislar}>
         {sonuc.yanlis.map((k) => (
           <View key={k} style={[s.yanlis, { backgroundColor: t.card, borderColor: t.kartLine }]}>
-            <Text style={{ fontSize: 13.5, color: t.tr }}><Text style={{ fontWeight: "700", color: t.ink }}>{ANAHTARLA[k].d.w}</Text> — {ANAHTARLA[k].d.tr || ""}</Text>
+            <Text style={{ fontSize: 13.5, color: t.ink }}><Text style={{ fontWeight: "700" }}>{ANAHTARLA[k].d.w}</Text> — <Text style={{ color: t.tr }}>{ANAHTARLA[k].d.tr || ""}</Text></Text>
           </View>
         ))}
       </View>
@@ -412,7 +471,8 @@ const s = StyleSheet.create({
   modOn: { boxShadow: "0 1px 3px rgba(0,0,0,.12)" },
   modYazi: { fontSize: 13.5, fontWeight: "800" },
   baslik: { fontSize: 15, fontWeight: "800" },
-  ilerleme: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 8, minHeight: 26 },
+  ilerleme: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 8 },
+  ilerlemeSinav: { minHeight: 26 },   // Bitir düğmesi sığsın (Test'te yok)
   cubuk: { flex: 1, height: 7, borderRadius: 6, overflow: "hidden" },
   sayac: { fontSize: 11.5, fontWeight: "800" },
   bitir: { borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12 },

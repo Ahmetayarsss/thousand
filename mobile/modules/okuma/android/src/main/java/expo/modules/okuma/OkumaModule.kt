@@ -85,7 +85,10 @@ class OkumaModule : Module() {
       val i = if (Build.VERSION.SDK_INT >= 26) Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, pkg)
       else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg"))
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      context.startActivity(i)
+      // Bazı telefonlarda bildirim ayarı sayfası yok: uygulama ayrıntılarına düş (eskisi gibi).
+      try { context.startActivity(i) } catch (e: Exception) {
+        context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+      }
     }
   }
 

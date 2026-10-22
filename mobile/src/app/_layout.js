@@ -1,31 +1,31 @@
-// Alt sekmeler: Capacitor uygulamasındaki sırayla (Liste · Kartlar · İlerleme · Sözlük · Arkadaş · Ayarlar).
-// Kökte bir kez: ortadaki pencere (karşılama, onaylar) ve alttaki kısa bildirimler.
+// Alt sekmeler: Capacitor uygulamasındaki sırayla (Liste · Kartlar · İlerleme · Sözlük · Arkadaş · Ayarlar) ve
+// çubukta görünmeyen İstatistikler (analiz). Çubuk eskisinin aynısı (SekmeCubugu). Geri tuşu bir önceki sayfaya
+// döner (fullHistory: gezilen sayfaların sırası); sayfalar arası kaydırma ekranlarda (Kaydir, gezinme.js).
+// Kökte bir kez: ortadaki pencere (karşılama, onaylar), alttaki kısa bildirimler, ilk açılışta sayfa haritası.
 import "../cekirdek";
 import "../hesap";
-import { Ionicons } from "@expo/vector-icons";
-import { router, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import { useEffect } from "react";
 import { AppState } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import { DuyuruAlani } from "../bilesenler/Duyuru";
 import { PencereAlani } from "../bilesenler/Pencere";
-import { cikisSor } from "../cikis";
+import SekmeCubugu from "../bilesenler/SekmeCubugu";
+import { OXLOG } from "../cekirdek";
+import { git } from "../gezinme";
 import { bildirimHedefi } from "../hesap";
 import { useTema } from "../tema";
 
-const SEKMELER = [
-  ["index", "Liste", "list"],
-  ["kartlar", "Kartlar", "albums-outline"],
-  ["ilerleme", "İlerleme", "bar-chart-outline"],
-  ["sozluk", "Sözlük", "book-outline"],
-  ["arkadas", "Arkadaş", "people-outline"],
-  ["ayarlar", "Ayarlar", "settings-outline"],
-];
+const EKRANLAR = ["index", "kartlar", "ilerleme", "sozluk", "arkadas", "ayarlar", "analiz"];
 
 // Bildirime dokununca: hedef ekrana geç (uygulama kapalıyken açıldıysa da, açıkken öne geldiyse de).
+// Sınav sürerken onay sorulur; hedef zaten süren sınavsa hiçbir şey olmaz (eski oxCikisSor).
 function hedefeGit() {
   const h = bildirimHedefi();
-  if (h) cikisSor(() => router.navigate(h)) || router.navigate(h);
+  if (!h) return;
+  OXLOG.add("bildirim", { a: "ac", p: h.ad + (h.mod ? "?" + h.mod : "") });
+  git(h.ad, h.mod);
 }
 
 export default function Duzen() {
@@ -36,33 +36,13 @@ export default function Duzen() {
     return () => { clearTimeout(z); a.remove(); };
   }, []);
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: t.bg }}>
       <StatusBar style={t.koyu ? "light" : "dark"} />
-      <Tabs
-        screenListeners={({ navigation, route }) => ({
-          // Sınav sürerken başka sekmeye geçiş: önce onay (kartlar ekranı sorar).
-          tabPress: (e) => {
-            if (route.name !== "kartlar" && cikisSor(() => navigation.navigate(route.name))) e.preventDefault();
-          },
-        })}
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: t.ink,
-          tabBarInactiveTintColor: t.muted,
-          tabBarStyle: { backgroundColor: t.bar, borderTopColor: t.line },
-          tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
-        }}
-      >
-        {SEKMELER.map(([ad, baslik, simge]) => (
-          <Tabs.Screen
-            key={ad}
-            name={ad}
-            options={{ title: baslik, tabBarIcon: ({ color, size }) => <Ionicons name={simge} color={color} size={size - 2} /> }}
-          />
-        ))}
+      <Tabs backBehavior="fullHistory" tabBar={(p) => <SekmeCubugu {...p} />} screenOptions={{ headerShown: false }}>
+        {EKRANLAR.map((ad) => <Tabs.Screen key={ad} name={ad} />)}
       </Tabs>
       <DuyuruAlani />
       <PencereAlani />
-    </>
+    </GestureHandlerRootView>
   );
 }

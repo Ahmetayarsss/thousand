@@ -1,14 +1,16 @@
 /*
  * Arkadaşlar (eski arkadaslar sayfası): kodun (kopyala / paylaş), arkadaş ekle, gelen istekler, arkadaşların
  * (bugün / toplam, seri, dürt, arkadaşlıktan çıkar), gönderilen istekler. Ekrana dönünce ve açıkken dakikada bir
- * yenilenir; bağlantı yoksa son görülen pano gösterilir. Hesap yoksa önce takma ad.
+ * yenilenir; bağlantı yoksa son görülen pano gösterilir. Hesap yoksa önce takma ad. "Dürtüldü ✓" sunucudan gelir
+ * (gün değişince yeniden "Dürt"); dürttükten sonra yenilemeye kadar yerelde tutulur.
  */
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { duyur } from "../bilesenler/Duyuru";
+import Kaydir, { useKenar } from "../bilesenler/Kaydir";
 import Pano from "../bilesenler/Pano";
 import { Dugme, onayla } from "../bilesenler/Pencere";
 import { OXLOG } from "../cekirdek";
@@ -37,14 +39,22 @@ export default function Arkadaslar() {
   const [gonderiyor, setGonderiyor] = useState(false);
   const [mesgul, setMesgul] = useState({});   // düğme anahtarı → işlem sürüyor
   const [durtuldu, setDurtuldu] = useState({});
+  const [odak, setOdak] = useState(false);
   const yenileniyor = useRef(false);
+  const [kenar, kenarProps] = useKenar();
+  // Hesap değişti (açıldı, silindi, kurtarma koduyla geldi): eski hesabın panosu görünmesin.
+  const hesapKodu = a ? a.code : null;
+  useEffect(() => {
+    const c = HESAP.cachedDashboard();
+    setD(c && c.me && c.me.code === hesapKodu ? c : null); setDurtuldu({}); setHata("");
+  }, [hesapKodu]);
 
   const yenile = useCallback(async () => {
     if (!HESAP.account() || yenileniyor.current) return;
     yenileniyor.current = true;
     try {
       await HESAP.pushStats(false).catch(() => {});
-      setD(await HESAP.dashboard()); setCevrimdisi(false); setHata("");
+      setD(await HESAP.dashboard()); setCevrimdisi(false); setHata(""); setDurtuldu({});
     } catch (e) {
       const c = HESAP.cachedDashboard();
       setD(c); setCevrimdisi(true);
@@ -99,20 +109,25 @@ export default function Arkadaslar() {
     try { await Clipboard.setStringAsync(c); duyur("Kod kopyalandı: " + c); } catch (e) { duyur(c); }
   };
   const paylas = async (c) => {
-    try { await Share.share({ message: "Thousand'da arkadaşım ol! Kodum: " + c }); } catch (e) { kopyala(c); }
+    const metin = "Thousand'da arkadaşım ol! Kodum: " + c;
+    try { await Share.share({ message: metin }); } catch (e) {
+      try { await Clipboard.setStringAsync(metin); duyur("Davet metni kopyalandı, istediğin yere yapıştır.", 4000); } catch (x) { duyur(metin, 4000); }
+    }
   };
 
   if (!a) {
     return (
+      <Kaydir ad="arkadas" kenar={kenar}>
       <SafeAreaView edges={["top"]} style={[s.ekran, { backgroundColor: t.kartBg }]}>
-        <ScrollView contentContainerStyle={s.icerik}>
+        <ScrollView contentContainerStyle={s.icerik} {...kenarProps}>
           <Text style={[s.h1, { color: t.ink }]} accessibilityRole="header">Arkadaşlar</Text>
           <Pano t={t}>
             <Text style={[s.bos, { color: t.muted }]}>Arkadaşlarını eklemek için önce bir takma ad seç.</Text>
-            <Dugme metin="Hesap oluştur" onBas={() => karsilama({ zorla: true, bitti: () => yenile() })} />
+            <Dugme kucuk metin="Hesap oluştur" style={s.hesapDugme} onBas={() => karsilama({ zorla: true, bitti: () => yenile() })} />
           </Pano>
         </ScrollView>
       </SafeAreaView>
+      </Kaydir>
     );
   }
 
@@ -122,8 +137,9 @@ export default function Arkadaslar() {
   ((d && d.durtmeler) || []).forEach((x) => { if (!dm[x.from]) dm[x.from] = x; });
 
   return (
+    <Kaydir ad="arkadas" kenar={kenar}>
     <SafeAreaView edges={["top"]} style={[s.ekran, { backgroundColor: t.kartBg }]}>
-      <ScrollView contentContainerStyle={s.icerik} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={s.icerik} keyboardShouldPersistTaps="handled" {...kenarProps}>
         <Text style={[s.h1, { color: t.ink }]} accessibilityRole="header">Arkadaşlar</Text>
 
         <Pano t={t}>
@@ -144,10 +160,11 @@ export default function Arkadaslar() {
           <View style={s.ekle}>
             <TextInput value={kod} onChangeText={(v) => setKod(v.toUpperCase())} maxLength={8} placeholder="Arkadaşının kodu"
               placeholderTextColor={t.muted} autoCapitalize="characters" autoCorrect={false} onSubmitEditing={gonder}
-              style={[s.girdi, { borderColor: t.kartLine, color: t.ink, backgroundColor: t.field }, !kod && s.girdiBos]} />
-            <Dugme kucuk metin="İstek gönder" pasif={gonderiyor} onBas={gonder} />
+              onFocus={() => setOdak(true)} onBlur={() => setOdak(false)}
+              style={[s.girdi, { borderColor: odak ? t.accent : t.kartLine, color: t.ink, backgroundColor: t.field }, !kod && s.girdiBos]} />
+            <Dugme kucuk metin="İstek gönder" pasif={gonderiyor} onBas={gonder} style={s.gonder} />
           </View>
-          {ekle.m ? <Text style={[s.msg, { color: ekle.ok === true ? t.green : ekle.ok === false ? t.red : t.muted }]}>{ekle.m}</Text> : null}
+          {ekle.m ? <Text style={[s.msg, { color: ekle.ok === true ? t.green : ekle.ok === false ? t.red : t.ink }]}>{ekle.m}</Text> : null}
         </Pano>
 
         {gelen.length ? (
@@ -178,7 +195,7 @@ export default function Arkadaslar() {
                     <Text style={[s.frAd, { color: t.ink }]}>{f.nick}</Text>
                     <Text style={[s.gorulme, { color: t.muted }]}>{once(f.last_seen)}</Text>
                     <Dugme kucuk tur={dt ? "bos" : "dolu"} metin={dt ? "Dürtüldü ✓" : "👉 Dürt"} pasif={dt || mesgul["d" + f.id]}
-                      onBas={() => durt(f)} style={[s.durt, dt && { opacity: 1 }]} yaziRengi={dt ? t.green : null} />
+                      onBas={() => durt(f)} style={[s.durt, dt && { opacity: 1 }]} yaziRengi={dt ? t.green : null} yaziBoyu={12} />
                     <Pressable accessibilityRole="button" accessibilityLabel="Seçenekler" hitSlop={10}
                       onPress={async () => { if (await onayla(f.nick + " arkadaşlıktan çıkarılsın mı?", "", "Çıkar", true)) yap("x" + f.id, () => HESAP.removeFriend(f.id), "Arkadaşlıktan çıkarıldı"); }}>
                       <Text style={[s.daha, { color: t.muted }]}>⋯</Text>
@@ -214,9 +231,10 @@ export default function Arkadaslar() {
           </Pano>
         ) : null}
 
-        {cevrimdisi ? <Text style={[s.ayak, { color: t.muted }]}>Bağlantı yok</Text> : null}
+        {cevrimdisi && !hata ? <Text style={[s.ayak, { color: t.muted }]}>Bağlantı yok</Text> : null}
       </ScrollView>
     </SafeAreaView>
+    </Kaydir>
   );
 }
 
@@ -232,7 +250,9 @@ const s = StyleSheet.create({
   nick: { fontSize: 18, fontWeight: "800" },
   lbl: { fontSize: 12, fontWeight: "700" },
   kod: { fontSize: 24, fontWeight: "900", letterSpacing: 3 },
-  ekle: { flexDirection: "row", gap: 8, alignItems: "center" },
+  ekle: { flexDirection: "row", gap: 8, alignItems: "stretch" },
+  gonder: { justifyContent: "center" },
+  hesapDugme: { alignSelf: "center", marginTop: 4 },
   girdi: { flex: 1, minWidth: 0, borderWidth: 2, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, fontSize: 17,
     fontWeight: "800", letterSpacing: 2 },
   girdiBos: { letterSpacing: 0, fontWeight: "600", fontSize: 15 },

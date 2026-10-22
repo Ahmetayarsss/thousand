@@ -1,13 +1,14 @@
 // Eski sayfalardaki beyaz kart (.card): başlık (büyük harf), başlığın yanında isteğe bağlı ek (ör. sayı rozeti),
-// isteğe bağlı açıklama.
+// isteğe bağlı açıklama. baslikRengi: başlığın rengi (ör. geliştirici modu mor); sik: başlık altı 4 px (eski analiz
+// sayfasındaki .card h2).
 import { StyleSheet, Text, View } from "react-native";
 
-export default function Pano({ baslik, ek, aciklama, t, children, style }) {
+export default function Pano({ baslik, ek, aciklama, t, children, style, baslikRengi, sik }) {
   return (
     <View style={[s.pano, { backgroundColor: t.card, borderColor: t.kartLine, boxShadow: "0 6px 20px " + t.golge }, style]}>
       {baslik ? (
-        <View style={[s.ust, aciklama ? s.aciklamali : null]}>
-          <Text style={[s.baslik, { color: t.muted }]} accessibilityRole="header">{baslik.toLocaleUpperCase("tr-TR")}</Text>
+        <View style={[s.ust, aciklama || sik ? s.aciklamali : null]}>
+          <Text style={[s.baslik, { color: baslikRengi || t.muted }]} accessibilityRole="header">{baslik.toLocaleUpperCase("tr-TR")}</Text>
           {ek}
         </View>
       ) : null}

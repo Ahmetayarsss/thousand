@@ -38,9 +38,13 @@ export function useHesap() {
 setTimeout(() => HESAP.acilis(), 2000);
 AppState.addEventListener("change", (d) => { if (d === "background") HESAP.arkaPlan(); });
 
-// Bildirime dokunarak açıldıysa gidilecek ekran (bildirimdeki hedef eski sayfa adıyla gelir). Bir kez verir.
-const EKRAN = { "arkadaslar.html": "/arkadas", "kartlar.html?exam=1": "/kartlar?exam=1", "kartlar.html": "/kartlar" };
+// Bildirime dokunarak açıldıysa gidilecek ekran: { ad, mod } (gezinme.js → git). Bildirimdeki hedef eski sayfa
+// adıyla gelir ("index.html": Listeyi oku bildirimi). Bir kez verir.
+const EKRAN = {
+  "index.html": { ad: "index" }, "arkadaslar.html": { ad: "arkadas" },
+  "kartlar.html?exam=1": { ad: "kartlar", mod: "sinav" }, "kartlar.html": { ad: "kartlar" },
+};
 export function bildirimHedefi() {
   if (!B) return null;
-  try { const r = B.launchTarget(); return (r && r.sayfa && (EKRAN[r.sayfa] || "/")) || null; } catch (e) { return null; }
+  try { const r = B.launchTarget(); return (r && r.sayfa && (EKRAN[r.sayfa] || EKRAN["index.html"])) || null; } catch (e) { return null; }
 }

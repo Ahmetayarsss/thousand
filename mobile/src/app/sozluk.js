@@ -1,11 +1,14 @@
 /*
  * Sözlük — eski uygulamanın sözlük sayfasıyla aynı: 3000 kelimenin hepsinde arama
- * (İngilizce ya da Türkçe), en çok 60 sonuç; boşken 📖. Karta dokununca kelime okunur. Arama src/sozluk/arama.js'te.
+ * (İngilizce ya da Türkçe), en çok 60 sonuç; boşken 📖. Karta dokununca kelime okunur ve klavye kapanır. Arama
+ * src/sozluk/arama.js'te. Ekrandan çıkınca arama silinir (eskide sayfa her açılışta boştu). Kaydırma: sola Liste,
+ * en üstte aşağı çekince Ayarlar, en altta yukarı itince Arkadaşlar.
  */
 import { useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Keyboard, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Kaydir, { useKenar } from "../bilesenler/Kaydir";
 import KelimeKarti from "../bilesenler/KelimeKarti";
 import { GRUPLAR, OXLOG } from "../cekirdek";
 import { durdur, kelimeyiOku } from "../ses";
@@ -18,17 +21,20 @@ export default function Sozluk() {
   const t = useTema();
   const [q, setQ] = useState("");
   const [okunan, setOkunan] = useState(null);
+  const [kenar, kenarProps] = useKenar();
   const sonuc = useMemo(() => ara(LISTE, q), [q]);
   useFocusEffect(useCallback(() => {
     OXLOG.add("sayfa", { p: "sozluk" });
-    return () => { durdur(); setOkunan(null); };
+    return () => { durdur(); setOkunan(null); setQ(""); };
   }, []));
   const oku = useCallback((x) => {
+    Keyboard.dismiss();
     setOkunan(x.d._k);
-    kelimeyiOku(x.d.w, () => setOkunan((o) => (o === x.d._k ? null : o)));
+    kelimeyiOku(x.d.w, () => setOkunan((o) => (o === x.d._k ? null : o)), 0.9);
   }, []);
 
   return (
+    <Kaydir ad="sozluk" kenar={q.trim() ? kenar : { ust: true, alt: true }}>
     <SafeAreaView edges={["top"]} style={[s.ekran, { backgroundColor: t.bg }]}>
       <View style={[s.ust, { borderBottomColor: t.line }]}>
         <Text style={[s.baslik, { color: t.ink }]} accessibilityRole="header">Sözlük</Text>
@@ -45,11 +51,13 @@ export default function Sozluk() {
           contentContainerStyle={s.liste}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
+          {...kenarProps}
         />
       ) : (
         <Text style={[s.ipucu, { color: t.muted }]}>📖</Text>
       )}
     </SafeAreaView>
+    </Kaydir>
   );
 }
 

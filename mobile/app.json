@@ -15,7 +15,7 @@
       "package": "io.github.ahmetayarsss.thousand",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon-foreground.png",
-        "backgroundImage": "./assets/icon-background.png"
+        "backgroundColor": "#2B5AA0"
       },
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",

@@ -344,4 +344,69 @@ t("hafıza dolu, açılacak yer yok → hata kaydedilir ve görünür (sessiz de
   } finally { geri(); }
 });
 
+// ---- çok anlamlı kelimeler (PLAN.md adım 41) ----
+const ITEM = { w: "course", tr: "kurs; rota; yemek servisi" };
+const KC = k1;   // kayıt anahtarı olarak katalogdan bir kelime (anlamları ITEM'den)
+const kutu = () => S.level(KC), bekleyen = () => S.pendingMeanings(KC, 3);
+
+t("anlamlar: ';' ile; yalnız parantezden oluşan not anlam değil", () => {
+  assert.deepStrictEqual(S.meanings(ITEM), ["kurs", "rota", "yemek servisi"]);
+  assert.deepStrictEqual(S.meanings({ tr: "-e, -a; (mastar eki)" }), ["-e, -a"]);
+  assert.deepStrictEqual(S.meanings({ tr: "elma" }), ["elma"]);
+});
+
+t("hepsi cevaplanmadan kutu değişmez; hepsi doğru → üst kutu, günlük sayı bir", () => {
+  assert.deepStrictEqual(bekleyen(), [0, 1, 2]);
+  assert.strictEqual(S.answerMeaning(KC, 0, true, 3, at(0)), null);
+  assert.strictEqual(S.isNew(KC), true, "karar yokken kelime hâlâ yeni");
+  assert.deepStrictEqual(bekleyen(), [1, 2]);
+  assert.strictEqual(S.answerMeaning(KC, 2, true, 3, at(0)), null);
+  const r = S.answerMeaning(KC, 1, true, 3, at(0));
+  assert.deepStrictEqual([r.from, r.to, r.yanlis], [0, 2, []]);
+  assert.deepStrictEqual(S.daily()[S.today(at(0))], { n: 1, ok: 1, nw: 1 });
+  assert.deepStrictEqual(bekleyen(), [0, 1, 2]);
+});
+
+t("kullanıcının örneği: kutu 3'te rota yanlış → 2; doğrular 4'e park; 2 ve 3'te yalnız rota; 4'te üçü", () => {
+  const s = {}; s[KC] = { b: 3, n: 2, l: 0, f: S.today(at(0)), due: S.today(at(0)), a: S.today(at(0)) };
+  mem.ox3000_srs_v1 = JSON.stringify(s); S._reload();
+  S.answerMeaning(KC, 0, true, 3, at(0)); S.answerMeaning(KC, 1, false, 3, at(0));
+  const r = S.answerMeaning(KC, 2, true, 3, at(0));
+  assert.deepStrictEqual([r.from, r.to, r.yanlis], [3, 2, [1]]);
+  assert.deepStrictEqual(bekleyen(), [1], "kutu 2: yalnız rota");
+  assert.deepStrictEqual(S.answerMeaning(KC, 1, true, 3, at(3)).to, 3);
+  assert.deepStrictEqual(bekleyen(), [1], "kutu 3: hâlâ yalnız rota (doğrular 4'te bekliyor)");
+  assert.deepStrictEqual(S.answerMeaning(KC, 1, true, 3, at(10)).to, 4);
+  assert.deepStrictEqual(bekleyen(), [0, 1, 2], "kutu 4: üçü birden");
+  assert.strictEqual(JSON.parse(mem.ox3000_srs_v1)[KC].pk, undefined);
+});
+
+t("yanlış sürdükçe kelime çıkamaz; park edilenler yerinde kalır", () => {
+  const s = {}; s[KC] = { b: 5, n: 4, l: 0, f: 0, due: S.today(at(0)), a: 0 };
+  mem.ox3000_srs_v1 = JSON.stringify(s); S._reload();
+  S.answerMeaning(KC, 0, true, 3, at(0)); S.answerMeaning(KC, 1, false, 3, at(0)); S.answerMeaning(KC, 2, false, 3, at(0));
+  assert.strictEqual(kutu(), 2, "olgunda yanlış → 2");
+  assert.deepStrictEqual(bekleyen(), [1, 2]);
+  S.answerMeaning(KC, 1, true, 3, at(1));
+  assert.strictEqual(S.answerMeaning(KC, 2, false, 3, at(1)).to, 1, "biri yanlış → yine iner");
+  assert.deepStrictEqual(bekleyen(), [2], "rota doğru bilindi: kurs gibi park (kutu 3'e)");
+  assert.deepStrictEqual(JSON.parse(mem.ox3000_srs_v1)[KC].pk, { 0: 6, 1: 3 });
+});
+
+t("yarım kalan tur saklanır; tekrar sorulmaz; sıfırlama siler", () => {
+  S.answerMeaning(KC, 1, false, 3, at(0));
+  S._reload();
+  assert.deepStrictEqual(bekleyen(), [0, 2]);
+  assert.strictEqual(S.isNew(KC), true, "karar yok: kayıt açılmadı");
+  S.reset();
+  assert.deepStrictEqual(bekleyen(), [0, 1, 2]);
+});
+
+t("eski kayıt (pk yok) geçerli: kutusu ve tarihi değişmeden bütün anlamlar sorulur", () => {
+  const s = {}; s[KC] = { b: 6, n: 5, l: 1, f: 1, due: 99999, a: 2 };
+  mem.ox3000_srs_v1 = JSON.stringify(s); S._reload();
+  assert.deepStrictEqual(bekleyen(), [0, 1, 2]);
+  assert.deepStrictEqual(JSON.parse(mem.ox3000_srs_v1)[KC], { b: 6, n: 5, l: 1, f: 1, due: 99999, a: 2 });
+});
+
 console.log(`\n${n} test geçti`);

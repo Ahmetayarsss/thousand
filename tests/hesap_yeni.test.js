@@ -80,7 +80,7 @@ const t = async (ad, f) => { await f(); n++; console.log("ok -", ad); };
 
   await t("kurtarma koduyla hesap al, yedeği geri yükle", async () => {
     const yedek = { v: 1, t: 1, keys: { ox3000_srs_v1: { "1|apple": { b: 3, n: 2, l: 1, f: 20000, due: 20010, a: 20003 } }, ox3000_daily_v1: { 20003: { n: 4, ok: 3, nw: 1 } } } };
-    const o = ortam({ ox3000_sessions_v1: "[1]" }, { yedek });
+    const o = ortam({ ox3000_sessions_v1: "[1]", ox3000_parca_v1: JSON.stringify({ "1|apple": { 0: 1 } }) }, { yedek });
     const r = await o.A.claim("abcdefghjklm");
     assert.strictEqual(r.ok, true);
     assert.strictEqual(r.account.recovery, "ABCD-EFGH-JKLM");
@@ -89,6 +89,7 @@ const t = async (ad, f) => { await f(); n++; console.log("ok -", ad); };
     assert.deepStrictEqual(g, { ok: true, eksik: [] });
     assert.ok(o.ctx.SRS.records()["1|apple"]);
     assert.strictEqual(o.ls.ox3000_sessions_v1, undefined, "yedekte olmayan anahtar silinir");
+    assert.strictEqual(o.ls.ox3000_parca_v1, undefined, "telefondaki yarım anlam turu eski yedeğe uygulanmaz");
     const k = o.A.karsilastirma(yedek);
     assert.ok(/^1 kelime/.test(k.yedek), k.yedek);
     assert.strictEqual((await ortam().A.claim("kısa")).ok, false);

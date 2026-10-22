@@ -56,14 +56,16 @@ function jsSonraki(nesil) {
       if (nesil !== J.nesil) return;
       Speech.speak(say, { language: "tr-TR", rate: HIZ, onDone: ilerle, onStopped: () => {}, onError: ilerle });
     }, 400);
-  });
+  }, HIZ);
 }
 
 export function oku({ anahtarlar, baslangic = 0, gap, loop, readTr }) {
   const liste = okumaListesi(anahtarlar, (k) => ANAHTARLA[k], N ? kaynak : () => "");
   if (!liste.words.length) return;
   if (N) {
-    N.speakGroup({ ...liste, rate: HIZ, loop, readTr, gap, start: baslangic });
+    // Servis başlatılamazsa (ör. Android'in arka plan sınırı) uygulama çökmesin: hata Liste'de gösterilir.
+    try { N.speakGroup({ ...liste, rate: HIZ, loop, readTr, gap, start: baslangic }); }
+    catch (e) { hataDinleyenler.forEach((f) => f("Okuma başlatılamadı: " + ((e && e.message) || e))); bildir({ etkin: false, kelime: null }); }
     return;
   }
   jsDurdur();

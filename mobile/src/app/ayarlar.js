@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { duyur } from "../bilesenler/Duyuru";
+import Kaydir, { useKenar } from "../bilesenler/Kaydir";
 import Pano from "../bilesenler/Pano";
 import { bildirimKurulumu } from "../bildirim/Kurulum";
 import { Baslik, Dugme, girdiIste, onayla, pencereAc } from "../bilesenler/Pencere";
@@ -32,7 +33,7 @@ const SAATLER = [];
 for (let m = 8 * 60; m < 22 * 60; m += 15) SAATLER.push(("0" + Math.floor(m / 60)).slice(-2) + ":" + ("0" + (m % 60)).slice(-2));
 function saatSec(baslik, deger) {
   return new Promise((coz) => {
-    pencereAc((kapat) => <SaatListesi baslik={baslik} deger={deger} sec={(v) => { kapat(); coz(v); }} />);
+    pencereAc((kapat) => <SaatListesi baslik={baslik} deger={deger} sec={(v) => { kapat(); coz(v); }} />, (kapat) => { kapat(); coz(null); });
   });
 }
 function SaatListesi({ baslik, deger, sec }) {
@@ -41,7 +42,7 @@ function SaatListesi({ baslik, deger, sec }) {
     <View>
       <Baslik>{baslik}</Baslik>
       <ScrollView style={{ maxHeight: 320 }} contentContainerStyle={s.saatler}>
-        {SAATLER.map((v) => (
+        {(deger && !SAATLER.includes(deger) ? [...SAATLER, deger].sort() : SAATLER).map((v) => (
           <Pressable key={v} onPress={() => sec(v)} accessibilityRole="button" accessibilityState={{ selected: v === deger }}
             style={[s.saat, { borderColor: v === deger ? t.accent : t.kartLine, backgroundColor: v === deger ? t.accent : t.kartBg }]}>
             <Text style={[s.saatYazi, { color: v === deger ? "#fff" : t.ink }]}>{v}</Text>
@@ -67,11 +68,17 @@ export default function Ayarlar() {
   const [kodGoster, setKodGoster] = useState(false);
   const [mesgul, setMesgul] = useState("");
   const dokunuslar = useRef([]);
+  const [kenar, kenarProps] = useKenar();
 
   useFocusEffect(useCallback(() => { OXLOG.add("sayfa", { p: "ayarlar" }); ciz(); }, [ciz]));
   // Telefonun ayarlarından dönünce izin durumu yenilensin.
   useEffect(() => { const a = AppState.addEventListener("change", (d) => { if (d === "active") ciz(); }); return () => a.remove(); }, [ciz]);
-  const bilDegistir = async (p, metin) => { await HESAP.bildirimAyarla(p); ciz(); duyur(metin, 1800); };
+  const bilMesgul = useRef(false);   // işlem bitene dek ikinci dokunuş yok (eskide düğme pasifleşirdi)
+  const bilDegistir = async (p, metin) => {
+    if (bilMesgul.current) return;
+    bilMesgul.current = true;
+    try { await HESAP.bildirimAyarla(p); duyur(metin, 1800); } finally { bilMesgul.current = false; ciz(); }
+  };
 
   const hesapIsi = async (ad, fn, tamam) => {
     setMesgul(ad);
@@ -104,8 +111,9 @@ export default function Ayarlar() {
   const kb = Math.max(1, Math.round(OXLOG.size() / 1024));
 
   return (
+    <Kaydir ad="ayarlar" kenar={kenar}>
     <SafeAreaView edges={["top"]} style={[s.ekran, { backgroundColor: t.kartBg }]}>
-      <ScrollView contentContainerStyle={s.icerik}>
+      <ScrollView contentContainerStyle={s.icerik} {...kenarProps}>
         <Pressable onPress={baslikDokun}><Text style={[s.h1, { color: t.ink }]} accessibilityRole="header">Ayarlar</Text></Pressable>
 
         <Pano t={t} baslik="Hesap">
@@ -236,7 +244,7 @@ export default function Ayarlar() {
         ) : null}
 
         {dev.on ? (
-          <Pano t={t} baslik="Geliştirici modu" style={{ borderStyle: "dashed", borderWidth: 1.5, borderColor: "#8E44AD" }}>
+          <Pano t={t} baslik="Geliştirici modu" baslikRengi={t.dev} style={{ borderStyle: "dashed", borderWidth: 1.5, borderColor: t.dev }}>
             <Satir t={t} ilk baslik="Uygulama tarihi" alt={tarih(SRS.now()) + (dev.off ? " (+" + dev.off + " gün)" : " (gerçek)")}>
               <Dugme kucuk metin="+1 gün" onBas={() => { SRS.setDev({ off: SRS.dev().off + 1 }); OXLOG.add("dev", { a: "gun+1", off: SRS.dev().off }); ciz(); HESAP.hatirlatmaPlanla(true); duyur("1 gün ileri sarıldı", 1800); }} />
               <Dugme kucuk tur="bos" metin="Bugün" onBas={() => { SRS.setDev({ off: 0 }); OXLOG.add("dev", { a: "bugun" }); ciz(); HESAP.hatirlatmaPlanla(true); duyur("Gerçek tarihe dönüldü", 1800); }} />
@@ -264,6 +272,7 @@ export default function Ayarlar() {
         ) : null}
       </ScrollView>
     </SafeAreaView>
+    </Kaydir>
   );
 }
 
@@ -298,7 +307,7 @@ const s = StyleSheet.create({
   satir: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 10 },
   dugmeler: { flexDirection: "row", gap: 6 },
   t: { fontSize: 14, fontWeight: "700" },
-  alt: { fontSize: 12, marginTop: 2, lineHeight: 17 },
+  alt: { fontSize: 12, marginTop: 2, lineHeight: 15 },
   v: { fontSize: 15, fontWeight: "800", marginTop: 2 },
   mono: { fontFamily: "monospace" },
   not: { fontSize: 12, marginTop: 4, lineHeight: 17 },

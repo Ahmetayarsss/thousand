@@ -18,13 +18,14 @@ yedek yüklenir).
 
 | Yol | Ne |
 |---|---|
-| `src/app/` | Ekranlar (Expo Router: her dosya bir sekme). `_layout.js` alt sekmeleri kurar; `ilerleme/` bir yığın: İlerleme ve ondan açılan İstatistikler (`analiz.js`) |
-| `src/cekirdek/` | Çekirdek: `srs.js` (tekrar sistemi) ve `log.js` (kullanım kaydı), eski uygulamadan; `index.js` ikisini yükler, kelime kataloğunu kurar. localStorage'ı telefonda `expo-sqlite` karşılar |
+| `src/app/` | Ekranlar (Expo Router: her dosya bir sekme). `_layout.js` sekmeleri kurar (geri tuşu bir önceki sayfaya: gezilen sayfaların sırası); İstatistikler (`analiz.js`) çubukta görünmeyen bir sekme, İlerleme'den ya da Ayarlar'dan sola kaydırarak açılır |
+| `src/gezinme.js` | Sayfalar arası geçiş: `git(ekran, mod)` (sınav sürerken onay; Kartlar'a Test ya da bildirimden Sınav), kaydırma haritası (`KOMSU`, eskisiyle aynı), `geriGit` |
+| `src/cekirdek/` | Çekirdek: `srs.js` (tekrar sistemi; çok anlamlı kelimede anlam turu ve kutu kararı, `ox3000_parca_v1`) ve `log.js` (kullanım kaydı), eski uygulamadan; `index.js` ikisini yükler, kelime kataloğunu kurar. localStorage'ı telefonda `expo-sqlite` karşılar |
 | `assets/audio/` | Kelimelerin insan sesi kayıtları (mp3) |
 | `src/ses.js` | Kelime sesi: gömülü kayıt (`assets/audio`), yoksa cihazın konuşma sentezi |
 | `src/tema.js` | Açık / koyu tema renkleri |
-| `src/bilesenler/` | Ekranların ortak parçaları: `KelimeKarti.js`, `Pano.js` (beyaz kart), `HavaiFisek.js` (bütün kelimeler bitince, Skia), `Pencere.js` (ortadaki pencere, onay, girdi), `Duyuru.js` (alttaki kısa bildirim) |
-| `src/hesap/` | Hesap ve arkadaşlar: `hesap.js` (eski uygulamanın hesap kodunun ekrandan bağımsız hali; aynı sunucu işlevleri ve anahtarlar), `index.js` (bu telefonda kurulumu, açılış/arka plan gönderimleri, `useHesap`), `Karsilama.js` (takma ad, kodlar, kurtarma kodu, kayıt izni) |
+| `src/bilesenler/` | Ekranların ortak parçaları: `KelimeKarti.js`, `Pano.js` (beyaz kart), `HavaiFisek.js` (bütün kelimeler bitince, Skia), `Pencere.js` (ortadaki pencere, onay, girdi; geri tuşu ve dışına dokunma "Vazgeç"), `Duyuru.js` (alttaki kısa bildirim), `SekmeCubugu.js` (alt çubuk, eskisinin simgeleriyle), `Kaydir.js` (parmakla sayfa değiştirme, react-native-gesture-handler), `Tanitim.js` (ilk açılışta "Sayfalar nerede?" haritası) |
+| `src/hesap/` | Hesap ve arkadaşlar: `hesap.js` (eski uygulamanın hesap kodunun ekrandan bağımsız hali; aynı sunucu işlevleri ve anahtarlar), `index.js` (bu telefonda kurulumu, açılış/arka plan gönderimleri, `useHesap`, bildirimin hedef ekranı), `Karsilama.js` (takma ad, kodlar, kurtarma kodu, kayıt izni), `haberler.js` (yeni arkadaşlık istekleri ve dürtmeler, alttaki kısa bildirimle) |
 | `src/ilerleme/` | İlerleme / İstatistikler: `veri.js` (hesaplar, ekrandan bağımsız), `Grafikler.js` (SVG grafikler, eskisinin ölçüleriyle) |
 | `src/sozluk/arama.js` | Sözlük araması (ekrandan bağımsız) |
 | `src/skiaWeb.web.js` | Webde Skia'yı yükler; Skia kullanan bileşenler webde kendi "Katmani" dosyalarının web sürümüyle tembel yüklenir |
@@ -33,7 +34,6 @@ yedek yüklenir).
 | `modules/okuma/` | Android "Listeyi oku" servisi (Expo yerel modülü): eski uygulamanın `GroupTtsService`'i (`OkumaServisi.java`; bildirim, kilit ekranı, kulaklık düğmeleri, ekran kapalıyken okuma) ve köprüsü (`OkumaModule.kt`). `expo prebuild` kendiliğinden bağlar |
 | `src/bildirim/Kurulum.js` | Bildirim kurulumu penceresi (izin, otomatik başlatma); bildirim ayarları ve hatırlatma planı `src/hesap/hesap.js`'te |
 | `modules/bildirim/` | Android bildirimleri (Expo yerel modülü): eski uygulamanın `Bildirimler`, `HatirlatmaWorker` (seri / tekrar hatırlatması), `ArkadasWorker` (arkadaşlık isteği, dürtme; uygulama kapalıyken de) sınıfları aynen; köprü `BildirimModule.kt`, bildirime dokununca hedef ekran `BildirimPackage.kt`; yayın derlemesinin küçültmesi (R8) için koruma kuralları `consumer-rules.pro` |
-| `src/cikis.js` | Sınav sürerken başka sekmeye geçişte onay |
 | `src/uretilen/` | **Üretilen, elle düzenlenmez** (`scripts/build_all.py`): `kelimeler.json` (sıralı kelime verisi), `sesler.js` (ses haritası) |
 | `app.config.js` | `app.json`'un üstüne derleme numarası (sürüm kodu) |
 

@@ -158,6 +158,49 @@ kullanım kaydı (`log.js`) iki uygulamada ortak ve değişmeden kullanılır; l
       testler beklenenleri kendi içinde tutar (karşılaştırma için three kütüphanesi `tests/cevirme/`'de). Eski
       uygulama son aldığı güncelleme paketiyle çalışmaya devam eder; release'ten paket dosyaları silinir.
 
+## Aşama 10 — Çok anlamlı kelimeler
+
+Sorun (kullanıcı, Ekim 2026): Türkçeden İngilizceye sorarken bütün anlamlar birlikte görünüyor ("kurs; rota;
+yemek servisi"); biri bilinince öbürleri öğrenilmeden kelime kutu atlıyor. 3000 kelimenin 576'sı çok anlamlı.
+Kullanıcı kararları:
+
+- [x] 41. Anlamlar ayrı ayrı sorulur, kelime bir bütün kalır:
+      - Birim kelime: tek kutu. Anlam = `tr`'de `;` ile ayrılan parça; yalnız parantezden oluşan not anlam değildir.
+      - Çok anlamlı kelime hep Türkçeden İngilizceye, her anlam ayrı kart (Sınav ve Test). "2/3" gibi gösterge yok;
+        kartlar özel olarak dağıtılmaz. Arka yüz yalnız sorulan anlamı ve İngilizce kelimeyi (okunuşuyla) gösterir.
+      - Turda sorulan anlamların hepsi cevaplanmadan kutu değişmez. Hepsi doğru → üst kutu. Biri bile yanlış → alt
+        kutu; yanlışlar kaydedilir, doğrular "normalde çıkacağı kutu"ya park edilir ve kelime o kutuya gelene dek
+        sorulmaz; sonraki turlarda yalnız kalanlar sorulur (yine hepsi cevaplanınca karar). Yanlış bilinen anlam aynı
+        sınavda tekrar gelmez. Yarım kalan turun cevapları saklanır.
+      - Belirsizlik: yazılı kartta aynı Türkçe karşılığa sahip başka bir kelime yazılırsa ("rota" için "route") yanlış
+        sayılmaz ama kart geçilmez; yeniden sorulur.
+      - İpucu yalnız ek anlamlarında ("-ecek", "-dığı için"…), `data/all_groups.json` → `ipucu`.
+      - Sayılar (günlük cevap, doğruluk, arkadaşların gördüğü, "en çok yanlış") kelime bazında: karar başına bir.
+      - Mevcut ilerleme değişmez: kutular, tarihler aynı; kayda yalnız yeni alanlar eklenir (eski kayıt geçerli).
+
+## Aşama 11 — Eski uygulamayla karşılaştırma düzeltmeleri
+
+Eski (HTML) uygulamayla ekran ekran karşılaştırma (Ekim 2026) bulgularının hepsi tek seferde (kullanıcı kararı).
+Kararlar: sayfalar arası kaydırma geri gelsin; geri tuşu bir önceki sayfaya (gezilen sayfaların sırası), geçmiş bitince
+çıkış; ekran döndürme kapalı kalır.
+
+- [x] 42. Karşılaştırma bulguları:
+  - **Gezinme:** eski kaydırma haritası ve "Sayfalar nerede?" (`Kaydir.js`, `Tanitim.js`, `gezinme.js`); geri tuşu
+    geçmişi; pencereler geri tuşu / dışına dokunmayla kapanır; eski sekme çubuğu (simgeler, 58 px, mavi etkin simge);
+    İstatistikler çubukta görünmeyen sekme; bildirimden açılan Sınav'ın Kartlar sekmesine yapışması; sınav sürerken
+    aynı sınav bildirimi onay sormaz; okuma bildirimi Liste'yi açar. Emülatörde gezinme denemesi.
+  - **Kırıklar:** kart dönerken sekme değişince yeni Test'in cevabı açık gelmesi; ses kaydı çalınamazsa cihaz sesine
+    geçiş; "Dürtüldü ✓" takılması; grafikte "1.500" / "%100" kesilmesi; okuma servisi başlatılamazsa çökme.
+  - **Eksikler:** kurtarma kodundan sonra açılış işleri; Kartlar sayfa kaydı.
+  - **Adım 41'in yan etkileri:** sayaç ve sonuç kelime sayar; yarım tur mesajı; yarım tur yedeğe girer; kayıtta
+    kelime anahtarı; ölü kod (çok kutulu yazılı kart).
+  - **Görünüm ve davranış:** sayaç uçuştan sonra, uçan kartın etiketi, kırpma, kart konumu, vurgu halkası, dokununca
+    ortalama, arama sıfırlama, klavye dokunuşları, kısa bildirim yeri ve süresi, istatistik kutucukları ve tabloları,
+    ipucu, seviye aralığı, geliştirici rengi, saat listesi, bildirim anahtarı kilidi, izin, ses hızları, "İ" araması,
+    uygulama simgesi (eski düz mavi zemin) ve küçük ölçüler.
+  - Yapılmayanlar: "Hoş geldin" penceresinde arka plan bulanıklığı (yeni yerel bağımlılık ister); telefonun yazı
+    boyutuna sınır (telefonda denenmeden karar verilmedi).
+
 ## Bilerek bırakılanlar (şimdilik)
 
 - Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele

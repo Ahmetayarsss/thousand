@@ -2,7 +2,8 @@
  * Kartın bir yüzü — Capacitor'daki kartın (.face) aynısı: beyaz yüz, iç içe kalın çerçeve, üstte seviye ve
  * (sınavda) Yeni/Tekrar etiketi; yazılı kartta altın zemin. Düzen her kartta ve her yönde aynı: ana yazı hep
  * aynı yükseklikte (üstten %22), altında okunuş, ayraç, Türkçe anlam, örnekler.
- *   ön yüz: soru (tr2en → Türkçe anlam, en2tr → İngilizce kelime)
+ *   ön yüz: soru (tr2en → Türkçe anlam, en2tr → İngilizce kelime); ek anlamlarında ("-ecek") altında ipucu
+ *   (d.ipucu, all_groups.json → ipucu)
  *   arka yüz: yön ne olursa olsun İngilizce kelime, okunuş, ayraç, Türkçe anlam, örnekler
  * golge=false: çevirme için yakalanan kopya (eski uygulamada da yakalanan yüzde gölge yoktu).
  */
@@ -44,6 +45,7 @@ function KartYuzu({ d, yuz, yon, seviye, etiket, yazili, golge = true, t }) {
           <Text style={[s.etiket, s.sag, { backgroundColor: t.accent }]}>{seviye}</Text>
           <View style={s.bosluk} />
           <Text style={[s.soru, ana.length > 16 && s.kucuk, { color: soruTr ? t.tr : t.ink }]}>{ana}</Text>
+          {soruTr && d.ipucu ? <Text style={[s.anlamIpucu, { color: t.ex }]}>{d.ipucu}</Text> : null}
           {yuz === "on" ? (
             yazili ? <Text style={[s.ipucu, { color: t.yaziIpucu }]}>✎ Cevabı aşağıya yaz</Text> : null
           ) : (
@@ -77,6 +79,7 @@ const s = StyleSheet.create({
   soru: { fontSize: 34, fontWeight: "800", letterSpacing: -0.34, lineHeight: 38, textAlign: "center" },
   kucuk: { fontSize: 27, lineHeight: 30 },
   ipucu: { marginTop: 16, fontSize: 12.5, fontWeight: "800", letterSpacing: 0.25 },
+  anlamIpucu: { fontSize: 15, fontStyle: "italic", marginTop: 10, textAlign: "center" },
   okunus: { fontSize: 15, fontWeight: "700", marginTop: 8, textAlign: "center" },
   ayrac: { width: 44, height: 3, borderRadius: 2, marginTop: 16, marginBottom: 14 },
   anlam: { fontSize: 22, fontWeight: "800", lineHeight: 27.5, textAlign: "center" },

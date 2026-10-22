@@ -8,6 +8,8 @@
  *   sayfa {p}             sayfa açıldı
  *   test_bas {n}          Test başladı        test {k, ok}   Test kartı
  *   sinav_bas {rev,nw,yz} Sınav başladı       cevap {k, y, ok, b, ms, yz, g?}
+ *     (cevap k: kart kimliği; çok anlamlı kelimede "anahtar#anlamNo", b yalnız kutu kararı verilince)
+ *   baska_karsilik {k, w} yazılı kartta aynı Türkçe anlamın başka kelimesi (w) yazıldı; yanlış sayılmadı
  *   sinav_bit {n,ok,tum}  Sınav bitti/bırakıldı
  *   okuma {…}             Listeyi oku         okuma_hata {m}
  *   hesap {a}             hesap işlemi        hesap_hata {f, m}

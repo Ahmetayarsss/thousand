@@ -1,17 +1,19 @@
 /*
  * İlerleme — eski uygulamanın istatistik sayfasıyla aynı: genel olgun/öğreniliyor/yeni,
  * seviyeye göre, 30 kısım, son sınavlar. Hesaplar src/ilerleme/veri.js'te. Yeni: alttaki bağlantı İstatistikler'i
- * açar (eskiden Ayarlar'dan kaydırarak açılıyordu; yeni uygulamada kaydırarak geçiş yok).
+ * de açar (eskisi gibi Ayarlar'dan sola kaydırarak da açılır). Kaydırma: sağa Kartlar.
  */
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Pano from "../../bilesenler/Pano";
-import { GRUPLAR, OXLOG, SRS } from "../../cekirdek";
-import * as V from "../../ilerleme/veri";
-import { OTURUM_ANAHTARI } from "../../kartlar/oturum";
-import { useTema } from "../../tema";
+import Kaydir from "../bilesenler/Kaydir";
+import Pano from "../bilesenler/Pano";
+import { git } from "../gezinme";
+import { GRUPLAR, OXLOG, SRS } from "../cekirdek";
+import * as V from "../ilerleme/veri";
+import { OTURUM_ANAHTARI } from "../kartlar/oturum";
+import { useTema } from "../tema";
 
 const yuzde = (x, top) => (top ? (x / top) * 100 + "%" : "0%");
 
@@ -35,6 +37,7 @@ export default function Ilerleme() {
   const sinifRengi = { iyi: t.green, orta: t.amber, dusuk: t.red };
 
   return (
+    <Kaydir ad="ilerleme">
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: t.kartBg }}>
       <ScrollView contentContainerStyle={s.icerik}>
         <View style={s.ust}>
@@ -107,13 +110,14 @@ export default function Ilerleme() {
           )) : <Text style={[s.bos, { color: t.muted }]}>Henüz sınav yapmadın. Çalışma sayfasında “Sınav”ı dene.</Text>}
         </Pano>
 
-        <Pressable onPress={() => router.push("/ilerleme/analiz")} accessibilityRole="button"
+        <Pressable onPress={() => git("analiz")} accessibilityRole="button"
           style={({ pressed }) => [s.bag, { backgroundColor: t.card, borderColor: t.kartLine, opacity: pressed ? 0.7 : 1 }]}>
           <Text style={[s.bagYazi, { color: t.ink }]}>Ayrıntılı istatistikler</Text>
           <Text style={[s.bagOk, { color: t.muted }]}>›</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
+    </Kaydir>
   );
 }
 
@@ -124,10 +128,10 @@ const s = StyleSheet.create({
   alt: { fontSize: 14, fontWeight: "800", marginTop: 2 },
   buyuk: { flexDirection: "row", gap: 10, marginBottom: 14 },
   hucre: { flex: 1, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 6, alignItems: "center" },
-  n: { fontSize: 26, fontWeight: "800", lineHeight: 28 },
+  n: { fontSize: 26, fontWeight: "800", lineHeight: 26 },
   l: { fontSize: 11, fontWeight: "700", marginTop: 4 },
   pbar: { height: 12, borderRadius: 8, overflow: "hidden", flexDirection: "row" },
-  svSatir: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 10 },
+  svSatir: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 5 },   // eskide 10 px (üst üste binen boşluk)
   svEtiket: { width: 34, fontWeight: "800", fontSize: 13, color: "#fff", borderRadius: 6, overflow: "hidden", textAlign: "center", paddingVertical: 3 },
   iz: { flex: 1, height: 9, borderRadius: 6, overflow: "hidden" },
   svSayi: { fontSize: 12, fontWeight: "700", minWidth: 62, textAlign: "right" },

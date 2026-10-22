@@ -7,6 +7,8 @@
 - ok dolu ise: yalnız Türkçe harfler + tire, heceler tireli, en az bir hece
   TAMAMEN BÜYÜK (vurgu). en/ex de dolu olmalı.
 - ex dolu ise kelimeyi (ya da bir çekimini) içermeli — <b>...</b> işaretli.
+- ipucu (çok anlamlı kelimede ek anlamının kartta altında görünen açıklaması): {anlam: metin}; anahtar
+  kelimenin anlamlarından biri olmalı (srs.js meanings ile aynı kural), metin İngilizce kelimeyi vermemeli.
 - mobile/assets/audio/*.mp3: her ses bir kelimeye ait olmalı (adı uygulamadaki slugOf ile aynı
   kurala uyar — mobile/src/ses.js). Sesi olmayan kelimeler yalnız bildirilir; onları cihazın TTS'i okur.
 """
@@ -62,6 +64,27 @@ def check_ex(gno, w, ex):
             err(f"G{gno} {w!r}: işaretli kelime uyumsuz: {marked!r}")
 
 
+def meanings(tr):
+    # srs.js meanings: ";" ile ayrılır; yalnız parantezden oluşan not anlam sayılmaz.
+    return [m.strip() for m in tr.split(";") if re.sub(r"\([^)]*\)", "", m).strip(" ,/")]
+
+
+def check_ipucu(gno, w, tr, ipucu):
+    if not isinstance(ipucu, dict) or not ipucu:
+        err(f"G{gno} {w!r}: ipucu {{anlam: metin}} olmalı")
+        return
+    ms = meanings(tr)
+    if len(ms) < 2:
+        err(f"G{gno} {w!r}: ipucu var ama kelime tek anlamlı (ipucu yalnız anlam kartında görünür)")
+    for anlam, metin in ipucu.items():
+        if anlam not in ms:
+            err(f"G{gno} {w!r}: ipucu anahtarı {anlam!r} anlamlardan biri değil: {ms}")
+        if not isinstance(metin, str) or not metin.strip():
+            err(f"G{gno} {w!r}: ipucu {anlam!r} boş")
+        elif re.search(rf"\b{re.escape(w.lower())}\b", metin.lower()):
+            err(f"G{gno} {w!r}: ipucu {anlam!r} cevabı veriyor")
+
+
 def main():
     groups = json.load(open(ROOT / "data" / "all_groups.json", encoding="utf-8"))
     if len(groups) != 30:
@@ -85,6 +108,8 @@ def main():
                     err(f"G{gno} {w!r}: ok dolu ama ex boş")
             if ex:
                 check_ex(gno, w, ex)
+            if "ipucu" in it:
+                check_ipucu(gno, w, it.get("tr", ""), it["ipucu"])
     want = {"A1": 900, "A2": 800, "B1": 700, "B2": 600}
     if totals != want:
         err(f"seviye toplamları {totals} != {want}")

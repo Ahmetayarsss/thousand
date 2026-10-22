@@ -14,7 +14,8 @@ export function bildirimKurulumu({ zorla = false, bitti } = {}) {
   const d = HESAP.kurulumDurum();
   if (!d) { if (bitti) bitti(); return false; }
   if (!zorla && !HESAP.kurulumGosterilsin()) { HESAP.izinIlk(); if (bitti) bitti(); return false; }
-  pencereAc((kapat) => <Kurulum kapat={() => { kapat(); if (bitti) bitti(); }} />);
+  const kapat2 = (kapat) => { kapat(); if (bitti) bitti(); };
+  pencereAc((kapat) => <Kurulum kapat={() => kapat2(kapat)} />, kapat2);
   return true;
 }
 

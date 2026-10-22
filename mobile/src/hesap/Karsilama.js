@@ -11,6 +11,7 @@ import { bildirimKurulumu } from "../bildirim/Kurulum";
 import { pencereAc, Baslik, Dugme, Girdi, Hata, Metin } from "../bilesenler/Pencere";
 import { OXLOG, SRS } from "../cekirdek";
 import { useTema } from "../tema";
+import { haberler } from "./haberler";
 import { HESAP, errText, hesapDegisti } from "./index";
 
 let sonraDendi = false;   // eskisinde sessionStorage: uygulama yeniden açılınca yine sorulur
@@ -18,19 +19,29 @@ let sonraDendi = false;   // eskisinde sessionStorage: uygulama yeniden açılı
 export function karsilama({ zorla = false, adim = "ad", bitti } = {}) {
   if (adim === "ad" && HESAP.account()) { if (bitti) bitti(HESAP.account()); return; }
   if (!zorla && sonraDendi) return;
-  pencereAc((kapat) => <Akis ilk={adim} kapat={kapat} bitti={bitti} />);
+  const su = { adim: adim };
+  // Geri tuşu / dışına dokunma: takma ad ve kurtarma adımında "Sonra" gibi; kodlar, seçim ve izin cevap bekler.
+  pencereAc((kapat) => <Akis ilk={adim} su={su} kapat={kapat} bitti={bitti} />,
+    (kapat) => { if (su.adim === "ad" || su.adim === "kurtar") { sonraDendi = true; kapat(); } });
 }
 
-function Akis({ ilk, kapat, bitti }) {
+function Akis({ ilk, su, kapat, bitti }) {
   const [adim, setAdim] = useState({ ad: ilk });
+  su.adim = adim.ad;
   // Hesap açıldı ya da geri geldi: bildirimler için telefon ayarları (eksikse bir kez) ya da yalnız izin.
-  const bitir = (a) => { kapat(); hesapDegisti(); if (ilk !== "izin") bildirimKurulumu(); if (bitti) bitti(a); };
+  // Kurtarma koduyla geldiyse açılış işleri yeniden (eskide sayfa yenilenirdi): özet, hatırlatmalar, arkadaş haberleri.
+  const bitir = (a) => {
+    kapat(); hesapDegisti();
+    if (su.kurtarildi) { HESAP.acilis(); HESAP.syncSoon(true, false); haberler(); }
+    if (ilk !== "izin") bildirimKurulumu();
+    if (bitti) bitti(a);
+  };
   const izinSonra = (a) => { if (HESAP.kayitIzni() === null) setAdim({ ad: "izin", a }); else bitir(a); };
   switch (adim.ad) {
-    case "kodlar": return <Kodlar a={adim.a} devam={() => izinSonra(adim.a)} />;
+    case "kodlar": return <Kodlar a={adim.a} devam={() => setAdim({ ad: "izin", a: adim.a })} />;   // yeni hesapta her zaman (eskisi gibi)
     case "kurtar": return <Kurtar yeni={() => setAdim({ ad: "ad" })} sonuc={(r) => setAdim(r)} />;
     case "secim": return <Secim r={adim.r} sec={(yukle) => setAdim({ ad: "hosgeldin", r: adim.r, yuklendi: yukle ? HESAP.restore(adim.r.backup) : null })} />;
-    case "hosgeldin": return <Hosgeldin r={adim.r} yuklendi={adim.yuklendi} devam={() => izinSonra(adim.r.account)} />;
+    case "hosgeldin": su.kurtarildi = true; return <Hosgeldin r={adim.r} yuklendi={adim.yuklendi} devam={() => izinSonra(adim.r.account)} />;
     case "izin": return <Izin devam={() => bitir(adim.a || HESAP.account())} />;
     default: return <TakmaAd kapat={kapat} kurtar={() => setAdim({ ad: "kurtar" })} acildi={(a) => { hesapDegisti(); setAdim({ ad: "kodlar", a }); }} />;
   }
@@ -70,7 +81,7 @@ function Kod({ etiket, deger, kurtarma }) {
   return (
     <View>
       <Text style={[s.lbl, { color: t.muted }]}>{etiket.toLocaleUpperCase("tr-TR")}</Text>
-      <Text selectable style={[s.kod, { backgroundColor: kurtarma ? t.kutu : t.kartBg, color: t.ink },
+      <Text selectable style={[s.kod, { backgroundColor: kurtarma ? (t.koyu ? t.kutu : "#FFF6DD") : t.kartBg, color: t.ink },
         kurtarma && { fontSize: 21, letterSpacing: 2, borderWidth: 2, borderStyle: "dashed", borderColor: t.kutuCizgi }]}>{deger}</Text>
     </View>
   );
@@ -97,7 +108,7 @@ function Kurtar({ yeni, sonuc }) {
     setBekle(true); setHata("");
     HESAP.claim(c).then((r) => {
       setBekle(false);
-      if (!r.ok) { setHata("Bu kurtarma koduyla bir hesap bulunamadı."); return; }
+      if (!r.ok) { setTekrar(false); setHata("Bu kurtarma koduyla bir hesap bulunamadı."); return; }
       hesapDegisti();
       const yerelVar = Object.keys(SRS.records()).length > 0;
       if (r.backup && yerelVar) sonuc({ ad: "secim", r });

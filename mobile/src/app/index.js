@@ -7,39 +7,28 @@
  * sorulmadıysa izin, bildirim ayarları eksikse kurulum (bir kez); yeni arkadaşlık istekleri ve dürtmeler haber verilir.
  * "Listeyi oku": listedeki kelimeler sırayla (src/okuma — Android'de ekran kapalıyken de, bildirim ve kilit ekranı
  * düğmeleriyle; ekrandan çıkınca sürer, Spotify gibi). Okunan kart işaretlenir ve ortaya kaydırılır. Kelime arası
- * bekleme sürgüyle (sürerken de uygulanır); döngü ve Türkçe okuma Ayarlar'da.
+ * bekleme sürgüyle (sürerken de uygulanır); döngü ve Türkçe okuma Ayarlar'da. Dokunulan kart da ortaya kaydırılır.
+ * İlk açılışta bir kez sayfa haritası (Tanitim). Kaydırma: sola Kartlar, sağa Sözlük. Ekrandan çıkınca arama silinir.
  */
 import Slider from "@react-native-community/slider";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AppState, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { AppState, FlatList, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { duyur } from "../bilesenler/Duyuru";
 import HavaiFisek from "../bilesenler/HavaiFisekKatmani";
+import Kaydir, { kaydirmayiEngelle } from "../bilesenler/Kaydir";
 import KelimeKarti from "../bilesenler/KelimeKarti";
+import { tanitim } from "../bilesenler/Tanitim";
 import { Baslik, Dugme, Metin, pencereAc } from "../bilesenler/Pencere";
 import { ANAHTARLA, OXLOG, SRS } from "../cekirdek";
 import { HESAP, useHesap } from "../hesap";
+import { haberler } from "../hesap/haberler";
 import { bildirimKurulumu } from "../bildirim/Kurulum";
 import { karsilama } from "../hesap/Karsilama";
 import * as Okuma from "../okuma";
 import { durdur, kelimeyiOku } from "../ses";
 import { useTema } from "../tema";
-
-// Arkadaş haberleri: görülmemiş istekler ve (son 24 saatteki) dürtmeler; görülenler eskisiyle aynı anahtarlarda.
-function haberler(d) {
-  const oku = (k) => { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch (e) { return []; } };
-  const yaz = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
-  const gelen = (d && d.incoming) || [], m = [];
-  const gorulen = oku("ox3000_istek_gor"), yeni = gelen.filter((r) => !gorulen.includes(r.id));
-  if (yeni.length) m.push("👥 " + (yeni.length === 1 ? yeni[0].nick + " sana arkadaşlık isteği gönderdi" : yeni.length + " yeni arkadaşlık isteği") + " — Arkadaş sekmesinde.");
-  yaz("ox3000_istek_gor", gelen.map((r) => r.id));
-  const dz = (d && d.durtmeler) || [], dg = oku("ox3000_durt_gor"), kim = [];
-  dz.filter((x) => !dg.includes(x.id)).forEach((x) => { if (!kim.some((y) => y.from === x.from)) kim.push(x); });
-  if (kim.length) m.push("👉 " + kim[0].nick + (kim.length > 1 ? " ve " + (kim.length - 1) + " kişi daha" : "") + " seni dürttü: Hadi çalış!");
-  yaz("ox3000_durt_gor", dz.map((x) => x.id));
-  m.forEach((x, i) => setTimeout(() => duyur(x), i * 4300));
-}
 
 let acildi = false;
 function acilis() {
@@ -49,8 +38,9 @@ function acilis() {
     if (!HESAP.account()) { karsilama(); return; }
     if (HESAP.kayitIzni() === null) karsilama({ adim: "izin" });
     bildirimKurulumu();   // telefon ayarları (bildirim izni, otomatik başlatma): eksikse bir kez
-    HESAP.dashboard().then(haberler, () => {});
+    haberler();
   }, 800);
+  tanitim();   // pencereler (takma ad, kurulum) kapanınca, bir kez
 }
 
 function ustBaslik() {
@@ -63,7 +53,8 @@ export default function Liste() {
   const [anahtarlar, setAnahtarlar] = useState([]);
   const [baslik, setBaslik] = useState("");
   const [ara, setAra] = useState("");
-  const [okunan, setOkunan] = useState(null);
+  const [okunan, setOkunan] = useState(null);       // "Listeyi oku"nun okuduğu
+  const [dokunulan, setDokunulan] = useState(null); // dokunulup okunan (okumanın "durdu" haberi bunu silmez)
   const [okuyor, setOkuyor] = useState(false);
   const [bekle, setBekle] = useState(() => { const g = parseFloat(SRS.opt("gap", 0.5)); return g >= 0 && g <= 3 ? g : 0.5; });
   const liste = useRef(null), gorunenRef = useRef([]), bekleZaman = useRef(null);
@@ -91,7 +82,7 @@ export default function Liste() {
           <View><Baslik>Bildirimler kapalı</Baslik><Metin>{m}</Metin>
             <Dugme metin="Bildirimleri aç" onBas={() => { kapat(); Okuma.bildirimAyarlariniAc(); }} />
             <Dugme metin="Kapat" tur="bos" onBas={kapat} /></View>
-        ));
+        ), (kapat) => kapat());
       } else duyur("🔎 " + m, 4000);
     });
     // Bildirimden ya da arka plandan dönünce süren okumayı göster.
@@ -104,7 +95,7 @@ export default function Liste() {
     OXLOG.add("sayfa", { p: "index" });
     setTimeout(() => isaretle(Okuma.durum(), true), 300);   // telefonda süren okuma (başka ekrandan dönünce)
     return () => {
-      durdur(); setOkunan(null);
+      durdur(); setOkunan(null); setDokunulan(null); setAra("");
       if (!Okuma.YEREL) Okuma.durdur();   // ekran açıkken okunuyorsa (servis yok) ekrandan çıkınca durur
       if (kutla) router.setParams({ kutla: undefined });
     };
@@ -123,30 +114,35 @@ export default function Liste() {
     durdur();
     const loop = !!SRS.opt("loop", true), readTr = !!SRS.opt("readTr", false);
     OXLOG.add("okuma", { mod: Okuma.YEREL ? "native" : "js", n: gorunen.length, dongu: loop ? 1 : 0, tr: readTr ? 1 : 0 });
+    setOkuyor(true);   // başlatılamazsa hata haberi geri alır
     Okuma.oku({ anahtarlar: gorunen, gap: Math.round(bekle * 1000), loop, readTr });
-    setOkuyor(true);
   };
   const bekleDegisti = (v) => {
+    kaydirmayiEngelle();   // sürgüyü kaydırmak sayfa değiştirmesin
     setBekle(v); SRS.setOpt("gap", v);
     clearTimeout(bekleZaman.current);
     bekleZaman.current = setTimeout(() => { Okuma.bekleme(Math.round(v * 1000)); OXLOG.add("ayar", { bekleme: Math.round(v * 1000) }); }, 400);
   };
 
   const oku = useCallback((k) => {
-    Okuma.durdur(); setOkuyor(false);   // tek kelime: okuma durur (eskisi gibi)
-    setOkunan(k);
-    kelimeyiOku(ANAHTARLA[k].d.w, () => setOkunan((o) => (o === k ? null : o)));
+    Keyboard.dismiss();
+    Okuma.durdur(); setOkuyor(false); setOkunan(null);   // tek kelime: okuma durur (eskisi gibi)
+    setDokunulan(k);
+    const i = gorunenRef.current.indexOf(k);
+    if (i >= 0 && liste.current) { try { liste.current.scrollToIndex({ index: i, viewPosition: 0.5, animated: true }); } catch (e) {} }
+    kelimeyiOku(ANAHTARLA[k].d.w, () => setDokunulan((o) => (o === k ? null : o)), 0.8);
   }, []);
 
   const kutlama = (!anahtarlar.length && baslik !== "") || kutla === "1";
   return (
+    <Kaydir ad="index">
     <SafeAreaView edges={["top"]} style={[s.ekran, { backgroundColor: t.bg }]}>
       <View style={[s.ust, { borderBottomColor: t.line }]}>
         <Text style={[s.baslik, { color: t.ink }]} accessibilityRole="header">{baslik}</Text>
         {kutlama ? null : (
         <View style={s.denetim}>
           <Text style={[s.bekleYazi, { color: t.muted }]}>Kelime arası</Text>
-          <Slider style={s.surgu} minimumValue={0} maximumValue={3} step={0.25} value={bekle} onValueChange={bekleDegisti}
+          <Slider style={s.surgu} minimumValue={0} maximumValue={3} step={0.25} value={bekle} onValueChange={bekleDegisti} onSlidingStart={kaydirmayiEngelle}
             minimumTrackTintColor={t.accent} maximumTrackTintColor={t.line} thumbTintColor={t.accent}
             accessibilityLabel="Kelimeler arası bekleme" />
           <Text style={[s.bekleDeger, { color: t.ink }]}>{String(bekle).replace(".", ",")} sn</Text>
@@ -178,29 +174,31 @@ export default function Liste() {
         keyExtractor={(k) => k}
         renderItem={({ item: k }) => {
           const e = ANAHTARLA[k];
-          return <KelimeKarti d={e.d} seviye={e.g.level} okunuyor={okunan === k} onBas={() => oku(k)} t={t} />;
+          return <KelimeKarti d={e.d} seviye={e.g.level} okunuyor={okunan === k || dokunulan === k} onBas={() => oku(k)} t={t} />;
         }}
-        extraData={okunan}
+        extraData={[okunan, dokunulan]}
         contentContainerStyle={s.liste}
+        keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         ListEmptyComponent={<Text style={[s.bos, { color: t.muted }]}>Aramaya uyan kelime yok.</Text>}
       />
       )}
     </SafeAreaView>
+    </Kaydir>
   );
 }
 
 const s = StyleSheet.create({
   ekran: { flex: 1 },
-  ust: { paddingHorizontal: 14, paddingTop: 6, paddingBottom: 10, borderBottomWidth: StyleSheet.hairlineWidth },
+  ust: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 10, borderBottomWidth: StyleSheet.hairlineWidth },
   baslik: { fontSize: 16, fontWeight: "800", paddingVertical: 4 },
-  denetim: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 5 },
+  denetim: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 9 },
   bekleYazi: { fontSize: 12 },
-  surgu: { width: 96, height: 30 },
+  surgu: { width: 84, height: 30 },
   bekleDeger: { fontSize: 12, fontWeight: "700", minWidth: 38 },
   okuDugme: { marginLeft: "auto", borderRadius: 10, paddingVertical: 8, paddingHorizontal: 13 },
   okuYazi: { fontSize: 13, fontWeight: "700" },
-  ara: { marginTop: 6, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 14 },
+  ara: { marginTop: 9, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 14 },
   liste: { paddingHorizontal: 14, paddingTop: 6, paddingBottom: 24 },
   bos: { textAlign: "center", marginTop: 40, fontSize: 14 },
 });

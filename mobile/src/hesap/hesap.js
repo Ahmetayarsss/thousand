@@ -22,8 +22,9 @@ const BVAR = { seri: true, seriSaat: "20:00", tekrar: true, tekrarSaat: "09:00",
 const GUN = 86400000, UFUK = 3 * GUN;   // en çok 3 gün sonrası planlanır
 // Saat "SS:DD", 08:00–21:59 (22:00–08:00 sessiz saatler).
 function saatOk(v) { return typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(v) && v >= "08:00" && v < "22:00"; }
-// Yedeklenen veriler (kayıtlar/log hariç).
-const BKEYS = ["ox3000_srs_v1", "ox3000_daily_v1", "ox3000_sessions_v1", "ox3000_settings_v1", "ox3000_exam_batch_v1"];
+// Yedeklenen veriler (kayıtlar/log hariç). ox3000_parca_v1: çok anlamlı kelimenin yarım turu (kayıtlarla birlikte
+// gelmeli; eski yedekte yoksa geri yüklemede silinir).
+const BKEYS = ["ox3000_srs_v1", "ox3000_daily_v1", "ox3000_sessions_v1", "ox3000_settings_v1", "ox3000_exam_batch_v1", "ox3000_parca_v1"];
 const LOG_PARCA = 500, LOG_BAYT = 100000;
 
 const MSG = {
@@ -448,8 +449,12 @@ function kur(o) {
     nset((x) => { x.izin = 1; });
     try {
       let d = B.permission().display;
-      if (d === "prompt") { const q = await B.requestPermission(); d = q && q.display; log("bildirim", { a: "izin", d }); }
-      else if (d !== "granted") B.openSettings();
+      if (d === "prompt") {
+        // Eski uygulamada kalıcı reddedildiyse telefon pencere göstermeden hemen "hayır" der: o zaman ayarları aç.
+        const t0 = Date.now(), q = await B.requestPermission();
+        d = q && q.display; log("bildirim", { a: "izin", d });
+        if (d !== "granted" && Date.now() - t0 < 400) B.openSettings();
+      } else if (d !== "granted") B.openSettings();
       return d;
     } catch (e) { return null; }
   }

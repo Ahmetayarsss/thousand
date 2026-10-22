@@ -72,7 +72,8 @@ public class OkumaServisi extends Service {
     public static final String ACTION_TOGGLE = "thousand.okuma.TTS_TOGGLE";
     public static final String ACTION_NEXT = "thousand.okuma.TTS_NEXT";
     public static final String ACTION_PREV = "thousand.okuma.TTS_PREV";
-    public static final String EXTRA_FROM_TTS = "fromTts";
+    /** Bildirime dokununca açılacak sayfa: bildirim modülünün eki (Bildirimler.EXTRA_TARGET, BildirimPackage okur). */
+    private static final String EXTRA_HEDEF = "oxHedef";
     private static final String CUSTOM_CLOSE = "kapat";
     private static final String CHANNEL = "thousand_tts";
     private static final int NOTIF_ID = 4201;
@@ -643,7 +644,7 @@ public class OkumaServisi extends Service {
     private PendingIntent openPendingIntent() {
         Intent li = getPackageManager().getLaunchIntentForPackage(getPackageName());
         if (li == null) return null;
-        li.putExtra(EXTRA_FROM_TTS, true);
+        li.putExtra(EXTRA_HEDEF, "index.html");   // okunan liste: Liste ekranı (eskide fromTts → oxTtsOpen)
         return PendingIntent.getActivity(this, 1, li, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 

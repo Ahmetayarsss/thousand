@@ -1,7 +1,8 @@
 name: Uygulama açılıyor mu
 
 # PR'larda uygulamayı yayın derlemesiyle aynı ayarlarla (release, küçültme açık) derler ve bir Android emülatöründe
-# açar; açılışta çökerse ya da kapanırsa kırmızı yanar. Yayındaki APK yalnız arm64; emülatör için x86_64 derlenir
+# açar; açılışta çökerse ya da kapanırsa kırmızı yanar. Ardından gezinme denemesi (gezinme-denemesi.sh): kaydırma,
+# geri tuşu, pencere; beklenen sayfa gelmezse kırmızı yanar. Yayındaki APK yalnız arm64; emülatör için x86_64 derlenir
 # (kod aynı). Hiçbir şey yayınlanmaz. Ekran görüntüsü ve logcat iş akışı çıktısı olarak kalır.
 
 on:
@@ -12,6 +13,7 @@ on:
       - "data/**"
       - ".github/workflows/acilis-denemesi.yml"
       - ".github/betikler/acilis-denemesi.sh"
+      - ".github/betikler/gezinme-denemesi.sh"
 
 concurrency:
   group: acilis-${{ github.ref }}
@@ -65,7 +67,7 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          script: bash .github/betikler/acilis-denemesi.sh mobile/android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/acilis"
+          script: bash .github/betikler/acilis-denemesi.sh mobile/android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/acilis" && bash .github/betikler/gezinme-denemesi.sh "$RUNNER_TEMP/acilis/gezinme"
 
       - name: Ekran görüntüsü ve logcat
         if: always()

@@ -178,6 +178,29 @@ Kullanıcı kararları:
       - Sayılar (günlük cevap, doğruluk, arkadaşların gördüğü, "en çok yanlış") kelime bazında: karar başına bir.
       - Mevcut ilerleme değişmez: kutular, tarihler aynı; kayda yalnız yeni alanlar eklenir (eski kayıt geçerli).
 
+## Aşama 11 — Eski uygulamayla karşılaştırma düzeltmeleri
+
+Eski (HTML) uygulamayla ekran ekran karşılaştırma (Ekim 2026) bulgularının hepsi tek seferde (kullanıcı kararı).
+Kararlar: sayfalar arası kaydırma geri gelsin; geri tuşu bir önceki sayfaya (gezilen sayfaların sırası), geçmiş bitince
+çıkış; ekran döndürme kapalı kalır.
+
+- [x] 42. Karşılaştırma bulguları:
+  - **Gezinme:** eski kaydırma haritası ve "Sayfalar nerede?" (`Kaydir.js`, `Tanitim.js`, `gezinme.js`); geri tuşu
+    geçmişi; pencereler geri tuşu / dışına dokunmayla kapanır; eski sekme çubuğu (simgeler, 58 px, mavi etkin simge);
+    İstatistikler çubukta görünmeyen sekme; bildirimden açılan Sınav'ın Kartlar sekmesine yapışması; sınav sürerken
+    aynı sınav bildirimi onay sormaz; okuma bildirimi Liste'yi açar. Emülatörde gezinme denemesi.
+  - **Kırıklar:** kart dönerken sekme değişince yeni Test'in cevabı açık gelmesi; ses kaydı çalınamazsa cihaz sesine
+    geçiş; "Dürtüldü ✓" takılması; grafikte "1.500" / "%100" kesilmesi; okuma servisi başlatılamazsa çökme.
+  - **Eksikler:** kurtarma kodundan sonra açılış işleri; Kartlar sayfa kaydı.
+  - **Adım 41'in yan etkileri:** sayaç ve sonuç kelime sayar; yarım tur mesajı; yarım tur yedeğe girer; kayıtta
+    kelime anahtarı; ölü kod (çok kutulu yazılı kart).
+  - **Görünüm ve davranış:** sayaç uçuştan sonra, uçan kartın etiketi, kırpma, kart konumu, vurgu halkası, dokununca
+    ortalama, arama sıfırlama, klavye dokunuşları, kısa bildirim yeri ve süresi, istatistik kutucukları ve tabloları,
+    ipucu, seviye aralığı, geliştirici rengi, saat listesi, bildirim anahtarı kilidi, izin, ses hızları, "İ" araması,
+    uygulama simgesi (eski düz mavi zemin) ve küçük ölçüler.
+  - Yapılmayanlar: "Hoş geldin" penceresinde arka plan bulanıklığı (yeni yerel bağımlılık ister); telefonun yazı
+    boyutuna sınır (telefonda denenmeden karar verilmedi).
+
 ## Bilerek bırakılanlar (şimdilik)
 
 - Güncelleme paketine ayrı imza (4b): anahtar GitHub'da duracağı için, GitHub hesabını ele

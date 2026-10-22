@@ -154,6 +154,34 @@ t("sınav yarıda bırakıldı: cevaplanan anlamlar bir daha gelmez, kelime yeni
   assert.ok(!o2.liste.includes(ilk));
 });
 
+t("sayaç ve sonuç kelime sayar: çok anlamlı kelimenin kartları bir kelime", () => {
+  mem.ox3000_exam_batch_v1 = JSON.stringify([COK, IKI]); S._reload();
+  const o = O.sinavKur(S, ANLAM);
+  assert.strictEqual(o.liste.length, 5);
+  assert.strictEqual(O.sayac(o), "Yeni 1/2");
+  const ilk = O.kartCoz(o.cur).k;
+  let i = 0;
+  while (o.cur && O.kartCoz(o.cur).k === ilk && i++ < 5) { O.yon(S, o, o.cur); O.sinavCevap(S, o, true); }
+  assert.strictEqual(O.sayac(o), "Yeni 2/2", "ilk kelimenin bütün anlamlarından sonra ikinci kelime");
+  // Test: 20 kelime (çok anlamlıların kartları fazla), "kaldı" ve sonuç kelime sayar
+  const t2 = O.testKur(S, ANLAM);
+  assert.ok(t2.toplam > 20);
+  assert.strictEqual(O.sayac(t2), "20 kaldı");
+  let adim = 0;
+  while (t2.cur && adim++ < 200) O.testCevap(t2, true);
+  assert.strictEqual(O.testSonu(t2).buyuk, "20");
+});
+
+t("yarım tur bitirilince: kayıt yok ama cevapların kaydedildiği söylenir", () => {
+  mem.ox3000_exam_batch_v1 = JSON.stringify([COK]); S._reload();
+  const o = O.sinavKur(S, ANLAM);
+  O.yon(S, o, o.cur); O.sinavCevap(S, o, true);
+  const r = O.sinavSonu(S, o);
+  assert.strictEqual(r.n, 0);
+  assert.ok(/Cevapların kaydedildi/.test(r.mesaj), r.mesaj);
+  assert.strictEqual(mem[O.OTURUM_ANAHTARI], undefined);
+});
+
 t("başka karşılık: aynı Türkçe anlamın başka kelimesi yazıldı mı", () => {
   const dz = O.esAnlamDizini(S, groups);
   assert.strictEqual(O.baskaKarsilik(S, dz, "rota", "course", "Route"), "route");

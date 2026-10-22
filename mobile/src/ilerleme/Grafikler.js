@@ -2,12 +2,13 @@
  * İstatistikler sayfasının grafikleri — eski uygulamanın analiz sayfasının SVG
  * çizimlerinin aynısı (ölçüler, eksenler, renkler), react-native-svg ile. Bir işarete dokununca ipucu kutusu
  * açılır (değer önde, etiket arkada), işaretin alanı hafifçe koyulaşır; doğruluk çizgisinde parmak en yakın
- * güne oturur.
+ * güne oturur. Eskisi gibi eksen yazıları çizim alanının dışına taşabilir (kartın iç boşluğuna; SVG her yandan TASMA
+ * kadar geniş çizilir), "1.500" ya da sondaki "%100" kesilmez.
  * ipucu: { grafik, x, y, baslik, satirlar } (ekran tutar), goster(grafik, ipucu | null).
  */
 import { useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import Svg, { Circle, Line, Path, Rect, Text as SvgYazi } from "react-native-svg";
+import Svg, { Circle, G, Line, Path, Rect, Text as SvgYazi } from "react-native-svg";
 import * as V from "./veri";
 
 // Yazı tipi: telefonda sistemin yazı tipi (varsayılan); webde SVG varsayılanı tırnaklı olduğu için açıkça.
@@ -16,19 +17,29 @@ function Yazi({ x, y, children, t, anchor = "start", renk, kalin, boy = 11 }) {
   return <SvgYazi x={x} y={y} fontSize={boy} fontFamily={YAZI_TIPI} fill={renk || t.muted} textAnchor={anchor} fontWeight={kalin ? "700" : "400"}>{children}</SvgYazi>;
 }
 
-// Ipucu kutusu: değer önde, etiket arkada; kutunun içinde kalır.
+const TASMA = 16;
+// Taşabilen çizim: koordinatlar grafiğin kendi genişliğine göre, SVG iki yandan TASMA kadar geniş.
+function Cizim({ W, H, etiket, children }) {
+  return (
+    <Svg width={W + 2 * TASMA} height={H} style={{ marginHorizontal: -TASMA }} accessibilityLabel={etiket}>
+      <G x={TASMA}>{children}</G>
+    </Svg>
+  );
+}
+
+// Ipucu kutusu: değer önde, etiket arkada; kutunun içinde kalır, satırları kırılmaz (ilk ölçülen genişlik korunur).
 export function Ipucu({ ip, genislik, t }) {
   const [boy, setBoy] = useState(null);
   const left = boy ? Math.max(0, Math.min(genislik - boy.w, ip.x - boy.w / 2)) : 0;
   const top = boy ? Math.max(-6, ip.y - boy.h - 10) : 0;
   return (
-    <View pointerEvents="none" onLayout={(e) => setBoy({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
-      style={[s.ipucu, { left, top, opacity: boy ? 1 : 0, backgroundColor: t.card, borderColor: t.kartLine }]}>
-      <Text style={[s.ipBas, { color: t.ink }]}>{ip.baslik}</Text>
+    <View pointerEvents="none" onLayout={(e) => { if (!boy) setBoy({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height }); }}
+      style={[s.ipucu, { left, top, opacity: boy ? 1 : 0, backgroundColor: t.card, borderColor: t.kartLine }, boy && { width: boy.w }]}>
+      <Text numberOfLines={1} style={[s.ipBas, { color: t.ink }]}>{ip.baslik}</Text>
       {(ip.satirlar || []).map((r, i) => (
         <View key={i} style={s.ipSatir}>
           {r.c ? <View style={[s.ipAnahtar, { backgroundColor: r.c }]} /> : null}
-          <Text style={{ fontSize: 12, color: t.ink2 }}><Text style={{ fontWeight: "700", color: t.ink }}>{r.v}</Text> {r.l}</Text>
+          <Text numberOfLines={1} style={{ fontSize: 12, color: t.ink2 }}><Text style={{ fontWeight: "700", color: t.ink }}>{r.v}</Text> {r.l}</Text>
         </View>
       ))}
     </View>
@@ -74,7 +85,7 @@ export function GunlukCevaplar({ SRS, gunler, ip, goster, t }) {
   return (
     <Kap id="gunluk" ip={ip} t={t} onLayout={olc} genislik={W} dokun={dokun}>
       {W > 0 ? (
-        <Svg width={W} height={H} accessibilityLabel="Son 30 gün günlük cevaplar">
+        <Cizim W={W} H={H} etiket="Son 30 gün günlük cevaplar">
           {izgara.map((v) => { const yy = Math.round(y(v)) + 0.5; return [
             <Line key={"l" + v} x1={ml} x2={W - mr} y1={yy} y2={yy} stroke={v ? t.izgara : t.eksen} strokeWidth={1} />,
             <Yazi key={"y" + v} x={ml - 6} y={yy + 4} anchor="end" t={t}>{V.sayi(v)}</Yazi>]; })}
@@ -90,7 +101,7 @@ export function GunlukCevaplar({ SRS, gunler, ip, goster, t }) {
             <Yazi key={"x" + i} x={ml + band * i + band / 2} y={H - 6} anchor={i === son ? "end" : "middle"} t={t}>{i === son ? "Bugün" : V.gunAy(SRS, x.d)}</Yazi>
           ) : null))}
           {!gunler.some((x) => x.n) ? <Yazi x={ml + pw / 2} y={mt + ph / 2} anchor="middle" boy={12} t={t}>Henüz sınav cevabı yok</Yazi> : null}
-        </Svg>
+        </Cizim>
       ) : <View style={{ height: H }} />}
     </Kap>
   );
@@ -106,8 +117,8 @@ export function GunlukDogruluk({ SRS, gunler, ip, goster, t }) {
   pts.forEach((p, i) => { if (p) yol += (i && pts[i - 1] ? "L" : "M") + x(i) + "," + y(p.v); });
   const sonNokta = [...pts].reverse().find(Boolean);
   const secili = ip && ip.grafik === "dogruluk" ? pts[ip.i] : null;
-  function dokun(px) {
-    if (!sonNokta) return;
+  function dokun(px, py) {   // eskisi gibi yalnız çizim alanında (eksen yazıları dışarıda)
+    if (!sonNokta || px < ml - 6 || px > ml + pw + 6 || py < mt || py > mt + ph) return;
     let en = null;
     pts.forEach((p) => { if (p && (!en || Math.abs(x(p.i) - px) < Math.abs(x(en.i) - px))) en = p; });
     if (en) goster("dogruluk", { i: en.i, x: x(en.i), y: y(en.v), baslik: "%" + Math.round(en.v), satirlar: [{ c: t.s1, v: V.gunAy(SRS, en.d.d), l: "· " + en.d.ok + "/" + en.d.n + " doğru" }] });
@@ -116,7 +127,7 @@ export function GunlukDogruluk({ SRS, gunler, ip, goster, t }) {
     <Kap id="dogruluk" ip={ip} t={t} onLayout={olc} genislik={W} dokun={sonNokta ? dokun : null}>
       {W > 0 ? (
         <View>
-          <Svg width={W} height={H} accessibilityLabel="Son 30 gün günlük doğruluk">
+          <Cizim W={W} H={H} etiket="Son 30 gün günlük doğruluk">
             {[0, 25, 50, 75, 100].map((v) => { const yy = Math.round(y(v)) + 0.5; return [
               <Line key={"l" + v} x1={ml} x2={W - mr} y1={yy} y2={yy} stroke={v ? t.izgara : t.eksen} strokeWidth={1} />,
               <Yazi key={"y" + v} x={ml - 6} y={yy + 4} anchor="end" t={t}>{"%" + v}</Yazi>]; })}
@@ -132,7 +143,7 @@ export function GunlukDogruluk({ SRS, gunler, ip, goster, t }) {
             {secili ? [
               <Line key="ci" x1={x(secili.i)} x2={x(secili.i)} y1={mt} y2={mt + ph} stroke={t.eksen} strokeWidth={1} />,
               <Circle key="cn" cx={x(secili.i)} cy={y(secili.v)} r={5} fill={t.s1} stroke="#fff" strokeWidth={2} />] : null}
-          </Svg>
+          </Cizim>
         </View>
       ) : <View style={{ height: H }} />}
     </Kap>
@@ -154,7 +165,7 @@ export function KutuDagilimi({ sayilar, ip, goster, t }) {
   return (
     <Kap id="kutu" ip={ip} t={t} onLayout={olc} genislik={W} dokun={dokun}>
       {W > 0 ? (
-        <Svg width={W} height={H} accessibilityLabel="Kutu dağılımı">
+        <Cizim W={W} H={H} etiket="Kutu dağılımı">
           <Line x1={ml + 0.5} x2={ml + 0.5} y1={2} y2={H - 2} stroke={t.eksen} strokeWidth={1} />
           {sayilar.map((v, i) => {
             const yy = 4 + i * rowH + (rowH - bh) / 2, w = (v / mx) * pw, secili = ip && ip.grafik === "kutu" && ip.i === i;
@@ -165,7 +176,7 @@ export function KutuDagilimi({ sayilar, ip, goster, t }) {
               <Yazi key={"s" + i} x={ml + 1 + w + 6} y={yy + bh / 2 + 4} renk={t.ink} kalin boy={12} t={t}>{V.sayi(v)}</Yazi>,
             ];
           })}
-        </Svg>
+        </Cizim>
       ) : <View style={{ height: H }} />}
       {!tot ? <Text style={[s.bos, { color: t.muted }]}>Henüz çalışılan kelime yok</Text> : null}
     </Kap>
@@ -187,7 +198,7 @@ export function YediGun({ SRS, gunler, ip, goster, t }) {
   return (
     <Kap id="yedi" ip={ip} t={t} onLayout={olc} genislik={W} dokun={dokun}>
       {W > 0 ? (
-        <Svg width={W} height={H} accessibilityLabel="Önümüzdeki 7 günün tekrar yükü">
+        <Cizim W={W} H={H} etiket="Önümüzdeki 7 günün tekrar yükü">
           <Line x1={ml} x2={W - mr} y1={mt + ph + 0.5} y2={mt + ph + 0.5} stroke={t.eksen} strokeWidth={1} />
           {gunler.map((x, i) => {
             const cx = ml + band * i + (band - bw) / 2, top = y(x.n), secili = ip && ip.grafik === "yedi" && ip.i === i;
@@ -198,23 +209,26 @@ export function YediGun({ SRS, gunler, ip, goster, t }) {
               secili ? <Rect key={"h" + i} x={ml + band * i} y={0} width={band} height={H} fill={vurgu} /> : null,
             ];
           })}
-        </Svg>
+        </Cizim>
       ) : <View style={{ height: H }} />}
     </Kap>
   );
 }
 
 // ---------- Tablo ----------
+// Sütun genişliği eskideki HTML tablosu gibi içeriğe göre: en uzun yazının uzunluğuyla orantılı.
 export function Tablo({ basliklar, satirlar, sayiSutun = [], trSutun = [], t }) {
   const hiza = (i) => (sayiSutun.includes(i) ? "right" : "left");
+  const agirlik = basliklar.map((b, i) => Math.max(5, String(b).length, ...satirlar.map((r) => String(r[i]).length)));
+  const sutun = (i) => ({ flexGrow: agirlik[i], flexBasis: 0 });
   return (
     <View style={{ marginTop: 6 }}>
       <View style={[s.satir, { borderBottomColor: t.kartLine }]}>
-        {basliklar.map((b, i) => <Text key={i} style={[s.th, { color: t.muted, textAlign: hiza(i) }]}>{b}</Text>)}
+        {basliklar.map((b, i) => <Text key={i} style={[s.th, sutun(i), { color: t.muted, textAlign: hiza(i) }]}>{b}</Text>)}
       </View>
       {satirlar.map((r, j) => (
         <View key={j} style={[s.satir, { borderBottomColor: t.kartLine }]}>
-          {r.map((c, i) => <Text key={i} style={[s.td, { color: trSutun.includes(i) ? t.tr : t.ink, textAlign: hiza(i) }]}>{c}</Text>)}
+          {r.map((c, i) => <Text key={i} style={[s.td, sutun(i), { color: trSutun.includes(i) ? t.tr : t.ink, textAlign: hiza(i) }]}>{c}</Text>)}
         </View>
       ))}
     </View>
@@ -228,7 +242,7 @@ const s = StyleSheet.create({
   ipSatir: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 2 },
   ipAnahtar: { width: 10, height: 2, borderRadius: 1 },
   bos: { fontSize: 13, textAlign: "center", paddingVertical: 12 },
-  satir: { flexDirection: "row", borderBottomWidth: 1, paddingVertical: 5 },
-  th: { flex: 1, fontSize: 11, fontWeight: "700", paddingHorizontal: 4 },
-  td: { flex: 1, fontSize: 12.5, paddingHorizontal: 4, fontVariant: ["tabular-nums"] },
+  satir: { flexDirection: "row", alignItems: "center", borderBottomWidth: 1, paddingVertical: 6 },
+  th: { fontSize: 11, fontWeight: "700", paddingHorizontal: 4 },
+  td: { fontSize: 12.5, paddingHorizontal: 4, fontVariant: ["tabular-nums"] },
 });

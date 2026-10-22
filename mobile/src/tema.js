@@ -21,6 +21,7 @@ const ACIK = {
   klavye: "#D9E0EA", tus: "#fff", tusBasili: "#B9C4D4", tusIslev: "#AEB9C9", tusIslevBasili: "#8E9BB0",
   // İlerleme / İstatistikler
   amber: "#E5892B", neu: "#C7D0DB", greenBg: "#E7F5EC", secgray: "#EDF0F4", secgrayInk: "#9AA6B4", golge: "rgba(20,30,50,.06)",
+  dev: "#8E44AD",
   ink2: "#52514e", izgara: "#e9ecf1", eksen: "#c3c9d3", s1: "#2a78d6", s2: "#eb6834", o: ["#86b6ef", "#3987e5", "#1c5cab", "#0d366b"],
 };
 
@@ -37,6 +38,7 @@ const KOYU = {
   klavye: "#151B23", tus: "#2A3442", tusBasili: "#3A4656", tusIslev: "#3A4656", tusIslevBasili: "#4A5768",
   // Eski sayfalarda grafik renklerinin koyu karşılığı yoktu; aynı kalır.
   amber: "#E5892B", neu: "#3A4554", greenBg: "#17352A", secgray: "#222B36", secgrayInk: "#7C8899", golge: "rgba(0,0,0,.35)",
+  dev: "#B27AD0",
   ink2: "#C5CDD8", izgara: "#e9ecf1", eksen: "#c3c9d3", s1: "#2a78d6", s2: "#eb6834", o: ["#86b6ef", "#3987e5", "#1c5cab", "#0d366b"],
 };
 

@@ -60,7 +60,7 @@ Bir değişikliği "bitti" saymadan önce gerçekten çalıştır: test, gerekir
   derlenir, yayınlanmaz. iOS yalnız derleniyor mu diye denetlenir
   (`ios-derle.yml`, PR'larda); Apple Developer hesabı açılınca imzalı derleme ve TestFlight eklenir.
 - **Açılış denemesi:** PR'larda `acilis-denemesi.yml` uygulamayı yayın ayarlarıyla derleyip emülatörde açar; çökerse
-  kırmızı yanar. Yerel modüllerde (Java/Kotlin) ya da yerel bağımlılıkta değişiklik varsa yeşil olmadan birleştirilmez
+  kırmızı yanar. Ardından emülatörde gezinme denenir (kaydırma, geri tuşu, pencere; `gezinme-denemesi.sh`). Yerel modüllerde (Java/Kotlin) ya da yerel bağımlılıkta değişiklik varsa yeşil olmadan birleştirilmez
   (adım 36'da WorkManager yalnız telefonda, açılışta çöküyordu).
 - **`main`'e doğrudan push yok.** İş bir çalışma dalında yapılır, PR açılır, kullanıcı
   birleştirir. PR açıklaması telefonda neyin değişeceğini sade dille söyler.

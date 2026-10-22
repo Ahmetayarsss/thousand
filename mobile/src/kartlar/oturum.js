@@ -10,7 +10,8 @@
  * Yön: tr2en (Türkçesi gösterilir) ya da en2tr; Sınav'da önceki yanlışın yönü (SRS.dirOf), yoksa rastgele.
  * Çok anlamlı kelime (PLAN.md adım 41): her anlam ayrı kart ("anahtar#anlamNo"), hep tr2en. Sınav'da yalnız
  *   bekleyen anlamlar (SRS.pendingMeanings) gelir; karar o turun anlamlarının hepsi cevaplanınca verilir
- *   (SRS.answerMeaning) ve sayılar kelime başına bir. anlamSay(anahtar) → kelimenin anlam sayısı.
+ *   (SRS.answerMeaning) ve sayılar kelime başına bir. anlamSay(anahtar) → kelimenin anlam sayısı. Sayaç ve sonuç da
+ *   kelime sayar (kartları değil); ilerleme çubuğu kartları.
  */
 const OTURUM_ANAHTARI = "ox3000_sessions_v1";   // sınav oturumları (İlerleme sayfası için)
 
@@ -19,6 +20,7 @@ function rastgeleYon() { return Math.random() < 0.5 ? "tr2en" : "en2tr"; }
 // Kart kimliği: tek anlamlıda anahtar, çok anlamlıda "anahtar#anlamNo".
 function kartId(k, i) { return i == null ? k : k + "#" + i; }
 function kartCoz(id) { const j = id.lastIndexOf("#"); return j < 0 ? { k: id, i: null } : { k: id.slice(0, j), i: +id.slice(j + 1) }; }
+function kelimeSayisi(ids) { return new Set(ids.map((id) => kartCoz(id).k)).size; }
 // Kelimenin kartları. hepsi: Test (bütün anlamlar); değilse Sınav (bekleyen anlamlar).
 function kartlar(SRS, k, anlamSay, hepsi) {
   const n = anlamSay(k);
@@ -29,7 +31,7 @@ function kartlar(SRS, k, anlamSay, hepsi) {
 
 function testKur(SRS, anlamSay) {
   const sira = SRS.shuffle([].concat(...SRS.newList(SRS.listSize()).map((k) => kartlar(SRS, k, anlamSay, true))));
-  return { mod: "test", cur: sira[0] || null, kuyruk: sira.slice(1), toplam: sira.length, yon: {} };
+  return { mod: "test", cur: sira[0] || null, kuyruk: sira.slice(1), toplam: sira.length, kelime: kelimeSayisi(sira), yon: {} };
 }
 
 function sinavKur(SRS, anlamSay) {
@@ -85,14 +87,15 @@ function oran(o) {
 }
 function kalan(o) { return o.kuyruk.length + (o.cur ? 1 : 0); }
 function sayac(o) {
-  if (o.mod === "test") return kalan(o) + " kaldı";
-  return o.i < o.tekrar ? "Tekrar " + (o.i + 1) + "/" + o.tekrar : "Yeni " + (o.i - o.tekrar + 1) + "/" + (o.liste.length - o.tekrar);
+  if (o.mod === "test") return kelimeSayisi(o.cur ? [o.cur].concat(o.kuyruk) : []) + " kaldı";
+  const L = o.liste, sira = kelimeSayisi(L.slice(0, o.i + 1)), tk = kelimeSayisi(L.slice(0, o.tekrar));
+  return o.i < o.tekrar ? "Tekrar " + sira + "/" + tk : "Yeni " + (sira - tk) + "/" + kelimeSayisi(L.slice(o.tekrar));
 }
 
 // Sonuç ekranı.
 function testSonu(o) {
   if (!o.toplam) return { buyuk: "🎉", kucuk: "yeni kelime kalmadı", mesaj: "Tüm kelimeler çalışılıyor. Sınav sekmesinden tekrarlara devam et.", yanlis: [], dugme: "Tekrar çalış" };
-  return { buyuk: String(o.toplam), kucuk: "kelime çalışıldı", mesaj: "Listeyi baştan sona çalıştın. 👏", yanlis: [], dugme: "Tekrar çalış" };
+  return { buyuk: String(o.kelime), kucuk: "kelime çalışıldı", mesaj: "Listeyi baştan sona çalıştın. 👏", yanlis: [], dugme: "Tekrar çalış" };
 }
 
 // Sınav bitti ya da bırakıldı: oturum kaydedilir (SRS.yaz: yazılamazsa kullanıcı uyarılır, kayda düşer).
@@ -113,7 +116,8 @@ function sinavSonu(SRS, o) {
     const nl = SRS.newList(1).length;
     mesaj = "Bu listenin bütün kelimeleri bitti. " + (nl ? "Ana sayfada yeni kelimeler seni bekliyor; çalışınca sınava dönebilirsin. " : "") + (nxt || "");
     if (n) mesaj = ozet() + ". " + mesaj;
-  } else if (!n) mesaj = ((left || SRS.newList(1).length) ? "Henüz cevap yok." : "Bugün sorulacak kelime yok. 🎉") + (nxt ? " " + nxt : "");
+  } else if (!n && o.i > 0) mesaj = "Cevapların kaydedildi; kelime, bütün anlamları cevaplanınca sayılır." + (nxt ? " " + nxt : "");
+  else if (!n) mesaj = ((left || SRS.newList(1).length) ? "Henüz cevap yok." : "Bugün sorulacak kelime yok. 🎉") + (nxt ? " " + nxt : "");
   else mesaj = ozet() + ". " + (ot.nw ? ot.nw + " kelime çalışılanlara eklendi. " : "") + nxt;
   return { buyuk: n ? ok + "/" + n : "0", kucuk: n ? "doğru" : "kelime cevaplandı", mesaj, yanlis: ot.yanlis.slice(), dugme: tumu ? "Yeni liste" : "Sınava devam", n, ok, tumu };
 }
